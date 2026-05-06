@@ -1,0 +1,107 @@
+import { useRef } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
+import { useSettingsStore } from '../../stores/settingsStore';
+import { SCORE_BUTTON_SIZE, ANIMATION_DURATION_SHORT } from '../../utils/constants';
+
+interface ScoreButtonProps {
+  teamName: string;
+  score: number;
+  teamColor: string;
+  onPress: () => void;
+  disabled?: boolean;
+}
+
+const DEBOUNCE_MS = 400;
+
+export function ScoreButton({ teamName, score, teamColor, onPress, disabled }: ScoreButtonProps) {
+  const hapticsEnabled = useSettingsStore((s) => s.hapticsEnabled);
+  const scale = useSharedValue(1);
+  const lastPressRef = useRef(0);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const gesture = Gesture.Tap()
+    .enabled(!disabled)
+    .onStart(() => {
+      const now = Date.now();
+      if (now - lastPressRef.current < DEBOUNCE_MS) return;
+      lastPressRef.current = now;
+
+      scale.value = withTiming(0.93, { duration: ANIMATION_DURATION_SHORT });
+      if (hapticsEnabled) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      }
+    })
+    .onEnd(() => {
+      scale.value = withSpring(1, { damping: 12, stiffness: 180 });
+      onPress();
+    });
+
+  return (
+    <GestureDetector gesture={gesture}>
+      <Animated.View style={[styles.container, animatedStyle]}>
+        <Text style={styles.teamName} numberOfLines={1}>
+          {teamName}
+        </Text>
+        <View style={[styles.button, { backgroundColor: teamColor + '20', borderColor: teamColor }]}>
+          <Text style={[styles.score, { color: teamColor }]}>{score}</Text>
+        </View>
+        <View style={[styles.addBadge, { backgroundColor: teamColor }]}>
+          <Text style={styles.addText}>+1</Text>
+        </View>
+      </Animated.View>
+    </GestureDetector>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 12,
+  },
+  teamName: {
+    fontSize: 14,
+    fontFamily: 'Inter_600SemiBold',
+    color: '#8B949E',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    maxWidth: '90%',
+  },
+  button: {
+    width: '90%',
+    aspectRatio: 1,
+    maxWidth: 160,
+    minHeight: SCORE_BUTTON_SIZE,
+    borderRadius: 24,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  score: {
+    fontSize: 96,
+    fontFamily: 'Inter_900Black',
+    lineHeight: 96,
+    includeFontPadding: false,
+  },
+  addBadge: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  addText: {
+    fontSize: 16,
+    fontFamily: 'Inter_700Bold',
+    color: '#fff',
+  },
+});

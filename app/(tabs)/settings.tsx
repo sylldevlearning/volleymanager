@@ -1,0 +1,169 @@
+import { StyleSheet, Text, View, Switch, Pressable } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { Moon, Sun, Zap, Globe, Info } from 'lucide-react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSettingsStore } from '../../src/stores/settingsStore';
+import { palette } from '../../src/theme/tokens';
+import i18n from '../../src/i18n';
+import { APP_VERSION } from '../../src/utils/constants';
+
+export default function SettingsScreen() {
+  const { t } = useTranslation();
+  const { theme, toggleTheme, hapticsEnabled, setHapticsEnabled, language, setLanguage } =
+    useSettingsStore();
+  const isDark = theme === 'dark';
+
+  const changeLanguage = (lang: 'fr' | 'en') => {
+    setLanguage(lang);
+    i18n.changeLanguage(lang);
+  };
+
+  return (
+    <SafeAreaView style={styles.container} edges={['bottom']}>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t('settings.theme')}</Text>
+        <View style={styles.card}>
+          <SettingRow
+            icon={isDark ? <Moon size={20} color={palette.info} /> : <Sun size={20} color={palette.warning} />}
+            label={isDark ? t('settings.darkMode') : t('settings.lightMode')}
+            right={
+              <Switch
+                value={isDark}
+                onValueChange={toggleTheme}
+                trackColor={{ false: palette.backgroundHover, true: palette.accentSecondary }}
+                thumbColor="#fff"
+              />
+            }
+          />
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t('settings.language')}</Text>
+        <View style={styles.card}>
+          <LanguageOption
+            label="Français"
+            active={language === 'fr'}
+            onPress={() => changeLanguage('fr')}
+          />
+          <View style={styles.divider} />
+          <LanguageOption
+            label="English"
+            active={language === 'en'}
+            onPress={() => changeLanguage('en')}
+          />
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t('settings.haptics')}</Text>
+        <View style={styles.card}>
+          <SettingRow
+            icon={<Zap size={20} color={palette.warning} />}
+            label={t('settings.hapticsDesc')}
+            right={
+              <Switch
+                value={hapticsEnabled}
+                onValueChange={setHapticsEnabled}
+                trackColor={{ false: palette.backgroundHover, true: palette.accentSecondary }}
+                thumbColor="#fff"
+              />
+            }
+          />
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <View style={styles.card}>
+          <SettingRow
+            icon={<Info size={20} color={palette.textMuted} />}
+            label={`${t('settings.version')} ${APP_VERSION}`}
+            right={null}
+          />
+        </View>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+function SettingRow({
+  icon,
+  label,
+  right,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  right: React.ReactNode;
+}) {
+  return (
+    <View style={styles.row}>
+      {icon}
+      <Text style={styles.rowLabel}>{label}</Text>
+      {right}
+    </View>
+  );
+}
+
+function LanguageOption({
+  label,
+  active,
+  onPress,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityState={{ selected: active }}
+    >
+      <Globe size={20} color={active ? palette.accentPrimary : palette.textMuted} />
+      <Text style={[styles.rowLabel, active && { color: palette.accentPrimary }]}>{label}</Text>
+      {active && <View style={styles.activeDot} />}
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: palette.background, padding: 16, gap: 0 },
+  section: { marginBottom: 20 },
+  sectionTitle: {
+    fontSize: 12,
+    fontFamily: 'Inter_600SemiBold',
+    color: palette.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginBottom: 8,
+    marginLeft: 4,
+  },
+  card: {
+    backgroundColor: palette.backgroundSurface,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: palette.backgroundElevated,
+    overflow: 'hidden',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 14,
+  },
+  rowPressed: { backgroundColor: palette.backgroundElevated },
+  rowLabel: {
+    flex: 1,
+    fontSize: 15,
+    fontFamily: 'Inter_400Regular',
+    color: palette.textPrimary,
+  },
+  divider: { height: 1, backgroundColor: palette.backgroundElevated, marginLeft: 14 },
+  activeDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: palette.accentPrimary,
+  },
+});
