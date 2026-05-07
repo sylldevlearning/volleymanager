@@ -10,17 +10,27 @@
 
 | Sévérité | Trouvés | Corrigés |
 |---|---|---|
-| Critique | 3 | 3 |
+| Critique | 4 | 4 |
 | Haute | 1 | 1 |
 | Moyenne | 6 | 6 |
 | Basse | 1 | 1 |
-| **Total** | **11** | **11** |
+| **Total** | **12** | **12** |
 
 Aucun bug en suspens. Tous les bugs nécessitent une décision produit ? Non.
 
 ---
 
 ## Bugs détectés et corrigés
+
+### BUG-012 : Crash au drag d'un joueur sur Expo Go — clamp() non déclarée worklet
+- **Fichier** : [src/features/tactical/positionUtils.ts](../src/features/tactical/positionUtils.ts)
+- **Sévérité** : Critique
+- **Description** : L'app se fermait brutalement dès qu'on commençait à déplacer un jeton joueur sur le Tableau Tactique. Le crash était silencieux (pas de Red Box).
+- **Cause** : `clamp()` était appelée depuis les callbacks `.onEnd()` de `Gesture.Pan()` dans `PlayerToken.tsx` et `TacticalBoard.tsx`. Ces callbacks s'exécutent sur le **thread UI** (worklet Reanimated). Appeler une fonction JS normale (non-worklet) depuis un worklet est un crash garanti sur Expo Go. `clamp` n'avait pas la directive `'worklet';`.
+- **Fix** : Ajout de `'worklet';` en première ligne du corps de `clamp()`. `easeInOut` et `findNearestPlayer` ne sont appelées que depuis le thread JS (requestAnimationFrame) et ne nécessitent pas la directive.
+- **Commit** : `5dbe3ef fix: tactical board drag crash on Expo Go — clamp() missing worklet directive`
+
+---
 
 ### BUG-001 : computeTimeoutsUsed — logique d'identification du type cassée
 - **Fichier** : [src/services/eventService.ts](../src/services/eventService.ts)
