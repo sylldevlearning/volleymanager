@@ -99,6 +99,15 @@ export async function getEventsForMatch(matchId: string): Promise<MatchEvent[]> 
   return rows.map(rowToEvent);
 }
 
+export async function getMatchIdsForPlayer(playerId: string): Promise<string[]> {
+  const db = await getDb();
+  const rows = await db.getAllAsync<{ match_id: string }>(
+    'SELECT DISTINCT match_id FROM match_events WHERE player_id = ? AND is_cancelled = 0',
+    [playerId]
+  );
+  return rows.map((r) => r.match_id);
+}
+
 // Recalculate score from non-cancelled events (source of truth)
 export function computeScore(events: MatchEvent[]): { home: number; away: number } {
   let home = 0;

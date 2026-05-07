@@ -3,7 +3,7 @@ import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft } from 'lucide-react-native';
+import { ArrowLeft, BarChart2 } from 'lucide-react-native';
 
 import { getMatchById, getSetsForMatch } from '../../../src/services/matchService';
 import { getPlayersByTeam } from '../../../src/services/playerService';
@@ -160,8 +160,18 @@ export default function CoachScreen() {
         <Pressable onPress={() => router.back()} style={styles.backBtn} accessibilityRole="button">
           <ArrowLeft size={22} color={palette.textSecondary} />
         </Pressable>
-        <Text style={styles.headerTitle}>{team.name}</Text>
-        <Text style={styles.headerSubtitle}>{t('stats.title')}</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.headerTitle}>{team.name}</Text>
+          <Text style={styles.headerSubtitle}>{t('stats.title')}</Text>
+        </View>
+        <Pressable
+          onPress={() => router.push(`/match/${id}/stats` as never)}
+          style={styles.statsBtn}
+          accessibilityRole="button"
+          accessibilityLabel={t('stats.matchDashboard')}
+        >
+          <BarChart2 size={20} color={palette.accentSecondary} />
+        </Pressable>
       </View>
 
       {/* Player selector */}
@@ -230,12 +240,16 @@ const styles = StyleSheet.create({
   loading: { flex: 1, backgroundColor: palette.background, alignItems: 'center', justifyContent: 'center' },
   loadingText: { color: palette.textSecondary, fontFamily: 'Inter_400Regular' },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: palette.backgroundElevated,
+    gap: 10,
   },
-  backBtn: { marginBottom: 8 },
+  backBtn: { padding: 4 },
+  statsBtn: { padding: 8 },
   headerTitle: { fontSize: 20, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
   headerSubtitle: { fontSize: 13, fontFamily: 'Inter_400Regular', color: palette.textSecondary },
   playerList: { paddingHorizontal: 12, paddingVertical: 10, gap: 8 },

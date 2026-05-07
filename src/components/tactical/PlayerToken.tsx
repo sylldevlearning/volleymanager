@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -10,8 +10,10 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
 import type { PlayerPosition } from '../../models/tactical';
 import { clamp } from '../../features/tactical/positionUtils';
+import { getPlayerShortName } from '../../features/players/player-helpers';
 
 const TOKEN_RADIUS = 20;
+const WRAPPER_WIDTH = 64;
 
 interface PlayerTokenProps {
   player: PlayerPosition;
@@ -20,6 +22,7 @@ interface PlayerTokenProps {
   canDrag: boolean;
   showName: boolean;
   onDragEnd: (playerId: string, x: number, y: number) => void;
+  onTap?: (playerId: string) => void;
   hapticsEnabled: boolean;
 }
 
@@ -30,23 +33,30 @@ export function PlayerToken({
   canDrag,
   showName,
   onDragEnd,
+  onTap,
   hapticsEnabled,
 }: PlayerTokenProps) {
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const scale = useSharedValue(1);
 
-  // When player position updates from store (after drop or playback), reset delta
   const basePixelX = player.x * courtWidth;
   const basePixelY = player.y * courtHeight;
 
   function triggerHaptic() {
-    if (hapticsEnabled) {
-      Haptics.selectionAsync();
-    }
+    if (hapticsEnabled) Haptics.selectionAsync();
+  }
+  function notifyTap() {
+    onTap?.(player.playerId);
   }
 
-  const gesture = Gesture.Pan()
+  const tapGesture = Gesture.Tap()
+    .maxDuration(200)
+    .onEnd((_e, success) => {
+      if (success) runOnJS(notifyTap)();
+    });
+
+  const panGesture = Gesture.Pan()
     .enabled(canDrag)
     .onBegin(() => {
       scale.value = withSpring(1.2);
@@ -70,6 +80,8 @@ export function PlayerToken({
       scale.value = withSpring(1);
     });
 
+  const gesture = Gesture.Exclusive(tapGesture, panGesture);
+
   const animStyle = useAnimatedStyle(() => ({
     transform: [
       { translateX: translateX.value },
@@ -80,25 +92,36 @@ export function PlayerToken({
 
   const bgColor = player.isHome ? '#1D4ED8' : '#E63946';
   const diameter = TOKEN_RADIUS * 2;
+  const shortName = getPlayerShortName(player);
+  const insideLabel = showName ? player.label.slice(0, 3) : String(player.number);
 
   return (
     <GestureDetector gesture={gesture}>
       <Animated.View
         style={[
-          styles.token,
+          styles.wrapper,
           {
-            width: diameter,
-            height: diameter,
-            borderRadius: TOKEN_RADIUS,
-            backgroundColor: bgColor,
-            left: basePixelX - TOKEN_RADIUS,
+            left: basePixelX - WRAPPER_WIDTH / 2,
             top: basePixelY - TOKEN_RADIUS,
           },
           animStyle,
         ]}
       >
-        <Text style={styles.label}>
-          {showName ? player.label.slice(0, 3) : String(player.number)}
+        <View
+          style={[
+            styles.circle,
+            {
+              width: diameter,
+              height: diameter,
+              borderRadius: TOKEN_RADIUS,
+              backgroundColor: bgColor,
+            },
+          ]}
+        >
+          <Text style={styles.label}>{insideLabel}</Text>
+        </View>
+        <Text style={styles.nameLabel} numberOfLines={1}>
+          {shortName}
         </Text>
       </Animated.View>
     </GestureDetector>
@@ -106,8 +129,12 @@ export function PlayerToken({
 }
 
 const styles = StyleSheet.create({
-  token: {
+  wrapper: {
     position: 'absolute',
+    width: WRAPPER_WIDTH,
+    alignItems: 'center',
+  },
+  circle: {
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
@@ -123,5 +150,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Inter_700Bold',
     textAlign: 'center',
+  },
+  nameLabel: {
+    color: '#8B949E',
+    fontSize: 12,
+    fontFamily: 'Inter_500Medium',
+    textAlign: 'center',
+    width: WRAPPER_WIDTH,
+    marginTop: 2,
   },
 });

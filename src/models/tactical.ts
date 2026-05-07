@@ -7,6 +7,8 @@ export interface PlayerPosition {
   teamId: string;
   number: number;
   label: string;
+  firstName?: string | null;
+  lastName?: string | null;
   isHome: boolean;
 }
 

@@ -15,6 +15,7 @@ interface TacticalState {
 
   setPositions: (positions: PlayerPosition[]) => void;
   movePlayer: (playerId: string, x: number, y: number) => void;
+  updatePlayerInfo: (playerId: string, data: { number?: number; firstName?: string | null; lastName?: string | null; label?: string }) => void;
   addArrow: (arrow: Omit<Arrow, 'id' | 'order'>) => void;
   removeArrow: (id: string) => void;
   clearArrows: () => void;
@@ -44,6 +45,13 @@ export const useTacticalStore = create<TacticalState>()((set, get) => ({
     set((state) => ({
       positions: state.positions.map((p) =>
         p.playerId === playerId ? { ...p, x, y } : p
+      ),
+    })),
+
+  updatePlayerInfo: (playerId, data) =>
+    set((state) => ({
+      positions: state.positions.map((p) =>
+        p.playerId === playerId ? { ...p, ...data } : p
       ),
     })),
 

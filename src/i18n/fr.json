@@ -100,6 +100,10 @@
     "new": "Nouvelle équipe",
     "noPlayers": "Aucun joueur — ajoutez des joueurs",
     "nameRequired": "Le nom est requis.",
+    "homeDefault": "Équipe Locale",
+    "awayDefault": "Équipe Visiteur",
+    "homeShort": "LOC",
+    "awayShort": "VIS",
     "edit": "Modifier l'équipe",
     "name": "Nom de l'équipe",
     "shortName": "Abbréviation",
@@ -116,6 +120,15 @@
     "lastName": "Nom",
     "number": "Numéro",
     "position": "Poste",
+    "defaultName": "Joueur {{number}}",
+    "numberOnly": "Numéro de maillot",
+    "numberRequired": "Le numéro est obligatoire",
+    "numberDuplicate": "Ce numéro existe déjà dans l'équipe",
+    "namePlaceholder": "Nom (optionnel)",
+    "quickEdit": "Modifier le joueur",
+    "addAnother": "Ajouter un autre",
+    "done": "Terminé",
+    "batchMode": "Ajout rapide",
     "positions": {
       "setter": "Passeur",
       "outside": "Pointu",
@@ -127,6 +140,12 @@
   },
   "stats": {
     "title": "Statistiques",
+    "matchDashboard": "Stats du match",
+    "teamComparison": "Comparaison équipes",
+    "pointsByType": "Points par type",
+    "topPerformers": "Meilleurs performeurs",
+    "playerList": "Détail joueurs",
+    "detailed": "Voir les stats détaillées",
     "serve": "Service",
     "serveAce": "Ace",
     "serveFault": "Faute service",
@@ -153,7 +172,87 @@
     "setBad": "Mauvaise",
     "efficiency": "Efficacité",
     "total": "Total",
-    "perSet": "/ set"
+    "perSet": "/ set",
+    "categories": {
+      "attack": "Attaque",
+      "serve": "Service",
+      "block": "Block",
+      "reception": "Réception",
+      "defense": "Défense",
+      "setting": "Passe"
+    },
+    "attackStats": {
+      "kills": "Points",
+      "faults": "Fautes",
+      "defended": "Défendues",
+      "efficiency": "Efficacité attaque"
+    },
+    "serveStats": {
+      "aces": "Aces",
+      "faults": "Fautes",
+      "inPlay": "En jeu",
+      "efficiency": "Efficacité service"
+    },
+    "blockStats": {
+      "kills": "Points",
+      "touches": "Touches",
+      "faults": "Fautes",
+      "efficiency": "Efficacité block"
+    },
+    "receptionStats": {
+      "perfect": "Parfaite (A)",
+      "positive": "Positive (B)",
+      "negative": "Négative (C)",
+      "fault": "Faute (D)",
+      "efficiency": "Réception positive"
+    },
+    "defenseStats": {
+      "success": "Réussies",
+      "faults": "Fautes",
+      "efficiency": "Efficacité défense"
+    },
+    "settingStats": {
+      "perfect": "Parfaites",
+      "good": "Bonnes",
+      "bad": "Mauvaises",
+      "efficiency": "Qualité de passe"
+    },
+    "summary": {
+      "points": "Points",
+      "faults": "Fautes",
+      "plusMinus": "+/-",
+      "efficiency": "Efficacité"
+    },
+    "topPerformer": {
+      "bestAttacker": "Meilleur attaquant",
+      "bestServer": "Meilleur serveur",
+      "bestReceiver": "Meilleure réception",
+      "bestBlocker": "Meilleur bloqueur"
+    },
+    "progression": {
+      "bySet": "Progression par set",
+      "byMatch": "Évolution par match"
+    },
+    "career": {
+      "title": "Historique",
+      "matchesPlayed": "{{count}} matchs joués",
+      "averages": "Moyennes",
+      "records": "Records",
+      "mostKills": "Plus de kills en 1 match",
+      "mostAces": "Plus d'aces en 1 match",
+      "bestEfficiency": "Meilleure efficacité",
+      "worstMatch": "Pire match",
+      "evolution": "Évolution",
+      "matchHistory": "Matchs"
+    },
+    "pointTypes": {
+      "attack": "Attaque",
+      "block": "Block",
+      "ace": "Ace",
+      "opponentFault": "Faute adverse"
+    },
+    "noData": "Aucune donnée statistique",
+    "noMatches": "Aucun match joué"
   },
   "history": {
     "title": "Historique",
@@ -161,7 +260,8 @@
     "noMatchesDesc": "Commencez votre premier match",
     "filterByTeam": "Filtrer par équipe",
     "filterByDate": "Filtrer par date",
-    "allTeams": "Toutes les équipes",
+    "allTeams": "Toutes",
+    "statusAll": "Tous",
     "vs": "vs"
   },
   "tactical": {

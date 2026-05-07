@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, Pressable } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Trophy } from 'lucide-react-native';
+import { Trophy, BarChart2 } from 'lucide-react-native';
 
 import { getMatchById, getSetsForMatch } from '../../../src/services/matchService';
 import { getTeamById } from '../../../src/services/teamService';
@@ -13,7 +13,18 @@ import type { Match, MatchSet } from '../../../src/models/match';
 import type { Team } from '../../../src/models/team';
 import type { Player } from '../../../src/models/player';
 import type { PlayerStats } from '../../../src/models/stats';
-import { serveEfficiency, attackEfficiency, receptionEfficiency } from '../../../src/models/stats';
+import {
+  serveEfficiency,
+  attackEfficiency,
+  receptionEfficiency,
+  servePositiveRate,
+  attackPositiveRate,
+  blockPositiveRate,
+  receptionPositiveRate,
+  defensePositiveRate,
+} from '../../../src/models/stats';
+import { RadarChart } from '../../../src/components/stats/RadarChart';
+import { BarChart } from '../../../src/components/stats/BarChart';
 import { palette } from '../../../src/theme/tokens';
 
 export default function SummaryScreen() {
@@ -36,16 +47,17 @@ export default function SummaryScreen() {
       setMatch(m);
       setSets(s);
 
-      const [home, away, ps, playerList] = await Promise.all([
+      const [home, away, ps, homePlayers, awayPlayers] = await Promise.all([
         getTeamById(m.teamHomeId),
         getTeamById(m.teamAwayId),
         getPlayerStatsForMatch(id),
         getPlayersByTeam(m.teamHomeId),
+        getPlayersByTeam(m.teamAwayId),
       ]);
       setHomeTeam(home);
       setAwayTeam(away);
       setStats(ps);
-      setPlayers(playerList);
+      setPlayers([...homePlayers, ...awayPlayers]);
     }
     load();
   }, [id]);
@@ -62,10 +74,34 @@ export default function SummaryScreen() {
   const setsAway = sets.filter((s) => s.winnerTeamId === match.teamAwayId).length;
   const winner = match.winnerTeamId === match.teamHomeId ? homeTeam : awayTeam;
 
+  const homePlayerIds = new Set(
+    players.filter((p) => p.teamId === match.teamHomeId).map((p) => p.id)
+  );
+
+  function sumStat(ps: PlayerStats[], key: keyof PlayerStats): number {
+    return ps.reduce((acc, s) => acc + (s[key] as number), 0);
+  }
+
+  const homeStats = stats.filter((ps) => homePlayerIds.has(ps.playerId));
+  const awayStats = stats.filter((ps) => !homePlayerIds.has(ps.playerId));
+  const showTeamComparison = homeStats.length > 0 || awayStats.length > 0;
+
+  const teamBarData = showTeamComparison
+    ? [
+        { label: t('stats.serveAce'), value: sumStat(homeStats, 'serveAce'), color: homeTeam.color },
+        { label: t('stats.serveAce'), value: sumStat(awayStats, 'serveAce'), color: palette.teamAway },
+        { label: '', value: 0, color: 'transparent' },
+        { label: t('stats.attackKill'), value: sumStat(homeStats, 'attackKill'), color: homeTeam.color },
+        { label: t('stats.attackKill'), value: sumStat(awayStats, 'attackKill'), color: palette.teamAway },
+        { label: '', value: 0, color: 'transparent' },
+        { label: t('stats.blockKill'), value: sumStat(homeStats, 'blockKill'), color: homeTeam.color },
+        { label: t('stats.blockKill'), value: sumStat(awayStats, 'blockKill'), color: palette.teamAway },
+      ]
+    : [];
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scroll}>
-        {/* Winner banner */}
         {winner && (
           <View style={styles.winnerBanner}>
             <Trophy size={28} color={palette.warning} />
@@ -74,14 +110,12 @@ export default function SummaryScreen() {
           </View>
         )}
 
-        {/* Final score */}
         <View style={styles.scoreCard}>
           <TeamScore name={homeTeam.name} color={homeTeam.color} sets={setsHome} />
           <Text style={styles.vs}>-</Text>
           <TeamScore name={awayTeam.name} color={palette.teamAway} sets={setsAway} />
         </View>
 
-        {/* Sets detail */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('match.sets')}</Text>
           {sets.map((set) => (
@@ -92,15 +126,52 @@ export default function SummaryScreen() {
           ))}
         </View>
 
-        {/* Player stats */}
+        {showTeamComparison && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeaderRow}>
+              <Text style={styles.sectionTitle}>{t('stats.title')}</Text>
+              <View style={styles.legendRow}>
+                <View style={[styles.legendDot, { backgroundColor: homeTeam.color }]} />
+                <Text style={styles.legendText}>{homeTeam.name}</Text>
+                <View style={[styles.legendDot, { backgroundColor: palette.teamAway }]} />
+                <Text style={styles.legendText}>{awayTeam.name}</Text>
+              </View>
+            </View>
+            <View style={styles.barChartWrap}>
+              <BarChart data={teamBarData} height={120} />
+            </View>
+            <View style={styles.barLabelRow}>
+              <Text style={styles.barGroupLabel}>{t('stats.serve')}</Text>
+              <Text style={styles.barGroupLabel}>{t('stats.attack')}</Text>
+              <Text style={styles.barGroupLabel}>{t('stats.block')}</Text>
+            </View>
+          </View>
+        )}
+
+        <Pressable
+          style={({ pressed }) => [styles.statsDetailBtn, pressed && { opacity: 0.75 }]}
+          onPress={() => router.push(`/match/${id}/stats` as never)}
+          accessibilityRole="button"
+        >
+          <BarChart2 size={18} color={palette.accentSecondary} />
+          <Text style={styles.statsDetailBtnText}>{t('stats.detailed')}</Text>
+        </Pressable>
+
         {stats.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t('stats.title')}</Text>
+            <Text style={styles.sectionTitle}>{t('stats.title')} — {t('player.position')}</Text>
             {stats.map((ps) => {
               const player = players.find((p) => p.id === ps.playerId);
               if (!player) return null;
+              const isHome = homePlayerIds.has(ps.playerId);
+              const teamColor = isHome ? homeTeam.color : palette.teamAway;
               return (
-                <PlayerStatRow key={ps.playerId} player={player} stats={ps} />
+                <PlayerStatCard
+                  key={ps.playerId}
+                  player={player}
+                  stats={ps}
+                  teamColor={teamColor}
+                />
               );
             })}
           </View>
@@ -119,26 +190,55 @@ function TeamScore({ name, color, sets }: { name: string; color: string; sets: n
   );
 }
 
-function PlayerStatRow({ player, stats }: { player: Player; stats: PlayerStats }) {
+function PlayerStatCard({
+  player,
+  stats,
+  teamColor,
+}: {
+  player: Player;
+  stats: PlayerStats;
+  teamColor: string;
+}) {
+  const { t } = useTranslation();
   const serveEff = serveEfficiency(stats);
   const attackEff = attackEfficiency(stats);
   const receptionEff = receptionEfficiency(stats);
   const totalAces = stats.serveAce;
   const totalKills = stats.attackKill + stats.blockKill;
 
+  const radarMetrics = [
+    { label: t('stats.serve'), value: servePositiveRate(stats) },
+    { label: t('stats.attack'), value: attackPositiveRate(stats) },
+    { label: t('stats.block'), value: blockPositiveRate(stats) },
+    { label: t('stats.reception'), value: receptionPositiveRate(stats) },
+    { label: t('stats.defense'), value: defensePositiveRate(stats) },
+  ];
+
+  const hasData = radarMetrics.some((m) => m.value > 0);
+
   return (
-    <View style={styles.playerStatRow}>
-      <View style={styles.playerStatHeader}>
+    <View style={styles.playerCard}>
+      <View style={styles.playerCardHeader}>
+        <View style={[styles.playerTeamBar, { backgroundColor: teamColor }]} />
         <Text style={styles.playerStatName}>
           #{player.number} {player.firstName} {player.lastName}
         </Text>
       </View>
-      <View style={styles.statGrid}>
-        <StatCell label="Ace" value={totalAces} />
-        <StatCell label="Kill" value={totalKills} />
-        <StatCell label="Srv%" value={serveEff} suffix="%" />
-        <StatCell label="Atk%" value={attackEff} suffix="%" />
-        <StatCell label="Rec%" value={receptionEff} suffix="%" />
+
+      <View style={styles.playerCardBody}>
+        {hasData && (
+          <View style={styles.radarWrap}>
+            <RadarChart metrics={radarMetrics} size={148} color={teamColor} />
+          </View>
+        )}
+
+        <View style={styles.statGrid}>
+          <StatCell label="Ace" value={totalAces} />
+          <StatCell label="Kill" value={totalKills} />
+          <StatCell label="Srv%" value={serveEff} suffix="%" />
+          <StatCell label="Atk%" value={attackEff} suffix="%" />
+          <StatCell label="Rec%" value={receptionEff} suffix="%" />
+        </View>
       </View>
     </View>
   );
@@ -155,7 +255,12 @@ function StatCell({ label, value, suffix = '' }: { label: string; value: number;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
-  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: palette.background },
+  loading: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: palette.background,
+  },
   loadingText: { color: palette.textSecondary, fontFamily: 'Inter_400Regular' },
   scroll: { padding: 20, gap: 16 },
   winnerBanner: {
@@ -167,7 +272,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  winnerLabel: { fontSize: 12, fontFamily: 'Inter_600SemiBold', color: palette.textMuted, textTransform: 'uppercase', letterSpacing: 1 },
+  winnerLabel: {
+    fontSize: 12,
+    fontFamily: 'Inter_600SemiBold',
+    color: palette.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
   winnerName: { fontSize: 22, fontFamily: 'Inter_700Bold', color: palette.warning },
   scoreCard: {
     backgroundColor: palette.backgroundSurface,
@@ -179,7 +290,12 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   teamScore: { flex: 1, alignItems: 'center', gap: 6 },
-  teamScoreName: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary, textAlign: 'center' },
+  teamScoreName: {
+    fontSize: 14,
+    fontFamily: 'Inter_600SemiBold',
+    color: palette.textSecondary,
+    textAlign: 'center',
+  },
   teamScoreSets: { fontSize: 52, fontFamily: 'Inter_900Black', lineHeight: 56 },
   vs: { fontSize: 20, fontFamily: 'Inter_500Medium', color: palette.textMuted, marginHorizontal: 8 },
   section: {
@@ -199,6 +315,30 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: palette.backgroundElevated,
   },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: palette.backgroundElevated,
+    paddingRight: 14,
+  },
+  legendRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginLeft: 'auto' },
+  legendDot: { width: 8, height: 8, borderRadius: 4 },
+  legendText: { fontSize: 11, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
+  barChartWrap: { paddingHorizontal: 8, paddingTop: 8 },
+  barLabelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingHorizontal: 8,
+    paddingBottom: 12,
+  },
+  barGroupLabel: {
+    fontSize: 10,
+    fontFamily: 'Inter_600SemiBold',
+    color: palette.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
   setRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -210,15 +350,50 @@ const styles = StyleSheet.create({
   },
   setNum: { fontSize: 14, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
   setScore: { fontSize: 16, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
-  playerStatRow: {
-    padding: 14,
+  playerCard: {
     borderBottomWidth: 1,
     borderBottomColor: palette.backgroundElevated,
   },
-  playerStatHeader: { marginBottom: 8 },
+  playerCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    gap: 10,
+  },
+  playerTeamBar: { width: 3, height: 20, borderRadius: 2 },
   playerStatName: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },
-  statGrid: { flexDirection: 'row', gap: 8 },
-  statCell: { flex: 1, alignItems: 'center' },
-  statCellValue: { fontSize: 16, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
-  statCellLabel: { fontSize: 10, fontFamily: 'Inter_500Medium', color: palette.textMuted, marginTop: 2 },
+  playerCardBody: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingBottom: 12,
+    gap: 12,
+  },
+  radarWrap: { alignItems: 'center', justifyContent: 'center' },
+  statGrid: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  statCell: { minWidth: 48, alignItems: 'center' },
+  statCellValue: { fontSize: 18, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
+  statCellLabel: {
+    fontSize: 10,
+    fontFamily: 'Inter_500Medium',
+    color: palette.textMuted,
+    marginTop: 2,
+  },
+  statsDetailBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: palette.backgroundSurface,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: palette.accentSecondary + '40',
+    paddingVertical: 14,
+  },
+  statsDetailBtnText: {
+    fontSize: 15,
+    fontFamily: 'Inter_600SemiBold',
+    color: palette.accentSecondary,
+  },
 });

@@ -18,12 +18,14 @@ import { PlayerToken } from './PlayerToken';
 import { ToolBar } from './ToolBar';
 import { PlaybackControls } from './PlaybackControls';
 import { PlaybookSheet } from './PlaybookSheet';
+import { PlayerEditSheet } from './PlayerEditSheet';
 import { useTacticalStore } from '../../features/tactical/tacticalStore';
 import { seedDefaultPlays } from '../../features/tactical/tacticalService';
 import { HOME_POSITION_COORDS, AWAY_POSITION_COORDS, findNearestPlayer, clamp, easeInOut } from '../../features/tactical/positionUtils';
 import { useScoringStore } from '../../stores/scoringStore';
 import { useSettingsStore } from '../../stores/settingsStore';
 import type { PlayerPosition, TacticalPlay } from '../../models/tactical';
+import { updatePlayer } from '../../services/playerService';
 import type { MatchFormat } from '../../models/match';
 import { palette } from '../../theme/tokens';
 
@@ -116,6 +118,7 @@ export function TacticalBoard({
     currentPlayName,
     setPositions,
     movePlayer,
+    updatePlayerInfo,
     addArrow,
     removeArrow,
     clearArrows,
@@ -140,6 +143,7 @@ export function TacticalBoard({
 
   const [drawPreview, setDrawPreview] = useState<DrawPreviewState | null>(null);
   const [showPlaybook, setShowPlaybook] = useState(false);
+  const [editingPlayer, setEditingPlayer] = useState<PlayerPosition | null>(null);
   const [playbookMode, setPlaybookMode] = useState<'load' | 'save'>('load');
   const [playbackPositions, setPlaybackPositions] = useState<PlayerPosition[] | null>(null);
   const [showNames, setShowNames] = useState(false);
@@ -295,6 +299,37 @@ export function TacticalBoard({
     movePlayer(playerId, x, y);
   }
 
+  function handleTokenTap(playerId: string) {
+    const found = positions.find((p) => p.playerId === playerId);
+    if (found) setEditingPlayer(found);
+  }
+
+  async function handleEditSave(
+    playerId: string,
+    updates: { number: number; firstName: string; lastName: string },
+  ) {
+    const newLabel = String(updates.number);
+    updatePlayerInfo(playerId, {
+      number: updates.number,
+      firstName: updates.firstName || null,
+      lastName: updates.lastName || null,
+      label: newLabel,
+    });
+    // Only persist to DB for real (non-synthetic) player IDs
+    const isSynthetic = playerId.startsWith('home_') || playerId.startsWith('away_');
+    if (!isSynthetic) {
+      try {
+        await updatePlayer(playerId, {
+          firstName: updates.firstName || null,
+          lastName: updates.lastName || null,
+          number: updates.number,
+        });
+      } catch {
+        // Best-effort — store already updated, DB update non-blocking
+      }
+    }
+  }
+
   function handleLoadPlay(play: TacticalPlay) {
     loadPlay(play);
     setCurrentFormat(play.format);
@@ -411,6 +446,7 @@ export function TacticalBoard({
                 canDrag={selectedTool === 'move' && !isPlaying}
                 showName={showNames}
                 onDragEnd={handleDragEnd}
+                onTap={handleTokenTap}
                 hapticsEnabled={hapticsEnabled}
               />
             ))}
@@ -444,6 +480,14 @@ export function TacticalBoard({
           arrowThickness={arrowThickness}
           onSelectTool={setTool}
           onClearAll={clearArrows}
+        />
+
+        {/* Player quick-edit sheet */}
+        <PlayerEditSheet
+          visible={editingPlayer !== null}
+          player={editingPlayer}
+          onClose={() => setEditingPlayer(null)}
+          onSave={handleEditSave}
         />
 
         {/* Playbook sheet */}

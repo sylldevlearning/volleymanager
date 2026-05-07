@@ -56,9 +56,9 @@ docs/plans/             # Plan .md pour chaque feature (workflow obligatoire)
 - Supprimer les fichiers template Expo (two.tsx, modal.tsx, EditScreenInfo, Themed, etc.)
 
 ## Priorité features restantes
-- [ ] Composition de départ interactive (drag & drop sur terrain SVG)
-- [ ] Écran statistiques détaillé avec graphiques (radar, barres)
-- [ ] Filtres historique par équipe/date
+- [x] Composition de départ interactive (drag & drop sur terrain SVG)
+- [x] Écran statistiques détaillé avec graphiques (radar, barres) — RadarChart + BarChart SVG
+- [x] Filtres historique par équipe/date — status chips + team chips dans matches.tsx
 - [ ] Export PDF du résumé de match
 - [ ] Light mode complet
 - [ ] Notifications de fin de set

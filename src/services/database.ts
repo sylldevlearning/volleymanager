@@ -1,12 +1,19 @@
 import * as SQLite from 'expo-sqlite';
 
 let _db: SQLite.SQLiteDatabase | null = null;
+let _initPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
 export async function getDb(): Promise<SQLite.SQLiteDatabase> {
   if (_db) return _db;
-  _db = await SQLite.openDatabaseAsync('volleymanager.db');
-  await runMigrations(_db);
-  return _db;
+  if (!_initPromise) {
+    _initPromise = (async () => {
+      const db = await SQLite.openDatabaseAsync('volleymanager.db');
+      await runMigrations(db);
+      _db = db;
+      return db;
+    })();
+  }
+  return _initPromise;
 }
 
 async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
@@ -172,6 +179,73 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
       }
 
       await db.execAsync('PRAGMA user_version = 3');
+    });
+  }
+
+  if (version < 4) {
+    await db.withExclusiveTransactionAsync(async () => {
+      // Make first_name / last_name nullable + add UNIQUE(team_id, number)
+      // Idempotent: inspect current schema before acting
+      const colInfo = await db.getAllAsync<{ name: string; notnull: number }>(
+        'PRAGMA table_info(players)'
+      );
+
+      if (colInfo.length === 0) {
+        // players table missing entirely — create with new schema
+        await db.execAsync(`
+          CREATE TABLE IF NOT EXISTS players (
+            id TEXT PRIMARY KEY,
+            team_id TEXT NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+            first_name TEXT,
+            last_name TEXT,
+            number INTEGER NOT NULL,
+            position TEXT CHECK(position IN ('setter','outside','opposite','middle','libero','universal')),
+            photo_uri TEXT,
+            is_active INTEGER DEFAULT 1,
+            created_at TEXT DEFAULT (datetime('now')),
+            UNIQUE(team_id, number)
+          )
+        `);
+        await db.execAsync('CREATE INDEX IF NOT EXISTS idx_players_team ON players(team_id)');
+      } else {
+        const firstNameNotnull = colInfo.find(c => c.name === 'first_name')?.notnull ?? 0;
+        if (firstNameNotnull === 1) {
+          // Columns are still NOT NULL — migrate via rename/recreate
+          // Guard: if players_old already exists (interrupted prior run), skip rename
+          const oldExists = await db.getFirstAsync<{ name: string }>(
+            `SELECT name FROM sqlite_master WHERE type='table' AND name='players_old'`
+          );
+          if (!oldExists) {
+            await db.execAsync('ALTER TABLE players RENAME TO players_old');
+          }
+          await db.execAsync(`
+            CREATE TABLE IF NOT EXISTS players (
+              id TEXT PRIMARY KEY,
+              team_id TEXT NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+              first_name TEXT,
+              last_name TEXT,
+              number INTEGER NOT NULL,
+              position TEXT CHECK(position IN ('setter','outside','opposite','middle','libero','universal')),
+              photo_uri TEXT,
+              is_active INTEGER DEFAULT 1,
+              created_at TEXT DEFAULT (datetime('now')),
+              UNIQUE(team_id, number)
+            )
+          `);
+          await db.execAsync(`
+            INSERT OR IGNORE INTO players
+              (id, team_id, first_name, last_name, number, position, photo_uri, is_active, created_at)
+            SELECT
+              id, team_id, first_name, last_name, number, position, photo_uri, is_active, created_at
+            FROM players_old
+          `);
+          await db.execAsync('DROP TABLE players_old');
+          await db.execAsync('CREATE INDEX IF NOT EXISTS idx_players_team ON players(team_id)');
+        }
+        // else: first_name already nullable — schema is already correct, just bump version
+      }
+
+      await db.execAsync('PRAGMA user_version = 4');
     });
   }
 }

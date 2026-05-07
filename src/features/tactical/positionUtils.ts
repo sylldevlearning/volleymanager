@@ -37,6 +37,8 @@ export interface SimplePlayer {
   id: string;
   number: number;
   teamId: string;
+  firstName?: string | null;
+  lastName?: string | null;
 }
 
 export function buildInitialPositions(
@@ -63,6 +65,8 @@ export function buildInitialPositions(
         teamId: homeTeamId,
         number: player.number,
         label: String(player.number),
+        firstName: player.firstName,
+        lastName: player.lastName,
         isHome: true,
       });
     }
@@ -78,6 +82,8 @@ export function buildInitialPositions(
         teamId: awayTeamId,
         number: player.number,
         label: String(player.number),
+        firstName: player.firstName,
+        lastName: player.lastName,
         isHome: false,
       });
     }
@@ -94,6 +100,8 @@ export function buildInitialPositions(
         teamId: homeTeamId,
         number: player.number,
         label: String(player.number),
+        firstName: player.firstName,
+        lastName: player.lastName,
         isHome: true,
       });
     }
@@ -108,6 +116,8 @@ export function buildInitialPositions(
         teamId: awayTeamId,
         number: player.number,
         label: String(player.number),
+        firstName: player.firstName,
+        lastName: player.lastName,
         isHome: false,
       });
     }

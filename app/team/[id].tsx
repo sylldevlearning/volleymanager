@@ -11,15 +11,16 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Plus, Trash2, Edit2, X } from 'lucide-react-native';
+import { Plus, Trash2, X, BarChart2 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getTeamById, updateTeam, deleteTeam } from '../../src/services/teamService';
 import { getPlayersByTeam, createPlayer, deletePlayer } from '../../src/services/playerService';
 import type { Team } from '../../src/models/team';
-import type { Player, PlayerPosition } from '../../src/models/player';
+import type { Player, PlayerPosition as PPos } from '../../src/models/player';
+import { getPlayerDisplayName } from '../../src/features/players/player-helpers';
 import { palette } from '../../src/theme/tokens';
 
-const POSITIONS: PlayerPosition[] = ['setter', 'outside', 'opposite', 'middle', 'libero', 'universal'];
+const POSITIONS: PPos[] = ['setter', 'outside', 'opposite', 'middle', 'libero', 'universal'];
 
 export default function TeamDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -31,9 +32,9 @@ export default function TeamDetailScreen() {
 
   const load = useCallback(async () => {
     if (!id) return;
-    const [t, p] = await Promise.all([getTeamById(id), getPlayersByTeam(id)]);
-    setTeam(t);
-    setPlayers(p);
+    const [tm, pl] = await Promise.all([getTeamById(id), getPlayersByTeam(id)]);
+    setTeam(tm);
+    setPlayers(pl);
   }, [id]);
 
   useFocusEffect(useCallback(() => { load(); }, [load]));
@@ -48,10 +49,7 @@ export default function TeamDetailScreen() {
           text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
-            if (id) {
-              await deleteTeam(id);
-              router.back();
-            }
+            if (id) { await deleteTeam(id); router.back(); }
           },
         },
       ]
@@ -62,7 +60,6 @@ export default function TeamDetailScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
-      {/* Team header */}
       <View style={styles.header}>
         <View style={[styles.colorBand, { backgroundColor: team.color }]} />
         <View style={styles.headerContent}>
@@ -73,14 +70,12 @@ export default function TeamDetailScreen() {
         <Pressable
           onPress={handleDeleteTeam}
           style={styles.deleteBtn}
-          accessibilityLabel={`Supprimer ${team.name}`}
           accessibilityRole="button"
         >
           <Trash2 size={18} color={palette.error} />
         </Pressable>
       </View>
 
-      {/* Players list */}
       <FlatList
         data={players}
         keyExtractor={(p) => p.id}
@@ -91,15 +86,11 @@ export default function TeamDetailScreen() {
         renderItem={({ item }) => (
           <PlayerRow
             player={item}
-            onDelete={async () => {
-              await deletePlayer(item.id);
-              load();
-            }}
+            onDelete={async () => { await deletePlayer(item.id); load(); }}
           />
         )}
       />
 
-      {/* Add player button */}
       <Pressable
         style={({ pressed }) => [styles.fab, pressed && styles.fabPressed]}
         onPress={() => setShowAddPlayer(true)}
@@ -109,12 +100,13 @@ export default function TeamDetailScreen() {
         <Plus size={26} color="#fff" />
       </Pressable>
 
-      {/* Add player modal */}
       <AddPlayerModal
         visible={showAddPlayer}
         teamId={id!}
+        existingNumbers={players.map((p) => p.number)}
         onClose={() => setShowAddPlayer(false)}
         onAdded={() => { setShowAddPlayer(false); load(); }}
+        onAddedAnother={() => load()}
       />
     </SafeAreaView>
   );
@@ -122,23 +114,28 @@ export default function TeamDetailScreen() {
 
 function PlayerRow({ player, onDelete }: { player: Player; onDelete: () => void }) {
   const { t } = useTranslation();
+  const router = useRouter();
+  const name = getPlayerDisplayName(player);
   return (
     <View style={styles.playerRow}>
       <View style={styles.numberBadge}>
         <Text style={styles.numberText}>{player.number}</Text>
       </View>
       <View style={styles.playerInfo}>
-        <Text style={styles.playerName}>{player.firstName} {player.lastName}</Text>
+        <Text style={styles.playerName}>{name}</Text>
         {player.position && (
           <Text style={styles.playerPosition}>{t(`player.positions.${player.position}`)}</Text>
         )}
       </View>
       <Pressable
-        onPress={onDelete}
-        style={styles.deleteRowBtn}
-        accessibilityLabel={`Supprimer ${player.firstName}`}
+        onPress={() => router.push(`/player/${player.id}/stats` as never)}
+        style={styles.statsRowBtn}
         accessibilityRole="button"
+        accessibilityLabel={t('stats.career.title')}
       >
+        <BarChart2 size={16} color={palette.textMuted} />
+      </Pressable>
+      <Pressable onPress={onDelete} style={styles.deleteRowBtn} accessibilityRole="button">
         <Trash2 size={16} color={palette.textMuted} />
       </Pressable>
     </View>
@@ -148,76 +145,123 @@ function PlayerRow({ player, onDelete }: { player: Player; onDelete: () => void 
 function AddPlayerModal({
   visible,
   teamId,
+  existingNumbers,
   onClose,
   onAdded,
+  onAddedAnother,
 }: {
   visible: boolean;
   teamId: string;
+  existingNumbers: number[];
   onClose: () => void;
   onAdded: () => void;
+  onAddedAnother: () => void;
 }) {
   const { t } = useTranslation();
-  const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [number, setNumber] = useState('');
-  const [position, setPosition] = useState<PlayerPosition | null>(null);
+  const [position, setPosition] = useState<PPos | null>(null);
   const [loading, setLoading] = useState(false);
+  const [addedCount, setAddedCount] = useState(0);
 
-  const reset = () => { setFirstName(''); setLastName(''); setNumber(''); setPosition(null); };
+  const reset = () => { setLastName(''); setNumber(''); setPosition(null); };
 
-  const handleAdd = async () => {
-    if (!firstName.trim() || !lastName.trim() || !number) {
-      Alert.alert(t('common.error'), 'Prénom, nom et numéro sont requis.');
-      return;
-    }
+  async function handleAdd(addAnother: boolean) {
     const num = parseInt(number, 10);
     if (isNaN(num) || num < 0 || num > 99) {
-      Alert.alert(t('common.error'), 'Numéro invalide (0–99).');
+      Alert.alert(t('common.error'), t('player.numberRequired'));
       return;
     }
     setLoading(true);
     try {
       await createPlayer({
         teamId,
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
+        firstName: null,
+        lastName: lastName.trim() || null,
         number: num,
         position,
         photoUri: null,
         isActive: true,
       });
-      reset();
-      onAdded();
+      if (addAnother) {
+        setAddedCount((c) => c + 1);
+        reset();
+        onAddedAnother();
+      } else {
+        setAddedCount(0);
+        onAdded();
+      }
     } catch (e) {
-      Alert.alert(t('common.error'), String(e));
+      const msg = String(e);
+      if (msg.includes('DUPLICATE_NUMBER')) {
+        Alert.alert(t('common.error'), t('player.numberDuplicate'));
+      } else {
+        Alert.alert(t('common.error'), msg);
+      }
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  function handleClose() {
+    reset();
+    setAddedCount(0);
+    onClose();
+  }
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={handleClose}
+    >
       <SafeAreaView style={styles.modal}>
         <View style={styles.modalHeader}>
-          <Text style={styles.modalTitle}>{t('team.addPlayer')}</Text>
-          <Pressable onPress={onClose} accessibilityLabel={t('common.close')} accessibilityRole="button">
+          <View>
+            <Text style={styles.modalTitle}>{t('team.addPlayer')}</Text>
+            {addedCount > 0 && (
+              <Text style={styles.batchCount}>
+                {addedCount} ajouté{addedCount > 1 ? 's' : ''}
+              </Text>
+            )}
+          </View>
+          <Pressable onPress={handleClose} accessibilityRole="button">
             <X size={24} color={palette.textSecondary} />
           </Pressable>
         </View>
 
         <View style={styles.modalBody}>
-          <Row>
-            <ModalInput label={t('player.firstName')} value={firstName} onChangeText={setFirstName} placeholder="Jean" />
-            <ModalInput label={t('player.lastName')} value={lastName} onChangeText={setLastName} placeholder="Dupont" />
-          </Row>
-          <ModalInput
-            label={`${t('player.number')} (0–99)`}
-            value={number}
-            onChangeText={setNumber}
-            placeholder="7"
-            keyboardType="number-pad"
-            maxLength={2}
-          />
+          <View style={styles.row}>
+            <View style={styles.numberInput}>
+              <Text style={styles.fieldLabel}>{t('player.numberOnly')} *</Text>
+              <TextInput
+                style={[styles.input, styles.inputCenter]}
+                value={number}
+                onChangeText={setNumber}
+                placeholder="7"
+                placeholderTextColor={palette.textMuted}
+                keyboardType="number-pad"
+                maxLength={2}
+                autoFocus
+                selectTextOnFocus
+                accessibilityLabel={t('player.numberOnly')}
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.fieldLabel}>{t('player.namePlaceholder')}</Text>
+              <TextInput
+                style={styles.input}
+                value={lastName}
+                onChangeText={setLastName}
+                placeholder={t('player.namePlaceholder')}
+                placeholderTextColor={palette.textMuted}
+                autoCapitalize="words"
+                returnKeyType="done"
+                accessibilityLabel="Nom"
+              />
+            </View>
+          </View>
 
           <Text style={styles.fieldLabel}>{t('player.position')}</Text>
           <View style={styles.positionsGrid}>
@@ -229,7 +273,12 @@ function AddPlayerModal({
                 accessibilityRole="radio"
                 accessibilityState={{ selected: position === pos }}
               >
-                <Text style={[styles.positionChipText, position === pos && styles.positionChipTextActive]}>
+                <Text
+                  style={[
+                    styles.positionChipText,
+                    position === pos && styles.positionChipTextActive,
+                  ]}
+                >
                   {t(`player.positions.${pos}`)}
                 </Text>
               </Pressable>
@@ -237,53 +286,36 @@ function AddPlayerModal({
           </View>
         </View>
 
-        <Pressable
-          style={({ pressed }) => [styles.addButton, pressed && styles.addButtonPressed, loading && styles.addButtonDisabled]}
-          onPress={handleAdd}
-          disabled={loading}
-          accessibilityLabel={t('common.add')}
-          accessibilityRole="button"
-        >
-          <Text style={styles.addButtonText}>{loading ? t('common.loading') : t('team.addPlayer')}</Text>
-        </Pressable>
+        <View style={styles.modalButtons}>
+          <Pressable
+            style={({ pressed }) => [
+              styles.batchBtn,
+              pressed && styles.batchBtnPressed,
+              loading && styles.btnDisabled,
+            ]}
+            onPress={() => handleAdd(true)}
+            disabled={loading}
+            accessibilityRole="button"
+          >
+            <Text style={styles.batchBtnText}>{t('player.addAnother')}</Text>
+          </Pressable>
+          <Pressable
+            style={({ pressed }) => [
+              styles.addButton,
+              pressed && styles.addButtonPressed,
+              loading && styles.btnDisabled,
+            ]}
+            onPress={() => handleAdd(false)}
+            disabled={loading}
+            accessibilityRole="button"
+          >
+            <Text style={styles.addButtonText}>
+              {loading ? t('common.loading') : t('player.done')}
+            </Text>
+          </Pressable>
+        </View>
       </SafeAreaView>
     </Modal>
-  );
-}
-
-function Row({ children }: { children: React.ReactNode }) {
-  return <View style={{ flexDirection: 'row', gap: 12 }}>{children}</View>;
-}
-
-function ModalInput({
-  label,
-  value,
-  onChangeText,
-  placeholder,
-  keyboardType,
-  maxLength,
-}: {
-  label: string;
-  value: string;
-  onChangeText: (v: string) => void;
-  placeholder?: string;
-  keyboardType?: 'default' | 'number-pad';
-  maxLength?: number;
-}) {
-  return (
-    <View style={{ flex: 1, marginBottom: 14 }}>
-      <Text style={styles.fieldLabel}>{label}</Text>
-      <TextInput
-        style={styles.input}
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        placeholderTextColor={palette.textMuted}
-        keyboardType={keyboardType ?? 'default'}
-        maxLength={maxLength}
-        accessibilityLabel={label}
-      />
-    </View>
   );
 }
 
@@ -302,11 +334,26 @@ const styles = StyleSheet.create({
   colorBand: { width: 8, alignSelf: 'stretch' },
   headerContent: { flex: 1, padding: 16 },
   teamName: { fontSize: 20, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
-  shortName: { fontSize: 14, fontFamily: 'Inter_500Medium', color: palette.textSecondary, marginTop: 2 },
-  playerCount: { fontSize: 13, fontFamily: 'Inter_400Regular', color: palette.textMuted, marginTop: 4 },
+  shortName: {
+    fontSize: 14,
+    fontFamily: 'Inter_500Medium',
+    color: palette.textSecondary,
+    marginTop: 2,
+  },
+  playerCount: {
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+    color: palette.textMuted,
+    marginTop: 4,
+  },
   deleteBtn: { padding: 16 },
   list: { padding: 16, gap: 8, paddingBottom: 80 },
-  emptyText: { textAlign: 'center', color: palette.textMuted, fontFamily: 'Inter_400Regular', marginTop: 40 },
+  emptyText: {
+    textAlign: 'center',
+    color: palette.textMuted,
+    fontFamily: 'Inter_400Regular',
+    marginTop: 40,
+  },
   playerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -328,7 +375,13 @@ const styles = StyleSheet.create({
   numberText: { fontSize: 15, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
   playerInfo: { flex: 1 },
   playerName: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },
-  playerPosition: { fontSize: 12, fontFamily: 'Inter_400Regular', color: palette.textSecondary, marginTop: 2 },
+  playerPosition: {
+    fontSize: 12,
+    fontFamily: 'Inter_400Regular',
+    color: palette.textSecondary,
+    marginTop: 2,
+  },
+  statsRowBtn: { padding: 8 },
   deleteRowBtn: { padding: 8 },
   fab: {
     position: 'absolute',
@@ -346,14 +399,22 @@ const styles = StyleSheet.create({
   modal: { flex: 1, backgroundColor: palette.backgroundSurface },
   modalHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
     padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: palette.backgroundElevated,
   },
   modalTitle: { fontSize: 18, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
+  batchCount: {
+    fontSize: 12,
+    fontFamily: 'Inter_500Medium',
+    color: palette.success,
+    marginTop: 3,
+  },
   modalBody: { flex: 1, padding: 20 },
+  row: { flexDirection: 'row', gap: 12, marginBottom: 0 },
+  numberInput: { width: 72 },
   fieldLabel: {
     fontSize: 12,
     fontFamily: 'Inter_600SemiBold',
@@ -361,6 +422,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 6,
+    marginTop: 14,
   },
   input: {
     backgroundColor: palette.backgroundElevated,
@@ -373,7 +435,8 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_400Regular',
     color: palette.textPrimary,
   },
-  positionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
+  inputCenter: { textAlign: 'center', fontSize: 20, fontFamily: 'Inter_700Bold' },
+  positionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 2 },
   positionChip: {
     paddingHorizontal: 12,
     paddingVertical: 7,
@@ -382,17 +445,42 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'transparent',
   },
-  positionChipActive: { borderColor: palette.accentPrimary, backgroundColor: palette.accentPrimaryMuted },
+  positionChipActive: {
+    borderColor: palette.accentPrimary,
+    backgroundColor: palette.accentPrimaryMuted,
+  },
   positionChipText: { fontSize: 13, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
   positionChipTextActive: { color: palette.textPrimary },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 10,
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: palette.backgroundElevated,
+  },
+  batchBtn: {
+    flex: 1,
+    backgroundColor: palette.backgroundElevated,
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: palette.backgroundHover,
+  },
+  batchBtnPressed: { opacity: 0.8 },
+  batchBtnText: {
+    fontSize: 14,
+    fontFamily: 'Inter_600SemiBold',
+    color: palette.textSecondary,
+  },
   addButton: {
-    margin: 20,
+    flex: 1,
     backgroundColor: palette.accentPrimary,
-    paddingVertical: 16,
+    paddingVertical: 14,
     borderRadius: 14,
     alignItems: 'center',
   },
   addButtonPressed: { opacity: 0.85 },
-  addButtonDisabled: { opacity: 0.5 },
-  addButtonText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: '#fff' },
+  btnDisabled: { opacity: 0.5 },
+  addButtonText: { fontSize: 15, fontFamily: 'Inter_700Bold', color: '#fff' },
 });

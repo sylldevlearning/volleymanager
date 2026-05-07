@@ -5,8 +5,8 @@ function rowToPlayer(row: Record<string, unknown>): Player {
   return {
     id: row.id as string,
     teamId: row.team_id as string,
-    firstName: row.first_name as string,
-    lastName: row.last_name as string,
+    firstName: (row.first_name as string | null) ?? null,
+    lastName: (row.last_name as string | null) ?? null,
     number: row.number as number,
     position: row.position as Player['position'],
     photoUri: row.photo_uri as string | null,
@@ -37,11 +37,19 @@ export async function createPlayer(input: PlayerInput): Promise<Player> {
   const db = await getDb();
   const id = generateId();
   const now = new Date().toISOString();
-  await db.runAsync(
-    `INSERT INTO players (id, team_id, first_name, last_name, number, position, photo_uri, is_active, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)`,
-    [id, input.teamId, input.firstName, input.lastName, input.number, input.position, input.photoUri, now]
-  );
+  try {
+    await db.runAsync(
+      `INSERT INTO players (id, team_id, first_name, last_name, number, position, photo_uri, is_active, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)`,
+      [id, input.teamId, input.firstName ?? null, input.lastName ?? null, input.number, input.position, input.photoUri, now]
+    );
+  } catch (e) {
+    const msg = String(e);
+    if (msg.includes('UNIQUE') && (msg.includes('team_id') || msg.includes('number'))) {
+      throw new Error('DUPLICATE_NUMBER');
+    }
+    throw e;
+  }
   return { id, ...input, isActive: true, createdAt: now };
 }
 

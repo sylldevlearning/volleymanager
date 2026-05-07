@@ -22,6 +22,29 @@ Aucun bug en suspens. Tous les bugs nécessitent une décision produit ? Non.
 
 ## Bugs détectés et corrigés
 
+### BUG-014 : Crash au dessin de flèches — getDrawType() non-worklet appelée depuis le gesture
+- **Fichier** : [src/components/tactical/TacticalBoard.tsx](../src/components/tactical/TacticalBoard.tsx)
+- **Sévérité** : Critique
+- **Description** : Toute tentative de dessiner une flèche (outil →, ⇢ ou ↝) crashait l'app sur Expo Go.
+- **Cause** : `getDrawType()` était une fonction JS ordinaire appelée depuis `onBegin()`, `onUpdate()` et `onEnd()` du `drawGesture` (Pan) — tous exécutés sur le thread UI (worklet). Appeler une fonction JS non-worklet depuis un worklet = crash.
+- **Fix** : Suppression de `getDrawType()`. Remplacement par `drawType` calculé directement comme chaîne primitive avant la définition du gesture (capturée dans la closure worklet de manière sûre).
+- **Commit** : `2474693 fix: worklet crashes on arrows and scoreboard`
+
+---
+
+### BUG-015 : Crash au scoring — 3 violations worklet dans ScoreButton
+- **Fichier** : [src/components/scoring/ScoreButton.tsx](../src/components/scoring/ScoreButton.tsx)
+- **Sévérité** : Critique
+- **Description** : Appuyer sur un bouton de score crashait l'app sur Expo Go.
+- **Cause** : 3 violations simultanées dans les callbacks `Gesture.Tap()` (thread UI) :
+  1. `lastPressRef.current` lu et muté depuis le worklet — les refs React sont des objets JS, inaccessibles depuis l'UI thread.
+  2. `Haptics.impactAsync()` appelé directement (pas via `runOnJS`).
+  3. `onPress()` appelé directement depuis `onEnd` worklet.
+- **Fix** : Remplacement de `useRef(0)` par `useSharedValue(0)` pour le debounce, `runOnJS(triggerHaptic)()` pour les haptiques, `runOnJS(onPress)()` pour le callback.
+- **Commit** : `2474693 fix: worklet crashes on arrows and scoreboard`
+
+---
+
 ### BUG-012 : Crash au drag d'un joueur sur Expo Go — clamp() non déclarée worklet
 - **Fichier** : [src/features/tactical/positionUtils.ts](../src/features/tactical/positionUtils.ts)
 - **Sévérité** : Critique
