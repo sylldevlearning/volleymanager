@@ -1,4 +1,3 @@
-import { useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -6,6 +5,7 @@ import Animated, {
   useSharedValue,
   withSpring,
   withTiming,
+  runOnJS,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { useSettingsStore } from '../../stores/settingsStore';
@@ -24,27 +24,33 @@ const DEBOUNCE_MS = 400;
 export function ScoreButton({ teamName, score, teamColor, onPress, disabled }: ScoreButtonProps) {
   const hapticsEnabled = useSettingsStore((s) => s.hapticsEnabled);
   const scale = useSharedValue(1);
-  const lastPressRef = useRef(0);
+  // useSharedValue instead of useRef — refs are JS-side objects and cannot be
+  // safely read or mutated from a Reanimated worklet (UI thread).
+  const lastPressTime = useSharedValue(0);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
 
+  function triggerHaptic() {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  }
+
   const gesture = Gesture.Tap()
     .enabled(!disabled)
     .onStart(() => {
       const now = Date.now();
-      if (now - lastPressRef.current < DEBOUNCE_MS) return;
-      lastPressRef.current = now;
+      if (now - lastPressTime.value < DEBOUNCE_MS) return;
+      lastPressTime.value = now;
 
       scale.value = withTiming(0.93, { duration: ANIMATION_DURATION_SHORT });
       if (hapticsEnabled) {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        runOnJS(triggerHaptic)();
       }
     })
     .onEnd(() => {
       scale.value = withSpring(1, { damping: 12, stiffness: 180 });
-      onPress();
+      runOnJS(onPress)();
     });
 
   return (

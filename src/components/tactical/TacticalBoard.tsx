@@ -241,12 +241,10 @@ export function TacticalBoard({
   // Drawing gesture
   const isDrawMode = selectedTool === 'arrow_solid' || selectedTool === 'arrow_dashed' || selectedTool === 'arrow_curved';
   const drawColor = selectedTool === 'arrow_dashed' ? '#FBBF24' : '#1D4ED8';
-
-  function getDrawType(): 'solid' | 'dashed' | 'curved' {
-    if (selectedTool === 'arrow_dashed') return 'dashed';
-    if (selectedTool === 'arrow_curved') return 'curved';
-    return 'solid';
-  }
+  // Precompute as primitive string so the worklet can capture it safely
+  const drawType: 'solid' | 'dashed' | 'curved' =
+    selectedTool === 'arrow_dashed' ? 'dashed' :
+    selectedTool === 'arrow_curved' ? 'curved' : 'solid';
 
   const drawGesture = Gesture.Pan()
     .enabled(isDrawMode)
@@ -258,7 +256,7 @@ export function TacticalBoard({
         fromX: e.x, fromY: e.y,
         toX: e.x, toY: e.y,
         color: drawColor,
-        type: getDrawType(),
+        type: drawType,
       });
     })
     .onUpdate((e) => {
@@ -268,7 +266,7 @@ export function TacticalBoard({
         toX: drawStartX.value + e.translationX,
         toY: drawStartY.value + e.translationY,
         color: drawColor,
-        type: getDrawType(),
+        type: drawType,
       });
     })
     .onEnd((e) => {
@@ -278,13 +276,12 @@ export function TacticalBoard({
         const fromYR = clamp(drawStartY.value / courtH, 0, 1);
         const toXR = clamp((drawStartX.value + e.translationX) / courtW, 0, 1);
         const toYR = clamp((drawStartY.value + e.translationY) / courtH, 0, 1);
-        const type = getDrawType();
         runOnJS(addArrow)({
-          type,
+          type: drawType,
           fromX: fromXR, fromY: fromYR,
           toX: toXR, toY: toYR,
-          controlX: type === 'curved' ? (fromXR + toXR) / 2 - 0.05 : undefined,
-          controlY: type === 'curved' ? (fromYR + toYR) / 2 : undefined,
+          controlX: drawType === 'curved' ? (fromXR + toXR) / 2 - 0.05 : undefined,
+          controlY: drawType === 'curved' ? (fromYR + toYR) / 2 : undefined,
           color: drawColor,
           thickness: arrowThickness,
         });
