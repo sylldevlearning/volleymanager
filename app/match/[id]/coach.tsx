@@ -102,11 +102,11 @@ export default function CoachScreen() {
       if (!m) return;
       setMatch(m);
 
-      const [t, p] = await Promise.all([
+      const [tm, p] = await Promise.all([
         getTeamById(m.teamHomeId),
         getPlayersByTeam(m.teamHomeId),
       ]);
-      setTeam(t);
+      setTeam(tm);
       setPlayers(p);
       if (p.length > 0) setSelectedPlayer(p[0]);
 

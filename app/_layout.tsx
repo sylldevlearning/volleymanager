@@ -13,6 +13,7 @@ import {
 } from '@expo-google-fonts/inter';
 import tamaguiConfig from '../tamagui.config';
 import { useSettingsStore } from '../src/stores/settingsStore';
+import { seedDefaultDataIfEmpty } from '../src/services/seedService';
 import '../src/i18n';
 
 SplashScreen.preventAutoHideAsync();
@@ -39,7 +40,10 @@ export default function RootLayout() {
   }, [error]);
 
   useEffect(() => {
-    if (loaded) SplashScreen.hideAsync();
+    if (loaded) {
+      SplashScreen.hideAsync();
+      seedDefaultDataIfEmpty().catch(() => {});
+    }
   }, [loaded]);
 
   if (!loaded) return null;
@@ -59,6 +63,9 @@ function RootLayoutNav() {
           <Stack.Screen name="match/[id]/referee" options={{ headerShown: false }} />
           <Stack.Screen name="match/[id]/coach" options={{ headerShown: false }} />
           <Stack.Screen name="match/[id]/summary" options={{ title: 'Résumé' }} />
+          <Stack.Screen name="match/[id]/stats" options={{ headerShown: false }} />
+          <Stack.Screen name="match/[id]/player-stats/[playerId]" options={{ headerShown: false }} />
+          <Stack.Screen name="player/[id]/stats" options={{ headerShown: false }} />
           <Stack.Screen name="team/new" options={{ title: 'Nouvelle équipe', presentation: 'modal' }} />
           <Stack.Screen name="team/[id]" options={{ title: 'Équipe' }} />
         </Stack>

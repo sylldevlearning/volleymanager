@@ -23,6 +23,7 @@ import {
   receptionPositiveRate,
   defensePositiveRate,
 } from '../../../src/models/stats';
+import { getPlayerDisplayName } from '../../../src/features/players/player-helpers';
 import { RadarChart } from '../../../src/components/stats/RadarChart';
 import { BarChart } from '../../../src/components/stats/BarChart';
 import { palette } from '../../../src/theme/tokens';
@@ -221,7 +222,7 @@ function PlayerStatCard({
       <View style={styles.playerCardHeader}>
         <View style={[styles.playerTeamBar, { backgroundColor: teamColor }]} />
         <Text style={styles.playerStatName}>
-          #{player.number} {player.firstName} {player.lastName}
+          #{player.number} {getPlayerDisplayName(player)}
         </Text>
       </View>
 

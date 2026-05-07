@@ -12,7 +12,6 @@ import { MirrorBar } from '../../../src/components/charts/MirrorBar';
 import { TopPerformerCard } from '../../../src/components/charts/TopPerformerCard';
 import { StatCard } from '../../../src/components/charts/StatCard';
 import { palette } from '../../../src/theme/tokens';
-import { getPlayerShortName } from '../../../src/features/players/player-helpers';
 
 export default function MatchStatsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();

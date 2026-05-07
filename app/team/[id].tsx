@@ -42,7 +42,7 @@ export default function TeamDetailScreen() {
   const handleDeleteTeam = () => {
     Alert.alert(
       t('common.delete'),
-      `Supprimer l'équipe "${team?.name}" ?`,
+      t('team.deleteConfirm', { name: team?.name }),
       [
         { text: t('common.cancel'), style: 'cancel' },
         {
@@ -222,7 +222,7 @@ function AddPlayerModal({
             <Text style={styles.modalTitle}>{t('team.addPlayer')}</Text>
             {addedCount > 0 && (
               <Text style={styles.batchCount}>
-                {addedCount} ajouté{addedCount > 1 ? 's' : ''}
+                {t('player.addedCount', { count: addedCount })}
               </Text>
             )}
           </View>

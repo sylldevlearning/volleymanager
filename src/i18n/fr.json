@@ -94,7 +94,11 @@
     "requestTimeout": "Temps mort",
     "requestSubstitution": "Remplacement",
     "confirmUndo": "Annuler le dernier point ?",
-    "confirmEndMatch": "Terminer le match ?"
+    "confirmEndMatch": "Terminer le match ?",
+    "winsMatch": "{{name}} remporte le match !",
+    "nextSet": "Set suivant",
+    "noTimeoutsLeft": "Plus de temps morts disponibles.",
+    "timeoutFor": "Temps mort — {{name}}"
   },
   "team": {
     "new": "Nouvelle équipe",
@@ -112,6 +116,7 @@
     "createFirst": "Créez votre première équipe",
     "players": "Joueurs",
     "addPlayer": "Ajouter un joueur",
+    "deleteConfirm": "Supprimer l'équipe \"{{name}}\" ?",
     "playerCount": "{{count}} joueur",
     "playerCount_other": "{{count}} joueurs"
   },
@@ -129,6 +134,8 @@
     "addAnother": "Ajouter un autre",
     "done": "Terminé",
     "batchMode": "Ajout rapide",
+    "addedCount": "{{count}} ajouté",
+    "addedCount_other": "{{count}} ajoutés",
     "positions": {
       "setter": "Passeur",
       "outside": "Pointu",

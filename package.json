@@ -15,7 +15,7 @@
     "transformIgnorePatterns": [
       "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|tamagui|@tamagui/.*)"
     ],
-    "testPathPattern": ".*\\.test\\.(ts|tsx)$"
+    "testRegex": ".*\\.test\\.(ts|tsx)$"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",

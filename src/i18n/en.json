@@ -94,7 +94,11 @@
     "requestTimeout": "Timeout",
     "requestSubstitution": "Substitution",
     "confirmUndo": "Undo last point?",
-    "confirmEndMatch": "End the match?"
+    "confirmEndMatch": "End the match?",
+    "winsMatch": "{{name}} wins the match!",
+    "nextSet": "Next set",
+    "noTimeoutsLeft": "No more timeouts available.",
+    "timeoutFor": "Timeout — {{name}}"
   },
   "team": {
     "new": "New team",
@@ -112,6 +116,7 @@
     "createFirst": "Create your first team",
     "players": "Players",
     "addPlayer": "Add player",
+    "deleteConfirm": "Delete team \"{{name}}\"?",
     "playerCount": "{{count}} player",
     "playerCount_other": "{{count}} players"
   },
@@ -129,6 +134,8 @@
     "addAnother": "Add another",
     "done": "Done",
     "batchMode": "Quick add",
+    "addedCount": "{{count}} added",
+    "addedCount_other": "{{count}} added",
     "positions": {
       "setter": "Setter",
       "outside": "Outside",

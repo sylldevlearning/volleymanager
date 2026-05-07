@@ -136,7 +136,7 @@ export default function RefereeScreen() {
         }
         Alert.alert(
           t('match.matchOver'),
-          `${isMatchWon(newSetsHome, match.config) ? homeTeam?.name : awayTeam?.name} remporte le match !`,
+          t('referee.winsMatch', { name: isMatchWon(newSetsHome, match.config) ? homeTeam?.name : awayTeam?.name }),
           [{ text: t('common.done'), onPress: () => router.replace(`/match/${match.id}/summary`) }]
         );
       } else {
@@ -145,7 +145,7 @@ export default function RefereeScreen() {
           t('match.setOver'),
           `Score des sets : ${newSetsHome} - ${newSetsAway}`,
           [{
-            text: 'Set suivant',
+            text: t('referee.nextSet'),
             onPress: async () => {
               const nextSet = await createSet(match.id, setNum + 1);
               startNewSet(nextSet);
@@ -169,12 +169,12 @@ export default function RefereeScreen() {
     if (!match) return;
     const timeoutsUsed = team === 'home' ? timeoutsHome : timeoutsAway;
     if (!canRequestTimeout(timeoutsUsed, match.config)) {
-      Alert.alert('', 'Plus de temps morts disponibles.');
+      Alert.alert('', t('referee.noTimeoutsLeft'));
       return;
     }
     requestTimeout(team);
     if (hapticsEnabled) Haptics.selectionAsync();
-    Alert.alert(t('match.timeout'), `Temps mort — ${team === 'home' ? homeTeam?.name : awayTeam?.name}`);
+    Alert.alert(t('match.timeout'), t('referee.timeoutFor', { name: team === 'home' ? homeTeam?.name : awayTeam?.name }));
   };
 
   const handlePause = () => {
