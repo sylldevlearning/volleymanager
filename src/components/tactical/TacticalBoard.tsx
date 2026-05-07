@@ -128,10 +128,11 @@ export function TacticalBoard({
 
   // Court dimensions: portrait, height = 2 * width
   const HEADER_H = 48;
+  const SAVEBAR_H = 44;
   const PLAYBACK_H = 60;
   const TOOLBAR_H = 106;
   const PADDING = 16;
-  const availableH = screenH - HEADER_H - PLAYBACK_H - TOOLBAR_H - PADDING * 2;
+  const availableH = screenH - HEADER_H - SAVEBAR_H - PLAYBACK_H - TOOLBAR_H - PADDING * 2;
   const courtW = Math.min(screenW - PADDING * 2, availableH / 2);
   const courtH = courtW * 2;
 
@@ -140,6 +141,7 @@ export function TacticalBoard({
   const [playbookMode, setPlaybookMode] = useState<'load' | 'save'>('load');
   const [playbackPositions, setPlaybackPositions] = useState<PlayerPosition[] | null>(null);
   const [showNames, setShowNames] = useState(false);
+  const [currentFormat, setCurrentFormat] = useState<MatchFormat>(format);
 
   const drawStartX = useSharedValue(0);
   const drawStartY = useSharedValue(0);
@@ -296,7 +298,22 @@ export function TacticalBoard({
 
   function handleLoadPlay(play: TacticalPlay) {
     loadPlay(play);
+    setCurrentFormat(play.format);
     setPlaybackPositions(null);
+  }
+
+  function handleNewBoard() {
+    handleReset();
+    clearArrows();
+    setPositions(buildDefaultPositions(homeTeamId, awayTeamId, rotationHome, rotationAway, currentFormat));
+    setTool('move');
+  }
+
+  function handleToggleFormat() {
+    const next: MatchFormat = currentFormat === 'indoor_6v6' ? 'beach_2v2' : 'indoor_6v6';
+    setCurrentFormat(next);
+    clearArrows();
+    setPositions(buildDefaultPositions(homeTeamId, awayTeamId, rotationHome, rotationAway, next));
   }
 
   function handleClose() {
@@ -314,17 +331,55 @@ export function TacticalBoard({
       <SafeAreaView style={styles.safeArea}>
         {/* Header */}
         <View style={styles.header}>
-          <Pressable onPress={handleClose} style={styles.closeBtn} accessibilityRole="button">
-            <Text style={styles.closeBtnText}>✕</Text>
+          <Pressable onPress={handleClose} style={styles.headerBtn} accessibilityRole="button">
+            <Text style={styles.headerBtnText}>✕</Text>
           </Pressable>
+
+          {/* Format toggle (only in standalone mode) */}
+          {!homeTeamName && (
+            <Pressable onPress={handleToggleFormat} style={styles.formatChip} accessibilityRole="button">
+              <Text style={styles.formatChipText}>
+                {currentFormat === 'indoor_6v6' ? '6×6' : '2×2'}
+              </Text>
+            </Pressable>
+          )}
+
           <Text style={styles.title}>{t('tactical.title')}</Text>
+
+          <Pressable onPress={handleNewBoard} style={styles.headerBtn} accessibilityRole="button"
+            accessibilityLabel="Nouveau schéma">
+            <Text style={styles.headerBtnText}>🗒</Text>
+          </Pressable>
           <Pressable
             onPress={() => setShowNames((v) => !v)}
-            style={styles.nameToggle}
+            style={styles.headerBtn}
             accessibilityRole="button"
           >
-            <Text style={[styles.nameToggleText, showNames && styles.nameToggleActive]}>
+            <Text style={[styles.headerBtnText, showNames && styles.headerBtnActive]}>
               {showNames ? 'ABC' : '123'}
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* Save / Load bar */}
+        <View style={styles.saveBar}>
+          <Pressable
+            style={styles.saveBarBtn}
+            onPress={() => { setPlaybookMode('load'); setShowPlaybook(true); }}
+            accessibilityRole="button"
+          >
+            <Text style={styles.saveBarIcon}>📂</Text>
+            <Text style={styles.saveBarText}>{t('tactical.playbook.load')}</Text>
+          </Pressable>
+          <View style={styles.saveBarDivider} />
+          <Pressable
+            style={[styles.saveBarBtn, styles.saveBarBtnPrimary]}
+            onPress={() => { setPlaybookMode('save'); setShowPlaybook(true); }}
+            accessibilityRole="button"
+          >
+            <Text style={styles.saveBarIcon}>💾</Text>
+            <Text style={[styles.saveBarText, styles.saveBarTextPrimary]}>
+              {t('tactical.playbook.save')}
             </Text>
           </Pressable>
         </View>
@@ -333,7 +388,7 @@ export function TacticalBoard({
         <View style={styles.courtContainer}>
           <View style={[styles.court, { width: courtW, height: courtH }]}>
             {/* Base court SVG */}
-            <CourtSVG width={courtW} height={courtH} format={format} />
+            <CourtSVG width={courtW} height={courtH} format={currentFormat} />
 
             {/* Arrow layer */}
             <ArrowOverlay
@@ -388,15 +443,13 @@ export function TacticalBoard({
           arrowThickness={arrowThickness}
           onSelectTool={setTool}
           onClearAll={clearArrows}
-          onSave={() => { setPlaybookMode('save'); setShowPlaybook(true); }}
-          onLoad={() => { setPlaybookMode('load'); setShowPlaybook(true); }}
         />
 
         {/* Playbook sheet */}
         <PlaybookSheet
           visible={showPlaybook}
           mode={playbookMode}
-          format={format}
+          format={currentFormat}
           currentPositions={positions}
           currentArrows={arrows}
           onLoad={handleLoadPlay}
@@ -416,44 +469,82 @@ const styles = StyleSheet.create({
     height: 48,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
+    gap: 4,
     borderBottomWidth: 1,
     borderBottomColor: palette.backgroundElevated,
   },
-  closeBtn: {
+  headerBtn: {
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: 10,
     backgroundColor: palette.backgroundElevated,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  closeBtnText: {
+  headerBtnText: {
     fontSize: 14,
     color: palette.textSecondary,
     fontFamily: 'Inter_700Bold',
   },
+  headerBtnActive: {
+    color: palette.accentPrimary,
+  },
+  formatChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: palette.accentSecondary + '25',
+    borderWidth: 1,
+    borderColor: palette.accentSecondary + '50',
+  },
+  formatChipText: {
+    fontSize: 11,
+    fontFamily: 'Inter_700Bold',
+    color: palette.accentSecondary,
+  },
   title: {
     flex: 1,
     textAlign: 'center',
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: 'Inter_700Bold',
     color: palette.textPrimary,
   },
-  nameToggle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: palette.backgroundElevated,
+  saveBar: {
+    flexDirection: 'row',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    gap: 8,
+    backgroundColor: palette.backgroundSurface,
+    borderBottomWidth: 1,
+    borderBottomColor: palette.backgroundElevated,
+  },
+  saveBarBtn: {
+    flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: palette.backgroundElevated,
   },
-  nameToggleText: {
-    fontSize: 10,
-    color: palette.textMuted,
-    fontFamily: 'Inter_700Bold',
+  saveBarBtnPrimary: {
+    backgroundColor: palette.accentPrimaryMuted,
+    borderWidth: 1,
+    borderColor: palette.accentPrimary + '50',
   },
-  nameToggleActive: {
+  saveBarDivider: {
+    width: 1,
+    backgroundColor: palette.backgroundElevated,
+  },
+  saveBarIcon: { fontSize: 15 },
+  saveBarText: {
+    fontSize: 13,
+    fontFamily: 'Inter_600SemiBold',
+    color: palette.textSecondary,
+  },
+  saveBarTextPrimary: {
     color: palette.accentPrimary,
   },
   courtContainer: {

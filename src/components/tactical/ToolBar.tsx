@@ -9,8 +9,6 @@ interface ToolBarProps {
   arrowThickness: ArrowThickness;
   onSelectTool: (tool: TacticalTool) => void;
   onClearAll: () => void;
-  onSave: () => void;
-  onLoad: () => void;
 }
 
 const TOOLS: { key: TacticalTool; icon: string }[] = [
@@ -26,8 +24,6 @@ export function ToolBar({
   arrowThickness,
   onSelectTool,
   onClearAll,
-  onSave,
-  onLoad,
 }: ToolBarProps) {
   const { t } = useTranslation();
 
@@ -45,7 +41,6 @@ export function ToolBar({
 
   return (
     <View style={styles.container}>
-      {/* Tool buttons row */}
       <View style={styles.toolsRow}>
         {TOOLS.map((tool) => {
           const active = selectedTool === tool.key;
@@ -60,6 +55,9 @@ export function ToolBar({
               <Text style={[styles.toolIcon, active && styles.toolIconActive]}>
                 {tool.icon}
               </Text>
+              <Text style={[styles.toolLabel, active && styles.toolLabelActive]}>
+                {t(`tactical.tools.${camelKey(tool.key)}`).split(' ')[0]}
+              </Text>
             </Pressable>
           );
         })}
@@ -67,22 +65,13 @@ export function ToolBar({
         <View style={styles.divider} />
 
         <Pressable
-          style={styles.actionBtn}
+          style={styles.clearBtn}
           onPress={handleClearAll}
           accessibilityLabel={t('tactical.tools.clearAll')}
           accessibilityRole="button"
         >
-          <Text style={styles.actionBtnText}>✕</Text>
-        </Pressable>
-      </View>
-
-      {/* Playbook actions */}
-      <View style={styles.playbookRow}>
-        <Pressable style={styles.playbookBtn} onPress={onLoad} accessibilityRole="button">
-          <Text style={styles.playbookBtnText}>📂 {t('tactical.playbook.load')}</Text>
-        </Pressable>
-        <Pressable style={[styles.playbookBtn, styles.playbookBtnSave]} onPress={onSave} accessibilityRole="button">
-          <Text style={[styles.playbookBtnText, styles.playbookSaveText]}>💾 {t('tactical.playbook.save')}</Text>
+          <Text style={styles.clearBtnIcon}>🧺</Text>
+          <Text style={styles.clearBtnText}>{t('tactical.tools.clearAll')}</Text>
         </Pressable>
       </View>
     </View>
@@ -96,9 +85,8 @@ function camelKey(key: string): string {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: palette.backgroundSurface,
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 12,
-    gap: 8,
     borderTopWidth: 1,
     borderTopColor: palette.backgroundElevated,
   },
@@ -108,61 +96,50 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   toolBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    backgroundColor: palette.backgroundElevated,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 10,
+    backgroundColor: palette.backgroundElevated,
+    minWidth: 44,
   },
   toolBtnActive: {
     backgroundColor: palette.accentPrimary,
   },
   toolIcon: {
     fontSize: 18,
-    color: palette.textSecondary,
   },
   toolIconActive: {
     color: '#FFFFFF',
   },
+  toolLabel: {
+    fontSize: 9,
+    fontFamily: 'Inter_500Medium',
+    color: palette.textMuted,
+    marginTop: 2,
+  },
+  toolLabelActive: {
+    color: 'rgba(255,255,255,0.9)',
+  },
   divider: {
     flex: 1,
   },
-  actionBtn: {
-    width: 44,
-    height: 44,
+  clearBtn: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 6,
     borderRadius: 10,
     backgroundColor: palette.backgroundElevated,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  actionBtnText: {
-    fontSize: 16,
-    color: palette.error,
-  },
-  playbookRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  playbookBtn: {
-    flex: 1,
-    height: 38,
-    borderRadius: 8,
-    backgroundColor: palette.backgroundElevated,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  playbookBtnSave: {
-    backgroundColor: palette.accentPrimaryMuted,
     borderWidth: 1,
-    borderColor: palette.accentPrimary + '40',
+    borderColor: palette.error + '30',
   },
-  playbookBtnText: {
-    fontSize: 13,
+  clearBtnIcon: { fontSize: 16 },
+  clearBtnText: {
+    fontSize: 9,
     fontFamily: 'Inter_500Medium',
-    color: palette.textSecondary,
-  },
-  playbookSaveText: {
-    color: palette.accentPrimary,
+    color: palette.error,
+    marginTop: 2,
   },
 });

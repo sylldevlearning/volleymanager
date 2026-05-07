@@ -1,61 +1,43 @@
-import { getDb, generateId } from '../../services/database';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { generateId } from '../../services/database';
 import type { TacticalPlay, PlayerPosition, Arrow } from '../../models/tactical';
 import type { MatchFormat } from '../../models/match';
 import { DEFAULT_PLAYS } from './defaultPlays';
 
-function rowToPlay(row: Record<string, unknown>): TacticalPlay {
-  return {
-    id: row.id as string,
-    name: row.name as string,
-    description: row.description as string | undefined,
-    format: row.format as MatchFormat,
-    category: row.category as TacticalPlay['category'],
-    positions: JSON.parse(row.positions_json as string) as PlayerPosition[],
-    arrows: JSON.parse(row.arrows_json as string) as Arrow[],
-    isDefault: Boolean(row.is_default),
-    createdAt: row.created_at as string,
-    updatedAt: row.updated_at as string,
-  };
-}
+const STORAGE_KEY = '@volleymanager/tactical_plays';
 
-export async function seedDefaultPlays(): Promise<void> {
-  const db = await getDb();
-  for (const play of DEFAULT_PLAYS) {
-    const existing = await db.getFirstAsync<{ id: string }>(
-      'SELECT id FROM tactical_plays WHERE id = ?',
-      [play.id]
-    );
-    if (!existing) {
-      await db.runAsync(
-        `INSERT INTO tactical_plays (id, name, description, format, category, positions_json, arrows_json, is_default, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?)`,
-        [
-          play.id,
-          play.name,
-          play.description ?? null,
-          play.format,
-          play.category,
-          JSON.stringify(play.positions),
-          JSON.stringify(play.arrows),
-          play.createdAt,
-          play.updatedAt,
-        ]
-      );
-    }
+async function readCustomPlays(): Promise<TacticalPlay[]> {
+  try {
+    const raw = await AsyncStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw) as TacticalPlay[];
+  } catch {
+    return [];
   }
 }
 
+async function writeCustomPlays(plays: TacticalPlay[]): Promise<void> {
+  await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(plays));
+}
+
+// No-op: defaults live in-memory, no DB needed
+export async function seedDefaultPlays(): Promise<void> {}
+
 export async function getAllPlays(format?: MatchFormat): Promise<TacticalPlay[]> {
-  const db = await getDb();
-  const rows = format
-    ? await db.getAllAsync<Record<string, unknown>>(
-        'SELECT * FROM tactical_plays WHERE format = ? ORDER BY is_default DESC, name ASC',
-        [format]
-      )
-    : await db.getAllAsync<Record<string, unknown>>(
-        'SELECT * FROM tactical_plays ORDER BY is_default DESC, name ASC'
-      );
-  return rows.map(rowToPlay);
+  const custom = await readCustomPlays();
+  const all = [
+    ...DEFAULT_PLAYS,
+    ...custom,
+  ];
+  const filtered = format ? all.filter((p) => p.format === format || !format) : all;
+  return filtered.sort((a, b) => {
+    if (a.isDefault !== b.isDefault) return a.isDefault ? -1 : 1;
+    return a.name.localeCompare(b.name);
+  });
+}
+
+export async function getCustomPlaysOnly(): Promise<TacticalPlay[]> {
+  return readCustomPlays();
 }
 
 export async function savePlay(
@@ -66,21 +48,42 @@ export async function savePlay(
   arrows: Arrow[],
   description?: string,
 ): Promise<TacticalPlay> {
-  const db = await getDb();
+  const custom = await readCustomPlays();
   const id = generateId();
   const now = new Date().toISOString();
-  await db.runAsync(
-    `INSERT INTO tactical_plays (id, name, description, format, category, positions_json, arrows_json, is_default, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?)`,
-    [id, name, description ?? null, format, category, JSON.stringify(positions), JSON.stringify(arrows), now, now]
-  );
-  return {
-    id, name, description, format, category, positions, arrows,
-    isDefault: false, createdAt: now, updatedAt: now,
+  const play: TacticalPlay = {
+    id,
+    name: name.trim(),
+    description,
+    format,
+    category,
+    positions,
+    arrows,
+    isDefault: false,
+    createdAt: now,
+    updatedAt: now,
   };
+  await writeCustomPlays([...custom, play]);
+  return play;
+}
+
+export async function updatePlay(
+  id: string,
+  positions: PlayerPosition[],
+  arrows: Arrow[],
+  name?: string,
+): Promise<void> {
+  const custom = await readCustomPlays();
+  const now = new Date().toISOString();
+  const updated = custom.map((p) =>
+    p.id === id
+      ? { ...p, positions, arrows, name: name ?? p.name, updatedAt: now }
+      : p
+  );
+  await writeCustomPlays(updated);
 }
 
 export async function deletePlay(id: string): Promise<void> {
-  const db = await getDb();
-  await db.runAsync('DELETE FROM tactical_plays WHERE id = ? AND is_default = 0', [id]);
+  const custom = await readCustomPlays();
+  await writeCustomPlays(custom.filter((p) => p.id !== id));
 }
