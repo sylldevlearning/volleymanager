@@ -135,6 +135,7 @@ export function findNearestPlayer(
 }
 
 export function clamp(value: number, min: number, max: number): number {
+  'worklet';
   return Math.max(min, Math.min(max, value));
 }
 
