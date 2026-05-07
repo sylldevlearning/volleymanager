@@ -58,13 +58,20 @@ export function PlaybookSheet({
 
   useEffect(() => {
     if (visible) {
-      getAllPlays(format).then(setPlays).catch(console.error);
-      // Pre-fill name if editing an existing play
+      getAllPlays(format)
+        .then((loadedPlays) => {
+          setPlays(loadedPlays);
+          // Restore category after async load resolves
+          if (mode === 'save' && currentPlayId) {
+            const existing = loadedPlays.find((p) => p.id === currentPlayId);
+            if (existing) setSaveCategory(existing.category);
+          }
+        })
+        .catch(console.error);
+
       if (mode === 'save' && currentPlayId && currentPlayName) {
         setSaveName(currentPlayName);
         setSaveMode('update');
-        const existing = plays.find((p) => p.id === currentPlayId);
-        if (existing) setSaveCategory(existing.category);
       } else {
         setSaveName('');
         setSaveMode('new');
