@@ -8,8 +8,8 @@ import { ArrowLeft, BarChart2 } from 'lucide-react-native';
 import { getMatchById, getSetsForMatch } from '../../../src/services/matchService';
 import { getPlayersByTeam } from '../../../src/services/playerService';
 import { getTeamById } from '../../../src/services/teamService';
-import { addEvent } from '../../../src/services/eventService';
-import { getPlayerStatsForMatch, computePlayerStats } from '../../../src/services/statsService';
+import { addEvent, getEventsForMatch } from '../../../src/services/eventService';
+import { computePlayerStats } from '../../../src/services/statsService';
 import type { Match } from '../../../src/models/match';
 import type { Player } from '../../../src/models/player';
 import type { Team } from '../../../src/models/team';
@@ -110,11 +110,12 @@ export default function CoachScreen() {
       setPlayers(p);
       if (p.length > 0) setSelectedPlayer(p[0]);
 
-      const [s, sets] = await Promise.all([
-        getPlayerStatsForMatch(id),
+      const [existingEvents, sets] = await Promise.all([
+        getEventsForMatch(id),
         getSetsForMatch(id),
       ]);
-      setStats(s);
+      setEventsBuffer(existingEvents);
+      setStats(computePlayerStats(existingEvents));
       // Auto-select the last unfinished (active) set
       const activeSet =
         sets.find((set) => !set.finishedAt) ?? sets[sets.length - 1];

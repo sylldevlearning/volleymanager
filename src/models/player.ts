@@ -20,11 +20,3 @@ export interface Player {
 
 export type PlayerInput = Omit<Player, 'id' | 'createdAt'>;
 
-export function playerDisplayName(player: Pick<Player, 'firstName' | 'lastName' | 'number'>): string {
-  const first = (player.firstName ?? '').trim();
-  const last = (player.lastName ?? '').trim();
-  if (first && last) return `#${player.number} ${first} ${last}`;
-  if (last) return `#${player.number} ${last}`;
-  if (first) return `#${player.number} ${first}`;
-  return `#${player.number}`;
-}
