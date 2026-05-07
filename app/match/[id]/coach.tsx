@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft } from 'lucide-react-native';
 
-import { getMatchById } from '../../../src/services/matchService';
+import { getMatchById, getSetsForMatch } from '../../../src/services/matchService';
 import { getPlayersByTeam } from '../../../src/services/playerService';
 import { getTeamById } from '../../../src/services/teamService';
 import { addEvent } from '../../../src/services/eventService';
@@ -13,7 +13,7 @@ import { getPlayerStatsForMatch, computePlayerStats } from '../../../src/service
 import type { Match } from '../../../src/models/match';
 import type { Player } from '../../../src/models/player';
 import type { Team } from '../../../src/models/team';
-import type { StatEventType } from '../../../src/models/event';
+import type { StatEventType, MatchEvent } from '../../../src/models/event';
 import type { PlayerStats } from '../../../src/models/stats';
 import { StatButton } from '../../../src/components/stats/StatButton';
 import { palette } from '../../../src/theme/tokens';
@@ -93,7 +93,7 @@ export default function CoachScreen() {
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [stats, setStats] = useState<PlayerStats[]>([]);
   const [currentSetId, setCurrentSetId] = useState<string>('');
-  const [eventsBuffer, setEventsBuffer] = useState<any[]>([]);
+  const [eventsBuffer, setEventsBuffer] = useState<MatchEvent[]>([]);
 
   useEffect(() => {
     async function load() {
@@ -110,8 +110,15 @@ export default function CoachScreen() {
       setPlayers(p);
       if (p.length > 0) setSelectedPlayer(p[0]);
 
-      const s = await getPlayerStatsForMatch(id);
+      const [s, sets] = await Promise.all([
+        getPlayerStatsForMatch(id),
+        getSetsForMatch(id),
+      ]);
       setStats(s);
+      // Auto-select the last unfinished (active) set
+      const activeSet =
+        sets.find((set) => !set.finishedAt) ?? sets[sets.length - 1];
+      if (activeSet) setCurrentSetId(activeSet.id);
     }
     load();
   }, [id]);
@@ -186,15 +193,6 @@ export default function CoachScreen() {
         }}
       />
 
-      {!currentSetId && (
-        <View style={styles.noSetBanner}>
-          <Text style={styles.noSetText}>
-            Entrez l'ID du set actif pour enregistrer des stats.
-            {'\n'}(Utilisez l'écran Arbitre en parallèle)
-          </Text>
-        </View>
-      )}
-
       {/* Stat categories */}
       <ScrollView contentContainerStyle={styles.statsScroll}>
         {STAT_CATEGORIES.map((category) => {
@@ -256,15 +254,6 @@ const styles = StyleSheet.create({
   playerChipNumActive: { color: palette.accentPrimary },
   playerChipName: { fontSize: 13, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
   playerChipNameActive: { color: palette.textPrimary },
-  noSetBanner: {
-    margin: 16,
-    padding: 12,
-    backgroundColor: palette.warning + '20',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: palette.warning + '40',
-  },
-  noSetText: { fontSize: 13, fontFamily: 'Inter_400Regular', color: palette.warning, textAlign: 'center' },
   statsScroll: { padding: 16, gap: 16 },
   category: {
     backgroundColor: palette.backgroundSurface,
