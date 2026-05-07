@@ -1,13 +1,16 @@
 import { ScrollView, StyleSheet, View, Text, Pressable, StatusBar } from 'react-native';
+import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Volleyball, Users, History, ChevronRight } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { palette } from '../../src/theme/tokens';
+import { TacticalBoard } from '../../src/components/tactical/TacticalBoard';
 
 export default function HomeScreen() {
   const router = useRouter();
   const { t } = useTranslation();
+  const [showTactical, setShowTactical] = useState(false);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -50,6 +53,21 @@ export default function HomeScreen() {
           />
         </View>
 
+        {/* Tactical Board CTA */}
+        <Pressable
+          style={({ pressed }) => [styles.tacticalButton, pressed && styles.tacticalButtonPressed]}
+          onPress={() => setShowTactical(true)}
+          accessibilityLabel={t('tactical.title')}
+          accessibilityRole="button"
+        >
+          <Text style={styles.tacticalEmoji}>📋</Text>
+          <View style={styles.tacticalContent}>
+            <Text style={styles.tacticalTitle}>{t('tactical.title')}</Text>
+            <Text style={styles.tacticalDesc}>{t('home.tacticalDesc')}</Text>
+          </View>
+          <ChevronRight size={20} color={palette.textMuted} />
+        </Pressable>
+
         {/* Quick Links */}
         <View style={styles.quickLinks}>
           <QuickLink
@@ -65,6 +83,11 @@ export default function HomeScreen() {
           />
         </View>
       </ScrollView>
+
+      <TacticalBoard
+        visible={showTactical}
+        onClose={() => setShowTactical(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -209,6 +232,40 @@ const styles = StyleSheet.create({
     marginBottom: 3,
   },
   modeDesc: {
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+    color: palette.textSecondary,
+  },
+  tacticalButton: {
+    backgroundColor: palette.backgroundSurface,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#2A3F2A',
+    marginBottom: 16,
+  },
+  tacticalButtonPressed: {
+    opacity: 0.8,
+    backgroundColor: palette.backgroundElevated,
+  },
+  tacticalEmoji: {
+    fontSize: 28,
+    width: 48,
+    textAlign: 'center',
+  },
+  tacticalContent: {
+    flex: 1,
+  },
+  tacticalTitle: {
+    fontSize: 15,
+    fontFamily: 'Inter_600SemiBold',
+    color: palette.textPrimary,
+    marginBottom: 3,
+  },
+  tacticalDesc: {
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
     color: palette.textSecondary,

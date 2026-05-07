@@ -271,19 +271,18 @@ export default function RefereeScreen() {
       </View>
 
       {/* Bottom actions */}
-      <View style={styles.actions}>
+      <View style={styles.actionsRow}>
         <UndoButton
           onPress={handleUndo}
           disabled={isPaused}
         />
         <Pressable
-          style={({ pressed }) => [styles.actionBtn, pressed && styles.actionBtnPressed]}
+          style={({ pressed }) => [styles.tacticalBtn, pressed && styles.actionBtnPressed]}
           onPress={() => setShowTactical(true)}
           accessibilityLabel={t('tactical.title')}
           accessibilityRole="button"
         >
-          <Text style={styles.actionIcon}>📋</Text>
-          <Text style={styles.actionText}>{t('tactical.title')}</Text>
+          <Text style={styles.tacticalIcon}>📋</Text>
         </Pressable>
         <Pressable
           style={({ pressed }) => [styles.actionBtn, pressed && styles.actionBtnPressed]}
@@ -295,12 +294,12 @@ export default function RefereeScreen() {
           <Text style={styles.actionText}>{isPaused ? t('match.resume') : t('match.pause')}</Text>
         </Pressable>
         <Pressable
-          style={({ pressed }) => [styles.actionBtn, pressed && styles.actionBtnPressed]}
+          style={({ pressed }) => [styles.actionBtnEnd, pressed && styles.actionBtnPressed]}
           onPress={handleEndMatch}
           accessibilityLabel={t('match.endMatch')}
           accessibilityRole="button"
         >
-          <Flag size={18} color={palette.error} />
+          <Flag size={16} color={palette.error} />
           <Text style={[styles.actionText, { color: palette.error }]}>{t('match.endMatch')}</Text>
         </Pressable>
       </View>
@@ -308,12 +307,12 @@ export default function RefereeScreen() {
       {/* Tactical board */}
       <TacticalBoard
         visible={showTactical}
+        onClose={() => setShowTactical(false)}
         format={match.format}
         homeTeamId={match.teamHomeId}
         awayTeamId={match.teamAwayId}
         homeTeamName={homeTeam.name}
         awayTeamName={awayTeam.name}
-        onClose={() => setShowTactical(false)}
       />
 
       {/* Change ends modal (beach) */}
@@ -417,12 +416,12 @@ const styles = StyleSheet.create({
   timeoutDots: { flexDirection: 'row', gap: 4 },
   timeoutDot: { width: 10, height: 10, borderRadius: 5 },
   timeoutInf: { fontSize: 16, color: palette.textMuted, fontFamily: 'Inter_700Bold' },
-  actions: {
+  actionsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingBottom: 8,
     gap: 8,
+    alignItems: 'center',
   },
   actionBtn: {
     flex: 1,
@@ -436,9 +435,31 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: palette.backgroundElevated,
   },
+  actionBtnEnd: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    backgroundColor: palette.backgroundSurface,
+    borderWidth: 1,
+    borderColor: palette.error + '40',
+  },
+  tacticalBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: palette.backgroundSurface,
+    borderWidth: 1,
+    borderColor: palette.backgroundElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tacticalIcon: { fontSize: 20 },
   actionBtnPressed: { opacity: 0.7 },
-  actionText: { fontSize: 11, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
-  actionIcon: { fontSize: 16 },
+  actionText: { fontSize: 12, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
   changeEndsOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.7)',

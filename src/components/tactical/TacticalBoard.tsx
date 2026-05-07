@@ -29,12 +29,12 @@ import { palette } from '../../theme/tokens';
 
 interface TacticalBoardProps {
   visible: boolean;
-  format: MatchFormat;
-  homeTeamId: string;
-  awayTeamId: string;
-  homeTeamName: string;
-  awayTeamName: string;
   onClose: () => void;
+  format?: MatchFormat;
+  homeTeamId?: string;
+  awayTeamId?: string;
+  homeTeamName?: string;
+  awayTeamName?: string;
 }
 
 function buildDefaultPositions(
@@ -94,12 +94,12 @@ interface DrawPreviewState {
 
 export function TacticalBoard({
   visible,
-  format,
-  homeTeamId,
-  awayTeamId,
+  onClose,
+  format = 'indoor_6v6',
+  homeTeamId = 'home',
+  awayTeamId = 'away',
   homeTeamName,
   awayTeamName,
-  onClose,
 }: TacticalBoardProps) {
   const { t } = useTranslation();
   const { width: screenW, height: screenH } = useWindowDimensions();

@@ -27,7 +27,8 @@
     "modeReferee": "Mode Arbitre",
     "modeCoach": "Mode Entraîneur",
     "modeRefereeDesc": "Scorez en live, gérez les temps morts et rotations",
-    "modeCoachDesc": "Statistiques joueurs en temps réel"
+    "modeCoachDesc": "Statistiques joueurs en temps réel",
+    "tacticalDesc": "Dessine des schémas, anime les déplacements"
   },
   "tabs": {
     "home": "Accueil",

@@ -27,7 +27,8 @@
     "modeReferee": "Referee Mode",
     "modeCoach": "Coach Mode",
     "modeRefereeDesc": "Live scoring, timeouts and rotations",
-    "modeCoachDesc": "Real-time player statistics"
+    "modeCoachDesc": "Real-time player statistics",
+    "tacticalDesc": "Draw plays, animate movements"
   },
   "tabs": {
     "home": "Home",
