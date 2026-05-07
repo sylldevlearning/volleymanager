@@ -28,13 +28,13 @@ export function shouldChangeEndsBeach(
   return totalPoints > 0 && totalPoints % interval === 0;
 }
 
-// FIVB rotation: clockwise P1→P6→P5→P4→P3→P2→P1
-// P1 is always the server
+// Serving order after each rotation: P1 → P6 → P5 → P4 → P3 → P2 → P1
+// When a team wins the right to serve they rotate clockwise on court:
+// the player at P6 moves to P1 (becomes server), P5→P6, P4→P5, ..., P1→P2.
+// In the position array each value increases by 1 (with 6 wrapping to 1).
 export const ROTATION_ORDER: [1, 2, 3, 4, 5, 6] = [1, 2, 3, 4, 5, 6];
 
 export function nextRotation(positions: number[]): number[] {
-  // Rotate clockwise: each player moves to next position
-  // P1→P2, P2→P3, P3→P4, P4→P5, P5→P6, P6→P1
   return positions.map((pos) => (pos === 6 ? 1 : pos + 1));
 }
 
