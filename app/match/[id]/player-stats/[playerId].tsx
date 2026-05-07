@@ -29,7 +29,7 @@ export default function PlayerStatsScreen() {
   const router = useRouter();
 
   const [stats, setStats] = useState<PlayerMatchStats | null>(null);
-  const [setStats, setSetStats] = useState<Map<number, PlayerMatchStats>>(new Map());
+  const [perSetStats, setPerSetStats] = useState<Map<number, PlayerMatchStats>>(new Map());
   const [player, setPlayer] = useState<Player | null>(null);
   const [team, setTeam] = useState<Team | null>(null);
   const [matchDate, setMatchDate] = useState('');
@@ -46,7 +46,7 @@ export default function PlayerStatsScreen() {
           getMatchById(matchId),
         ]);
         setStats(s);
-        setSetStats(ss);
+        setPerSetStats(ss);
         setPlayer(p);
         if (m) {
           setMatchDate(new Date(m.date).toLocaleDateString());
@@ -93,10 +93,10 @@ export default function PlayerStatsScreen() {
   const hasRadarData = radarMetrics.some((m) => m.value > 0);
 
   // Set progression data
-  const setNumbers = Array.from(setStats.keys()).sort((a, b) => a - b);
+  const setNumbers = Array.from(perSetStats.keys()).sort((a, b) => a - b);
   const lineData = setNumbers.map((n) => ({
     label: `S${n}`,
-    value: setStats.get(n)?.attackEfficiency ?? 0,
+    value: perSetStats.get(n)?.attackEfficiency ?? 0,
   }));
 
   return (
