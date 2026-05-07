@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Menu, Pause, Play, Flag } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 
-import { getMatchById, createSet, updateSet, updateMatchStatus } from '../../../src/services/matchService';
+import { getMatchById, createSet, getSetsForMatch, updateSet, updateMatchStatus } from '../../../src/services/matchService';
 import { addEvent, undoLastEvent } from '../../../src/services/eventService';
 import { useScoringStore } from '../../../src/stores/scoringStore';
 import { useSettingsStore } from '../../../src/stores/settingsStore';
@@ -63,9 +63,13 @@ export default function RefereeScreen() {
         const firstSet = await createSet(id, 1);
         initMatch({ ...m, status: 'live' }, firstSet);
       } else {
-        // Resume in-progress match (simplified: restart state)
-        const firstSet = await createSet(id, 1);
-        initMatch(m, firstSet);
+        // Resume: load existing sets, use the last unfinished one
+        const existingSets = await getSetsForMatch(id);
+        const activeSet =
+          existingSets.find((s) => !s.finishedAt) ??
+          existingSets[existingSets.length - 1] ??
+          (await createSet(id, 1));
+        initMatch(m, activeSet);
       }
       setLoading(false);
     }
