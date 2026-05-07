@@ -143,7 +143,7 @@ export default function RefereeScreen() {
         // Next set
         Alert.alert(
           t('match.setOver'),
-          `Score des sets : ${newSetsHome} - ${newSetsAway}`,
+          t('referee.setsScore', { home: newSetsHome, away: newSetsAway }),
           [{
             text: t('referee.nextSet'),
             onPress: async () => {

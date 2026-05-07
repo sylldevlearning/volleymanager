@@ -97,6 +97,7 @@
     "confirmEndMatch": "End the match?",
     "winsMatch": "{{name}} wins the match!",
     "nextSet": "Next set",
+    "setsScore": "Sets: {{home}} - {{away}}",
     "noTimeoutsLeft": "No more timeouts available.",
     "timeoutFor": "Timeout — {{name}}"
   },
