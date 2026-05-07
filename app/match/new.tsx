@@ -61,7 +61,7 @@ export default function NewMatchScreen() {
       return;
     }
     if (teamHomeId === teamAwayId) {
-      Alert.alert(t('common.error'), 'Les deux équipes doivent être différentes.');
+      Alert.alert(t('common.error'), t('match.differentTeams'));
       return;
     }
     setLoading(true);
@@ -184,10 +184,11 @@ function TeamPicker({
   onSelect: (id: string) => void;
   placeholder: string;
 }) {
+  const { t } = useTranslation();
   return (
     <View style={styles.teamPicker}>
       {teams.length === 0 ? (
-        <Text style={styles.noTeamText}>Aucune équipe — créez d'abord une équipe</Text>
+        <Text style={styles.noTeamText}>{t('match.noTeamsHint')}</Text>
       ) : (
         teams.map((team) => (
           <Pressable

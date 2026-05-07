@@ -29,7 +29,7 @@ export default function NewTeamScreen() {
 
   const handleSave = async () => {
     if (!name.trim()) {
-      Alert.alert(t('common.error'), 'Le nom est requis.');
+      Alert.alert(t('common.error'), t('team.nameRequired'));
       return;
     }
     setLoading(true);

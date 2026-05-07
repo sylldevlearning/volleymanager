@@ -38,6 +38,8 @@
   },
   "match": {
     "new": "New match",
+    "differentTeams": "Both teams must be different.",
+    "noTeamsHint": "No teams — create a team first",
     "format": "Game format",
     "mode": "Mode",
     "indoor6v6": "Indoor 6v6",
@@ -96,6 +98,8 @@
   },
   "team": {
     "new": "New team",
+    "noPlayers": "No players — add players",
+    "nameRequired": "Name is required.",
     "edit": "Edit team",
     "name": "Team name",
     "shortName": "Short name",
@@ -198,6 +202,8 @@
       "serve": "Serve",
       "custom": "Custom"
     },
+    "arrows_one": "arrow",
+    "arrows_other": "arrows",
     "clearConfirm": "Clear all drawings?"
   },
   "settings": {

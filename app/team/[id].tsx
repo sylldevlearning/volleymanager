@@ -86,7 +86,7 @@ export default function TeamDetailScreen() {
         keyExtractor={(p) => p.id}
         contentContainerStyle={styles.list}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>Aucun joueur — ajoutez des joueurs</Text>
+          <Text style={styles.emptyText}>{t('team.noPlayers')}</Text>
         }
         renderItem={({ item }) => (
           <PlayerRow

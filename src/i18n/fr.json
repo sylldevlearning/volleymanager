@@ -38,6 +38,8 @@
   },
   "match": {
     "new": "Nouveau match",
+    "differentTeams": "Les deux équipes doivent être différentes.",
+    "noTeamsHint": "Aucune équipe — créez d'abord une équipe",
     "format": "Format de jeu",
     "mode": "Mode",
     "indoor6v6": "Indoor 6 vs 6",
@@ -96,6 +98,8 @@
   },
   "team": {
     "new": "Nouvelle équipe",
+    "noPlayers": "Aucun joueur — ajoutez des joueurs",
+    "nameRequired": "Le nom est requis.",
     "edit": "Modifier l'équipe",
     "name": "Nom de l'équipe",
     "shortName": "Abbréviation",
@@ -198,6 +202,8 @@
       "serve": "Service",
       "custom": "Personnalisé"
     },
+    "arrows_one": "flèche",
+    "arrows_other": "flèches",
     "clearConfirm": "Effacer tous les tracés ?"
   },
   "settings": {

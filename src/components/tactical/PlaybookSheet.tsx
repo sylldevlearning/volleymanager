@@ -261,7 +261,7 @@ function PlayRow({
           <Text style={rowStyles.meta}>
             {t(`tactical.categories.${play.category}`)}
             {' · '}
-            {play.arrows.length} flèche{play.arrows.length !== 1 ? 's' : ''}
+            {play.arrows.length} {play.arrows.length === 1 ? t('tactical.arrows_one') : t('tactical.arrows_other')}
           </Text>
         </View>
         <Text style={rowStyles.chevron}>›</Text>
