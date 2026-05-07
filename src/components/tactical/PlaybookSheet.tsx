@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { getAllPlays, savePlay, deletePlay } from '../../features/tactical/tacticalService';
+import { getAllPlays, savePlay, updatePlay, deletePlay } from '../../features/tactical/tacticalService';
 import type { TacticalPlay, PlayerPosition, Arrow, TacticalCategory } from '../../models/tactical';
 import type { MatchFormat } from '../../models/match';
 import { palette } from '../../theme/tokens';
@@ -21,17 +21,20 @@ interface PlaybookSheetProps {
   format: MatchFormat;
   currentPositions: PlayerPosition[];
   currentArrows: Arrow[];
+  currentPlayId: string | null;
+  currentPlayName: string | null;
   onLoad: (play: TacticalPlay) => void;
   onClose: () => void;
+  onPlayDeleted?: (id: string) => void;
 }
 
-const CATEGORIES: { key: TacticalCategory; label: string }[] = [
-  { key: 'reception', label: 'reception' },
-  { key: 'attack', label: 'attack' },
-  { key: 'defense', label: 'defense' },
-  { key: 'coverage', label: 'coverage' },
-  { key: 'serve', label: 'serve' },
-  { key: 'custom', label: 'custom' },
+const CATEGORIES: { key: TacticalCategory; emoji: string }[] = [
+  { key: 'reception', emoji: '🫳' },
+  { key: 'attack', emoji: '💥' },
+  { key: 'defense', emoji: '🛡' },
+  { key: 'coverage', emoji: '⭕' },
+  { key: 'serve', emoji: '🏐' },
+  { key: 'custom', emoji: '✏️' },
 ];
 
 export function PlaybookSheet({
@@ -40,30 +43,48 @@ export function PlaybookSheet({
   format,
   currentPositions,
   currentArrows,
+  currentPlayId,
+  currentPlayName,
   onLoad,
   onClose,
+  onPlayDeleted,
 }: PlaybookSheetProps) {
   const { t } = useTranslation();
   const [plays, setPlays] = useState<TacticalPlay[]>([]);
   const [saveName, setSaveName] = useState('');
   const [saveCategory, setSaveCategory] = useState<TacticalCategory>('custom');
   const [saving, setSaving] = useState(false);
+  const [saveMode, setSaveMode] = useState<'new' | 'update'>('new');
 
   useEffect(() => {
     if (visible) {
       getAllPlays(format).then(setPlays).catch(console.error);
+      // Pre-fill name if editing an existing play
+      if (mode === 'save' && currentPlayId && currentPlayName) {
+        setSaveName(currentPlayName);
+        setSaveMode('update');
+        const existing = plays.find((p) => p.id === currentPlayId);
+        if (existing) setSaveCategory(existing.category);
+      } else {
+        setSaveName('');
+        setSaveMode('new');
+      }
     }
-  }, [visible, format]);
+  }, [visible, format, mode, currentPlayId, currentPlayName]);
 
   async function handleSave() {
     if (!saveName.trim()) return;
     setSaving(true);
     try {
-      const play = await savePlay(saveName.trim(), format, saveCategory, currentPositions, currentArrows);
-      setSaveName('');
+      if (saveMode === 'update' && currentPlayId) {
+        await updatePlay(currentPlayId, currentPositions, currentArrows, saveName.trim());
+      } else {
+        await savePlay(saveName.trim(), format, saveCategory, currentPositions, currentArrows);
+      }
       onClose();
     } catch (e) {
       console.error(e);
+      Alert.alert(t('common.error'), String(e));
     } finally {
       setSaving(false);
     }
@@ -79,10 +100,21 @@ export function PlaybookSheet({
         onPress: async () => {
           await deletePlay(play.id);
           setPlays((prev) => prev.filter((p) => p.id !== play.id));
+          onPlayDeleted?.(play.id);
         },
       },
     ]);
   }
+
+  function handleEdit(play: TacticalPlay) {
+    // Load the play for editing
+    onLoad(play);
+    // Switch to save mode will happen after load
+    onClose();
+  }
+
+  const defaultPlays = plays.filter((p) => p.isDefault);
+  const customPlays = plays.filter((p) => !p.isDefault);
 
   return (
     <Modal
@@ -93,12 +125,25 @@ export function PlaybookSheet({
     >
       <Pressable style={styles.backdrop} onPress={onClose} />
       <View style={styles.sheet}>
-        {/* Handle */}
         <View style={styles.handle} />
 
-        <Text style={styles.title}>
-          {mode === 'save' ? t('tactical.playbook.save') : t('tactical.playbook.load')}
-        </Text>
+        <View style={styles.sheetHeader}>
+          <Text style={styles.title}>
+            {mode === 'save'
+              ? (saveMode === 'update' ? t('tactical.playbook.update') : t('tactical.playbook.save'))
+              : t('tactical.playbook.load')}
+          </Text>
+          {mode === 'save' && currentPlayId && (
+            <Pressable
+              style={styles.modeToggle}
+              onPress={() => setSaveMode((m) => m === 'update' ? 'new' : 'update')}
+            >
+              <Text style={styles.modeToggleText}>
+                {saveMode === 'update' ? t('tactical.playbook.saveAsNew') : t('tactical.playbook.updateCurrent')}
+              </Text>
+            </Pressable>
+          )}
+        </View>
 
         {mode === 'save' ? (
           <View style={styles.saveForm}>
@@ -109,63 +154,163 @@ export function PlaybookSheet({
               placeholder={t('tactical.playbook.name')}
               placeholderTextColor={palette.textMuted}
               maxLength={40}
+              autoFocus
             />
-            <View style={styles.categoryRow}>
-              {CATEGORIES.map((cat) => (
-                <Pressable
-                  key={cat.key}
-                  style={[styles.catChip, saveCategory === cat.key && styles.catChipActive]}
-                  onPress={() => setSaveCategory(cat.key)}
-                >
-                  <Text style={[styles.catText, saveCategory === cat.key && styles.catTextActive]}>
-                    {t(`tactical.categories.${cat.label}`)}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
+            {saveMode === 'new' && (
+              <View style={styles.categoryRow}>
+                {CATEGORIES.map((cat) => (
+                  <Pressable
+                    key={cat.key}
+                    style={[styles.catChip, saveCategory === cat.key && styles.catChipActive]}
+                    onPress={() => setSaveCategory(cat.key)}
+                  >
+                    <Text style={styles.catEmoji}>{cat.emoji}</Text>
+                    <Text style={[styles.catText, saveCategory === cat.key && styles.catTextActive]}>
+                      {t(`tactical.categories.${cat.key}`)}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            )}
             <Pressable
               style={[styles.saveBtn, (!saveName.trim() || saving) && styles.saveBtnDisabled]}
               onPress={handleSave}
               disabled={!saveName.trim() || saving}
             >
               <Text style={styles.saveBtnText}>
-                {saving ? t('common.loading') : t('common.save')}
+                {saving
+                  ? t('common.loading')
+                  : saveMode === 'update'
+                    ? '✅ ' + t('tactical.playbook.update')
+                    : '💾 ' + t('common.save')}
               </Text>
             </Pressable>
           </View>
         ) : (
           <FlatList
-            data={plays}
-            keyExtractor={(item) => item.id}
+            data={[]}
+            keyExtractor={(item) => item}
             style={styles.list}
-            ListEmptyComponent={
-              <Text style={styles.emptyText}>{t('tactical.playbook.noPlays')}</Text>
-            }
-            renderItem={({ item }) => (
-              <View style={styles.playItem}>
-                <Pressable style={styles.playItemContent} onPress={() => { onLoad(item); onClose(); }}>
-                  <View>
-                    <Text style={styles.playName}>{item.name}</Text>
-                    <Text style={styles.playCat}>
-                      {t(`tactical.categories.${item.category}`)}
-                      {item.isDefault ? ` · ${t('tactical.playbook.defaults')}` : ''}
-                    </Text>
-                  </View>
-                  <Text style={styles.playArrow}>›</Text>
-                </Pressable>
-                {!item.isDefault && (
-                  <Pressable style={styles.deleteBtn} onPress={() => handleDelete(item)}>
-                    <Text style={styles.deleteBtnText}>🗑</Text>
-                  </Pressable>
+            ListHeaderComponent={
+              <>
+                {customPlays.length > 0 && (
+                  <>
+                    <Text style={styles.sectionTitle}>✏️ {t('tactical.playbook.custom')}</Text>
+                    {customPlays.map((play) => (
+                      <PlayRow
+                        key={play.id}
+                        play={play}
+                        onLoad={() => { onLoad(play); onClose(); }}
+                        onEdit={() => handleEdit(play)}
+                        onDelete={() => handleDelete(play)}
+                        t={t}
+                      />
+                    ))}
+                    <View style={styles.sectionDivider} />
+                  </>
                 )}
-              </View>
-            )}
+                <Text style={styles.sectionTitle}>📚 {t('tactical.playbook.defaults')}</Text>
+                {defaultPlays.map((play) => (
+                  <PlayRow
+                    key={play.id}
+                    play={play}
+                    onLoad={() => { onLoad(play); onClose(); }}
+                    t={t}
+                  />
+                ))}
+                {plays.length === 0 && (
+                  <Text style={styles.emptyText}>{t('tactical.playbook.noPlays')}</Text>
+                )}
+              </>
+            }
+            renderItem={() => null}
           />
         )}
       </View>
     </Modal>
   );
 }
+
+function PlayRow({
+  play,
+  onLoad,
+  onEdit,
+  onDelete,
+  t,
+}: {
+  play: TacticalPlay;
+  onLoad: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  t: (key: string) => string;
+}) {
+  const catEmoji = CATEGORIES.find((c) => c.key === play.category)?.emoji ?? '📋';
+  return (
+    <View style={rowStyles.row}>
+      <Pressable style={rowStyles.main} onPress={onLoad}>
+        <Text style={rowStyles.emoji}>{catEmoji}</Text>
+        <View style={rowStyles.info}>
+          <Text style={rowStyles.name}>{play.name}</Text>
+          <Text style={rowStyles.meta}>
+            {t(`tactical.categories.${play.category}`)}
+            {' · '}
+            {play.arrows.length} flèche{play.arrows.length !== 1 ? 's' : ''}
+          </Text>
+        </View>
+        <Text style={rowStyles.chevron}>›</Text>
+      </Pressable>
+      {!play.isDefault && (
+        <View style={rowStyles.actions}>
+          {onEdit && (
+            <Pressable style={rowStyles.actionBtn} onPress={onEdit}>
+              <Text style={rowStyles.editText}>✏️</Text>
+            </Pressable>
+          )}
+          {onDelete && (
+            <Pressable style={rowStyles.actionBtn} onPress={onDelete}>
+              <Text style={rowStyles.deleteText}>🗑</Text>
+            </Pressable>
+          )}
+        </View>
+      )}
+    </View>
+  );
+}
+
+const rowStyles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: palette.backgroundElevated,
+  },
+  main: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingLeft: 4,
+    gap: 10,
+  },
+  emoji: { fontSize: 20, width: 28, textAlign: 'center' },
+  info: { flex: 1 },
+  name: {
+    fontSize: 15,
+    fontFamily: 'Inter_600SemiBold',
+    color: palette.textPrimary,
+  },
+  meta: {
+    fontSize: 12,
+    fontFamily: 'Inter_400Regular',
+    color: palette.textMuted,
+    marginTop: 2,
+  },
+  chevron: { fontSize: 20, color: palette.textMuted, marginRight: 4 },
+  actions: { flexDirection: 'row' },
+  actionBtn: { padding: 10 },
+  editText: { fontSize: 16 },
+  deleteText: { fontSize: 16 },
+});
 
 const styles = StyleSheet.create({
   backdrop: {
@@ -174,11 +319,11 @@ const styles = StyleSheet.create({
   },
   sheet: {
     backgroundColor: palette.backgroundSurface,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     paddingHorizontal: 16,
     paddingBottom: 32,
-    maxHeight: '70%',
+    maxHeight: '75%',
   },
   handle: {
     width: 40,
@@ -189,14 +334,41 @@ const styles = StyleSheet.create({
     marginTop: 12,
     marginBottom: 16,
   },
+  sheetHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    gap: 12,
+  },
   title: {
+    flex: 1,
     fontSize: 17,
     fontFamily: 'Inter_700Bold',
     color: palette.textPrimary,
-    marginBottom: 16,
   },
-  list: {
-    maxHeight: 400,
+  modeToggle: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    backgroundColor: palette.backgroundElevated,
+  },
+  modeToggleText: {
+    fontSize: 11,
+    fontFamily: 'Inter_500Medium',
+    color: palette.textSecondary,
+  },
+  list: { maxHeight: 460 },
+  sectionTitle: {
+    fontSize: 12,
+    fontFamily: 'Inter_700Bold',
+    color: palette.textMuted,
+    letterSpacing: 0.5,
+    paddingVertical: 8,
+  },
+  sectionDivider: {
+    height: 1,
+    backgroundColor: palette.backgroundElevated,
+    marginVertical: 8,
   },
   emptyText: {
     color: palette.textMuted,
@@ -204,44 +376,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingVertical: 24,
   },
-  playItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
-  },
-  playItemContent: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 14,
-    paddingRight: 8,
-  },
-  playName: {
-    fontSize: 15,
-    fontFamily: 'Inter_600SemiBold',
-    color: palette.textPrimary,
-  },
-  playCat: {
-    fontSize: 12,
-    fontFamily: 'Inter_400Regular',
-    color: palette.textMuted,
-    marginTop: 2,
-  },
-  playArrow: {
-    fontSize: 20,
-    color: palette.textMuted,
-  },
-  deleteBtn: {
-    padding: 10,
-  },
-  deleteBtnText: {
-    fontSize: 16,
-  },
-  saveForm: {
-    gap: 12,
-  },
+  saveForm: { gap: 12 },
   input: {
     backgroundColor: palette.backgroundElevated,
     borderRadius: 10,
@@ -259,7 +394,10 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   catChip: {
-    paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 20,
     backgroundColor: palette.backgroundElevated,
@@ -269,24 +407,21 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: palette.accentPrimary + '50',
   },
+  catEmoji: { fontSize: 13 },
   catText: {
     fontSize: 12,
     fontFamily: 'Inter_500Medium',
     color: palette.textMuted,
   },
-  catTextActive: {
-    color: palette.accentPrimary,
-  },
+  catTextActive: { color: palette.accentPrimary },
   saveBtn: {
-    height: 48,
+    height: 50,
     borderRadius: 12,
     backgroundColor: palette.accentPrimary,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  saveBtnDisabled: {
-    opacity: 0.4,
-  },
+  saveBtnDisabled: { opacity: 0.4 },
   saveBtnText: {
     fontSize: 15,
     fontFamily: 'Inter_700Bold',

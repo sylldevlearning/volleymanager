@@ -9,7 +9,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import Animated, { useSharedValue, runOnJS } from 'react-native-reanimated';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useTranslation } from 'react-i18next';
 
 import { CourtSVG } from './CourtSVG';
@@ -112,6 +112,8 @@ export function TacticalBoard({
     arrowThickness,
     isPlaying,
     playbackSpeed,
+    currentPlayId,
+    currentPlayName,
     setPositions,
     movePlayer,
     addArrow,
@@ -328,6 +330,8 @@ export function TacticalBoard({
       presentationStyle="fullScreen"
       onRequestClose={handleClose}
     >
+      {/* GestureHandlerRootView inside Modal fixes drag on Android */}
+      <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView style={styles.safeArea}>
         {/* Header */}
         <View style={styles.header}>
@@ -452,10 +456,16 @@ export function TacticalBoard({
           format={currentFormat}
           currentPositions={positions}
           currentArrows={arrows}
+          currentPlayId={currentPlayId}
+          currentPlayName={currentPlayName}
           onLoad={handleLoadPlay}
           onClose={() => setShowPlaybook(false)}
+          onPlayDeleted={(id) => {
+            if (currentPlayId === id) resetBoard();
+          }}
         />
       </SafeAreaView>
+      </GestureHandlerRootView>
     </Modal>
   );
 }

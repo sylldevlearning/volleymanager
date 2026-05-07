@@ -10,6 +10,8 @@ interface TacticalState {
   isPlaying: boolean;
   playbackSpeed: 0.5 | 1 | 2;
   currentStep: number;
+  currentPlayId: string | null;
+  currentPlayName: string | null;
 
   setPositions: (positions: PlayerPosition[]) => void;
   movePlayer: (playerId: string, x: number, y: number) => void;
@@ -33,6 +35,8 @@ export const useTacticalStore = create<TacticalState>()((set, get) => ({
   isPlaying: false,
   playbackSpeed: 1,
   currentStep: 0,
+  currentPlayId: null,
+  currentPlayName: null,
 
   setPositions: (positions) => set({ positions }),
 
@@ -77,6 +81,8 @@ export const useTacticalStore = create<TacticalState>()((set, get) => ({
       selectedTool: 'move',
       isPlaying: false,
       currentStep: 0,
+      currentPlayId: play.isDefault ? null : play.id,
+      currentPlayName: play.name,
     }),
 
   resetBoard: () =>
@@ -86,5 +92,7 @@ export const useTacticalStore = create<TacticalState>()((set, get) => ({
       selectedTool: 'move',
       isPlaying: false,
       currentStep: 0,
+      currentPlayId: null,
+      currentPlayName: null,
     }),
 }));

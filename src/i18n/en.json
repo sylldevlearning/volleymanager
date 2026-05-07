@@ -183,6 +183,9 @@
       "category": "Category",
       "delete": "Delete",
       "deleteConfirm": "Delete this play?",
+      "update": "Update",
+      "saveAsNew": "Save as new",
+      "updateCurrent": "Update current",
       "noPlays": "No saved plays",
       "defaults": "Default play",
       "custom": "My plays"
