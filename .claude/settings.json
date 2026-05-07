@@ -3,7 +3,16 @@
     "allow": [
       "WebFetch(domain:docs.expo.dev)",
       "WebFetch(domain:tamagui.dev)",
-      "WebFetch(domain:expo.dev)"
+      "WebFetch(domain:expo.dev)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\Salou\\\\OneDrive\\\\Bureau\\\\projet en cours\\\\app-volleyball\" -Recurse -Force)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Sort-Object)",
+      "Bash(dir /s /b \"c:\\\\Users\\\\Salou\\\\OneDrive\\\\Bureau\\\\projet en cours\\\\app-volleyball\")",
+      "Bash(findstr /v \".git\\\\|node_modules\\\\|\\\\.expo\\\\|\\\\.claude\")",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\Salou\\\\OneDrive\\\\Bureau\\\\projet en cours\\\\app-volleyball\" -Recurse -Exclude \".git\", \"node_modules\", \".expo\", \".claude\" -Force | Where-Object { -not $_.FullName.Contains\\('.git'\\) -and -not $_.FullName.Contains\\('node_modules'\\) -and -not $_.FullName.Contains\\('.expo'\\) -and -not $_.FullName.Contains\\('.claude'\\) } | Select-Object -ExpandProperty FullName | Sort-Object)",
+      "Bash(npx jest *)",
+      "Bash(npx tsc *)",
+      "Bash(git add *)"
     ]
   }
 }

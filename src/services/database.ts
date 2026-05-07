@@ -96,6 +96,30 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
       `);
     });
   }
+
+  if (version < 2) {
+    await db.withExclusiveTransactionAsync(async () => {
+      await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS tactical_plays (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          description TEXT,
+          format TEXT NOT NULL CHECK(format IN ('indoor_6v6','beach_2v2')),
+          category TEXT DEFAULT 'custom' CHECK(category IN ('reception','attack','defense','coverage','serve','custom')),
+          positions_json TEXT NOT NULL DEFAULT '[]',
+          arrows_json TEXT NOT NULL DEFAULT '[]',
+          is_default INTEGER DEFAULT 0,
+          created_at TEXT DEFAULT (datetime('now')),
+          updated_at TEXT DEFAULT (datetime('now'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_plays_format ON tactical_plays(format);
+        CREATE INDEX IF NOT EXISTS idx_plays_category ON tactical_plays(category);
+
+        PRAGMA user_version = 2;
+      `);
+    });
+  }
 }
 
 export function generateId(): string {

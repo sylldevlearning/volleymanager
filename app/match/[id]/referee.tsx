@@ -15,6 +15,7 @@ import { isSetWon, isMatchWon, isLastSet, getTotalSets, canRequestTimeout } from
 import { ScoreButton } from '../../../src/components/scoring/ScoreButton';
 import { SetTracker } from '../../../src/components/scoring/SetTracker';
 import { UndoButton } from '../../../src/components/scoring/UndoButton';
+import { TacticalBoard } from '../../../src/components/tactical/TacticalBoard';
 import type { Match } from '../../../src/models/match';
 import type { Team } from '../../../src/models/team';
 import { palette } from '../../../src/theme/tokens';
@@ -43,6 +44,7 @@ export default function RefereeScreen() {
   const [awayTeam, setAwayTeam] = useState<Team | null>(null);
   const [loading, setLoading] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
+  const [showTactical, setShowTactical] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Load match
@@ -276,6 +278,15 @@ export default function RefereeScreen() {
         />
         <Pressable
           style={({ pressed }) => [styles.actionBtn, pressed && styles.actionBtnPressed]}
+          onPress={() => setShowTactical(true)}
+          accessibilityLabel={t('tactical.title')}
+          accessibilityRole="button"
+        >
+          <Text style={styles.actionIcon}>📋</Text>
+          <Text style={styles.actionText}>{t('tactical.title')}</Text>
+        </Pressable>
+        <Pressable
+          style={({ pressed }) => [styles.actionBtn, pressed && styles.actionBtnPressed]}
           onPress={handlePause}
           accessibilityLabel={isPaused ? t('match.resume') : t('match.pause')}
           accessibilityRole="button"
@@ -293,6 +304,17 @@ export default function RefereeScreen() {
           <Text style={[styles.actionText, { color: palette.error }]}>{t('match.endMatch')}</Text>
         </Pressable>
       </View>
+
+      {/* Tactical board */}
+      <TacticalBoard
+        visible={showTactical}
+        format={match.format}
+        homeTeamId={match.teamHomeId}
+        awayTeamId={match.teamAwayId}
+        homeTeamName={homeTeam.name}
+        awayTeamName={awayTeam.name}
+        onClose={() => setShowTactical(false)}
+      />
 
       {/* Change ends modal (beach) */}
       <Modal visible={showChangeEnds} transparent animationType="fade">
@@ -415,7 +437,8 @@ const styles = StyleSheet.create({
     borderColor: palette.backgroundElevated,
   },
   actionBtnPressed: { opacity: 0.7 },
-  actionText: { fontSize: 12, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
+  actionText: { fontSize: 11, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
+  actionIcon: { fontSize: 16 },
   changeEndsOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.7)',

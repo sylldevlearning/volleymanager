@@ -1,0 +1,90 @@
+import { create } from 'zustand';
+import type { PlayerPosition, Arrow, TacticalPlay, TacticalTool, ArrowThickness } from '../../models/tactical';
+import { generateId } from '../../services/database';
+
+interface TacticalState {
+  positions: PlayerPosition[];
+  arrows: Arrow[];
+  selectedTool: TacticalTool;
+  arrowThickness: ArrowThickness;
+  isPlaying: boolean;
+  playbackSpeed: 0.5 | 1 | 2;
+  currentStep: number;
+
+  setPositions: (positions: PlayerPosition[]) => void;
+  movePlayer: (playerId: string, x: number, y: number) => void;
+  addArrow: (arrow: Omit<Arrow, 'id' | 'order'>) => void;
+  removeArrow: (id: string) => void;
+  clearArrows: () => void;
+  setTool: (tool: TacticalTool) => void;
+  setArrowThickness: (thickness: ArrowThickness) => void;
+  setPlaying: (playing: boolean) => void;
+  setPlaybackSpeed: (speed: 0.5 | 1 | 2) => void;
+  setCurrentStep: (step: number) => void;
+  loadPlay: (play: TacticalPlay) => void;
+  resetBoard: () => void;
+}
+
+export const useTacticalStore = create<TacticalState>()((set, get) => ({
+  positions: [],
+  arrows: [],
+  selectedTool: 'move',
+  arrowThickness: 'thin',
+  isPlaying: false,
+  playbackSpeed: 1,
+  currentStep: 0,
+
+  setPositions: (positions) => set({ positions }),
+
+  movePlayer: (playerId, x, y) =>
+    set((state) => ({
+      positions: state.positions.map((p) =>
+        p.playerId === playerId ? { ...p, x, y } : p
+      ),
+    })),
+
+  addArrow: (arrow) =>
+    set((state) => {
+      const order = state.arrows.length > 0
+        ? Math.max(...state.arrows.map((a) => a.order)) + 1
+        : 1;
+      return {
+        arrows: [...state.arrows, { ...arrow, id: generateId(), order }],
+      };
+    }),
+
+  removeArrow: (id) =>
+    set((state) => ({
+      arrows: state.arrows.filter((a) => a.id !== id),
+    })),
+
+  clearArrows: () => set({ arrows: [] }),
+
+  setTool: (tool) => set({ selectedTool: tool }),
+
+  setArrowThickness: (thickness) => set({ arrowThickness: thickness }),
+
+  setPlaying: (playing) => set({ isPlaying: playing, currentStep: playing ? 0 : get().currentStep }),
+
+  setPlaybackSpeed: (speed) => set({ playbackSpeed: speed }),
+
+  setCurrentStep: (step) => set({ currentStep: step }),
+
+  loadPlay: (play) =>
+    set({
+      positions: play.positions,
+      arrows: play.arrows,
+      selectedTool: 'move',
+      isPlaying: false,
+      currentStep: 0,
+    }),
+
+  resetBoard: () =>
+    set({
+      positions: [],
+      arrows: [],
+      selectedTool: 'move',
+      isPlaying: false,
+      currentStep: 0,
+    }),
+}));

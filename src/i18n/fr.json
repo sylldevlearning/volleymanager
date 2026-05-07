@@ -159,6 +159,43 @@
     "allTeams": "Toutes les équipes",
     "vs": "vs"
   },
+  "tactical": {
+    "title": "Tableau Tactique",
+    "tools": {
+      "move": "Déplacer",
+      "arrowSolid": "Flèche (joueur)",
+      "arrowDashed": "Flèche (ballon)",
+      "arrowCurved": "Flèche courbe",
+      "eraser": "Gomme",
+      "clearAll": "Tout effacer"
+    },
+    "playback": {
+      "play": "Lecture",
+      "pause": "Pause",
+      "reset": "Remettre à zéro",
+      "speed": "Vitesse"
+    },
+    "playbook": {
+      "save": "Sauvegarder",
+      "load": "Charger un schéma",
+      "name": "Nom du schéma",
+      "category": "Catégorie",
+      "delete": "Supprimer",
+      "deleteConfirm": "Supprimer ce schéma ?",
+      "noPlays": "Aucun schéma sauvegardé",
+      "defaults": "Schéma par défaut",
+      "custom": "Mes schémas"
+    },
+    "categories": {
+      "reception": "Réception",
+      "attack": "Attaque",
+      "defense": "Défense",
+      "coverage": "Couverture",
+      "serve": "Service",
+      "custom": "Personnalisé"
+    },
+    "clearConfirm": "Effacer tous les tracés ?"
+  },
   "settings": {
     "title": "Paramètres",
     "language": "Langue",

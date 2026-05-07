@@ -159,6 +159,43 @@
     "allTeams": "All teams",
     "vs": "vs"
   },
+  "tactical": {
+    "title": "Tactical Board",
+    "tools": {
+      "move": "Move",
+      "arrowSolid": "Arrow (player)",
+      "arrowDashed": "Arrow (ball)",
+      "arrowCurved": "Curved arrow",
+      "eraser": "Eraser",
+      "clearAll": "Clear all"
+    },
+    "playback": {
+      "play": "Play",
+      "pause": "Pause",
+      "reset": "Reset",
+      "speed": "Speed"
+    },
+    "playbook": {
+      "save": "Save",
+      "load": "Load a play",
+      "name": "Play name",
+      "category": "Category",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this play?",
+      "noPlays": "No saved plays",
+      "defaults": "Default play",
+      "custom": "My plays"
+    },
+    "categories": {
+      "reception": "Reception",
+      "attack": "Attack",
+      "defense": "Defense",
+      "coverage": "Coverage",
+      "serve": "Serve",
+      "custom": "Custom"
+    },
+    "clearConfirm": "Clear all drawings?"
+  },
   "settings": {
     "title": "Settings",
     "language": "Language",
