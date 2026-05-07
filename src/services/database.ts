@@ -120,6 +120,60 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
       `);
     });
   }
+
+  if (version < 3) {
+    await db.withExclusiveTransactionAsync(async () => {
+      const existing = await db.getFirstAsync<{ c: number }>('SELECT COUNT(*) as c FROM teams');
+      if (!existing || existing.c === 0) {
+        const now = new Date().toISOString();
+        const teamAId = 'default_team_a';
+        const teamBId = 'default_team_b';
+
+        await db.runAsync(
+          `INSERT OR IGNORE INTO teams (id, name, short_name, color, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`,
+          [teamAId, 'Équipe A', 'EQA', '#E63946', now, now]
+        );
+        await db.runAsync(
+          `INSERT OR IGNORE INTO teams (id, name, short_name, color, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`,
+          [teamBId, 'Équipe B', 'EQB', '#1D4ED8', now, now]
+        );
+
+        const positionsA: [string, string, number][] = [
+          ['Passeur', 'setter', 1],
+          ['Pointu', 'outside', 2],
+          ['Central', 'middle', 3],
+          ['Opposite', 'opposite', 4],
+          ['Pointu', 'outside', 5],
+          ['Libéro', 'libero', 6],
+        ];
+        const positionsB: [string, string, number][] = [
+          ['Passeur', 'setter', 1],
+          ['Pointu', 'outside', 2],
+          ['Central', 'middle', 3],
+          ['Opposite', 'opposite', 4],
+          ['Pointu', 'outside', 5],
+          ['Libéro', 'libero', 6],
+        ];
+
+        for (const [firstName, position, number] of positionsA) {
+          const pid = generateId();
+          await db.runAsync(
+            `INSERT INTO players (id, team_id, first_name, last_name, number, position, is_active, created_at) VALUES (?, ?, ?, ?, ?, ?, 1, ?)`,
+            [pid, teamAId, firstName, 'A', number, position, now]
+          );
+        }
+        for (const [firstName, position, number] of positionsB) {
+          const pid = generateId();
+          await db.runAsync(
+            `INSERT INTO players (id, team_id, first_name, last_name, number, position, is_active, created_at) VALUES (?, ?, ?, ?, ?, ?, 1, ?)`,
+            [pid, teamBId, firstName, 'B', number, position, now]
+          );
+        }
+      }
+
+      await db.execAsync('PRAGMA user_version = 3');
+    });
+  }
 }
 
 export function generateId(): string {
