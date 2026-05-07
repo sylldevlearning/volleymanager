@@ -111,11 +111,12 @@ export function computeScore(events: MatchEvent[]): { home: number; away: number
   return { home, away };
 }
 
-// Count timeouts used for a team in a set
-export function computeTimeoutsUsed(
-  events: MatchEvent[],
-  teamId: string,
-): number {
-  const type = teamId === events[0]?.teamId ? 'timeout_home' : 'timeout_away';
-  return events.filter((e) => !e.isCancelled && e.eventType === type).length;
+// Count timeouts used for a team across provided events
+export function computeTimeoutsUsed(events: MatchEvent[], teamId: string): number {
+  return events.filter(
+    (e) =>
+      !e.isCancelled &&
+      e.teamId === teamId &&
+      (e.eventType === 'timeout_home' || e.eventType === 'timeout_away'),
+  ).length;
 }
