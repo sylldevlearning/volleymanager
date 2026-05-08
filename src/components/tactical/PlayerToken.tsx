@@ -52,12 +52,14 @@ export function PlayerToken({
 
   const tapGesture = Gesture.Tap()
     .maxDuration(200)
+    .maxDistance(10)
     .onEnd((_e, success) => {
       if (success) runOnJS(notifyTap)();
     });
 
   const panGesture = Gesture.Pan()
     .enabled(canDrag)
+    .minDistance(10)
     .onBegin(() => {
       scale.value = withSpring(1.2);
       runOnJS(triggerHaptic)();
@@ -80,7 +82,10 @@ export function PlayerToken({
       scale.value = withSpring(1);
     });
 
-  const gesture = Gesture.Exclusive(tapGesture, panGesture);
+  // Pan must be first: it activates on movement (minDistance 10), letting Tap handle quick taps.
+  // With Tap first and no maxDistance, Tap would hold the gesture for 200ms while Pan waits,
+  // then RNGH's late-activation of Pan causes a native crash on Expo Go.
+  const gesture = Gesture.Exclusive(panGesture, tapGesture);
 
   const animStyle = useAnimatedStyle(() => ({
     transform: [

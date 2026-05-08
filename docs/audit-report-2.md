@@ -10,11 +10,11 @@
 
 | Sévérité | Trouvés | Corrigés |
 |---|---|---|
-| Critique | 3 | 3 |
+| Critique | 4 | 4 |
 | Haute | 2 | 2 |
 | Moyenne | 5 | 5 |
 | Basse | 3 | 3 |
-| **Total** | **13** | **13** |
+| **Total** | **14** | **14** |
 
 Aucun bug en suspens.
 
@@ -162,6 +162,25 @@ Aucun bug en suspens.
 - **Cause** : `i18n` était importé uniquement pour ses effets de bord (`import '../src/i18n'`) sans jamais appeler `i18n.changeLanguage()` avec la valeur du store.
 - **Fix** : Import nommé `import i18n from '../src/i18n'` et ajout d'un `useEffect` dans `RootLayoutNav` qui appelle `i18n.changeLanguage(language)` dès que la valeur `language` du store change (y compris au premier rendu).
 - **Commit** : `b34ce6e`
+
+---
+
+### BUG-025 : Tableau tactique — crash natif silencieux au drag d'un jeton (Exclusive ordering + maxDistance)
+
+- **Fichier** : [src/components/tactical/PlayerToken.tsx](../src/components/tactical/PlayerToken.tsx)
+- **Sévérité** : Critique
+- **Description** : L'app se fermait immédiatement sans message d'erreur dès qu'un jeton joueur était glissé sur le terrain. Le crash était un crash natif silencieux dans le système de gesture de RNGH 2.28.
+- **Cause** : Double problème de configuration des gestes :
+  1. `Gesture.Exclusive(tapGesture, panGesture)` avec **Tap en premier** : Tap entrait en état `began` dès le touch-down et bloquait Pan (une seule gesture active dans Exclusive).
+  2. `Gesture.Tap()` sans `.maxDistance()` : Tap ne se cancellait jamais sur le mouvement du doigt. Il restait `began` pendant les 200ms de `maxDuration`, bloquant Pan tout ce temps.
+  3. `Gesture.Pan()` sans `.minDistance()` : Sans seuil de déplacement minimal, la distinction tap/drag était entièrement à la charge du `Exclusive`, qui était mal configuré.
+  
+  Résultat : après 200ms, Tap échouait et RNGH 2.28 tentait une "late activation" de Pan sur des events déjà traités → crash natif (pas d'error overlay React Native, app fermée directement).
+- **Fix** :
+  - Ajout de `.maxDistance(10)` sur `Gesture.Tap()` → Tap échoue immédiatement si le doigt dépasse 10px.
+  - Ajout de `.minDistance(10)` sur `Gesture.Pan()` → Pan n'active qu'à partir de 10px de mouvement.
+  - Inversion de l'ordre : `Gesture.Exclusive(panGesture, tapGesture)` → Pan a la priorité, s'active en moins de 200ms si le doigt bouge suffisamment, et Tap ne s'active que pour les touches courtes sans déplacement.
+- **Commit** : `fix: tactical board drag crash — Exclusive ordering + missing minDistance/maxDistance`
 
 ---
 
