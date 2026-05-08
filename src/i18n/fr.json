@@ -329,6 +329,37 @@
     "arrows_other": "flèches",
     "clearConfirm": "Effacer tous les tracés ?"
   },
+  "substitution": {
+    "title": "Remplacement",
+    "onCourt": "Sur le terrain",
+    "bench": "Banc",
+    "playerOut": "Sortir",
+    "playerIn": "Entrer",
+    "confirm": "Confirmer le remplacement",
+    "cancel": "Annuler",
+    "counter": "{{used}}/{{max}} remplacements",
+    "counterUnlimited": "{{used}} remplacements",
+    "maxReached": "Remplacements épuisés pour ce set",
+    "reciprocityViolation": "Ce joueur ne peut remplacer que {{playerName}}",
+    "notEligible": "Non éligible",
+    "selectOut": "Choisir le joueur qui sort",
+    "selectIn": "Choisir le joueur qui entre",
+    "success": "{{playerIn}} remplace {{playerOut}} en P{{position}}",
+    "libero": {
+      "title": "Libéro",
+      "enter": "Faire entrer le libéro",
+      "exit": "Sortir le libéro",
+      "selectReplace": "Quel joueur le libéro remplace ?",
+      "mustExit": "Le libéro doit sortir (passage en zone avant)",
+      "cannotServe": "Le libéro ne peut pas servir",
+      "backRowOnly": "Le libéro ne peut remplacer qu'en zone arrière (P1, P5, P6)",
+      "onCourt": "Libéro en jeu (remplace {{playerName}})",
+      "onBench": "Libéro sur le banc"
+    },
+    "beach": {
+      "noSubstitution": "Pas de remplacement en beach volley"
+    }
+  },
   "settings": {
     "title": "Paramètres",
     "language": "Langue",

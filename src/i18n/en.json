@@ -329,6 +329,37 @@
     "arrows_other": "arrows",
     "clearConfirm": "Clear all drawings?"
   },
+  "substitution": {
+    "title": "Substitution",
+    "onCourt": "On court",
+    "bench": "Bench",
+    "playerOut": "Sub out",
+    "playerIn": "Sub in",
+    "confirm": "Confirm substitution",
+    "cancel": "Cancel",
+    "counter": "{{used}}/{{max}} substitutions",
+    "counterUnlimited": "{{used}} substitutions",
+    "maxReached": "Substitutions exhausted for this set",
+    "reciprocityViolation": "This player can only replace {{playerName}}",
+    "notEligible": "Not eligible",
+    "selectOut": "Select player to sub out",
+    "selectIn": "Select player to sub in",
+    "success": "{{playerIn}} replaces {{playerOut}} at P{{position}}",
+    "libero": {
+      "title": "Libero",
+      "enter": "Sub in libero",
+      "exit": "Sub out libero",
+      "selectReplace": "Which player does the libero replace?",
+      "mustExit": "Libero must exit (moving to front row)",
+      "cannotServe": "Libero cannot serve",
+      "backRowOnly": "Libero can only replace in back row (P1, P5, P6)",
+      "onCourt": "Libero on court (replacing {{playerName}})",
+      "onBench": "Libero on bench"
+    },
+    "beach": {
+      "noSubstitution": "No substitutions in beach volleyball"
+    }
+  },
   "settings": {
     "title": "Settings",
     "language": "Language",
