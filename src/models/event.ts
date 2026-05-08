@@ -33,6 +33,14 @@ export type StatEventType =
 
 export type EventType = PointEventType | ManagementEventType | StatEventType;
 
+export interface SubstitutionDetails {
+  playerOutId: string;
+  playerInId: string;
+  position: number;
+  isLibero: boolean;
+  pairId: string;
+}
+
 export interface MatchEvent {
   id: string;
   matchId: string;
