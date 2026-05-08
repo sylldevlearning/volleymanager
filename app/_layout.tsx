@@ -14,7 +14,7 @@ import {
 import tamaguiConfig from '../tamagui.config';
 import { useSettingsStore } from '../src/stores/settingsStore';
 import { seedDefaultDataIfEmpty } from '../src/services/seedService';
-import '../src/i18n';
+import i18n from '../src/i18n';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -53,6 +53,11 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const theme = useSettingsStore((s) => s.theme);
+  const language = useSettingsStore((s) => s.language);
+
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
