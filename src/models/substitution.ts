@@ -7,6 +7,8 @@ export interface SubstitutionPair {
   playerOutId: string;
   /** The reserve (or libero) who entered */
   playerInId: string;
+  /** True for libero swaps — these don't consume a substitution slot */
+  isLibero: boolean;
   isCancelled: boolean;
 }
 

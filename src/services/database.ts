@@ -212,6 +212,7 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
           team_id TEXT NOT NULL REFERENCES teams(id),
           player_out_id TEXT NOT NULL REFERENCES players(id),
           player_in_id TEXT NOT NULL REFERENCES players(id),
+          is_libero INTEGER DEFAULT 0,
           is_cancelled INTEGER DEFAULT 0
         );
         CREATE INDEX IF NOT EXISTS idx_sub_pairs_match ON substitution_pairs(match_id, set_id, team_id);
