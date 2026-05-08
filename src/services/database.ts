@@ -201,6 +201,24 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
       await db.execAsync('PRAGMA user_version = 4');
     });
   }
+
+  if (version < 5) {
+    await db.withExclusiveTransactionAsync(async () => {
+      await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS substitution_pairs (
+          id TEXT PRIMARY KEY,
+          match_id TEXT NOT NULL REFERENCES matches(id) ON DELETE CASCADE,
+          set_id TEXT NOT NULL REFERENCES sets(id),
+          team_id TEXT NOT NULL REFERENCES teams(id),
+          player_out_id TEXT NOT NULL REFERENCES players(id),
+          player_in_id TEXT NOT NULL REFERENCES players(id),
+          is_cancelled INTEGER DEFAULT 0
+        );
+        CREATE INDEX IF NOT EXISTS idx_sub_pairs_match ON substitution_pairs(match_id, set_id, team_id);
+        PRAGMA user_version = 5;
+      `);
+    });
+  }
 }
 
 export function generateId(): string {
