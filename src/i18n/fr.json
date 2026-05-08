@@ -105,9 +105,15 @@
     "attribution": {
       "who": "Qui a marqué ?",
       "skip": "Passer",
+      "pointsSection": "Points",
+      "faultsSection": "Fautes adverses",
       "ace": "Ace",
       "attack": "Attaque",
-      "block": "Block"
+      "block": "Block",
+      "serveFault": "F. service",
+      "attackFault": "F. attaque",
+      "blockFault": "F. block",
+      "defenseFault": "F. défense"
     }
   },
   "team": {

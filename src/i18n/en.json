@@ -105,9 +105,15 @@
     "attribution": {
       "who": "Who scored?",
       "skip": "Skip",
+      "pointsSection": "Points",
+      "faultsSection": "Opponent faults",
       "ace": "Ace",
       "attack": "Attack",
-      "block": "Block"
+      "block": "Block",
+      "serveFault": "Serve fault",
+      "attackFault": "Attack fault",
+      "blockFault": "Block fault",
+      "defenseFault": "Defense fault"
     }
   },
   "team": {

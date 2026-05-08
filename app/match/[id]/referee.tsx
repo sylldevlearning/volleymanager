@@ -23,9 +23,14 @@ import type { Player } from '../../../src/models/player';
 import { getPlayerShortName } from '../../../src/features/players/player-helpers';
 import { palette } from '../../../src/theme/tokens';
 
-type PointAction = 'serve_ace' | 'attack_kill' | 'block_kill';
+type PointAction =
+  | 'serve_ace' | 'attack_kill' | 'block_kill'
+  | 'serve_fault' | 'attack_fault' | 'block_fault' | 'defense_fault';
+
+const FAULT_ACTIONS = new Set<PointAction>(['serve_fault', 'attack_fault', 'block_fault', 'defense_fault']);
+
 interface AttributionState {
-  team: 'home' | 'away';
+  scoringTeam: 'home' | 'away';
   playerId: string | null;
   action: PointAction | null;
 }
@@ -123,17 +128,28 @@ export default function RefereeScreen() {
       const next = { ...attribution, ...update };
       if (next.playerId && next.action) {
         // Both selected → record stat and dismiss
+        const isFault = FAULT_ACTIONS.has(next.action);
+        // Faults are attributed to the opposing team (they caused their opponents to score)
+        const eventTeamId = isFault
+          ? (next.scoringTeam === 'home' ? match.teamAwayId : match.teamHomeId)
+          : (next.scoringTeam === 'home' ? match.teamHomeId : match.teamAwayId);
         await addEvent({
           matchId: match.id,
           setId: currentSet.id,
           eventType: next.action,
           playerId: next.playerId,
-          teamId: next.team === 'home' ? match.teamHomeId : match.teamAwayId,
+          teamId: eventTeamId,
           details: {},
         });
         setAttribution(null);
         if (attributionTimerRef.current) clearTimeout(attributionTimerRef.current);
       } else {
+        // Clear player selection when switching between point/fault categories
+        if (update.action && attribution.action !== null) {
+          const wasFailt = FAULT_ACTIONS.has(attribution.action);
+          const isNowFault = FAULT_ACTIONS.has(update.action);
+          if (wasFailt !== isNowFault) next.playerId = null;
+        }
         setAttribution(next);
       }
     },
@@ -155,10 +171,9 @@ export default function RefereeScreen() {
 
     addPointEvent(team, newEvent);
 
-    // Show attribution strip for the scoring team
-    const scoringPlayers = team === 'home' ? homePlayers : awayPlayers;
-    if (scoringPlayers.length > 0) {
-      setAttribution({ team, playerId: null, action: null });
+    // Show attribution strip (always, even if no players — fault section still useful)
+    if (homePlayers.length > 0 || awayPlayers.length > 0) {
+      setAttribution({ scoringTeam: team, playerId: null, action: null });
     }
 
     const newScoreHome = team === 'home' ? scoreHome + 1 : scoreHome;
@@ -336,8 +351,11 @@ export default function RefereeScreen() {
       {/* Attribution strip — appears after each point */}
       {attribution && (
         <AttributionStrip
-          players={attribution.team === 'home' ? homePlayers : awayPlayers}
-          teamColor={attribution.team === 'home' ? (homeTeam?.color ?? palette.teamHome) : palette.teamAway}
+          scoringTeam={attribution.scoringTeam}
+          homePlayers={homePlayers}
+          awayPlayers={awayPlayers}
+          homeColor={homeTeam?.color ?? palette.teamHome}
+          awayColor={palette.teamAway}
           selectedPlayerId={attribution.playerId}
           selectedAction={attribution.action}
           onSelectPlayer={(id) => handleAttributionSelect({ playerId: id })}
@@ -412,8 +430,11 @@ export default function RefereeScreen() {
 }
 
 function AttributionStrip({
-  players,
-  teamColor,
+  scoringTeam,
+  homePlayers,
+  awayPlayers,
+  homeColor,
+  awayColor,
   selectedPlayerId,
   selectedAction,
   onSelectPlayer,
@@ -421,8 +442,11 @@ function AttributionStrip({
   onDismiss,
   t,
 }: {
-  players: Player[];
-  teamColor: string;
+  scoringTeam: 'home' | 'away';
+  homePlayers: Player[];
+  awayPlayers: Player[];
+  homeColor: string;
+  awayColor: string;
   selectedPlayerId: string | null;
   selectedAction: PointAction | null;
   onSelectPlayer: (id: string) => void;
@@ -430,10 +454,25 @@ function AttributionStrip({
   onDismiss: () => void;
   t: ReturnType<typeof useTranslation>['t'];
 }) {
-  const ACTIONS: { key: PointAction; label: string }[] = [
+  const isFaultAction = selectedAction ? FAULT_ACTIONS.has(selectedAction) : false;
+  // Points → scoring team's players; Faults → opposing team's players (they made the error)
+  const players = isFaultAction
+    ? (scoringTeam === 'home' ? awayPlayers : homePlayers)
+    : (scoringTeam === 'home' ? homePlayers : awayPlayers);
+  const teamColor = scoringTeam === 'home' ? homeColor : awayColor;
+  const chipColor = isFaultAction ? palette.error : teamColor;
+
+  const POINT_ACTIONS: { key: PointAction; label: string }[] = [
     { key: 'serve_ace', label: t('referee.attribution.ace') },
     { key: 'attack_kill', label: t('referee.attribution.attack') },
     { key: 'block_kill', label: t('referee.attribution.block') },
+  ];
+
+  const FAULT_ACTION_LIST: { key: PointAction; label: string }[] = [
+    { key: 'serve_fault', label: t('referee.attribution.serveFault') },
+    { key: 'attack_fault', label: t('referee.attribution.attackFault') },
+    { key: 'block_fault', label: t('referee.attribution.blockFault') },
+    { key: 'defense_fault', label: t('referee.attribution.defenseFault') },
   ];
 
   return (
@@ -445,45 +484,71 @@ function AttributionStrip({
         </Pressable>
       </View>
 
-      {/* Player chips */}
-      <FlatList
-        horizontal
-        data={players}
-        keyExtractor={(p) => p.id}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={attrStyles.playerList}
-        renderItem={({ item }) => {
-          const isSelected = item.id === selectedPlayerId;
-          return (
-            <Pressable
-              style={[attrStyles.playerChip, isSelected && { borderColor: teamColor, backgroundColor: teamColor + '20' }]}
-              onPress={() => onSelectPlayer(item.id)}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: isSelected }}
-            >
-              <Text style={[attrStyles.playerNum, isSelected && { color: teamColor }]}>#{item.number}</Text>
-              <Text style={attrStyles.playerName} numberOfLines={1}>{getPlayerShortName(item)}</Text>
-            </Pressable>
-          );
-        }}
-      />
+      {/* Player chips — scoring team for points, opposing team for faults */}
+      {players.length > 0 && (
+        <FlatList
+          horizontal
+          data={players}
+          keyExtractor={(p) => p.id}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={attrStyles.playerList}
+          renderItem={({ item }) => {
+            const isSelected = item.id === selectedPlayerId;
+            return (
+              <Pressable
+                style={[attrStyles.playerChip, isSelected && { borderColor: chipColor, backgroundColor: chipColor + '20' }]}
+                onPress={() => onSelectPlayer(item.id)}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: isSelected }}
+              >
+                <Text style={[attrStyles.playerNum, isSelected && { color: chipColor }]}>#{item.number}</Text>
+                <Text style={attrStyles.playerName} numberOfLines={1}>{getPlayerShortName(item)}</Text>
+              </Pressable>
+            );
+          }}
+        />
+      )}
 
-      {/* Action type buttons */}
-      <View style={attrStyles.actions}>
-        {ACTIONS.map(({ key, label }) => {
-          const isSelected = key === selectedAction;
-          return (
-            <Pressable
-              key={key}
-              style={[attrStyles.actionBtn, isSelected && { borderColor: teamColor, backgroundColor: teamColor + '20' }]}
-              onPress={() => onSelectAction(key)}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: isSelected }}
-            >
-              <Text style={[attrStyles.actionText, isSelected && { color: teamColor }]}>{label}</Text>
-            </Pressable>
-          );
-        })}
+      {/* Points section */}
+      <View style={attrStyles.sectionBlock}>
+        <Text style={attrStyles.sectionTitle}>{t('referee.attribution.pointsSection')}</Text>
+        <View style={attrStyles.actions}>
+          {POINT_ACTIONS.map(({ key, label }) => {
+            const isSelected = key === selectedAction;
+            return (
+              <Pressable
+                key={key}
+                style={[attrStyles.actionBtn, isSelected && { borderColor: teamColor, backgroundColor: teamColor + '20' }]}
+                onPress={() => onSelectAction(key)}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: isSelected }}
+              >
+                <Text style={[attrStyles.actionText, isSelected && { color: teamColor }]}>{label}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
+
+      {/* Faults section */}
+      <View style={attrStyles.sectionBlock}>
+        <Text style={[attrStyles.sectionTitle, attrStyles.faultSectionTitle]}>{t('referee.attribution.faultsSection')}</Text>
+        <View style={attrStyles.actions}>
+          {FAULT_ACTION_LIST.map(({ key, label }) => {
+            const isSelected = key === selectedAction;
+            return (
+              <Pressable
+                key={key}
+                style={[attrStyles.actionBtn, isSelected && { borderColor: palette.error, backgroundColor: palette.error + '20' }]}
+                onPress={() => onSelectAction(key)}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: isSelected }}
+              >
+                <Text style={[attrStyles.actionText, isSelected && { color: palette.error }]}>{label}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
       </View>
     </View>
   );
@@ -523,17 +588,20 @@ const attrStyles = StyleSheet.create({
   },
   playerNum: { fontSize: 12, fontFamily: 'Inter_700Bold', color: palette.textMuted },
   playerName: { fontSize: 12, fontFamily: 'Inter_500Medium', color: palette.textSecondary, maxWidth: 72 },
-  actions: { flexDirection: 'row', paddingHorizontal: 12, gap: 8 },
+  sectionBlock: { gap: 6, paddingHorizontal: 12 },
+  sectionTitle: { fontSize: 10, fontFamily: 'Inter_600SemiBold', color: palette.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 },
+  faultSectionTitle: { color: palette.error + 'AA' },
+  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   actionBtn: {
-    flex: 1,
-    paddingVertical: 8,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
     borderRadius: 10,
     backgroundColor: palette.backgroundElevated,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: 'transparent',
   },
-  actionText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary },
+  actionText: { fontSize: 12, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary },
 });
 
 function TimeoutIndicator({
