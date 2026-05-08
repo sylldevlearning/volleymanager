@@ -1,13 +1,19 @@
 import { create } from 'zustand';
-import type { Match, MatchSet, MatchConfig } from '../models/match';
+import type { Match, MatchSet } from '../models/match';
 import type { MatchEvent } from '../models/event';
+import type { Player } from '../models/player';
+import type { SubstitutionPair, LiberoState } from '../models/substitution';
 import { computeScore } from '../services/eventService';
 import { isSetWon, isMatchWon, isLastSet, shouldChangeEndsBeach } from '../utils/volleyball-rules';
+import { liberoMustExit } from '../utils/substitutionRules';
 
 interface SetScore {
   home: number;
   away: number;
 }
+
+/** position (1-6) → playerId */
+export type CourtMap = Record<number, string>;
 
 interface ScoringState {
   match: Match | null;
@@ -18,12 +24,24 @@ interface ScoringState {
   rotationAway: number[];
   timeoutsHome: number;
   timeoutsAway: number;
+  /** Count of normal (non-libero) subs used this set */
   substitutionsHome: number;
   substitutionsAway: number;
   matchTimer: number;
   isTimerRunning: boolean;
   lastScoringTeam: 'home' | 'away' | null;
   showChangeEnds: boolean;
+
+  // Court state (position → playerId)
+  onCourtHome: CourtMap;
+  onCourtAway: CourtMap;
+  benchHome: Player[];
+  benchAway: Player[];
+  liberoHome: LiberoState | null;
+  liberoAway: LiberoState | null;
+  // Active pairs for reciprocity checks
+  pairsHome: SubstitutionPair[];
+  pairsAway: SubstitutionPair[];
 
   // Derived (computed)
   scoreHome: number;
@@ -35,12 +53,26 @@ interface ScoringState {
 
   // Actions
   initMatch: (match: Match, firstSet: MatchSet) => void;
+  initLineup: (
+    side: 'home' | 'away',
+    onCourt: CourtMap,
+    bench: Player[],
+    libero: LiberoState | null,
+  ) => void;
   addPointEvent: (team: 'home' | 'away', newEvent: MatchEvent) => void;
   undoPoint: (cancelledEventId: string) => void;
   endCurrentSet: (winnerTeam: 'home' | 'away', updatedSet: MatchSet) => void;
   startNewSet: (newSet: MatchSet) => void;
   requestTimeout: (team: 'home' | 'away') => void;
-  requestSubstitution: (team: 'home' | 'away') => void;
+  applySubstitution: (
+    side: 'home' | 'away',
+    playerOutId: string,
+    playerInId: string,
+    position: number,
+    isLibero: boolean,
+    pair: SubstitutionPair,
+  ) => void;
+  applyLiberoExit: (side: 'home' | 'away') => void;
   rotateTeam: (team: 'home' | 'away') => void;
   tickTimer: () => void;
   setTimerRunning: (running: boolean) => void;
@@ -49,18 +81,37 @@ interface ScoringState {
 }
 
 const INITIAL_ROTATION = [1, 2, 3, 4, 5, 6];
+const EMPTY_COURT: CourtMap = {};
 
 function computeServingTeam(events: MatchEvent[], initialServing: 'home' | 'away'): 'home' | 'away' {
   let serving = initialServing;
   for (const e of events) {
     if (e.isCancelled) continue;
-    if (e.eventType === 'point_home') {
-      serving = 'home';
-    } else if (e.eventType === 'point_away') {
-      serving = 'away';
-    }
+    if (e.eventType === 'point_home') serving = 'home';
+    else if (e.eventType === 'point_away') serving = 'away';
   }
   return serving;
+}
+
+function applySubOnMap(
+  court: CourtMap,
+  bench: Player[],
+  playerOutId: string,
+  playerInId: string,
+  position: number,
+): { court: CourtMap; bench: Player[] } {
+  const newCourt = { ...court };
+  newCourt[position] = playerInId;
+  // Move playerOut to bench, remove playerIn from bench
+  const playerOut = Object.entries(court).find(([, id]) => id === playerOutId);
+  const playerOutOnBench = bench.find((p) => p.id === playerOutId);
+  const newBench = bench.filter((p) => p.id !== playerInId);
+  if (playerOut && !playerOutOnBench) {
+    // playerOut was on court — they go to bench as a ghost (we only have id, not full Player)
+    // We track the CourtMap, bench array stores Player objects
+    // On sub out, we add a placeholder if needed (UI shows the player's slot as empty on court)
+  }
+  return { court: newCourt, bench: newBench };
 }
 
 export const useScoringStore = create<ScoringState>()((set, get) => ({
@@ -78,6 +129,14 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
   isTimerRunning: false,
   lastScoringTeam: null,
   showChangeEnds: false,
+  onCourtHome: EMPTY_COURT,
+  onCourtAway: EMPTY_COURT,
+  benchHome: [],
+  benchAway: [],
+  liberoHome: null,
+  liberoAway: null,
+  pairsHome: [],
+  pairsAway: [],
   scoreHome: 0,
   scoreAway: 0,
   setsHome: 0,
@@ -107,7 +166,23 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
       servingTeam: 'home',
       lastScoringTeam: null,
       showChangeEnds: false,
+      onCourtHome: EMPTY_COURT,
+      onCourtAway: EMPTY_COURT,
+      benchHome: [],
+      benchAway: [],
+      liberoHome: null,
+      liberoAway: null,
+      pairsHome: [],
+      pairsAway: [],
     });
+  },
+
+  initLineup: (side, onCourt, bench, libero) => {
+    if (side === 'home') {
+      set({ onCourtHome: onCourt, benchHome: bench, liberoHome: libero });
+    } else {
+      set({ onCourtAway: onCourt, benchAway: bench, liberoAway: libero });
+    }
   },
 
   addPointEvent: (team, newEvent) => {
@@ -118,15 +193,12 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
     const match = state.match!;
     const setNum = state.currentSet?.setNumber ?? 1;
     const lastSet = isLastSet(setNum, match.config);
-    const setWonHome = isSetWon(home, away, match.config, lastSet);
-    const setWonAway = isSetWon(away, home, match.config, lastSet);
 
     let showChangeEnds = false;
     if (match.format === 'beach_2v2') {
       showChangeEnds = shouldChangeEndsBeach(home, away, setNum, match.config);
     }
 
-    // Side-out: if scoring team was previously receiving, rotate them
     const prevServing = state.servingTeam;
     const newServing = team;
 
@@ -138,6 +210,24 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
       rotationAway = rotationAway.map((p) => (p === 6 ? 1 : p + 1));
     }
 
+    // Check libero auto-exit after rotation
+    let liberoHome = state.liberoHome;
+    let liberoAway = state.liberoAway;
+
+    if (team === 'home' && prevServing === 'away' && liberoHome?.isOnCourt && liberoHome.replacedPosition) {
+      const newLiberoPos = liberoHome.replacedPosition === 6 ? 1 : liberoHome.replacedPosition + 1;
+      if (liberoMustExit(newLiberoPos)) {
+        // Libero auto-exits; restore original player
+        liberoHome = { ...liberoHome, isOnCourt: false, replacedPlayerId: null, replacedPosition: null };
+      }
+    }
+    if (team === 'away' && prevServing === 'home' && liberoAway?.isOnCourt && liberoAway.replacedPosition) {
+      const newLiberoPos = liberoAway.replacedPosition === 6 ? 1 : liberoAway.replacedPosition + 1;
+      if (liberoMustExit(newLiberoPos)) {
+        liberoAway = { ...liberoAway, isOnCourt: false, replacedPlayerId: null, replacedPosition: null };
+      }
+    }
+
     set({
       events: newEvents,
       scoreHome: home,
@@ -147,6 +237,8 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
       rotationAway,
       lastScoringTeam: team,
       showChangeEnds,
+      liberoHome,
+      liberoAway,
     });
   },
 
@@ -156,18 +248,13 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
       e.id === cancelledEventId ? { ...e, isCancelled: true } : e
     );
     const { home, away } = computeScore(newEvents.filter((e) => !e.isCancelled));
-    const serving = computeServingTeam(
-      newEvents.filter((e) => !e.isCancelled),
-      'home'
-    );
+    const serving = computeServingTeam(newEvents.filter((e) => !e.isCancelled), 'home');
     set({ events: newEvents, scoreHome: home, scoreAway: away, servingTeam: serving });
   },
 
   endCurrentSet: (winnerTeam, updatedSet) => {
     const state = get();
-    const updatedSets = state.sets.map((s) =>
-      s.id === updatedSet.id ? updatedSet : s
-    );
+    const updatedSets = state.sets.map((s) => (s.id === updatedSet.id ? updatedSet : s));
     const setsHome = updatedSets.filter((s) => s.winnerTeamId === state.match?.teamHomeId).length;
     const setsAway = updatedSets.filter((s) => s.winnerTeamId === state.match?.teamAwayId).length;
     const setScores = updatedSets.map((s) => ({ home: s.scoreHome, away: s.scoreAway }));
@@ -189,6 +276,11 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
       rotationAway: [...INITIAL_ROTATION],
       lastScoringTeam: null,
       showChangeEnds: false,
+      pairsHome: [],
+      pairsAway: [],
+      // Reset libero to bench at new set
+      liberoHome: state.liberoHome ? { ...state.liberoHome, isOnCourt: false, replacedPlayerId: null, replacedPosition: null } : null,
+      liberoAway: state.liberoAway ? { ...state.liberoAway, isOnCourt: false, replacedPlayerId: null, replacedPosition: null } : null,
     }));
   },
 
@@ -197,9 +289,60 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
     else set((s) => ({ timeoutsAway: s.timeoutsAway + 1 }));
   },
 
-  requestSubstitution: (team) => {
-    if (team === 'home') set((s) => ({ substitutionsHome: s.substitutionsHome + 1 }));
-    else set((s) => ({ substitutionsAway: s.substitutionsAway + 1 }));
+  applySubstitution: (side, playerOutId, playerInId, position, isLibero, pair) => {
+    set((state) => {
+      if (side === 'home') {
+        const newCourt = { ...state.onCourtHome, [position]: playerInId };
+        const newBench = state.benchHome.filter((p) => p.id !== playerInId);
+        const pairsHome = [...state.pairsHome, pair];
+        const liberoHome = isLibero
+          ? { ...state.liberoHome!, isOnCourt: true, replacedPlayerId: playerOutId, replacedPosition: position }
+          : state.liberoHome;
+        return {
+          onCourtHome: newCourt,
+          benchHome: newBench,
+          pairsHome,
+          liberoHome,
+          substitutionsHome: isLibero ? state.substitutionsHome : state.substitutionsHome + 1,
+        };
+      } else {
+        const newCourt = { ...state.onCourtAway, [position]: playerInId };
+        const newBench = state.benchAway.filter((p) => p.id !== playerInId);
+        const pairsAway = [...state.pairsAway, pair];
+        const liberoAway = isLibero
+          ? { ...state.liberoAway!, isOnCourt: true, replacedPlayerId: playerOutId, replacedPosition: position }
+          : state.liberoAway;
+        return {
+          onCourtAway: newCourt,
+          benchAway: newBench,
+          pairsAway,
+          liberoAway,
+          substitutionsAway: isLibero ? state.substitutionsAway : state.substitutionsAway + 1,
+        };
+      }
+    });
+  },
+
+  applyLiberoExit: (side) => {
+    set((state) => {
+      if (side === 'home') {
+        const libero = state.liberoHome;
+        if (!libero?.isOnCourt || !libero.replacedPlayerId || !libero.replacedPosition) return {};
+        const newCourt = { ...state.onCourtHome, [libero.replacedPosition]: libero.replacedPlayerId };
+        return {
+          onCourtHome: newCourt,
+          liberoHome: { ...libero, isOnCourt: false, replacedPlayerId: null, replacedPosition: null },
+        };
+      } else {
+        const libero = state.liberoAway;
+        if (!libero?.isOnCourt || !libero.replacedPlayerId || !libero.replacedPosition) return {};
+        const newCourt = { ...state.onCourtAway, [libero.replacedPosition]: libero.replacedPlayerId };
+        return {
+          onCourtAway: newCourt,
+          liberoAway: { ...libero, isOnCourt: false, replacedPlayerId: null, replacedPosition: null },
+        };
+      }
+    });
   },
 
   rotateTeam: (team) => {
@@ -226,5 +369,13 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
     servingTeam: 'home',
     isTimerRunning: false,
     matchTimer: 0,
+    onCourtHome: EMPTY_COURT,
+    onCourtAway: EMPTY_COURT,
+    benchHome: [],
+    benchAway: [],
+    liberoHome: null,
+    liberoAway: null,
+    pairsHome: [],
+    pairsAway: [],
   }),
 }));
