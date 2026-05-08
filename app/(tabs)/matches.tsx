@@ -175,6 +175,8 @@ function MatchCard({
   const date = new Date(match.date).toLocaleDateString();
   const isLive = match.status === 'live';
   const isFinished = match.status === 'finished';
+  const showCoach = !isFinished;
+  const showStats = isLive || isFinished;
 
   return (
     <Pressable
@@ -212,9 +214,9 @@ function MatchCard({
       </View>
 
       {/* Secondary action buttons */}
-      {(isLive || isFinished) && (
+      {(showCoach || showStats) && (
         <View style={styles.cardActions}>
-          {isLive && (
+          {showCoach && (
             <Pressable
               style={styles.actionBtn}
               onPress={() => router.push(`/match/${match.id}/coach` as never)}
@@ -224,7 +226,7 @@ function MatchCard({
               <Text style={styles.actionBtnText}>{t('match.coach')}</Text>
             </Pressable>
           )}
-          {isFinished && (
+          {showStats && (
             <Pressable
               style={styles.actionBtn}
               onPress={() => router.push(`/match/${match.id}/stats` as never)}
