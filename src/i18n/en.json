@@ -101,7 +101,14 @@
     "nextSet": "Next set",
     "setsScore": "Sets: {{home}} - {{away}}",
     "noTimeoutsLeft": "No more timeouts available.",
-    "timeoutFor": "Timeout — {{name}}"
+    "timeoutFor": "Timeout — {{name}}",
+    "attribution": {
+      "who": "Who scored?",
+      "skip": "Skip",
+      "ace": "Ace",
+      "attack": "Attack",
+      "block": "Block"
+    }
   },
   "team": {
     "new": "New team",

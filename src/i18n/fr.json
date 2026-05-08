@@ -101,7 +101,14 @@
     "nextSet": "Set suivant",
     "setsScore": "Score des sets : {{home}} - {{away}}",
     "noTimeoutsLeft": "Plus de temps morts disponibles.",
-    "timeoutFor": "Temps mort — {{name}}"
+    "timeoutFor": "Temps mort — {{name}}",
+    "attribution": {
+      "who": "Qui a marqué ?",
+      "skip": "Passer",
+      "ace": "Ace",
+      "attack": "Attaque",
+      "block": "Block"
+    }
   },
   "team": {
     "new": "Nouvelle équipe",

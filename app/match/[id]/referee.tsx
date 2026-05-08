@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,6 +8,7 @@ import * as Haptics from 'expo-haptics';
 
 import { getMatchById, createSet, getSetsForMatch, updateSet, updateMatchStatus } from '../../../src/services/matchService';
 import { addEvent, undoLastEvent } from '../../../src/services/eventService';
+import { getPlayersByTeam } from '../../../src/services/playerService';
 import { useScoringStore } from '../../../src/stores/scoringStore';
 import { useSettingsStore } from '../../../src/stores/settingsStore';
 import { getTeamById } from '../../../src/services/teamService';
@@ -18,7 +19,16 @@ import { UndoButton } from '../../../src/components/scoring/UndoButton';
 import { TacticalBoard } from '../../../src/components/tactical/TacticalBoard';
 import type { Match } from '../../../src/models/match';
 import type { Team } from '../../../src/models/team';
+import type { Player } from '../../../src/models/player';
+import { getPlayerShortName } from '../../../src/features/players/player-helpers';
 import { palette } from '../../../src/theme/tokens';
+
+type PointAction = 'serve_ace' | 'attack_kill' | 'block_kill';
+interface AttributionState {
+  team: 'home' | 'away';
+  playerId: string | null;
+  action: PointAction | null;
+}
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -42,10 +52,14 @@ export default function RefereeScreen() {
 
   const [homeTeam, setHomeTeam] = useState<Team | null>(null);
   const [awayTeam, setAwayTeam] = useState<Team | null>(null);
+  const [homePlayers, setHomePlayers] = useState<Player[]>([]);
+  const [awayPlayers, setAwayPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
   const [showTactical, setShowTactical] = useState(false);
+  const [attribution, setAttribution] = useState<AttributionState | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const attributionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Load match
   useEffect(() => {
@@ -54,9 +68,16 @@ export default function RefereeScreen() {
       const m = await getMatchById(id);
       if (!m) return;
 
-      const [home, away] = await Promise.all([getTeamById(m.teamHomeId), getTeamById(m.teamAwayId)]);
+      const [home, away, homePlrs, awayPlrs] = await Promise.all([
+        getTeamById(m.teamHomeId),
+        getTeamById(m.teamAwayId),
+        getPlayersByTeam(m.teamHomeId),
+        getPlayersByTeam(m.teamAwayId),
+      ]);
       setHomeTeam(home);
       setAwayTeam(away);
+      setHomePlayers(homePlrs);
+      setAwayPlayers(awayPlrs);
 
       if (m.status === 'created') {
         await updateMatchStatus(id, 'live');
@@ -87,6 +108,38 @@ export default function RefereeScreen() {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [isTimerRunning, isPaused]);
 
+  // Auto-dismiss attribution strip after 8 s of inactivity
+  useEffect(() => {
+    if (attribution) {
+      if (attributionTimerRef.current) clearTimeout(attributionTimerRef.current);
+      attributionTimerRef.current = setTimeout(() => setAttribution(null), 8000);
+    }
+    return () => { if (attributionTimerRef.current) clearTimeout(attributionTimerRef.current); };
+  }, [attribution]);
+
+  const handleAttributionSelect = useCallback(
+    async (update: Partial<Pick<AttributionState, 'playerId' | 'action'>>) => {
+      if (!match || !currentSet || !attribution) return;
+      const next = { ...attribution, ...update };
+      if (next.playerId && next.action) {
+        // Both selected → record stat and dismiss
+        await addEvent({
+          matchId: match.id,
+          setId: currentSet.id,
+          eventType: next.action,
+          playerId: next.playerId,
+          teamId: next.team === 'home' ? match.teamHomeId : match.teamAwayId,
+          details: {},
+        });
+        setAttribution(null);
+        if (attributionTimerRef.current) clearTimeout(attributionTimerRef.current);
+      } else {
+        setAttribution(next);
+      }
+    },
+    [match, currentSet, attribution],
+  );
+
   const handlePoint = useCallback(async (team: 'home' | 'away') => {
     if (!match || !currentSet || isPaused) return;
 
@@ -101,6 +154,12 @@ export default function RefereeScreen() {
     });
 
     addPointEvent(team, newEvent);
+
+    // Show attribution strip for the scoring team
+    const scoringPlayers = team === 'home' ? homePlayers : awayPlayers;
+    if (scoringPlayers.length > 0) {
+      setAttribution({ team, playerId: null, action: null });
+    }
 
     const newScoreHome = team === 'home' ? scoreHome + 1 : scoreHome;
     const newScoreAway = team === 'away' ? scoreAway + 1 : scoreAway;
@@ -154,7 +213,7 @@ export default function RefereeScreen() {
         );
       }
     }
-  }, [match, currentSet, isPaused, scoreHome, scoreAway, setsHome, setsAway, homeTeam, awayTeam]);
+  }, [match, currentSet, isPaused, scoreHome, scoreAway, setsHome, setsAway, homeTeam, awayTeam, homePlayers, awayPlayers]);
 
   const handleUndo = useCallback(async () => {
     if (!match || !currentSet) return;
@@ -274,6 +333,20 @@ export default function RefereeScreen() {
         />
       </View>
 
+      {/* Attribution strip — appears after each point */}
+      {attribution && (
+        <AttributionStrip
+          players={attribution.team === 'home' ? homePlayers : awayPlayers}
+          teamColor={attribution.team === 'home' ? (homeTeam?.color ?? palette.teamHome) : palette.teamAway}
+          selectedPlayerId={attribution.playerId}
+          selectedAction={attribution.action}
+          onSelectPlayer={(id) => handleAttributionSelect({ playerId: id })}
+          onSelectAction={(action) => handleAttributionSelect({ action })}
+          onDismiss={() => setAttribution(null)}
+          t={t}
+        />
+      )}
+
       {/* Bottom actions */}
       <View style={styles.actionsRow}>
         <UndoButton
@@ -337,6 +410,131 @@ export default function RefereeScreen() {
     </SafeAreaView>
   );
 }
+
+function AttributionStrip({
+  players,
+  teamColor,
+  selectedPlayerId,
+  selectedAction,
+  onSelectPlayer,
+  onSelectAction,
+  onDismiss,
+  t,
+}: {
+  players: Player[];
+  teamColor: string;
+  selectedPlayerId: string | null;
+  selectedAction: PointAction | null;
+  onSelectPlayer: (id: string) => void;
+  onSelectAction: (action: PointAction) => void;
+  onDismiss: () => void;
+  t: ReturnType<typeof useTranslation>['t'];
+}) {
+  const ACTIONS: { key: PointAction; label: string }[] = [
+    { key: 'serve_ace', label: t('referee.attribution.ace') },
+    { key: 'attack_kill', label: t('referee.attribution.attack') },
+    { key: 'block_kill', label: t('referee.attribution.block') },
+  ];
+
+  return (
+    <View style={attrStyles.strip}>
+      <View style={attrStyles.header}>
+        <Text style={attrStyles.title}>{t('referee.attribution.who')}</Text>
+        <Pressable onPress={onDismiss} accessibilityRole="button" style={attrStyles.skipBtn}>
+          <Text style={attrStyles.skipText}>{t('referee.attribution.skip')}</Text>
+        </Pressable>
+      </View>
+
+      {/* Player chips */}
+      <FlatList
+        horizontal
+        data={players}
+        keyExtractor={(p) => p.id}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={attrStyles.playerList}
+        renderItem={({ item }) => {
+          const isSelected = item.id === selectedPlayerId;
+          return (
+            <Pressable
+              style={[attrStyles.playerChip, isSelected && { borderColor: teamColor, backgroundColor: teamColor + '20' }]}
+              onPress={() => onSelectPlayer(item.id)}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: isSelected }}
+            >
+              <Text style={[attrStyles.playerNum, isSelected && { color: teamColor }]}>#{item.number}</Text>
+              <Text style={attrStyles.playerName} numberOfLines={1}>{getPlayerShortName(item)}</Text>
+            </Pressable>
+          );
+        }}
+      />
+
+      {/* Action type buttons */}
+      <View style={attrStyles.actions}>
+        {ACTIONS.map(({ key, label }) => {
+          const isSelected = key === selectedAction;
+          return (
+            <Pressable
+              key={key}
+              style={[attrStyles.actionBtn, isSelected && { borderColor: teamColor, backgroundColor: teamColor + '20' }]}
+              onPress={() => onSelectAction(key)}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: isSelected }}
+            >
+              <Text style={[attrStyles.actionText, isSelected && { color: teamColor }]}>{label}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+const attrStyles = StyleSheet.create({
+  strip: {
+    marginHorizontal: 16,
+    marginBottom: 8,
+    backgroundColor: palette.backgroundSurface,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: palette.backgroundElevated,
+    paddingVertical: 10,
+    gap: 8,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+  },
+  title: { fontSize: 12, fontFamily: 'Inter_600SemiBold', color: palette.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 },
+  skipBtn: { paddingHorizontal: 8, paddingVertical: 2 },
+  skipText: { fontSize: 12, fontFamily: 'Inter_400Regular', color: palette.textMuted },
+  playerList: { paddingHorizontal: 12, gap: 6 },
+  playerChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    backgroundColor: palette.backgroundElevated,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  playerNum: { fontSize: 12, fontFamily: 'Inter_700Bold', color: palette.textMuted },
+  playerName: { fontSize: 12, fontFamily: 'Inter_500Medium', color: palette.textSecondary, maxWidth: 72 },
+  actions: { flexDirection: 'row', paddingHorizontal: 12, gap: 8 },
+  actionBtn: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: palette.backgroundElevated,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  actionText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary },
+});
 
 function TimeoutIndicator({
   label,
