@@ -171,10 +171,6 @@ export interface PlayerCareerStats {
 
 // ─── Helper: derive computed stats from raw PlayerStats ───────────────────────
 
-const FAULT_TYPES = new Set([
-  'serve_fault', 'attack_fault', 'block_fault', 'defense_fault', 'reception_d',
-]);
-
 function eff(num: number, den: number): number {
   return den === 0 ? 0 : Math.round((num / den) * 100);
 }
