@@ -586,14 +586,18 @@ function AttributionStrip({
           contentContainerStyle={attrStyles.playerList}
           renderItem={({ item }) => {
             const isSelected = item.id === selectedPlayerId;
+            const isLibero = item.position === 'libero';
+            const activeChipColor = isLibero ? palette.libero : chipColor;
             return (
               <Pressable
-                style={[attrStyles.playerChip, isSelected && { borderColor: chipColor, backgroundColor: chipColor + '20' }]}
+                style={[attrStyles.playerChip, isSelected && { borderColor: activeChipColor, backgroundColor: activeChipColor + '20' }]}
                 onPress={() => onSelectPlayer(item.id)}
                 accessibilityRole="radio"
                 accessibilityState={{ selected: isSelected }}
               >
-                <Text style={[attrStyles.playerNum, isSelected && { color: chipColor }]}>#{item.number}</Text>
+                <Text style={[attrStyles.playerNum, isSelected && { color: activeChipColor }]}>
+                  {isLibero ? '⚡' : ''}#{item.number}
+                </Text>
                 <Text style={attrStyles.playerName} numberOfLines={1}>{getPlayerShortName(item)}</Text>
               </Pressable>
             );

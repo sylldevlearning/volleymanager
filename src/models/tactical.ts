@@ -10,6 +10,7 @@ export interface PlayerPosition {
   firstName?: string | null;
   lastName?: string | null;
   isHome: boolean;
+  isLibero?: boolean;
 }
 
 export type ArrowType = 'solid' | 'dashed' | 'curved';

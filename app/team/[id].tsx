@@ -118,13 +118,17 @@ function PlayerRow({ player, onDelete }: { player: Player; onDelete: () => void 
   const name = getPlayerDisplayName(player);
   return (
     <View style={styles.playerRow}>
-      <View style={styles.numberBadge}>
-        <Text style={styles.numberText}>{player.number}</Text>
+      <View style={[styles.numberBadge, player.position === 'libero' && styles.liberoBadge]}>
+        <Text style={[styles.numberText, player.position === 'libero' && styles.liberoText]}>
+          {player.position === 'libero' ? '⚡' : ''}{player.number}
+        </Text>
       </View>
       <View style={styles.playerInfo}>
         <Text style={styles.playerName}>{name}</Text>
         {player.position && (
-          <Text style={styles.playerPosition}>{t(`player.positions.${player.position}`)}</Text>
+          <Text style={[styles.playerPosition, player.position === 'libero' && { color: palette.libero }]}>
+            {t(`player.positions.${player.position}`)}
+          </Text>
         )}
       </View>
       <Pressable
@@ -373,6 +377,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   numberText: { fontSize: 15, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
+  liberoBadge: { backgroundColor: palette.libero + '25', borderWidth: 1.5, borderColor: palette.libero },
+  liberoText: { color: palette.libero, fontSize: 13 },
   playerInfo: { flex: 1 },
   playerName: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },
   playerPosition: {

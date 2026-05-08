@@ -189,21 +189,23 @@ export default function CoachScreen() {
         contentContainerStyle={styles.playerList}
         showsHorizontalScrollIndicator={false}
         renderItem={({ item }) => {
-          const ps = getPlayerStats(item.id);
           const isSelected = selectedPlayer?.id === item.id;
+          const isLibero = item.position === 'libero';
+          const chipBorder = isLibero ? palette.libero : (isSelected ? palette.accentPrimary : 'transparent');
+          const chipBg = isLibero ? palette.libero + '20' : (isSelected ? palette.accentPrimaryMuted : palette.backgroundSurface);
           return (
             <Pressable
-              style={[styles.playerChip, isSelected && styles.playerChipActive]}
+              style={[styles.playerChip, { borderColor: chipBorder, backgroundColor: chipBg }]}
               onPress={() => setSelectedPlayer(item)}
               accessibilityRole="radio"
               accessibilityState={{ selected: isSelected }}
-              accessibilityLabel={`${item.firstName} ${item.lastName}`}
+              accessibilityLabel={`${item.firstName ?? ''} ${item.lastName ?? ''}`}
             >
-              <Text style={[styles.playerChipNum, isSelected && styles.playerChipNumActive]}>
-                #{item.number}
+              <Text style={[styles.playerChipNum, { color: isLibero ? palette.libero : isSelected ? palette.accentPrimary : palette.textMuted }]}>
+                {isLibero ? '⚡' : ''}#{item.number}
               </Text>
               <Text style={[styles.playerChipName, isSelected && styles.playerChipNameActive]} numberOfLines={1}>
-                {item.lastName}
+                {item.lastName ?? item.firstName ?? `#${item.number}`}
               </Text>
             </Pressable>
           );

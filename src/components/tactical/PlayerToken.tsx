@@ -11,6 +11,7 @@ import * as Haptics from 'expo-haptics';
 import type { PlayerPosition } from '../../models/tactical';
 import { clamp } from '../../features/tactical/positionUtils';
 import { getPlayerShortName } from '../../features/players/player-helpers';
+import { palette } from '../../theme/tokens';
 
 const TOKEN_RADIUS = 20;
 const WRAPPER_WIDTH = 64;
@@ -95,10 +96,12 @@ export function PlayerToken({
     ],
   }));
 
-  const bgColor = player.isHome ? '#1D4ED8' : '#E63946';
+  const bgColor = player.isLibero ? palette.libero : (player.isHome ? '#1D4ED8' : '#E63946');
   const diameter = TOKEN_RADIUS * 2;
   const shortName = getPlayerShortName(player);
-  const insideLabel = showName ? player.label.slice(0, 3) : String(player.number);
+  const insideLabel = player.isLibero
+    ? `⚡${player.number}`
+    : (showName ? player.label.slice(0, 3) : String(player.number));
 
   return (
     <GestureDetector gesture={gesture}>
