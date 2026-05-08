@@ -96,14 +96,14 @@ export function IndoorCourt({
                 r={r}
                 fill={player
                   ? player.isLibero
-                    ? palette.warning + '40'
+                    ? palette.libero + '40'
                     : palette.accentSecondary + '30'
                   : palette.backgroundHover}
                 stroke={isServing
                   ? palette.accentPrimary
                   : player
                     ? player.isLibero
-                      ? palette.warning
+                      ? palette.libero
                       : palette.accentSecondary
                     : palette.backgroundHover}
                 strokeWidth={isServing ? 2.5 : 1.5}

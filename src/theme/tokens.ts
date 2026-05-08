@@ -20,6 +20,7 @@ export const palette = {
   warning: '#F59E0B',
   error: '#F85149',
   info: '#58A6FF',
+  libero: '#FBBF24',
 
   // Scoring teams
   teamHome: '#1D4ED8',

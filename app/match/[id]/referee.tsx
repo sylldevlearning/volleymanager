@@ -9,6 +9,7 @@ import * as Haptics from 'expo-haptics';
 import { getMatchById, createSet, getSetsForMatch, updateSet, updateMatchStatus } from '../../../src/services/matchService';
 import { addEvent, undoLastEvent } from '../../../src/services/eventService';
 import { getPlayersByTeam } from '../../../src/services/playerService';
+import { performSubstitution } from '../../../src/services/substitutionService';
 import { useScoringStore } from '../../../src/stores/scoringStore';
 import { useSettingsStore } from '../../../src/stores/settingsStore';
 import { getTeamById } from '../../../src/services/teamService';
@@ -16,6 +17,7 @@ import { isSetWon, isMatchWon, isLastSet, getTotalSets, canRequestTimeout } from
 import { ScoreButton } from '../../../src/components/scoring/ScoreButton';
 import { SetTracker } from '../../../src/components/scoring/SetTracker';
 import { UndoButton } from '../../../src/components/scoring/UndoButton';
+import { SubstitutionSheet } from '../../../src/components/scoring/SubstitutionSheet';
 import { TacticalBoard } from '../../../src/components/tactical/TacticalBoard';
 import type { Match } from '../../../src/models/match';
 import type { Team } from '../../../src/models/team';
@@ -51,8 +53,11 @@ export default function RefereeScreen() {
     match, currentSet, sets, scoreHome, scoreAway, setsHome, setsAway,
     setScores, servingTeam, timeoutsHome, timeoutsAway, matchTimer,
     isTimerRunning, showChangeEnds,
+    onCourtHome, onCourtAway, benchHome, benchAway, liberoHome, liberoAway,
+    pairsHome, pairsAway, substitutionsHome, substitutionsAway,
     initMatch, addPointEvent, undoPoint, endCurrentSet, startNewSet,
-    requestTimeout, tickTimer, setTimerRunning, dismissChangeEnds, reset,
+    requestTimeout, initLineup, applySubstitution,
+    tickTimer, setTimerRunning, dismissChangeEnds, reset,
   } = useScoringStore();
 
   const [homeTeam, setHomeTeam] = useState<Team | null>(null);
@@ -62,6 +67,8 @@ export default function RefereeScreen() {
   const [loading, setLoading] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
   const [showTactical, setShowTactical] = useState(false);
+  const [showSubSheet, setShowSubSheet] = useState(false);
+  const [subSide, setSubSide] = useState<'home' | 'away'>('home');
   const [attribution, setAttribution] = useState<AttributionState | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const attributionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -83,6 +90,27 @@ export default function RefereeScreen() {
       setAwayTeam(away);
       setHomePlayers(homePlrs);
       setAwayPlayers(awayPlrs);
+
+      // Build initial lineups (first 6 non-libero starters on court, libero on bench)
+      function buildLineup(players: Player[]) {
+        const liberoPlayer = players.find((p) => p.position === 'libero');
+        const starters = players.filter((p) => p.position !== 'libero').slice(0, 6);
+        const benchPlayers = [
+          ...players.filter((p) => p.position !== 'libero').slice(6),
+          ...(liberoPlayer ? [liberoPlayer] : []),
+        ];
+        const courtMap: Record<number, string> = {};
+        starters.forEach((p, i) => { courtMap[i + 1] = p.id; });
+        const liberoState = liberoPlayer
+          ? { liberoId: liberoPlayer.id, isOnCourt: false, replacedPlayerId: null, replacedPosition: null }
+          : null;
+        return { courtMap, bench: benchPlayers, liberoState };
+      }
+
+      const homeLineup = buildLineup(homePlrs);
+      const awayLineup = buildLineup(awayPlrs);
+      initLineup('home', homeLineup.courtMap, homeLineup.bench, homeLineup.liberoState);
+      initLineup('away', awayLineup.courtMap, awayLineup.bench, awayLineup.liberoState);
 
       if (m.status === 'created') {
         await updateMatchStatus(id, 'live');
@@ -239,6 +267,29 @@ export default function RefereeScreen() {
     }
   }, [match, currentSet, hapticsEnabled]);
 
+  const handleSubConfirm = useCallback(async (opts: {
+    playerOutId: string;
+    playerInId: string;
+    position: number;
+    isLibero: boolean;
+  }) => {
+    if (!match || !currentSet) return;
+    const side = subSide;
+    const teamId = side === 'home' ? match.teamHomeId : match.teamAwayId;
+    const { pair } = await performSubstitution({
+      matchId: match.id,
+      setId: currentSet.id,
+      teamId,
+      teamSide: side,
+      playerOutId: opts.playerOutId,
+      playerInId: opts.playerInId,
+      position: opts.position,
+      isLibero: opts.isLibero,
+    });
+    applySubstitution(side, opts.playerOutId, opts.playerInId, opts.position, opts.isLibero, pair);
+    if (hapticsEnabled) Haptics.selectionAsync();
+  }, [match, currentSet, subSide, applySubstitution, hapticsEnabled]);
+
   const handleTimeout = (team: 'home' | 'away') => {
     if (!match) return;
     const timeoutsUsed = team === 'home' ? timeoutsHome : timeoutsAway;
@@ -348,6 +399,28 @@ export default function RefereeScreen() {
         />
       </View>
 
+      {/* Substitution row */}
+      {match.format === 'indoor_6v6' && (
+        <View style={styles.subRow}>
+          <SubIndicator
+            label={homeTeam.shortName ?? homeTeam.name.slice(0, 3).toUpperCase()}
+            used={substitutionsHome}
+            max={match.config.unlimitedSubstitutions ? null : (match.config.substitutionsPerSet ?? 6)}
+            color={homeTeam.color || palette.teamHome}
+            onPress={() => { setSubSide('home'); setShowSubSheet(true); }}
+          />
+          <Text style={styles.subSeparator}>{t('match.substitution')}</Text>
+          <SubIndicator
+            label={awayTeam.shortName ?? awayTeam.name.slice(0, 3).toUpperCase()}
+            used={substitutionsAway}
+            max={match.config.unlimitedSubstitutions ? null : (match.config.substitutionsPerSet ?? 6)}
+            color={palette.teamAway}
+            onPress={() => { setSubSide('away'); setShowSubSheet(true); }}
+            reversed
+          />
+        </View>
+      )}
+
       {/* Attribution strip — appears after each point */}
       {attribution && (
         <AttributionStrip
@@ -398,6 +471,25 @@ export default function RefereeScreen() {
           <Text style={[styles.actionText, { color: palette.error }]}>{t('match.endMatch')}</Text>
         </Pressable>
       </View>
+
+      {/* Substitution sheet */}
+      <SubstitutionSheet
+        visible={showSubSheet}
+        onClose={() => setShowSubSheet(false)}
+        side={subSide}
+        teamName={subSide === 'home' ? (homeTeam?.name ?? '') : (awayTeam?.name ?? '')}
+        teamColor={subSide === 'home' ? (homeTeam?.color ?? palette.teamHome) : palette.teamAway}
+        allPlayers={subSide === 'home' ? homePlayers : awayPlayers}
+        onCourt={subSide === 'home' ? onCourtHome : onCourtAway}
+        bench={subSide === 'home' ? benchHome : benchAway}
+        libero={subSide === 'home' ? liberoHome : liberoAway}
+        pairs={subSide === 'home' ? pairsHome : pairsAway}
+        subsUsed={subSide === 'home' ? substitutionsHome : substitutionsAway}
+        config={match.config}
+        format={match.format}
+        mode={match.mode}
+        onConfirm={handleSubConfirm}
+      />
 
       {/* Tactical board */}
       <TacticalBoard
@@ -604,6 +696,38 @@ const attrStyles = StyleSheet.create({
   actionText: { fontSize: 12, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary },
 });
 
+function SubIndicator({
+  label, used, max, color, onPress, reversed,
+}: {
+  label: string;
+  used: number;
+  max: number | null;
+  color: string;
+  onPress: () => void;
+  reversed?: boolean;
+}) {
+  const dots = max !== null ? Array.from({ length: max }, (_, i) => i < used) : [];
+  const full = max !== null && used >= max;
+  return (
+    <Pressable
+      style={[styles.subGroup, reversed && styles.subGroupReversed, full && styles.subGroupFull]}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`Remplacement ${label}`}
+    >
+      <Text style={[styles.subLabel, { color }]}>{label}</Text>
+      {dots.length > 0 && (
+        <View style={styles.subDots}>
+          {dots.map((used, i) => (
+            <View key={i} style={[styles.subDot, { backgroundColor: used ? color : color + '30' }]} />
+          ))}
+        </View>
+      )}
+      {max === null && <Text style={styles.subInf}>∞</Text>}
+    </Pressable>
+  );
+}
+
 function TimeoutIndicator({
   label,
   used,
@@ -680,6 +804,21 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   timer: { fontSize: 20, fontFamily: 'Inter_700Bold', color: palette.textSecondary },
+  subRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingBottom: 6,
+  },
+  subSeparator: { fontSize: 10, fontFamily: 'Inter_500Medium', color: palette.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 },
+  subGroup: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  subGroupReversed: { flexDirection: 'row-reverse' },
+  subGroupFull: { opacity: 0.4 },
+  subLabel: { fontSize: 11, fontFamily: 'Inter_700Bold' },
+  subDots: { flexDirection: 'row', gap: 3 },
+  subDot: { width: 7, height: 7, borderRadius: 3.5 },
+  subInf: { fontSize: 14, color: palette.textMuted, fontFamily: 'Inter_700Bold' },
   timeoutGroup: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   timeoutGroupReversed: { flexDirection: 'row-reverse' },
   timeoutLabel: { fontSize: 13, fontFamily: 'Inter_700Bold' },
