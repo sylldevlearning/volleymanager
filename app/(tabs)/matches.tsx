@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { FlatList, ScrollView, StyleSheet, Text, View, Pressable, RefreshControl } from 'react-native';
-import { useRouter, useFocusEffect } from 'expo-router';
+import { useRouter, useFocusEffect, Router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Plus, Calendar } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -134,6 +134,7 @@ export default function MatchesScreen() {
             match={item}
             homeTeam={teams[item.teamHomeId]}
             awayTeam={teams[item.teamAwayId]}
+            router={router}
             onPress={() => {
               if (item.status === 'finished') {
                 router.push(`/match/${item.id}/summary`);
@@ -161,16 +162,19 @@ function MatchCard({
   match,
   homeTeam,
   awayTeam,
+  router,
   onPress,
 }: {
   match: Match;
   homeTeam?: Team;
   awayTeam?: Team;
+  router: Router;
   onPress: () => void;
 }) {
   const { t } = useTranslation();
   const date = new Date(match.date).toLocaleDateString();
   const isLive = match.status === 'live';
+  const isFinished = match.status === 'finished';
 
   return (
     <Pressable
@@ -206,6 +210,32 @@ function MatchCard({
           )}
         </View>
       </View>
+
+      {/* Secondary action buttons */}
+      {(isLive || isFinished) && (
+        <View style={styles.cardActions}>
+          {isLive && (
+            <Pressable
+              style={styles.actionBtn}
+              onPress={() => router.push(`/match/${match.id}/coach` as never)}
+              accessibilityRole="button"
+              accessibilityLabel={t('match.coach')}
+            >
+              <Text style={styles.actionBtnText}>{t('match.coach')}</Text>
+            </Pressable>
+          )}
+          {isFinished && (
+            <Pressable
+              style={styles.actionBtn}
+              onPress={() => router.push(`/match/${match.id}/stats` as never)}
+              accessibilityRole="button"
+              accessibilityLabel={t('match.stats')}
+            >
+              <Text style={styles.actionBtnText}>{t('match.stats')}</Text>
+            </Pressable>
+          )}
+        </View>
+      )}
     </Pressable>
   );
 }
@@ -298,6 +328,27 @@ const styles = StyleSheet.create({
   },
   teamNameAway: { textAlign: 'right' },
   vs: { fontSize: 12, fontFamily: 'Inter_500Medium', color: palette.textMuted },
+  cardActions: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 12,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: palette.backgroundElevated,
+  },
+  actionBtn: {
+    flex: 1,
+    paddingVertical: 7,
+    borderRadius: 8,
+    backgroundColor: palette.backgroundElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  actionBtnText: {
+    fontSize: 12,
+    fontFamily: 'Inter_600SemiBold',
+    color: palette.textSecondary,
+  },
   fab: {
     position: 'absolute',
     bottom: 24,

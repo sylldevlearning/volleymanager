@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, BarChart2 } from 'lucide-react-native';
 
-import { getMatchById, getSetsForMatch } from '../../../src/services/matchService';
+import { getMatchById, getSetsForMatch, createSet, updateMatchStatus } from '../../../src/services/matchService';
 import { getPlayersByTeam } from '../../../src/services/playerService';
 import { getTeamById } from '../../../src/services/teamService';
 import { addEvent, getEventsForMatch } from '../../../src/services/eventService';
@@ -116,10 +116,16 @@ export default function CoachScreen() {
       ]);
       setEventsBuffer(existingEvents);
       setStats(computePlayerStats(existingEvents));
-      // Auto-select the last unfinished (active) set
-      const activeSet =
-        sets.find((set) => !set.finishedAt) ?? sets[sets.length - 1];
-      if (activeSet) setCurrentSetId(activeSet.id);
+
+      if (sets.length === 0) {
+        // Match not yet started via referee mode — auto-create set 1 so coach can record stats
+        const newSet = await createSet(m.id, 1);
+        await updateMatchStatus(m.id, 'live');
+        setCurrentSetId(newSet.id);
+      } else {
+        const activeSet = sets.find((set) => !set.finishedAt) ?? sets[sets.length - 1];
+        if (activeSet) setCurrentSetId(activeSet.id);
+      }
     }
     load();
   }, [id]);
