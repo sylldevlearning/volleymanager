@@ -3,7 +3,7 @@ import { Alert, FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Menu, Pause, Play, Flag } from 'lucide-react-native';
+import { Pause, Play, Flag } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 
 import { getMatchById, createSet, getSetsForMatch, updateSet, updateMatchStatus } from '../../../src/services/matchService';
@@ -37,12 +37,6 @@ interface AttributionState {
   action: PointAction | null;
 }
 
-function formatTime(seconds: number): string {
-  const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-  const s = (seconds % 60).toString().padStart(2, '0');
-  return `${m}:${s}`;
-}
-
 export default function RefereeScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
@@ -50,14 +44,13 @@ export default function RefereeScreen() {
   const hapticsEnabled = useSettingsStore((s) => s.hapticsEnabled);
 
   const {
-    match, currentSet, sets, scoreHome, scoreAway, setsHome, setsAway,
-    setScores, servingTeam, timeoutsHome, timeoutsAway, matchTimer,
-    isTimerRunning, showChangeEnds,
+    match, currentSet, scoreHome, scoreAway, setsHome, setsAway,
+    setScores, servingTeam, timeoutsHome, timeoutsAway, showChangeEnds,
     onCourtHome, onCourtAway, benchHome, benchAway, liberoHome, liberoAway,
     pairsHome, pairsAway, substitutionsHome, substitutionsAway,
     initMatch, addPointEvent, undoPoint, endCurrentSet, startNewSet,
     requestTimeout, initLineup, applySubstitution,
-    tickTimer, setTimerRunning, dismissChangeEnds, reset,
+    dismissChangeEnds, reset,
   } = useScoringStore();
 
   const [homeTeam, setHomeTeam] = useState<Team | null>(null);
@@ -70,7 +63,6 @@ export default function RefereeScreen() {
   const [showSubSheet, setShowSubSheet] = useState(false);
   const [subSide, setSubSide] = useState<'home' | 'away'>('home');
   const [attribution, setAttribution] = useState<AttributionState | null>(null);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const attributionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Load match
@@ -130,16 +122,6 @@ export default function RefereeScreen() {
     load();
     return () => reset();
   }, [id]);
-
-  // Timer
-  useEffect(() => {
-    if (isTimerRunning && !isPaused) {
-      timerRef.current = setInterval(tickTimer, 1000);
-    } else {
-      if (timerRef.current) clearInterval(timerRef.current);
-    }
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [isTimerRunning, isPaused]);
 
   // Auto-dismiss attribution strip after 8 s of inactivity
   useEffect(() => {
@@ -232,7 +214,6 @@ export default function RefereeScreen() {
         // Match over
         const matchWinnerId = isMatchWon(newSetsHome, match.config) ? match.teamHomeId : match.teamAwayId;
         await updateMatchStatus(match.id, 'finished', matchWinnerId);
-        setTimerRunning(false);
         if (hapticsEnabled) {
           setTimeout(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success), 300);
         }
@@ -379,7 +360,7 @@ export default function RefereeScreen() {
         <View style={[styles.serviceDot, servingTeam === 'away' && styles.serviceDotActive]} />
       </View>
 
-      {/* Timeouts + Timer */}
+      {/* Timeouts */}
       <View style={styles.infoRow}>
         <TimeoutIndicator
           label={homeTeam.shortName ?? homeTeam.name.slice(0, 3).toUpperCase()}
@@ -388,7 +369,6 @@ export default function RefereeScreen() {
           onPress={() => handleTimeout('home')}
           color={homeTeam.color || palette.teamHome}
         />
-        <Text style={styles.timer}>{formatTime(matchTimer)}</Text>
         <TimeoutIndicator
           label={awayTeam.shortName ?? awayTeam.name.slice(0, 3).toUpperCase()}
           used={timeoutsAway}
@@ -807,7 +787,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginBottom: 4,
   },
-  timer: { fontSize: 20, fontFamily: 'Inter_700Bold', color: palette.textSecondary },
   subRow: {
     flexDirection: 'row',
     alignItems: 'center',

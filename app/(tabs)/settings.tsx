@@ -1,7 +1,8 @@
 import { StyleSheet, Text, View, Switch, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Moon, Sun, Zap, Globe, Info } from 'lucide-react-native';
+import { Zap, Globe, Info, ChevronRight } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { useSettingsStore } from '../../src/stores/settingsStore';
 import { palette } from '../../src/theme/tokens';
 import i18n from '../../src/i18n';
@@ -9,9 +10,8 @@ import { APP_VERSION } from '../../src/utils/constants';
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
-  const { theme, toggleTheme, hapticsEnabled, setHapticsEnabled, language, setLanguage } =
-    useSettingsStore();
-  const isDark = theme === 'dark';
+  const router = useRouter();
+  const { hapticsEnabled, setHapticsEnabled, language, setLanguage } = useSettingsStore();
 
   const changeLanguage = (lang: 'fr' | 'en') => {
     setLanguage(lang);
@@ -20,24 +20,6 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('settings.theme')}</Text>
-        <View style={styles.card}>
-          <SettingRow
-            icon={isDark ? <Moon size={20} color={palette.info} /> : <Sun size={20} color={palette.warning} />}
-            label={isDark ? t('settings.darkMode') : t('settings.lightMode')}
-            right={
-              <Switch
-                value={isDark}
-                onValueChange={toggleTheme}
-                trackColor={{ false: palette.backgroundHover, true: palette.accentSecondary }}
-                thumbColor="#fff"
-              />
-            }
-          />
-        </View>
-      </View>
-
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{t('settings.language')}</Text>
         <View style={styles.card}>
@@ -75,6 +57,16 @@ export default function SettingsScreen() {
 
       <View style={styles.section}>
         <View style={styles.card}>
+          <Pressable
+            style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+            onPress={() => router.push('/about' as never)}
+            accessibilityRole="button"
+          >
+            <Info size={20} color={palette.textMuted} />
+            <Text style={styles.rowLabel}>{t('about.title')}</Text>
+            <ChevronRight size={16} color={palette.textMuted} />
+          </Pressable>
+          <View style={styles.divider} />
           <SettingRow
             icon={<Info size={20} color={palette.textMuted} />}
             label={`${t('settings.version')} ${APP_VERSION}`}

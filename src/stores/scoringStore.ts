@@ -27,8 +27,6 @@ interface ScoringState {
   /** Count of normal (non-libero) subs used this set */
   substitutionsHome: number;
   substitutionsAway: number;
-  matchTimer: number;
-  isTimerRunning: boolean;
   lastScoringTeam: 'home' | 'away' | null;
   showChangeEnds: boolean;
 
@@ -74,8 +72,6 @@ interface ScoringState {
   ) => void;
   applyLiberoExit: (side: 'home' | 'away') => void;
   rotateTeam: (team: 'home' | 'away') => void;
-  tickTimer: () => void;
-  setTimerRunning: (running: boolean) => void;
   dismissChangeEnds: () => void;
   reset: () => void;
 }
@@ -125,8 +121,6 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
   timeoutsAway: 0,
   substitutionsHome: 0,
   substitutionsAway: 0,
-  matchTimer: 0,
-  isTimerRunning: false,
   lastScoringTeam: null,
   showChangeEnds: false,
   onCourtHome: EMPTY_COURT,
@@ -156,8 +150,6 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
       timeoutsAway: 0,
       substitutionsHome: 0,
       substitutionsAway: 0,
-      matchTimer: 0,
-      isTimerRunning: true,
       scoreHome: 0,
       scoreAway: 0,
       setsHome: 0,
@@ -353,8 +345,6 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
     }
   },
 
-  tickTimer: () => set((s) => ({ matchTimer: s.matchTimer + 1 })),
-  setTimerRunning: (running) => set({ isTimerRunning: running }),
   dismissChangeEnds: () => set({ showChangeEnds: false }),
   reset: () => set({
     match: null,
@@ -367,8 +357,6 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
     setsAway: 0,
     setScores: [],
     servingTeam: 'home',
-    isTimerRunning: false,
-    matchTimer: 0,
     onCourtHome: EMPTY_COURT,
     onCourtAway: EMPTY_COURT,
     benchHome: [],
