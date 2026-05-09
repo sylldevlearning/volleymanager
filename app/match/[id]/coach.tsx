@@ -16,6 +16,7 @@ import type { Team } from '../../../src/models/team';
 import type { StatEventType, MatchEvent } from '../../../src/models/event';
 import type { PlayerStats } from '../../../src/models/stats';
 import { StatButton } from '../../../src/components/stats/StatButton';
+import { useResponsive } from '../../../src/hooks/useResponsive';
 import { palette } from '../../../src/theme/tokens';
 
 interface StatAction {
@@ -94,6 +95,7 @@ export default function CoachScreen() {
   const [stats, setStats] = useState<PlayerStats[]>([]);
   const [currentSetId, setCurrentSetId] = useState<string>('');
   const [eventsBuffer, setEventsBuffer] = useState<MatchEvent[]>([]);
+  const { isSmall, isTablet } = useResponsive();
 
   useEffect(() => {
     async function load() {
@@ -213,7 +215,7 @@ export default function CoachScreen() {
       />
 
       {/* Stat categories */}
-      <ScrollView contentContainerStyle={styles.statsScroll}>
+      <ScrollView contentContainerStyle={[styles.statsScroll, isTablet && styles.statsScrollTablet]}>
         {STAT_CATEGORIES.map((category) => {
           const playerStats = selectedPlayer ? getPlayerStats(selectedPlayer.id) : null;
           return (
@@ -278,6 +280,7 @@ const styles = StyleSheet.create({
   playerChipName: { fontSize: 13, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
   playerChipNameActive: { color: palette.textPrimary },
   statsScroll: { padding: 16, gap: 16 },
+  statsScrollTablet: { paddingHorizontal: 32 },
   category: {
     backgroundColor: palette.backgroundSurface,
     borderRadius: 14,

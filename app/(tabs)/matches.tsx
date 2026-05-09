@@ -8,6 +8,7 @@ import { getAllMatches } from '../../src/services/matchService';
 import { getAllTeams } from '../../src/services/teamService';
 import type { Match } from '../../src/models/match';
 import type { Team } from '../../src/models/team';
+import { useResponsive } from '../../src/hooks/useResponsive';
 import { palette } from '../../src/theme/tokens';
 
 type StatusFilter = 'all' | 'live' | 'finished';
@@ -20,6 +21,7 @@ export default function MatchesScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [filterStatus, setFilterStatus] = useState<StatusFilter>('all');
   const [filterTeamId, setFilterTeamId] = useState<string | null>(null);
+  const { isTablet } = useResponsive();
 
   const load = useCallback(async () => {
     const [allMatches, allTeams] = await Promise.all([getAllMatches(), getAllTeams()]);
@@ -114,7 +116,10 @@ export default function MatchesScreen() {
       <FlatList
         data={filteredMatches}
         keyExtractor={(item) => item.id}
+        numColumns={isTablet ? 2 : 1}
+        key={isTablet ? 'tablet' : 'phone'}
         contentContainerStyle={styles.list}
+        columnWrapperStyle={isTablet ? styles.columnWrapper : undefined}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -291,6 +296,7 @@ const styles = StyleSheet.create({
   teamDot: { width: 7, height: 7, borderRadius: 3.5 },
 
   list: { padding: 16, gap: 12, paddingBottom: 80 },
+  columnWrapper: { gap: 12 },
   empty: {
     flex: 1,
     alignItems: 'center',
