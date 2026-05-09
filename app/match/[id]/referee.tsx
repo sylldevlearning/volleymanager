@@ -18,6 +18,7 @@ import { ScoreButton } from '../../../src/components/scoring/ScoreButton';
 import { SetTracker } from '../../../src/components/scoring/SetTracker';
 import { UndoButton } from '../../../src/components/scoring/UndoButton';
 import { SubstitutionSheet } from '../../../src/components/scoring/SubstitutionSheet';
+import { TimeoutTimerSheet } from '../../../src/components/scoring/TimeoutTimerSheet';
 import { TacticalBoard } from '../../../src/components/tactical/TacticalBoard';
 import type { Match } from '../../../src/models/match';
 import type { Team } from '../../../src/models/team';
@@ -63,6 +64,9 @@ export default function RefereeScreen() {
   const [showSubSheet, setShowSubSheet] = useState(false);
   const [subSide, setSubSide] = useState<'home' | 'away'>('home');
   const [attribution, setAttribution] = useState<AttributionState | null>(null);
+  const [showTimeoutSheet, setShowTimeoutSheet] = useState(false);
+  const [timeoutTeamName, setTimeoutTeamName] = useState('');
+  const [timeoutTeamColor, setTimeoutTeamColor] = useState<string>(palette.teamHome);
   const attributionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Load match
@@ -289,7 +293,11 @@ export default function RefereeScreen() {
     }
     requestTimeout(team);
     if (hapticsEnabled) Haptics.selectionAsync();
-    Alert.alert(t('match.timeout'), t('referee.timeoutFor', { name: team === 'home' ? homeTeam?.name : awayTeam?.name }));
+    const name = team === 'home' ? (homeTeam?.name ?? '') : (awayTeam?.name ?? '');
+    const color = team === 'home' ? (homeTeam?.color ?? palette.teamHome) : palette.teamAway;
+    setTimeoutTeamName(name);
+    setTimeoutTeamColor(color);
+    setShowTimeoutSheet(true);
   };
 
   const handlePause = () => {
@@ -462,6 +470,14 @@ export default function RefereeScreen() {
           <Text style={[styles.actionText, { color: palette.error }]}>{t('match.endMatch')}</Text>
         </Pressable>
       </View>
+
+      {/* Timeout countdown sheet */}
+      <TimeoutTimerSheet
+        visible={showTimeoutSheet}
+        teamName={timeoutTeamName}
+        teamColor={timeoutTeamColor}
+        onEnd={() => setShowTimeoutSheet(false)}
+      />
 
       {/* Substitution sheet */}
       <SubstitutionSheet
