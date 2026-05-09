@@ -9,7 +9,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { useSettingsStore } from '../../stores/settingsStore';
-import { SCORE_BUTTON_SIZE, ANIMATION_DURATION_SHORT } from '../../utils/constants';
+import { useResponsive } from '../../hooks/useResponsive';
+import { ANIMATION_DURATION_SHORT } from '../../utils/constants';
 import { palette } from '../../theme/tokens';
 
 interface ScoreButtonProps {
@@ -25,6 +26,7 @@ const DEBOUNCE_MS = 400;
 
 export function ScoreButton({ teamName, score, teamColor, onPress, onRemove, disabled }: ScoreButtonProps) {
   const hapticsEnabled = useSettingsStore((s) => s.hapticsEnabled);
+  const { scoreFontSize, scoreButtonSize } = useResponsive();
   const scale = useSharedValue(1);
   // useSharedValue instead of useRef — refs are JS-side objects and cannot be
   // safely read or mutated from a Reanimated worklet (UI thread).
@@ -61,8 +63,8 @@ export function ScoreButton({ teamName, score, teamColor, onPress, onRemove, dis
         <Text style={styles.teamName} numberOfLines={1}>
           {teamName}
         </Text>
-        <View style={[styles.button, { backgroundColor: teamColor + '20', borderColor: teamColor }]}>
-          <Text style={[styles.score, { color: teamColor }]}>{score}</Text>
+        <View style={[styles.button, { backgroundColor: teamColor + '20', borderColor: teamColor, minHeight: scoreButtonSize }]}>
+          <Text style={[styles.score, { color: teamColor, fontSize: scoreFontSize, lineHeight: scoreFontSize }]}>{score}</Text>
         </View>
         <View style={styles.badgeRow}>
           {onRemove && score > 0 && (
@@ -102,16 +104,13 @@ const styles = StyleSheet.create({
     width: '90%',
     aspectRatio: 1,
     maxWidth: 160,
-    minHeight: SCORE_BUTTON_SIZE,
     borderRadius: 24,
     borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
   },
   score: {
-    fontSize: 96,
     fontFamily: 'Inter_900Black',
-    lineHeight: 96,
     includeFontPadding: false,
   },
   badgeRow: {
