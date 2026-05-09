@@ -59,6 +59,7 @@ interface ScoringState {
   ) => void;
   addPointEvent: (team: 'home' | 'away', newEvent: MatchEvent) => void;
   undoPoint: (cancelledEventId: string) => void;
+  removePoint: (team: 'home' | 'away', cancelledEventId: string) => void;
   endCurrentSet: (winnerTeam: 'home' | 'away', updatedSet: MatchSet) => void;
   startNewSet: (newSet: MatchSet) => void;
   requestTimeout: (team: 'home' | 'away') => void;
@@ -241,6 +242,17 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
     );
     const { home, away } = computeScore(newEvents.filter((e) => !e.isCancelled));
     const serving = computeServingTeam(newEvents.filter((e) => !e.isCancelled), 'home');
+    set({ events: newEvents, scoreHome: home, scoreAway: away, servingTeam: serving });
+  },
+
+  removePoint: (team, cancelledEventId) => {
+    const state = get();
+    const newEvents = state.events.map((e) =>
+      e.id === cancelledEventId ? { ...e, isCancelled: true } : e
+    );
+    const active = newEvents.filter((e) => !e.isCancelled);
+    const { home, away } = computeScore(active);
+    const serving = computeServingTeam(active, 'home');
     set({ events: newEvents, scoreHome: home, scoreAway: away, servingTeam: serving });
   },
 

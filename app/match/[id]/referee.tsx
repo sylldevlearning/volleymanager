@@ -7,7 +7,7 @@ import { Pause, Play, Flag } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 
 import { getMatchById, createSet, getSetsForMatch, updateSet, updateMatchStatus } from '../../../src/services/matchService';
-import { addEvent, undoLastEvent } from '../../../src/services/eventService';
+import { addEvent, undoLastEvent, removeLastPoint } from '../../../src/services/eventService';
 import { getPlayersByTeam } from '../../../src/services/playerService';
 import { performSubstitution } from '../../../src/services/substitutionService';
 import { useScoringStore } from '../../../src/stores/scoringStore';
@@ -48,7 +48,7 @@ export default function RefereeScreen() {
     setScores, servingTeam, timeoutsHome, timeoutsAway, showChangeEnds,
     onCourtHome, onCourtAway, benchHome, benchAway, liberoHome, liberoAway,
     pairsHome, pairsAway, substitutionsHome, substitutionsAway,
-    initMatch, addPointEvent, undoPoint, endCurrentSet, startNewSet,
+    initMatch, addPointEvent, undoPoint, removePoint, endCurrentSet, startNewSet,
     requestTimeout, initLineup, applySubstitution,
     dismissChangeEnds, reset,
   } = useScoringStore();
@@ -248,6 +248,15 @@ export default function RefereeScreen() {
     }
   }, [match, currentSet, hapticsEnabled]);
 
+  const handleRemovePoint = useCallback(async (team: 'home' | 'away') => {
+    if (!match || !currentSet || isPaused) return;
+    const cancelledId = await removeLastPoint(match.id, currentSet.id, team);
+    if (cancelledId) {
+      removePoint(team, cancelledId);
+      if (hapticsEnabled) Haptics.selectionAsync();
+    }
+  }, [match, currentSet, isPaused, hapticsEnabled]);
+
   const handleSubConfirm = useCallback(async (opts: {
     playerOutId: string;
     playerInId: string;
@@ -334,6 +343,7 @@ export default function RefereeScreen() {
           score={scoreHome}
           teamColor={homeTeam.color || palette.teamHome}
           onPress={() => handlePoint('home')}
+          onRemove={() => handleRemovePoint('home')}
           disabled={isPaused}
         />
 
@@ -347,6 +357,7 @@ export default function RefereeScreen() {
           score={scoreAway}
           teamColor={palette.teamAway}
           onPress={() => handlePoint('away')}
+          onRemove={() => handleRemovePoint('away')}
           disabled={isPaused}
         />
       </View>

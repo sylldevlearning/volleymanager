@@ -9,7 +9,9 @@ export type ManagementEventType =
   | 'rotation_away'
   | 'undo'
   | 'set_end'
-  | 'match_end';
+  | 'match_end'
+  | 'point_correction_home'
+  | 'point_correction_away';
 
 export type StatEventType =
   | 'serve_ace'

@@ -77,6 +77,31 @@ export async function undoLastEvent(matchId: string, setId: string): Promise<str
   return cancelledId;
 }
 
+export async function removeLastPoint(
+  matchId: string,
+  setId: string,
+  team: 'home' | 'away',
+): Promise<string | null> {
+  const db = await getDb();
+  const eventType = team === 'home' ? 'point_home' : 'point_away';
+  const correctionType = team === 'home' ? 'point_correction_home' : 'point_correction_away';
+  const last = await db.getFirstAsync<Record<string, unknown>>(
+    `SELECT * FROM match_events
+     WHERE match_id = ? AND set_id = ? AND event_type = ? AND is_cancelled = 0
+     ORDER BY timestamp DESC
+     LIMIT 1`,
+    [matchId, setId, eventType]
+  );
+  if (!last) return null;
+
+  const cancelledId = last.id as string;
+  await db.withExclusiveTransactionAsync(async () => {
+    await db.runAsync('UPDATE match_events SET is_cancelled = 1 WHERE id = ?', [cancelledId]);
+    await addEvent({ matchId, setId, eventType: correctionType, playerId: null, teamId: null, details: { cancelledEventId: cancelledId } });
+  });
+  return cancelledId;
+}
+
 export async function getEventsForSet(matchId: string, setId: string): Promise<MatchEvent[]> {
   const db = await getDb();
   const rows = await db.getAllAsync<Record<string, unknown>>(

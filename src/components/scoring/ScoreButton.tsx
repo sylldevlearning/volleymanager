@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedStyle,
@@ -10,18 +10,20 @@ import Animated, {
 import * as Haptics from 'expo-haptics';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { SCORE_BUTTON_SIZE, ANIMATION_DURATION_SHORT } from '../../utils/constants';
+import { palette } from '../../theme/tokens';
 
 interface ScoreButtonProps {
   teamName: string;
   score: number;
   teamColor: string;
   onPress: () => void;
+  onRemove?: () => void;
   disabled?: boolean;
 }
 
 const DEBOUNCE_MS = 400;
 
-export function ScoreButton({ teamName, score, teamColor, onPress, disabled }: ScoreButtonProps) {
+export function ScoreButton({ teamName, score, teamColor, onPress, onRemove, disabled }: ScoreButtonProps) {
   const hapticsEnabled = useSettingsStore((s) => s.hapticsEnabled);
   const scale = useSharedValue(1);
   // useSharedValue instead of useRef — refs are JS-side objects and cannot be
@@ -62,8 +64,20 @@ export function ScoreButton({ teamName, score, teamColor, onPress, disabled }: S
         <View style={[styles.button, { backgroundColor: teamColor + '20', borderColor: teamColor }]}>
           <Text style={[styles.score, { color: teamColor }]}>{score}</Text>
         </View>
-        <View style={[styles.addBadge, { backgroundColor: teamColor }]}>
-          <Text style={styles.addText}>+1</Text>
+        <View style={styles.badgeRow}>
+          {onRemove && score > 0 && (
+            <Pressable
+              style={[styles.minusBadge, { borderColor: teamColor }]}
+              onPress={onRemove}
+              accessibilityRole="button"
+              accessibilityLabel="-1"
+            >
+              <Text style={[styles.minusText, { color: teamColor }]}>-1</Text>
+            </Pressable>
+          )}
+          <View style={[styles.addBadge, { backgroundColor: teamColor }]}>
+            <Text style={styles.addText}>+1</Text>
+          </View>
         </View>
       </Animated.View>
     </GestureDetector>
@@ -100,6 +114,11 @@ const styles = StyleSheet.create({
     lineHeight: 96,
     includeFontPadding: false,
   },
+  badgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   addBadge: {
     paddingHorizontal: 16,
     paddingVertical: 6,
@@ -109,5 +128,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Inter_700Bold',
     color: '#fff',
+  },
+  minusBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    backgroundColor: palette.backgroundSurface,
+  },
+  minusText: {
+    fontSize: 14,
+    fontFamily: 'Inter_700Bold',
   },
 });
