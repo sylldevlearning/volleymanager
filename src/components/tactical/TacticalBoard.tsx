@@ -115,6 +115,7 @@ export function TacticalBoard({
     arrowThickness,
     isPlaying,
     playbackSpeed,
+    groupMode,
     currentPlayId,
     currentPlayName,
     setPositions,
@@ -124,6 +125,7 @@ export function TacticalBoard({
     removeArrow,
     clearArrows,
     addFreehandPath,
+    toggleGroupMode,
     setTool,
     setPlaying,
     setPlaybackSpeed,
@@ -183,34 +185,37 @@ export function TacticalBoard({
   }, [isPlaying]);
 
   function startAnimation() {
+    // Build ordered list of groups: each group is an array of arrows to animate simultaneously
     const sorted = [...arrows].sort((a, b) => a.order - b.order);
+    const groupMap = new Map<number, typeof arrows>();
+    for (const arrow of sorted) {
+      const g = arrow.group ?? arrow.order;
+      if (!groupMap.has(g)) groupMap.set(g, []);
+      groupMap.get(g)!.push(arrow);
+    }
+    const groups = [...groupMap.values()];
+
     let animPositions = [...positionsRef.current];
     setPlaybackPositions([...animPositions]);
 
-    let arrowIdx = 0;
+    let groupIdx = 0;
     let animStart: number | null = null;
-    let nearestId: string | null = null;
-    let startX = 0;
-    let startY = 0;
+    // Per arrow in current group: nearest player + start coords
+    let groupMeta: Array<{ nearestId: string; startX: number; startY: number }> = [];
 
     function step(now: number) {
-      if (!isPlayingRef.current) {
-        setPlaybackPositions(null);
-        return;
-      }
-      if (arrowIdx >= sorted.length) {
-        setPlaying(false);
-        return;
-      }
+      if (!isPlayingRef.current) { setPlaybackPositions(null); return; }
+      if (groupIdx >= groups.length) { setPlaying(false); return; }
 
-      const arrow = sorted[arrowIdx];
+      const group = groups[groupIdx];
 
       if (animStart === null) {
-        const nearest = findNearestPlayer(animPositions, arrow.fromX, arrow.fromY);
-        if (!nearest) { arrowIdx++; animFrameRef.current = requestAnimationFrame(step); return; }
-        nearestId = nearest.playerId;
-        startX = nearest.x;
-        startY = nearest.y;
+        groupMeta = group.map((arrow) => {
+          const nearest = findNearestPlayer(animPositions, arrow.fromX, arrow.fromY);
+          return nearest
+            ? { nearestId: nearest.playerId, startX: nearest.x, startY: nearest.y }
+            : { nearestId: '', startX: 0, startY: 0 };
+        });
         animStart = now;
       }
 
@@ -219,17 +224,23 @@ export function TacticalBoard({
       const progress = Math.min(elapsed / duration, 1);
       const eased = easeInOut(progress);
 
-      animPositions = animPositions.map((p) =>
-        p.playerId === nearestId
-          ? { ...p, x: startX + (arrow.toX - startX) * eased, y: startY + (arrow.toY - startY) * eased }
-          : p
-      );
+      // Animate all arrows in the group simultaneously
+      animPositions = animPositions.map((p) => {
+        for (let i = 0; i < group.length; i++) {
+          const meta = groupMeta[i];
+          if (meta.nearestId && p.playerId === meta.nearestId) {
+            const arrow = group[i];
+            return { ...p, x: meta.startX + (arrow.toX - meta.startX) * eased, y: meta.startY + (arrow.toY - meta.startY) * eased };
+          }
+        }
+        return p;
+      });
       setPlaybackPositions([...animPositions]);
 
       if (progress < 1) {
         animFrameRef.current = requestAnimationFrame(step);
       } else {
-        arrowIdx++;
+        groupIdx++;
         animStart = null;
         animFrameRef.current = requestAnimationFrame(step);
       }
@@ -517,7 +528,9 @@ export function TacticalBoard({
         <ToolBar
           selectedTool={selectedTool}
           arrowThickness={arrowThickness}
+          groupMode={groupMode}
           onSelectTool={setTool}
+          onToggleGroupMode={toggleGroupMode}
           onClearAll={clearArrows}
         />
 

@@ -24,7 +24,7 @@ const mockPos = (id: string, x: number, y: number): PlayerPosition => ({
   isHome: true,
 });
 
-const mockArrow = (fromX: number, fromY: number, toX: number, toY: number): Omit<Arrow, 'id' | 'order'> => ({
+const mockArrow = (fromX: number, fromY: number, toX: number, toY: number): Omit<Arrow, 'id' | 'order' | 'group'> => ({
   type: 'solid',
   fromX,
   fromY,

@@ -28,6 +28,8 @@ export interface Arrow {
   color: string;
   thickness: ArrowThickness;
   order: number;
+  /** Arrows sharing the same group number animate simultaneously */
+  group: number;
 }
 
 export type TacticalCategory =

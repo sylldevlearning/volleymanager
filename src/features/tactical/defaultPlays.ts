@@ -38,6 +38,7 @@ function arrow(
     color,
     thickness,
     order,
+    group: order,
   };
 }
 

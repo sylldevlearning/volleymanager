@@ -7,7 +7,9 @@ import { palette } from '../../theme/tokens';
 interface ToolBarProps {
   selectedTool: TacticalTool;
   arrowThickness: ArrowThickness;
+  groupMode: boolean;
   onSelectTool: (tool: TacticalTool) => void;
+  onToggleGroupMode: () => void;
   onClearAll: () => void;
 }
 
@@ -23,7 +25,9 @@ const TOOLS: { key: TacticalTool; icon: string }[] = [
 export function ToolBar({
   selectedTool,
   arrowThickness,
+  groupMode,
   onSelectTool,
+  onToggleGroupMode,
   onClearAll,
 }: ToolBarProps) {
   const { t } = useTranslation();
@@ -62,6 +66,16 @@ export function ToolBar({
             </Pressable>
           );
         })}
+
+        <Pressable
+          style={[styles.toolBtn, groupMode && styles.toolBtnActive]}
+          onPress={onToggleGroupMode}
+          accessibilityLabel={t('tactical.tools.group')}
+          accessibilityRole="button"
+        >
+          <Text style={[styles.toolIcon, groupMode && styles.toolIconActive]}>⊕</Text>
+          <Text style={[styles.toolLabel, groupMode && styles.toolLabelActive]}>GRP</Text>
+        </Pressable>
 
         <View style={styles.divider} />
 
