@@ -11,9 +11,10 @@ interface TimeoutTimerSheetProps {
   teamName: string;
   teamColor: string;
   onEnd: () => void;
+  onCancel?: () => void;
 }
 
-export function TimeoutTimerSheet({ visible, teamName, teamColor, onEnd }: TimeoutTimerSheetProps) {
+export function TimeoutTimerSheet({ visible, teamName, teamColor, onEnd, onCancel }: TimeoutTimerSheetProps) {
   const { t } = useTranslation();
   const [seconds, setSeconds] = useState(TIMEOUT_DURATION);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -55,6 +56,11 @@ export function TimeoutTimerSheet({ visible, teamName, teamColor, onEnd }: Timeo
     onEnd();
   };
 
+  const handleCancel = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    onCancel?.();
+  };
+
   const progress = seconds / TIMEOUT_DURATION;
   const isUrgent = seconds <= 10;
 
@@ -93,6 +99,16 @@ export function TimeoutTimerSheet({ visible, teamName, teamColor, onEnd }: Timeo
           >
             <Text style={styles.endBtnText}>{t('timeout.endNow')}</Text>
           </Pressable>
+
+          {onCancel && (
+            <Pressable
+              style={({ pressed }) => [styles.cancelBtn, pressed && styles.endBtnPressed]}
+              onPress={handleCancel}
+              accessibilityRole="button"
+            >
+              <Text style={styles.cancelBtnText}>{t('timeout.cancel')}</Text>
+            </Pressable>
+          )}
         </View>
       </View>
     </Modal>
@@ -173,5 +189,19 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: 'Inter_600SemiBold',
     color: palette.textPrimary,
+  },
+  cancelBtn: {
+    paddingHorizontal: 32,
+    paddingVertical: 10,
+    borderRadius: 14,
+    width: '100%',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: palette.error + '50',
+  },
+  cancelBtnText: {
+    fontSize: 13,
+    fontFamily: 'Inter_500Medium',
+    color: palette.error,
   },
 });

@@ -48,13 +48,19 @@ describe('computeScore — point_correction removes a point', () => {
     expect(away).toBe(0);
   });
 
-  it('point_correction_home event does not count as a scored point', () => {
+  it('point_correction_home subtracts one point (allows negative)', () => {
     const events = [
       makeEvent('e1', 'point_home'),
       makeEvent('e2', 'point_correction_home'),
     ];
     const { home } = computeScore(events.filter((e) => !e.isCancelled));
-    expect(home).toBe(1); // correction event itself doesn't add to score
+    expect(home).toBe(0); // 1 point - 1 correction = 0
+  });
+
+  it('point_correction can make score go negative', () => {
+    const events = [makeEvent('e1', 'point_correction_home')];
+    const { home } = computeScore(events.filter((e) => !e.isCancelled));
+    expect(home).toBe(-1);
   });
 
   it('mixed: home leads 3-2 with one correction on each side', () => {

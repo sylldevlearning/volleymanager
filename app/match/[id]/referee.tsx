@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Pause, Play, Flag } from 'lucide-react-native';
+import { Flag, ArrowLeft } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 
 import { getMatchById, createSet, getSetsForMatch, updateSet, updateMatchStatus } from '../../../src/services/matchService';
-import { addEvent, undoLastEvent, removeLastPoint } from '../../../src/services/eventService';
+import { addEvent, undoLastEvent, addDirectPointCorrection } from '../../../src/services/eventService';
 import { getPlayersByTeam } from '../../../src/services/playerService';
 import { performSubstitution } from '../../../src/services/substitutionService';
 import { useScoringStore } from '../../../src/stores/scoringStore';
@@ -51,8 +51,8 @@ export default function RefereeScreen() {
     setScores, servingTeam, timeoutsHome, timeoutsAway, showChangeEnds,
     onCourtHome, onCourtAway, benchHome, benchAway, liberoHome, liberoAway,
     pairsHome, pairsAway, substitutionsHome, substitutionsAway,
-    initMatch, addPointEvent, undoPoint, removePoint, endCurrentSet, startNewSet,
-    requestTimeout, initLineup, applySubstitution,
+    initMatch, addPointEvent, undoPoint, removePoint, addCorrectionEvent, endCurrentSet, startNewSet,
+    requestTimeout, cancelTimeout, initLineup, applySubstitution,
     dismissChangeEnds, reset,
   } = useScoringStore();
 
@@ -61,12 +61,12 @@ export default function RefereeScreen() {
   const [homePlayers, setHomePlayers] = useState<Player[]>([]);
   const [awayPlayers, setAwayPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isPaused, setIsPaused] = useState(false);
   const [showTactical, setShowTactical] = useState(false);
   const [showSubSheet, setShowSubSheet] = useState(false);
   const [subSide, setSubSide] = useState<'home' | 'away'>('home');
   const [attribution, setAttribution] = useState<AttributionState | null>(null);
   const [showTimeoutSheet, setShowTimeoutSheet] = useState(false);
+  const [timeoutTeam, setTimeoutTeam] = useState<'home' | 'away'>('home');
   const [showInterstitial, setShowInterstitial] = useState(false);
   const [timeoutTeamName, setTimeoutTeamName] = useState('');
   const [timeoutTeamColor, setTimeoutTeamColor] = useState<string>(palette.teamHome);
@@ -185,7 +185,7 @@ export default function RefereeScreen() {
   );
 
   const handlePoint = useCallback(async (team: 'home' | 'away') => {
-    if (!match || !currentSet || isPaused) return;
+    if (!match || !currentSet) return;
 
     const eventType = team === 'home' ? 'point_home' : 'point_away';
     const newEvent = await addEvent({
@@ -256,7 +256,7 @@ export default function RefereeScreen() {
         );
       }
     }
-  }, [match, currentSet, isPaused, scoreHome, scoreAway, setsHome, setsAway, homeTeam, awayTeam, homePlayers, awayPlayers]);
+  }, [match, currentSet, scoreHome, scoreAway, setsHome, setsAway, homeTeam, awayTeam, homePlayers, awayPlayers]);
 
   const handleUndo = useCallback(async () => {
     if (!match || !currentSet) return;
@@ -268,13 +268,11 @@ export default function RefereeScreen() {
   }, [match, currentSet, hapticsEnabled]);
 
   const handleRemovePoint = useCallback(async (team: 'home' | 'away') => {
-    if (!match || !currentSet || isPaused) return;
-    const cancelledId = await removeLastPoint(match.id, currentSet.id, team);
-    if (cancelledId) {
-      removePoint(team, cancelledId);
-      if (hapticsEnabled) Haptics.selectionAsync();
-    }
-  }, [match, currentSet, isPaused, hapticsEnabled]);
+    if (!match || !currentSet) return;
+    const newEvent = await addDirectPointCorrection(match.id, currentSet.id, team);
+    addCorrectionEvent(team, newEvent);
+    if (hapticsEnabled) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  }, [match, currentSet, hapticsEnabled, addCorrectionEvent]);
 
   const handleSubConfirm = useCallback(async (opts: {
     playerOutId: string;
@@ -307,6 +305,7 @@ export default function RefereeScreen() {
       return;
     }
     requestTimeout(team);
+    setTimeoutTeam(team);
     if (hapticsEnabled) Haptics.selectionAsync();
     const name = team === 'home' ? (homeTeam?.name ?? '') : (awayTeam?.name ?? '');
     const color = team === 'home' ? (homeTeam?.color ?? palette.teamHome) : palette.teamAway;
@@ -315,9 +314,9 @@ export default function RefereeScreen() {
     setShowTimeoutSheet(true);
   };
 
-  const handlePause = () => {
-    setIsPaused((p) => !p);
-    if (hapticsEnabled) Haptics.selectionAsync();
+  const handleTimeoutCancel = () => {
+    cancelTimeout(timeoutTeam);
+    setShowTimeoutSheet(false);
   };
 
   const handleEndMatch = () => {
@@ -367,7 +366,7 @@ export default function RefereeScreen() {
           teamColor={homeTeam.color || palette.teamHome}
           onPress={() => handlePoint('home')}
           onRemove={() => handleRemovePoint('home')}
-          disabled={isPaused}
+          disabled={false}
         />
 
         <View style={styles.scoreSeparator}>
@@ -381,7 +380,7 @@ export default function RefereeScreen() {
           teamColor={palette.teamAway}
           onPress={() => handlePoint('away')}
           onRemove={() => handleRemovePoint('away')}
-          disabled={isPaused}
+          disabled={false}
         />
       </View>
 
@@ -455,11 +454,26 @@ export default function RefereeScreen() {
       )}
 
       {/* Bottom actions */}
-      <View style={styles.actionsRow}>
-        <UndoButton
-          onPress={handleUndo}
-          disabled={isPaused}
-        />
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.actionsScroll}
+        contentContainerStyle={styles.actionsRow}
+      >
+        <Pressable
+          style={({ pressed }) => [styles.actionBtn, pressed && styles.actionBtnPressed]}
+          onPress={() => {
+            Alert.alert(t('home.quitMatch'), '', [
+              { text: t('common.cancel'), style: 'cancel' },
+              { text: t('home.backToMenu'), onPress: () => router.replace('/') },
+            ]);
+          }}
+          accessibilityRole="button"
+        >
+          <ArrowLeft size={16} color={palette.textSecondary} />
+          <Text style={styles.actionText}>{t('home.backToMenu')}</Text>
+        </Pressable>
+        <UndoButton onPress={handleUndo} disabled={false} />
         <Pressable
           style={({ pressed }) => [styles.tacticalBtn, pressed && styles.actionBtnPressed]}
           onPress={() => setShowTactical(true)}
@@ -467,15 +481,6 @@ export default function RefereeScreen() {
           accessibilityRole="button"
         >
           <Text style={styles.tacticalIcon}>📋</Text>
-        </Pressable>
-        <Pressable
-          style={({ pressed }) => [styles.actionBtn, pressed && styles.actionBtnPressed]}
-          onPress={handlePause}
-          accessibilityLabel={isPaused ? t('match.resume') : t('match.pause')}
-          accessibilityRole="button"
-        >
-          {isPaused ? <Play size={18} color={palette.success} /> : <Pause size={18} color={palette.textSecondary} />}
-          <Text style={styles.actionText}>{isPaused ? t('match.resume') : t('match.pause')}</Text>
         </Pressable>
         <Pressable
           style={({ pressed }) => [styles.actionBtnEnd, pressed && styles.actionBtnPressed]}
@@ -486,7 +491,7 @@ export default function RefereeScreen() {
           <Flag size={16} color={palette.error} />
           <Text style={[styles.actionText, { color: palette.error }]}>{t('match.endMatch')}</Text>
         </Pressable>
-      </View>
+      </ScrollView>
 
       {/* Timeout countdown sheet */}
       <TimeoutTimerSheet
@@ -494,6 +499,7 @@ export default function RefereeScreen() {
         teamName={timeoutTeamName}
         teamColor={timeoutTeamColor}
         onEnd={() => setShowTimeoutSheet(false)}
+        onCancel={handleTimeoutCancel}
       />
 
       {/* Substitution sheet */}
@@ -855,12 +861,16 @@ const styles = StyleSheet.create({
   timeoutDots: { flexDirection: 'row', gap: 4 },
   timeoutDot: { width: 10, height: 10, borderRadius: 5 },
   timeoutInf: { fontSize: 16, color: palette.textMuted, fontFamily: 'Inter_700Bold' },
+  actionsScroll: {
+    flexShrink: 0,
+  },
   actionsRow: {
     flexDirection: 'row',
     paddingHorizontal: 16,
     paddingBottom: 8,
     gap: 8,
     alignItems: 'center',
+    flexWrap: 'nowrap',
   },
   actionBtn: {
     flex: 1,

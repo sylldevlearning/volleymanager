@@ -77,6 +77,15 @@ export async function undoLastEvent(matchId: string, setId: string): Promise<str
   return cancelledId;
 }
 
+export async function addDirectPointCorrection(
+  matchId: string,
+  setId: string,
+  team: 'home' | 'away',
+): Promise<MatchEvent> {
+  const eventType = team === 'home' ? 'point_correction_home' : 'point_correction_away';
+  return addEvent({ matchId, setId, eventType, playerId: null, teamId: null, details: { correction: -1 } });
+}
+
 export async function removeLastPoint(
   matchId: string,
   setId: string,
@@ -140,7 +149,9 @@ export function computeScore(events: MatchEvent[]): { home: number; away: number
   for (const e of events) {
     if (e.isCancelled) continue;
     if (e.eventType === 'point_home') home++;
-    if (e.eventType === 'point_away') away++;
+    else if (e.eventType === 'point_away') away++;
+    else if (e.eventType === 'point_correction_home') home--;
+    else if (e.eventType === 'point_correction_away') away--;
   }
   return { home, away };
 }

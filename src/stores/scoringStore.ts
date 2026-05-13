@@ -63,6 +63,8 @@ interface ScoringState {
   endCurrentSet: (winnerTeam: 'home' | 'away', updatedSet: MatchSet) => void;
   startNewSet: (newSet: MatchSet) => void;
   requestTimeout: (team: 'home' | 'away') => void;
+  cancelTimeout: (team: 'home' | 'away') => void;
+  addCorrectionEvent: (team: 'home' | 'away', newEvent: MatchEvent) => void;
   applySubstitution: (
     side: 'home' | 'away',
     playerOutId: string,
@@ -291,6 +293,20 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
   requestTimeout: (team) => {
     if (team === 'home') set((s) => ({ timeoutsHome: s.timeoutsHome + 1 }));
     else set((s) => ({ timeoutsAway: s.timeoutsAway + 1 }));
+  },
+
+  cancelTimeout: (team) => {
+    if (team === 'home') set((s) => ({ timeoutsHome: Math.max(0, s.timeoutsHome - 1) }));
+    else set((s) => ({ timeoutsAway: Math.max(0, s.timeoutsAway - 1) }));
+  },
+
+  addCorrectionEvent: (team, newEvent) => {
+    const state = get();
+    const newEvents = [...state.events, newEvent];
+    const active = newEvents.filter((e) => !e.isCancelled);
+    const { home, away } = computeScore(active);
+    const serving = computeServingTeam(active, 'home');
+    set({ events: newEvents, scoreHome: home, scoreAway: away, servingTeam: serving });
   },
 
   applySubstitution: (side, playerOutId, playerInId, position, isLibero, pair) => {

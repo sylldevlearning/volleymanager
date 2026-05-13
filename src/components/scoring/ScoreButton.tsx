@@ -67,7 +67,7 @@ export function ScoreButton({ teamName, score, teamColor, onPress, onRemove, dis
           <Text style={[styles.score, { color: teamColor, fontSize: scoreFontSize, lineHeight: scoreFontSize }]}>{score}</Text>
         </View>
         <View style={styles.badgeRow}>
-          {onRemove && score > 0 && (
+          {onRemove && (
             <Pressable
               style={[styles.minusBadge, { borderColor: teamColor }]}
               onPress={onRemove}
