@@ -28,7 +28,9 @@
     "modeCoach": "Mode Entraîneur",
     "modeRefereeDesc": "Scorez en live, gérez les temps morts et rotations",
     "modeCoachDesc": "Statistiques joueurs en temps réel",
-    "tacticalDesc": "Dessine des schémas, anime les déplacements"
+    "tacticalDesc": "Dessine des schémas, anime les déplacements",
+    "quickMatch": "Match rapide",
+    "quickMatchDesc": "Locale vs Visiteur • Indoor 6×6 • Loisir"
   },
   "tabs": {
     "home": "Accueil",

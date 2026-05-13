@@ -28,7 +28,9 @@
     "modeCoach": "Coach Mode",
     "modeRefereeDesc": "Live scoring, timeouts and rotations",
     "modeCoachDesc": "Real-time player statistics",
-    "tacticalDesc": "Draw plays, animate movements"
+    "tacticalDesc": "Draw plays, animate movements",
+    "quickMatch": "Quick Match",
+    "quickMatchDesc": "Home vs Away • Indoor 6×6 • Leisure"
   },
   "tabs": {
     "home": "Home",

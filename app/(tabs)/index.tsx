@@ -1,17 +1,42 @@
-import { ScrollView, StyleSheet, View, Text, Pressable, StatusBar } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, View, Text, Pressable, StatusBar } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Volleyball, Users, History, ChevronRight } from 'lucide-react-native';
+import { Volleyball, Users, History, ChevronRight, Zap } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { palette } from '../../src/theme/tokens';
 import { COMPANY } from '../../src/utils/constants';
 import { TacticalBoard } from '../../src/components/tactical/TacticalBoard';
+import { createTeam } from '../../src/services/teamService';
+import { createMatch } from '../../src/services/matchService';
+import { DEFAULT_INDOOR_CONFIG } from '../../src/models/match';
 
 export default function HomeScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const [showTactical, setShowTactical] = useState(false);
+  const [creatingQuickMatch, setCreatingQuickMatch] = useState(false);
+
+  async function handleQuickMatch() {
+    if (creatingQuickMatch) return;
+    setCreatingQuickMatch(true);
+    try {
+      const [home, away] = await Promise.all([
+        createTeam({ name: 'Locale', shortName: 'LOC', logoUri: null, color: palette.teamHome }),
+        createTeam({ name: 'Visiteur', shortName: 'VIS', logoUri: null, color: palette.teamAway }),
+      ]);
+      const match = await createMatch({
+        format: 'indoor_6v6',
+        mode: 'leisure',
+        teamHomeId: home.id,
+        teamAwayId: away.id,
+        config: DEFAULT_INDOOR_CONFIG,
+      });
+      router.replace(`/match/${match.id}/referee`);
+    } finally {
+      setCreatingQuickMatch(false);
+    }
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -23,6 +48,25 @@ export default function HomeScreen() {
           <Text style={styles.title}>{t('home.title')}</Text>
           <Text style={styles.subtitle}>{t('home.subtitle')}</Text>
         </View>
+
+        {/* Quick Match CTA */}
+        <Pressable
+          style={({ pressed }) => [styles.quickMatchButton, pressed && styles.quickMatchButtonPressed]}
+          onPress={handleQuickMatch}
+          disabled={creatingQuickMatch}
+          accessibilityLabel={t('home.quickMatch')}
+          accessibilityRole="button"
+        >
+          {creatingQuickMatch
+            ? <ActivityIndicator color="#fff" size="small" />
+            : <Zap size={28} color="#fff" strokeWidth={2} />
+          }
+          <View style={styles.quickMatchContent}>
+            <Text style={styles.quickMatchTitle}>{t('home.quickMatch')}</Text>
+            <Text style={styles.quickMatchDesc}>{t('home.quickMatchDesc')}</Text>
+          </View>
+          {!creatingQuickMatch && <ChevronRight size={20} color="rgba(255,255,255,0.7)" />}
+        </Pressable>
 
         {/* New Match CTA */}
         <Pressable
@@ -179,6 +223,34 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_400Regular',
     color: palette.textSecondary,
     marginTop: 6,
+  },
+  quickMatchButton: {
+    backgroundColor: '#16A34A',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+    borderRadius: 16,
+    marginBottom: 12,
+  },
+  quickMatchButtonPressed: {
+    opacity: 0.85,
+    transform: [{ scale: 0.98 }],
+  },
+  quickMatchContent: {
+    flex: 1,
+  },
+  quickMatchTitle: {
+    color: '#fff',
+    fontSize: 17,
+    fontFamily: 'Inter_700Bold',
+  },
+  quickMatchDesc: {
+    color: 'rgba(255,255,255,0.75)',
+    fontSize: 12,
+    fontFamily: 'Inter_400Regular',
+    marginTop: 2,
   },
   ctaButton: {
     backgroundColor: palette.accentPrimary,
