@@ -24,7 +24,7 @@ interface TacticalState {
   addArrow: (arrow: Omit<Arrow, 'id' | 'order' | 'group'>) => void;
   removeArrow: (id: string) => void;
   clearArrows: () => void;
-  addFreehandPath: (d: string, color: string) => void;
+  addFreehandPath: (d: string, color: string, hasArrow?: boolean) => void;
   clearFreehandPaths: () => void;
   toggleGroupMode: () => void;
   setTool: (tool: TacticalTool) => void;
@@ -95,9 +95,9 @@ export const useTacticalStore = create<TacticalState>()((set, get) => ({
 
   clearArrows: () => set({ arrows: [], freehandPaths: [], currentGroup: 1, groupMode: false }),
 
-  addFreehandPath: (d, color) =>
+  addFreehandPath: (d, color, hasArrow) =>
     set((state) => ({
-      freehandPaths: [...state.freehandPaths, { id: generateId(), d, color }],
+      freehandPaths: [...state.freehandPaths, { id: generateId(), d, color, hasArrow }],
     })),
 
   clearFreehandPaths: () => set({ freehandPaths: [] }),

@@ -3,6 +3,27 @@ import Svg, { Path, Polygon } from 'react-native-svg';
 import { ArrowPath } from './ArrowPath';
 import type { Arrow, FreehandPath } from '../../models/tactical';
 
+function computeArrowhead(d: string, color: string): React.ReactElement | null {
+  const tokens = d.trim().split(/\s+/);
+  const coords: number[] = [];
+  for (const t of tokens) {
+    const n = parseFloat(t);
+    if (!isNaN(n)) coords.push(n);
+  }
+  if (coords.length < 4) return null;
+  const tx = coords[coords.length - 2];
+  const ty = coords[coords.length - 1];
+  const px = coords[coords.length - 4];
+  const py = coords[coords.length - 3];
+  const angle = Math.atan2(ty - py, tx - px);
+  const s = 10;
+  const x1 = tx - s * Math.cos(angle - Math.PI / 6);
+  const y1 = ty - s * Math.sin(angle - Math.PI / 6);
+  const x2 = tx - s * Math.cos(angle + Math.PI / 6);
+  const y2 = ty - s * Math.sin(angle + Math.PI / 6);
+  return <Polygon key="ah" points={`${tx},${ty} ${x1},${y1} ${x2},${y2}`} fill={color} />;
+}
+
 interface DrawPreview {
   fromX: number;
   fromY: number;
@@ -43,17 +64,22 @@ export function ArrowOverlay({
       pointerEvents={eraserMode ? 'auto' : 'none'}
     >
       {/* Committed freehand paths */}
-      {freehandPaths.map((fp) => (
-        <Path
-          key={fp.id}
-          d={fp.d}
-          stroke={fp.color}
-          strokeWidth={2.5}
-          fill="none"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      ))}
+      {freehandPaths.map((fp) => {
+        const arrowhead = fp.hasArrow ? computeArrowhead(fp.d, fp.color) : null;
+        return (
+          <React.Fragment key={fp.id}>
+            <Path
+              d={fp.d}
+              stroke={fp.color}
+              strokeWidth={2.5}
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            {arrowhead}
+          </React.Fragment>
+        );
+      })}
 
       {arrows.map((arrow) => (
         <ArrowPath

@@ -53,6 +53,8 @@ export interface FreehandPath {
   /** SVG path data string (M x y L x y ...) */
   d: string;
   color: string;
+  /** When true, an arrowhead is drawn at the last point */
+  hasArrow?: boolean;
 }
 
 export interface TacticalPlay {

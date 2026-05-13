@@ -257,12 +257,12 @@ export function TacticalBoard({
   }
 
   // Drawing gesture
-  const isDrawMode = selectedTool === 'arrow_solid' || selectedTool === 'arrow_dashed' || selectedTool === 'arrow_curved';
+  const isDrawMode = selectedTool === 'arrow_solid' || selectedTool === 'arrow_dashed';
+  const isCurvedMode = selectedTool === 'arrow_curved';
   const drawColor = selectedTool === 'arrow_dashed' ? '#FBBF24' : '#1D4ED8';
   // Precompute as primitive string so the worklet can capture it safely
-  const drawType: 'solid' | 'dashed' | 'curved' =
-    selectedTool === 'arrow_dashed' ? 'dashed' :
-    selectedTool === 'arrow_curved' ? 'curved' : 'solid';
+  const drawType: 'solid' | 'dashed' =
+    selectedTool === 'arrow_dashed' ? 'dashed' : 'solid';
 
   const drawGesture = Gesture.Pan()
     .enabled(isDrawMode)
@@ -298,8 +298,6 @@ export function TacticalBoard({
           type: drawType,
           fromX: fromXR, fromY: fromYR,
           toX: toXR, toY: toYR,
-          controlX: drawType === 'curved' ? (fromXR + toXR) / 2 - 0.05 : undefined,
-          controlY: drawType === 'curved' ? (fromYR + toYR) / 2 : undefined,
           color: drawColor,
           thickness: arrowThickness,
         });
@@ -307,9 +305,9 @@ export function TacticalBoard({
       runOnJS(setDrawPreview)(null);
     });
 
-  // Pencil (freehand) gesture
+  // Pencil/Curved freehand gestures
   const isPencilMode = selectedTool === 'pencil';
-  const pencilColor = '#E63946';
+  const pencilColor = isCurvedMode ? drawColor : '#E63946';
 
   function buildPathD(pts: { x: number; y: number }[]): string {
     if (pts.length < 2) return '';
@@ -335,6 +333,15 @@ export function TacticalBoard({
     setPencilPreviewD(null);
   }
 
+  function onCurvedEnd() {
+    const pts = pencilPointsRef.current;
+    if (pts.length > 3) {
+      addFreehandPath(buildPathD(pts), drawColor, true);
+    }
+    pencilPointsRef.current = [];
+    setPencilPreviewD(null);
+  }
+
   const pencilGesture = Gesture.Pan()
     .enabled(isPencilMode)
     .minDistance(0)
@@ -342,6 +349,14 @@ export function TacticalBoard({
     .onUpdate((e) => { runOnJS(onPencilUpdate)(e.x, e.y); })
     .onEnd(() => { runOnJS(onPencilEnd)(); })
     .onFinalize(() => { runOnJS(onPencilEnd)(); });
+
+  const curvedGesture = Gesture.Pan()
+    .enabled(isCurvedMode)
+    .minDistance(0)
+    .onBegin((e) => { runOnJS(onPencilBegin)(e.x, e.y); })
+    .onUpdate((e) => { runOnJS(onPencilUpdate)(e.x, e.y); })
+    .onEnd(() => { runOnJS(onCurvedEnd)(); })
+    .onFinalize(() => { runOnJS(onCurvedEnd)(); });
 
   const displayPositions = playbackPositions ?? positions;
 
@@ -504,6 +519,12 @@ export function TacticalBoard({
             {/* Pencil gesture overlay */}
             {isPencilMode && (
               <GestureDetector gesture={pencilGesture}>
+                <Animated.View style={StyleSheet.absoluteFill} />
+              </GestureDetector>
+            )}
+            {/* Curved (freehand with arrowhead) gesture overlay */}
+            {isCurvedMode && (
+              <GestureDetector gesture={curvedGesture}>
                 <Animated.View style={StyleSheet.absoluteFill} />
               </GestureDetector>
             )}
