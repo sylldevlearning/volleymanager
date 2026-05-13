@@ -8,24 +8,24 @@ interface ToolBarProps {
   selectedTool: TacticalTool;
   arrowThickness: ArrowThickness;
   groupMode: boolean;
+  currentGroup: number;
   onSelectTool: (tool: TacticalTool) => void;
   onToggleGroupMode: () => void;
   onClearAll: () => void;
 }
 
-const TOOLS: { key: TacticalTool; icon: string }[] = [
-  { key: 'move', icon: '✋' },
-  { key: 'arrow_solid', icon: '→' },
-  { key: 'arrow_dashed', icon: '⇢' },
-  { key: 'arrow_curved', icon: '↝' },
-  { key: 'pencil', icon: '✏️' },
-  { key: 'eraser', icon: '🧹' },
+// Only 3 tools exposed: move, traced arrow (arrow_curved), pencil
+const TOOLS: { key: TacticalTool; icon: string; labelKey: string }[] = [
+  { key: 'move', icon: '✋', labelKey: 'tactical.tools.move' },
+  { key: 'arrow_curved', icon: '↝', labelKey: 'tactical.tools.tracedArrow' },
+  { key: 'pencil', icon: '✏️', labelKey: 'tactical.tools.pencil' },
 ];
 
 export function ToolBar({
   selectedTool,
   arrowThickness,
   groupMode,
+  currentGroup,
   onSelectTool,
   onToggleGroupMode,
   onClearAll,
@@ -44,6 +44,10 @@ export function ToolBar({
     );
   }
 
+  const linkLabel = groupMode
+    ? t('tactical.tools.linkActive', { number: currentGroup })
+    : t('tactical.tools.link');
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -53,32 +57,34 @@ export function ToolBar({
       >
         {TOOLS.map((tool) => {
           const active = selectedTool === tool.key;
+          const label = t(tool.labelKey).split(' ')[0];
           return (
             <Pressable
               key={tool.key}
               style={[styles.toolBtn, active && styles.toolBtnActive]}
               onPress={() => onSelectTool(tool.key)}
-              accessibilityLabel={t(`tactical.tools.${camelKey(tool.key)}`)}
+              accessibilityLabel={t(tool.labelKey)}
               accessibilityRole="button"
             >
               <Text style={[styles.toolIcon, active && styles.toolIconActive]}>
                 {tool.icon}
               </Text>
               <Text style={[styles.toolLabel, active && styles.toolLabelActive]}>
-                {t(`tactical.tools.${camelKey(tool.key)}`).split(' ')[0]}
+                {label}
               </Text>
             </Pressable>
           );
         })}
 
         <Pressable
-          style={[styles.toolBtn, groupMode && styles.toolBtnActive]}
+          style={[styles.toolBtn, groupMode && styles.toolBtnGroupActive]}
           onPress={onToggleGroupMode}
-          accessibilityLabel={t('tactical.tools.group')}
+          accessibilityLabel={linkLabel}
           accessibilityRole="button"
         >
-          <Text style={[styles.toolIcon, groupMode && styles.toolIconActive]}>⊕</Text>
-          <Text style={[styles.toolLabel, groupMode && styles.toolLabelActive]}>GRP</Text>
+          <Text style={[styles.toolLabel, styles.linkLabel, groupMode && styles.toolLabelActive]}>
+            {linkLabel}
+          </Text>
         </Pressable>
 
         <View style={styles.divider} />
@@ -94,10 +100,6 @@ export function ToolBar({
       </ScrollView>
     </View>
   );
-}
-
-function camelKey(key: string): string {
-  return key.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
 }
 
 const styles = StyleSheet.create({
@@ -126,6 +128,9 @@ const styles = StyleSheet.create({
   toolBtnActive: {
     backgroundColor: palette.accentPrimary,
   },
+  toolBtnGroupActive: {
+    backgroundColor: '#1D4ED8',
+  },
   toolIcon: {
     fontSize: 18,
   },
@@ -137,6 +142,10 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_500Medium',
     color: palette.textMuted,
     marginTop: 2,
+  },
+  linkLabel: {
+    fontSize: 10,
+    marginTop: 0,
   },
   toolLabelActive: {
     color: 'rgba(255,255,255,0.9)',

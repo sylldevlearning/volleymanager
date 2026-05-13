@@ -117,6 +117,7 @@ export function TacticalBoard({
     isPlaying,
     playbackSpeed,
     groupMode,
+    currentGroup,
     currentPlayId,
     currentPlayName,
     setPositions,
@@ -552,6 +553,7 @@ export function TacticalBoard({
           selectedTool={selectedTool}
           arrowThickness={arrowThickness}
           groupMode={groupMode}
+          currentGroup={currentGroup}
           onSelectTool={setTool}
           onToggleGroupMode={toggleGroupMode}
           onClearAll={clearArrows}
