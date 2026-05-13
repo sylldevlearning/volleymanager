@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Pause, Play, Flag } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
+import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 
 import { getMatchById, createSet, getSetsForMatch, updateSet, updateMatchStatus } from '../../../src/services/matchService';
 import { addEvent, undoLastEvent, removeLastPoint } from '../../../src/services/eventService';
@@ -70,6 +71,17 @@ export default function RefereeScreen() {
   const [timeoutTeamName, setTimeoutTeamName] = useState('');
   const [timeoutTeamColor, setTimeoutTeamColor] = useState<string>(palette.teamHome);
   const attributionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Animated ball bounce for service indicator
+  const ballY = useSharedValue(0);
+  useEffect(() => {
+    ballY.value = withRepeat(
+      withSequence(withTiming(-5, { duration: 350 }), withTiming(0, { duration: 350 })),
+      -1,
+      false,
+    );
+  }, [ballY]);
+  const ballAnimStyle = useAnimatedStyle(() => ({ transform: [{ translateY: ballY.value }] }));
 
   // Load match
   useEffect(() => {
@@ -375,11 +387,13 @@ export default function RefereeScreen() {
 
       {/* Service indicator */}
       <View style={styles.serviceRow}>
+        {servingTeam === 'home' && <Animated.Text style={[styles.serviceBall, ballAnimStyle]}>🏐</Animated.Text>}
         <View style={[styles.serviceDot, servingTeam === 'home' && styles.serviceDotActive]} />
         <Text style={styles.serviceText}>
           {t('referee.serveIndicator')} : {servingTeam === 'home' ? homeTeam.name : awayTeam.name}
         </Text>
         <View style={[styles.serviceDot, servingTeam === 'away' && styles.serviceDotActive]} />
+        {servingTeam === 'away' && <Animated.Text style={[styles.serviceBall, ballAnimStyle]}>🏐</Animated.Text>}
       </View>
 
       {/* Timeouts */}
@@ -808,6 +822,7 @@ const styles = StyleSheet.create({
     borderColor: palette.backgroundElevated,
     marginBottom: 8,
   },
+  serviceBall: { fontSize: 20, marginHorizontal: 4 },
   serviceDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: palette.backgroundHover },
   serviceDotActive: { backgroundColor: palette.accentPrimary },
   serviceText: { fontSize: 13, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
