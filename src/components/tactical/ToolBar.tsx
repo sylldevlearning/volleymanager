@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View, Alert } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { TacticalTool, ArrowThickness } from '../../models/tactical';
 import { palette } from '../../theme/tokens';
@@ -46,7 +46,11 @@ export function ToolBar({
 
   return (
     <View style={styles.container}>
-      <View style={styles.toolsRow}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.toolsRow}
+      >
         {TOOLS.map((tool) => {
           const active = selectedTool === tool.key;
           return (
@@ -78,7 +82,6 @@ export function ToolBar({
         </Pressable>
 
         <View style={styles.divider} />
-
         <Pressable
           style={styles.clearBtn}
           onPress={handleClearAll}
@@ -88,7 +91,7 @@ export function ToolBar({
           <Text style={styles.clearBtnIcon}>🧺</Text>
           <Text style={styles.clearBtnText}>{t('tactical.tools.clearAll')}</Text>
         </Pressable>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -109,6 +112,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    paddingRight: 4,
   },
   toolBtn: {
     alignItems: 'center',
@@ -138,7 +142,7 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.9)',
   },
   divider: {
-    flex: 1,
+    width: 8,
   },
   clearBtn: {
     alignItems: 'center',
