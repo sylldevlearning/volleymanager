@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
+import { Audio } from 'expo-av';
 import { useTranslation } from 'react-i18next';
 import { palette } from '../../theme/tokens';
 
@@ -19,6 +20,24 @@ export function TimeoutTimerSheet({ visible, teamName, teamColor, onEnd, onCance
   const [seconds, setSeconds] = useState(TIMEOUT_DURATION);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const hasBuzzed = useRef(false);
+  const soundRef = useRef<Audio.Sound | null>(null);
+
+  // Preload buzzer sound
+  useEffect(() => {
+    let mounted = true;
+    Audio.setAudioModeAsync({ playsInSilentModeIOS: true }).catch(() => {});
+    Audio.Sound.createAsync(
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      require('../../../assets/sounds/buzzer.wav'),
+    ).then(({ sound }) => {
+      if (mounted) soundRef.current = sound;
+    }).catch(() => { /* fallback to haptics only */ });
+    return () => {
+      mounted = false;
+      soundRef.current?.unloadAsync().catch(() => {});
+      soundRef.current = null;
+    };
+  }, []);
 
   useEffect(() => {
     if (!visible) return;
@@ -45,8 +64,15 @@ export function TimeoutTimerSheet({ visible, teamName, teamColor, onEnd, onCance
   }, [visible]);
 
   async function playBuzzer() {
-    // Three strong vibrations to simulate a buzzer
-    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    // Play real audio — always (regardless of haptics setting)
+    if (soundRef.current) {
+      try {
+        await soundRef.current.setPositionAsync(0);
+        await soundRef.current.playAsync();
+      } catch { /* ignore */ }
+    }
+    // Haptic reinforcement
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     setTimeout(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning), 300);
     setTimeout(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning), 600);
   }
