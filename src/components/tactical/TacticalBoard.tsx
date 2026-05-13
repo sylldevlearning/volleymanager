@@ -259,10 +259,15 @@ export function TacticalBoard({
     setPlaybackPositions(null);
   }
 
+  // Group colors — each group gets a distinct color that cycles
+  const GROUP_COLORS = ['#E63946', '#1D4ED8', '#2EA043', '#F59E0B', '#8B5CF6', '#EC4899'];
+  const groupColor = GROUP_COLORS[(currentGroup - 1) % GROUP_COLORS.length];
+
   // Drawing gesture
   const isDrawMode = selectedTool === 'arrow_solid' || selectedTool === 'arrow_dashed';
   const isCurvedMode = selectedTool === 'arrow_curved';
-  const drawColor = selectedTool === 'arrow_dashed' ? '#FBBF24' : '#1D4ED8';
+  // Curved arrows use group color; pencil uses red annotation color
+  const drawColor = groupColor;
   // Precompute as primitive string so the worklet can capture it safely
   const drawType: 'solid' | 'dashed' =
     selectedTool === 'arrow_dashed' ? 'dashed' : 'solid';
