@@ -11,6 +11,8 @@ export interface PlayerPosition {
   lastName?: string | null;
   isHome: boolean;
   isLibero?: boolean;
+  /** Special ball token — yellow, rendered as 🏐 */
+  isBall?: boolean;
 }
 
 export type ArrowType = 'solid' | 'dashed' | 'curved';

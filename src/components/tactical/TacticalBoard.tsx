@@ -82,6 +82,17 @@ function buildDefaultPositions(
     );
   }
 
+  // Ball token at center of court
+  positions.push({
+    playerId: 'ball',
+    x: 0.5, y: 0.5,
+    teamId: '',
+    number: 0,
+    label: '🏐',
+    isHome: false,
+    isBall: true,
+  });
+
   return positions;
 }
 
@@ -135,7 +146,7 @@ export function TacticalBoard({
     resetBoard,
   } = useTacticalStore();
 
-  const { rotationHome, rotationAway } = useScoringStore();
+  const { rotationHome, rotationAway, scoreHome, scoreAway, setsHome, setsAway } = useScoringStore();
 
   // Court dimensions: portrait, height = 2 * width
   const HEADER_H = 48;
@@ -373,6 +384,7 @@ export function TacticalBoard({
   }
 
   function handleTokenTap(playerId: string) {
+    if (playerId === 'ball') return;
     const found = positions.find((p) => p.playerId === playerId);
     if (found) setEditingPlayer(found);
   }
@@ -454,6 +466,15 @@ export function TacticalBoard({
           )}
 
           <Text style={styles.title}>{t('tactical.title')}</Text>
+
+          {/* Live score pill — shown when a match is active */}
+          {(scoreHome > 0 || scoreAway > 0 || setsHome > 0 || setsAway > 0) && (
+            <View style={styles.scorePill}>
+              <Text style={styles.scorePillText}>
+                {setsHome}–{setsAway} ({scoreHome}–{scoreAway})
+              </Text>
+            </View>
+          )}
 
           <Pressable onPress={handleNewBoard} style={styles.headerBtn} accessibilityRole="button"
             accessibilityLabel="Nouveau schéma">
@@ -640,6 +661,19 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
     fontSize: 15,
+    fontFamily: 'Inter_700Bold',
+    color: palette.textPrimary,
+  },
+  scorePill: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    backgroundColor: palette.backgroundElevated,
+    borderWidth: 1,
+    borderColor: palette.accentPrimary + '40',
+  },
+  scorePillText: {
+    fontSize: 11,
     fontFamily: 'Inter_700Bold',
     color: palette.textPrimary,
   },

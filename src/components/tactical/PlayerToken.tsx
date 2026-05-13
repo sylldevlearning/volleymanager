@@ -96,12 +96,15 @@ export function PlayerToken({
     ],
   }));
 
-  const bgColor = player.isLibero ? palette.libero : (player.isHome ? '#1D4ED8' : '#E63946');
-  const diameter = TOKEN_RADIUS * 2;
-  const shortName = getPlayerShortName(player);
-  const insideLabel = showName && !player.isLibero
-    ? player.label.slice(0, 3)
-    : String(player.number);
+  const isBall = player.isBall === true;
+  const bgColor = isBall ? '#F59E0B' : (player.isLibero ? palette.libero : (player.isHome ? '#1D4ED8' : '#E63946'));
+  const ballRadius = TOKEN_RADIUS - 4; // slightly smaller for the ball
+  const diameter = isBall ? ballRadius * 2 : TOKEN_RADIUS * 2;
+  const radius = isBall ? ballRadius : TOKEN_RADIUS;
+  const shortName = isBall ? '' : getPlayerShortName(player);
+  const insideLabel = isBall
+    ? '🏐'
+    : (showName && !player.isLibero ? player.label.slice(0, 3) : String(player.number));
 
   return (
     <GestureDetector gesture={gesture}>
@@ -110,7 +113,7 @@ export function PlayerToken({
           styles.wrapper,
           {
             left: basePixelX - WRAPPER_WIDTH / 2,
-            top: basePixelY - TOKEN_RADIUS,
+            top: basePixelY - radius,
           },
           animStyle,
         ]}
@@ -119,26 +122,29 @@ export function PlayerToken({
           <View
             style={[
               styles.circle,
-              player.isLibero && styles.liberoCircle,
+              isBall && styles.ballCircle,
+              !isBall && player.isLibero && styles.liberoCircle,
               {
                 width: diameter,
                 height: diameter,
-                borderRadius: TOKEN_RADIUS,
+                borderRadius: radius,
                 backgroundColor: bgColor,
               },
             ]}
           >
-            <Text style={styles.label}>{insideLabel}</Text>
+            <Text style={[styles.label, isBall && styles.ballEmoji]}>{insideLabel}</Text>
           </View>
-          {player.isLibero && (
+          {!isBall && player.isLibero && (
             <View style={styles.liberoBadge}>
               <Text style={styles.liberoBadgeText}>L</Text>
             </View>
           )}
         </View>
-        <Text style={styles.nameLabel} numberOfLines={1}>
-          {shortName}
-        </Text>
+        {!isBall && (
+          <Text style={styles.nameLabel} numberOfLines={1}>
+            {shortName}
+          </Text>
+        )}
       </Animated.View>
     </GestureDetector>
   );
@@ -160,6 +166,17 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 4,
     elevation: 6,
+  },
+  ballCircle: {
+    borderColor: '#FBBF24',
+    borderWidth: 2,
+    shadowColor: '#F59E0B',
+    shadowOpacity: 0.6,
+    shadowRadius: 6,
+    elevation: 8,
+  },
+  ballEmoji: {
+    fontSize: 16,
   },
   liberoCircle: {
     borderStyle: 'dashed',
