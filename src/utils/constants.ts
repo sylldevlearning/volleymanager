@@ -1,4 +1,5 @@
 export const APP_VERSION = '1.0.0';
+export const COMPANY = 'SyllDevLearning';
 
 export const SCORE_BUTTON_SIZE = 88;
 export const SCORE_FONT_SIZE = 96;

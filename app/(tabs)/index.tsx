@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Volleyball, Users, History, ChevronRight } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { palette } from '../../src/theme/tokens';
+import { COMPANY } from '../../src/utils/constants';
 import { TacticalBoard } from '../../src/components/tactical/TacticalBoard';
 
 export default function HomeScreen() {
@@ -82,6 +83,9 @@ export default function HomeScreen() {
             onPress={() => router.push('/(tabs)/matches')}
           />
         </View>
+
+        {/* Footer */}
+        <Text style={styles.footer}>{t('about.developedBy')} {COMPANY}</Text>
       </ScrollView>
 
       <TacticalBoard
@@ -297,5 +301,12 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: palette.backgroundElevated,
     marginLeft: 16,
+  },
+  footer: {
+    marginTop: 24,
+    fontSize: 12,
+    fontFamily: 'Inter_400Regular',
+    color: palette.textMuted,
+    textAlign: 'center',
   },
 });
