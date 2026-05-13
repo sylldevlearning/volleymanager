@@ -30,7 +30,9 @@
     "modeCoachDesc": "Statistiques joueurs en temps réel",
     "tacticalDesc": "Dessine des schémas, anime les déplacements",
     "quickMatch": "Match rapide",
-    "quickMatchDesc": "Locale vs Visiteur • Indoor 6×6 • Loisir"
+    "quickMatchDesc": "Locale vs Visiteur • Indoor 6×6 • Loisir",
+    "backToMenu": "Retour au menu",
+    "quitMatch": "Quitter le match ?"
   },
   "tabs": {
     "home": "Accueil",
@@ -295,10 +297,17 @@
       "move": "Déplacer",
       "arrowSolid": "Flèche (joueur)",
       "arrowDashed": "Flèche (ballon)",
-      "arrowCurved": "Flèche courbe",
+      "arrowCurved": "Flèche tracée",
+      "pencil": "Crayon",
       "eraser": "Gomme",
-      "clearAll": "Tout effacer"
+      "clearAll": "Tout effacer",
+      "tracedArrow": "Flèche tracée",
+      "link": "🔗 Lier",
+      "linkActive": "🔗 Groupe {{number}}"
     },
+    "ball": "Ballon",
+    "bench": "Remplaçants",
+    "swapPlayer": "Échanger",
     "playback": {
       "play": "Lecture",
       "pause": "Pause",
@@ -384,6 +393,7 @@
     "title": "TEMPS MORT",
     "timer": "Temps restant",
     "endNow": "Terminer",
+    "cancel": "Annuler le temps mort",
     "finished": "Temps mort terminé !",
     "buzzer": "BUZZER",
     "scoringDisabled": "Scoring désactivé pendant le temps mort"

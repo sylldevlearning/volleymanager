@@ -30,7 +30,9 @@
     "modeCoachDesc": "Real-time player statistics",
     "tacticalDesc": "Draw plays, animate movements",
     "quickMatch": "Quick Match",
-    "quickMatchDesc": "Home vs Away • Indoor 6×6 • Leisure"
+    "quickMatchDesc": "Home vs Away • Indoor 6×6 • Leisure",
+    "backToMenu": "Back to menu",
+    "quitMatch": "Quit match?"
   },
   "tabs": {
     "home": "Home",
@@ -295,10 +297,17 @@
       "move": "Move",
       "arrowSolid": "Arrow (player)",
       "arrowDashed": "Arrow (ball)",
-      "arrowCurved": "Curved arrow",
+      "arrowCurved": "Traced arrow",
+      "pencil": "Pencil",
       "eraser": "Eraser",
-      "clearAll": "Clear all"
+      "clearAll": "Clear all",
+      "tracedArrow": "Traced arrow",
+      "link": "🔗 Link",
+      "linkActive": "🔗 Group {{number}}"
     },
+    "ball": "Ball",
+    "bench": "Bench",
+    "swapPlayer": "Swap",
     "playback": {
       "play": "Play",
       "pause": "Pause",
@@ -384,6 +393,7 @@
     "title": "TIMEOUT",
     "timer": "Time remaining",
     "endNow": "End now",
+    "cancel": "Cancel timeout",
     "finished": "Timeout finished!",
     "buzzer": "BUZZER",
     "scoringDisabled": "Scoring disabled during timeout"
