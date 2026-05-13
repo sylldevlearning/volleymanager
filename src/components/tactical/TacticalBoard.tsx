@@ -7,7 +7,7 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { useSharedValue, runOnJS } from 'react-native-reanimated';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useTranslation } from 'react-i18next';
@@ -105,6 +105,7 @@ export function TacticalBoard({
 }: TacticalBoardProps) {
   const { t } = useTranslation();
   const { width: screenW, height: screenH } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const hapticsEnabled = useSettingsStore((s) => s.hapticsEnabled);
 
   const {
@@ -141,8 +142,9 @@ export function TacticalBoard({
   const PLAYBACK_H = 60;
   const TOOLBAR_H = 106;
   const PADDING = 16;
-  const availableH = screenH - HEADER_H - SAVEBAR_H - PLAYBACK_H - TOOLBAR_H - PADDING * 2;
-  const courtW = Math.min(screenW - PADDING * 2, availableH / 2);
+  const safeH = screenH - insets.top - insets.bottom;
+  const availableH = safeH - HEADER_H - SAVEBAR_H - PLAYBACK_H - TOOLBAR_H - PADDING * 2;
+  const courtW = Math.max(80, Math.min(screenW - PADDING * 2, availableH / 2));
   const courtH = courtW * 2;
 
   const [drawPreview, setDrawPreview] = useState<DrawPreviewState | null>(null);
