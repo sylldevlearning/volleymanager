@@ -19,6 +19,7 @@ import { SetTracker } from '../../../src/components/scoring/SetTracker';
 import { UndoButton } from '../../../src/components/scoring/UndoButton';
 import { SubstitutionSheet } from '../../../src/components/scoring/SubstitutionSheet';
 import { TimeoutTimerSheet } from '../../../src/components/scoring/TimeoutTimerSheet';
+import { AdBanner } from '../../../src/components/ads/AdBanner';
 import { TacticalBoard } from '../../../src/components/tactical/TacticalBoard';
 import type { Match } from '../../../src/models/match';
 import type { Team } from '../../../src/models/team';
@@ -65,6 +66,7 @@ export default function RefereeScreen() {
   const [subSide, setSubSide] = useState<'home' | 'away'>('home');
   const [attribution, setAttribution] = useState<AttributionState | null>(null);
   const [showTimeoutSheet, setShowTimeoutSheet] = useState(false);
+  const [showInterstitial, setShowInterstitial] = useState(false);
   const [timeoutTeamName, setTimeoutTeamName] = useState('');
   const [timeoutTeamColor, setTimeoutTeamColor] = useState<string>(palette.teamHome);
   const attributionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -221,10 +223,11 @@ export default function RefereeScreen() {
         if (hapticsEnabled) {
           setTimeout(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success), 300);
         }
+        setShowInterstitial(true);
         Alert.alert(
           t('match.matchOver'),
           t('referee.winsMatch', { name: isMatchWon(newSetsHome, match.config) ? homeTeam?.name : awayTeam?.name }),
-          [{ text: t('common.done'), onPress: () => router.replace(`/match/${match.id}/summary`) }]
+          [{ text: t('common.done'), onPress: () => { setShowInterstitial(false); router.replace(`/match/${match.id}/summary`); } }]
         );
       } else {
         // Next set
@@ -524,6 +527,8 @@ export default function RefereeScreen() {
           </View>
         </View>
       </Modal>
+      {/* Ad banner */}
+      {showInterstitial && <AdBanner />}
     </SafeAreaView>
   );
 }
