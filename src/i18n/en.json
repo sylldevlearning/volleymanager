@@ -372,5 +372,29 @@
     "soundDesc": "Sound on every point",
     "about": "About",
     "version": "Version"
+  },
+  "scoring": {
+    "removePoint": "-1 Point",
+    "scoreCannotBeNegative": "Score cannot be negative",
+    "pointCorrection": "Point correction"
+  },
+  "timeout": {
+    "title": "TIMEOUT",
+    "timer": "Time remaining",
+    "endNow": "End now",
+    "finished": "Timeout finished!",
+    "buzzer": "BUZZER",
+    "scoringDisabled": "Scoring disabled during timeout"
+  },
+  "about": {
+    "title": "About",
+    "version": "Version",
+    "developedBy": "Developed by",
+    "contact": "Contact",
+    "website": "Website",
+    "company": "SyllDevLearning"
+  },
+  "ads": {
+    "loading": "Advertisement"
   }
 }
