@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, Pressable } from 'react-native';
-import Svg, { Line, Rect, Circle, Text as SvgText } from 'react-native-svg';
+import Svg, { Line, Rect, Circle, Text as SvgText, G } from 'react-native-svg';
 import { palette } from '../../theme/tokens';
 
 interface PlayerInPosition {
@@ -107,6 +107,7 @@ export function IndoorCourt({
                       : palette.accentSecondary
                     : palette.backgroundHover}
                 strokeWidth={isServing ? 2.5 : 1.5}
+                strokeDasharray={player?.isLibero ? '4 2' : undefined}
                 onPress={() => onPositionPress?.(pos)}
               />
               {player ? (
@@ -135,6 +136,12 @@ export function IndoorCourt({
               )}
               {isServing && (
                 <Circle cx={cx + r - 4} cy={cy - r + 4} r={5} fill={palette.accentPrimary} />
+              )}
+              {player?.isLibero && (
+                <G>
+                  <Circle cx={cx + r - 5} cy={cy - r + 5} r={7} fill="#E63946" />
+                  <SvgText x={cx + r - 5} y={cy - r + 6} textAnchor="middle" alignmentBaseline="middle" fontSize={8} fontWeight="700" fill="#fff">L</SvgText>
+                </G>
               )}
             </React.Fragment>
           );

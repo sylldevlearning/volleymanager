@@ -99,9 +99,9 @@ export function PlayerToken({
   const bgColor = player.isLibero ? palette.libero : (player.isHome ? '#1D4ED8' : '#E63946');
   const diameter = TOKEN_RADIUS * 2;
   const shortName = getPlayerShortName(player);
-  const insideLabel = player.isLibero
-    ? `⚡${player.number}`
-    : (showName ? player.label.slice(0, 3) : String(player.number));
+  const insideLabel = showName && !player.isLibero
+    ? player.label.slice(0, 3)
+    : String(player.number);
 
   return (
     <GestureDetector gesture={gesture}>
@@ -115,18 +115,26 @@ export function PlayerToken({
           animStyle,
         ]}
       >
-        <View
-          style={[
-            styles.circle,
-            {
-              width: diameter,
-              height: diameter,
-              borderRadius: TOKEN_RADIUS,
-              backgroundColor: bgColor,
-            },
-          ]}
-        >
-          <Text style={styles.label}>{insideLabel}</Text>
+        <View style={{ position: 'relative' }}>
+          <View
+            style={[
+              styles.circle,
+              player.isLibero && styles.liberoCircle,
+              {
+                width: diameter,
+                height: diameter,
+                borderRadius: TOKEN_RADIUS,
+                backgroundColor: bgColor,
+              },
+            ]}
+          >
+            <Text style={styles.label}>{insideLabel}</Text>
+          </View>
+          {player.isLibero && (
+            <View style={styles.liberoBadge}>
+              <Text style={styles.liberoBadgeText}>L</Text>
+            </View>
+          )}
         </View>
         <Text style={styles.nameLabel} numberOfLines={1}>
           {shortName}
@@ -152,6 +160,27 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 4,
     elevation: 6,
+  },
+  liberoCircle: {
+    borderStyle: 'dashed',
+    borderColor: '#fff',
+    borderWidth: 2,
+  },
+  liberoBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#E63946',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  liberoBadgeText: {
+    color: '#fff',
+    fontSize: 8,
+    fontFamily: 'Inter_700Bold',
   },
   label: {
     color: '#FFFFFF',

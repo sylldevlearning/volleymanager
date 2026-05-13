@@ -9,9 +9,9 @@ import type { CourtMap } from '../../stores/scoringStore';
 import type { LiberoState, SubstitutionPair } from '../../models/substitution';
 import type { MatchConfig, MatchFormat } from '../../models/match';
 import { palette } from '../../theme/tokens';
-import { BACK_ROW_POSITIONS, validateSubstitution, validateLiberoSubstitution } from '../../utils/substitutionRules';
+import { validateSubstitution, validateLiberoSubstitution } from '../../utils/substitutionRules';
 
-const LIBERO_COLOR = '#FBBF24';
+const LIBERO_COLOR = palette.libero;
 
 interface SubstitutionSheetProps {
   visible: boolean;
@@ -167,19 +167,20 @@ export function SubstitutionSheet({
                 return (
                   <Pressable
                     key={pos}
-                    style={[subStyles.slot, { backgroundColor: bgColor, borderColor }]}
+                    style={[subStyles.slot, isLib && subStyles.slotLibero, { backgroundColor: bgColor, borderColor }]}
                     onPress={() => step === 'selectOut' && handleSelectOut(playerId, pos)}
                     accessibilityRole="radio"
                     accessibilityState={{ selected: isOut }}
                   >
                     <Text style={subStyles.slotPosLabel}>P{pos}</Text>
                     <Text style={[subStyles.slotNum, { color: isLib ? LIBERO_COLOR : teamColor }]}>
-                      {isLib ? '⚡' : ''}{player.number}
+                      {player.number}
                     </Text>
                     <Text style={subStyles.slotName} numberOfLines={1}>
                       {player.lastName ?? player.firstName ?? `#${player.number}`}
                     </Text>
                     {isOut && <View style={subStyles.outBadge}><Text style={subStyles.outBadgeText}>OUT</Text></View>}
+                    {isLib && <View style={subStyles.liberoBadge}><Text style={subStyles.liberoBadgeText}>L</Text></View>}
                   </Pressable>
                 );
               })}
@@ -351,6 +352,21 @@ const subStyles = StyleSheet.create({
     borderColor: palette.backgroundElevated,
     backgroundColor: palette.backgroundElevated,
   },
+  slotLibero: {
+    borderStyle: 'dashed',
+  },
+  liberoBadge: {
+    position: 'absolute',
+    top: 4,
+    left: 4,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#E63946',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  liberoBadgeText: { fontSize: 8, fontFamily: 'Inter_700Bold', color: '#fff' },
   slotPosLabel: { fontSize: 9, fontFamily: 'Inter_600SemiBold', color: palette.textMuted, letterSpacing: 0.5 },
   slotNum: { fontSize: 18, fontFamily: 'Inter_700Bold' },
   slotName: { fontSize: 10, fontFamily: 'Inter_400Regular', color: palette.textSecondary, maxWidth: 80 },
