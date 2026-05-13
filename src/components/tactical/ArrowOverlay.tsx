@@ -1,7 +1,7 @@
 import React from 'react';
 import Svg, { Path, Polygon } from 'react-native-svg';
 import { ArrowPath } from './ArrowPath';
-import type { Arrow } from '../../models/tactical';
+import type { Arrow, FreehandPath } from '../../models/tactical';
 
 interface DrawPreview {
   fromX: number;
@@ -14,19 +14,25 @@ interface DrawPreview {
 
 interface ArrowOverlayProps {
   arrows: Arrow[];
+  freehandPaths: FreehandPath[];
   courtWidth: number;
   courtHeight: number;
   eraserMode: boolean;
   drawPreview: DrawPreview | null;
+  pencilPreviewD: string | null;
+  pencilColor: string;
   onRemoveArrow: (id: string) => void;
 }
 
 export function ArrowOverlay({
   arrows,
+  freehandPaths,
   courtWidth,
   courtHeight,
   eraserMode,
   drawPreview,
+  pencilPreviewD,
+  pencilColor,
   onRemoveArrow,
 }: ArrowOverlayProps) {
   return (
@@ -36,6 +42,19 @@ export function ArrowOverlay({
       style={{ position: 'absolute', top: 0, left: 0 }}
       pointerEvents={eraserMode ? 'auto' : 'none'}
     >
+      {/* Committed freehand paths */}
+      {freehandPaths.map((fp) => (
+        <Path
+          key={fp.id}
+          d={fp.d}
+          stroke={fp.color}
+          strokeWidth={2.5}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      ))}
+
       {arrows.map((arrow) => (
         <ArrowPath
           key={arrow.id}
@@ -47,7 +66,20 @@ export function ArrowOverlay({
         />
       ))}
 
-      {/* Live draw preview */}
+      {/* Live pencil preview */}
+      {pencilPreviewD && (
+        <Path
+          d={pencilPreviewD}
+          stroke={pencilColor}
+          strokeWidth={2.5}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          opacity={0.8}
+        />
+      )}
+
+      {/* Live arrow draw preview */}
       {drawPreview && (
         <>
           <Path

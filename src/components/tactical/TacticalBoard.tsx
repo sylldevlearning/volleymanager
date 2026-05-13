@@ -110,6 +110,7 @@ export function TacticalBoard({
   const {
     positions,
     arrows,
+    freehandPaths,
     selectedTool,
     arrowThickness,
     isPlaying,
@@ -122,6 +123,7 @@ export function TacticalBoard({
     addArrow,
     removeArrow,
     clearArrows,
+    addFreehandPath,
     setTool,
     setPlaying,
     setPlaybackSpeed,
@@ -142,15 +144,16 @@ export function TacticalBoard({
   const courtH = courtW * 2;
 
   const [drawPreview, setDrawPreview] = useState<DrawPreviewState | null>(null);
+  const [pencilPreviewD, setPencilPreviewD] = useState<string | null>(null);
   const [showPlaybook, setShowPlaybook] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<PlayerPosition | null>(null);
   const [playbookMode, setPlaybookMode] = useState<'load' | 'save'>('load');
   const [playbackPositions, setPlaybackPositions] = useState<PlayerPosition[] | null>(null);
-  const [showNames, setShowNames] = useState(false);
   const [currentFormat, setCurrentFormat] = useState<MatchFormat>(format);
 
   const drawStartX = useSharedValue(0);
   const drawStartY = useSharedValue(0);
+  const pencilPointsRef = useRef<{ x: number; y: number }[]>([]);
   const isPlayingRef = useRef(false);
   const animFrameRef = useRef<number | null>(null);
   const positionsRef = useRef(positions);
@@ -293,6 +296,42 @@ export function TacticalBoard({
       runOnJS(setDrawPreview)(null);
     });
 
+  // Pencil (freehand) gesture
+  const isPencilMode = selectedTool === 'pencil';
+  const pencilColor = '#E63946';
+
+  function buildPathD(pts: { x: number; y: number }[]): string {
+    if (pts.length < 2) return '';
+    return pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
+  }
+
+  function onPencilBegin(x: number, y: number) {
+    pencilPointsRef.current = [{ x, y }];
+    setPencilPreviewD(`M ${x.toFixed(1)} ${y.toFixed(1)}`);
+  }
+
+  function onPencilUpdate(x: number, y: number) {
+    pencilPointsRef.current.push({ x, y });
+    setPencilPreviewD(buildPathD(pencilPointsRef.current));
+  }
+
+  function onPencilEnd() {
+    const pts = pencilPointsRef.current;
+    if (pts.length > 3) {
+      addFreehandPath(buildPathD(pts), pencilColor);
+    }
+    pencilPointsRef.current = [];
+    setPencilPreviewD(null);
+  }
+
+  const pencilGesture = Gesture.Pan()
+    .enabled(isPencilMode)
+    .minDistance(0)
+    .onBegin((e) => { runOnJS(onPencilBegin)(e.x, e.y); })
+    .onUpdate((e) => { runOnJS(onPencilUpdate)(e.x, e.y); })
+    .onEnd(() => { runOnJS(onPencilEnd)(); })
+    .onFinalize(() => { runOnJS(onPencilEnd)(); });
+
   const displayPositions = playbackPositions ?? positions;
 
   function handleDragEnd(playerId: string, x: number, y: number) {
@@ -386,15 +425,6 @@ export function TacticalBoard({
             accessibilityLabel="Nouveau schéma">
             <Text style={styles.headerBtnText}>🗒</Text>
           </Pressable>
-          <Pressable
-            onPress={() => setShowNames((v) => !v)}
-            style={styles.headerBtn}
-            accessibilityRole="button"
-          >
-            <Text style={[styles.headerBtnText, showNames && styles.headerBtnActive]}>
-              {showNames ? 'ABC' : '123'}
-            </Text>
-          </Pressable>
         </View>
 
         {/* Save / Load bar */}
@@ -426,13 +456,16 @@ export function TacticalBoard({
             {/* Base court SVG */}
             <CourtSVG width={courtW} height={courtH} format={currentFormat} />
 
-            {/* Arrow layer */}
+            {/* Arrow + freehand layer */}
             <ArrowOverlay
               arrows={arrows}
+              freehandPaths={freehandPaths}
               courtWidth={courtW}
               courtHeight={courtH}
               eraserMode={selectedTool === 'eraser'}
               drawPreview={drawPreview}
+              pencilPreviewD={pencilPreviewD}
+              pencilColor={pencilColor}
               onRemoveArrow={removeArrow}
             />
 
@@ -444,7 +477,7 @@ export function TacticalBoard({
                 courtWidth={courtW}
                 courtHeight={courtH}
                 canDrag={selectedTool === 'move' && !isPlaying}
-                showName={showNames}
+                showName={false}
                 onDragEnd={handleDragEnd}
                 onTap={handleTokenTap}
                 hapticsEnabled={hapticsEnabled}
@@ -454,6 +487,12 @@ export function TacticalBoard({
             {/* Drawing gesture overlay (on top of everything in draw mode) */}
             {isDrawMode && (
               <GestureDetector gesture={drawGesture}>
+                <Animated.View style={StyleSheet.absoluteFill} />
+              </GestureDetector>
+            )}
+            {/* Pencil gesture overlay */}
+            {isPencilMode && (
+              <GestureDetector gesture={pencilGesture}>
                 <Animated.View style={StyleSheet.absoluteFill} />
               </GestureDetector>
             )}

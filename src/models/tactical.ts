@@ -43,7 +43,15 @@ export type TacticalTool =
   | 'arrow_solid'
   | 'arrow_dashed'
   | 'arrow_curved'
+  | 'pencil'
   | 'eraser';
+
+export interface FreehandPath {
+  id: string;
+  /** SVG path data string (M x y L x y ...) */
+  d: string;
+  color: string;
+}
 
 export interface TacticalPlay {
   id: string;

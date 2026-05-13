@@ -16,6 +16,7 @@ const TOOLS: { key: TacticalTool; icon: string }[] = [
   { key: 'arrow_solid', icon: '→' },
   { key: 'arrow_dashed', icon: '⇢' },
   { key: 'arrow_curved', icon: '↝' },
+  { key: 'pencil', icon: '✏️' },
   { key: 'eraser', icon: '🧹' },
 ];
 

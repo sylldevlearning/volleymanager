@@ -1,10 +1,11 @@
 import { create } from 'zustand';
-import type { PlayerPosition, Arrow, TacticalPlay, TacticalTool, ArrowThickness } from '../../models/tactical';
+import type { PlayerPosition, Arrow, FreehandPath, TacticalPlay, TacticalTool, ArrowThickness } from '../../models/tactical';
 import { generateId } from '../../services/database';
 
 interface TacticalState {
   positions: PlayerPosition[];
   arrows: Arrow[];
+  freehandPaths: FreehandPath[];
   selectedTool: TacticalTool;
   arrowThickness: ArrowThickness;
   isPlaying: boolean;
@@ -19,6 +20,8 @@ interface TacticalState {
   addArrow: (arrow: Omit<Arrow, 'id' | 'order'>) => void;
   removeArrow: (id: string) => void;
   clearArrows: () => void;
+  addFreehandPath: (d: string, color: string) => void;
+  clearFreehandPaths: () => void;
   setTool: (tool: TacticalTool) => void;
   setArrowThickness: (thickness: ArrowThickness) => void;
   setPlaying: (playing: boolean) => void;
@@ -31,6 +34,7 @@ interface TacticalState {
 export const useTacticalStore = create<TacticalState>()((set, get) => ({
   positions: [],
   arrows: [],
+  freehandPaths: [],
   selectedTool: 'move',
   arrowThickness: 'thin',
   isPlaying: false,
@@ -70,7 +74,14 @@ export const useTacticalStore = create<TacticalState>()((set, get) => ({
       arrows: state.arrows.filter((a) => a.id !== id),
     })),
 
-  clearArrows: () => set({ arrows: [] }),
+  clearArrows: () => set({ arrows: [], freehandPaths: [] }),
+
+  addFreehandPath: (d, color) =>
+    set((state) => ({
+      freehandPaths: [...state.freehandPaths, { id: generateId(), d, color }],
+    })),
+
+  clearFreehandPaths: () => set({ freehandPaths: [] }),
 
   setTool: (tool) => set({ selectedTool: tool }),
 
@@ -86,6 +97,7 @@ export const useTacticalStore = create<TacticalState>()((set, get) => ({
     set({
       positions: play.positions,
       arrows: play.arrows,
+      freehandPaths: [],
       selectedTool: 'move',
       isPlaying: false,
       currentStep: 0,
@@ -97,6 +109,7 @@ export const useTacticalStore = create<TacticalState>()((set, get) => ({
     set({
       positions: [],
       arrows: [],
+      freehandPaths: [],
       selectedTool: 'move',
       isPlaying: false,
       currentStep: 0,
