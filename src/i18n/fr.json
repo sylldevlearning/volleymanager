@@ -30,7 +30,7 @@
     "modeCoachDesc": "Statistiques joueurs en temps réel",
     "tacticalDesc": "Dessine des schémas, anime les déplacements",
     "quickMatch": "Match rapide",
-    "quickMatchDesc": "Locale vs Visiteur • Indoor 6×6 • Loisir",
+    "quickMatchDesc": "France vs Brésil • Indoor 6×6 • Loisir",
     "backToMenu": "Retour au menu",
     "quitMatch": "Quitter le match ?"
   },
@@ -39,6 +39,9 @@
     "matches": "Matchs",
     "teams": "Équipes",
     "settings": "Paramètres"
+  },
+  "summary": {
+    "backToMenu": "Retour au menu"
   },
   "match": {
     "new": "Nouveau match",
@@ -302,9 +305,12 @@
       "eraser": "Gomme",
       "clearAll": "Tout effacer",
       "tracedArrow": "Flèche tracée",
-      "link": "🔗 Lier",
-      "linkActive": "🔗 Groupe {{number}}"
+      "link": "🔗 Mouvements",
+      "linkActive": "🔗 Temps {{number}}"
     },
+    "menu": "Menu",
+    "loadPlay": "Charger un schéma",
+    "savePlay": "Sauvegarder",
     "ball": "Ballon",
     "bench": "Remplaçants",
     "swapPlayer": "Échanger",

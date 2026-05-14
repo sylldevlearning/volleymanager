@@ -22,8 +22,8 @@ export default function HomeScreen() {
     setCreatingQuickMatch(true);
     try {
       const [home, away] = await Promise.all([
-        createTeam({ name: 'Locale', shortName: 'LOC', logoUri: null, color: palette.teamHome }),
-        createTeam({ name: 'Visiteur', shortName: 'VIS', logoUri: null, color: palette.teamAway }),
+        createTeam({ name: 'France', shortName: 'FRA', logoUri: null, color: '#1D4ED8' }),
+        createTeam({ name: 'Brésil', shortName: 'BRA', logoUri: null, color: '#F59E0B' }),
       ]);
       const match = await createMatch({
         format: 'indoor_6v6',

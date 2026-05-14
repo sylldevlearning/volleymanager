@@ -33,7 +33,7 @@ describe('seedDefaultDataIfEmpty', () => {
     expect(mockCreatePlayer).toHaveBeenCalledTimes(26);
   });
 
-  it('first team is red (home), second is blue (away)', async () => {
+  it('first team is France (blue), second is Brazil (amber)', async () => {
     mockGetAllTeams.mockResolvedValue([]);
     mockCreateTeam
       .mockResolvedValueOnce({ id: 'team-a' })
@@ -44,11 +44,11 @@ describe('seedDefaultDataIfEmpty', () => {
 
     expect(mockCreateTeam).toHaveBeenNthCalledWith(
       1,
-      expect.objectContaining({ color: '#E63946' })
+      expect.objectContaining({ name: 'France', shortName: 'FRA', color: '#1D4ED8' })
     );
     expect(mockCreateTeam).toHaveBeenNthCalledWith(
       2,
-      expect.objectContaining({ color: '#1D4ED8' })
+      expect.objectContaining({ name: 'Brésil', shortName: 'BRA', color: '#F59E0B' })
     );
   });
 
@@ -80,19 +80,37 @@ describe('seedDefaultDataIfEmpty', () => {
     expect(mockCreatePlayer).not.toHaveBeenCalled();
   });
 
-  it('players have numbers 1-13', async () => {
+  it('France players include Ngapeth (#2) and Grebennikov (#20)', async () => {
     mockGetAllTeams.mockResolvedValue([]);
     mockCreateTeam
-      .mockResolvedValueOnce({ id: 'team-a' })
-      .mockResolvedValueOnce({ id: 'team-b' });
+      .mockResolvedValueOnce({ id: 'team-france' })
+      .mockResolvedValueOnce({ id: 'team-brazil' });
     mockCreatePlayer.mockResolvedValue({});
 
     await seedDefaultDataIfEmpty();
 
-    const numbersA = mockCreatePlayer.mock.calls
-      .filter(([arg]) => arg.teamId === 'team-a')
-      .map(([arg]) => arg.number)
-      .sort((a: number, b: number) => a - b);
-    expect(numbersA).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]);
+    const francePlayers = mockCreatePlayer.mock.calls
+      .filter(([arg]) => arg.teamId === 'team-france')
+      .map(([arg]) => arg);
+
+    expect(francePlayers.some((p) => p.lastName === 'Ngapeth' && p.number === 2)).toBe(true);
+    expect(francePlayers.some((p) => p.lastName === 'Grebennikov' && p.position === 'libero')).toBe(true);
+  });
+
+  it('Brazil players include Bruninho (#1) and Thales libero (#18)', async () => {
+    mockGetAllTeams.mockResolvedValue([]);
+    mockCreateTeam
+      .mockResolvedValueOnce({ id: 'team-france' })
+      .mockResolvedValueOnce({ id: 'team-brazil' });
+    mockCreatePlayer.mockResolvedValue({});
+
+    await seedDefaultDataIfEmpty();
+
+    const brazilPlayers = mockCreatePlayer.mock.calls
+      .filter(([arg]) => arg.teamId === 'team-brazil')
+      .map(([arg]) => arg);
+
+    expect(brazilPlayers.some((p) => p.lastName === 'Bruninho' && p.number === 1)).toBe(true);
+    expect(brazilPlayers.some((p) => p.lastName === 'Thales' && p.position === 'libero')).toBe(true);
   });
 });

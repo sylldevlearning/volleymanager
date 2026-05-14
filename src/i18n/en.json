@@ -30,7 +30,7 @@
     "modeCoachDesc": "Real-time player statistics",
     "tacticalDesc": "Draw plays, animate movements",
     "quickMatch": "Quick Match",
-    "quickMatchDesc": "Home vs Away • Indoor 6×6 • Leisure",
+    "quickMatchDesc": "France vs Brazil • Indoor 6×6 • Leisure",
     "backToMenu": "Back to menu",
     "quitMatch": "Quit match?"
   },
@@ -39,6 +39,9 @@
     "matches": "Matches",
     "teams": "Teams",
     "settings": "Settings"
+  },
+  "summary": {
+    "backToMenu": "Back to menu"
   },
   "match": {
     "new": "New match",
@@ -305,6 +308,9 @@
       "link": "🔗 Link",
       "linkActive": "🔗 Group {{number}}"
     },
+    "menu": "Menu",
+    "loadPlay": "Load play",
+    "savePlay": "Save play",
     "ball": "Ball",
     "bench": "Bench",
     "swapPlayer": "Swap",
