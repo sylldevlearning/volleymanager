@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
+  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -8,6 +9,8 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
+
+const BALL_IMG = require('../../assets/images/ballon.png');
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -256,7 +259,7 @@ function ServePicker({
             <Text style={[styles.serveOptionText, isSelected && styles.serveOptionTextActive]}>
               {team.name}
             </Text>
-            {isSelected && <Text style={styles.serveIcon}>🏐</Text>}
+            {isSelected && <Image source={BALL_IMG} style={styles.serveIcon} />}
           </Pressable>
         );
       })}
@@ -354,7 +357,7 @@ const styles = StyleSheet.create({
   },
   serveOptionText: { flex: 1, fontSize: 14, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
   serveOptionTextActive: { color: palette.textPrimary, fontFamily: 'Inter_700Bold' },
-  serveIcon: { fontSize: 18 },
+  serveIcon: { width: 22, height: 22 },
   configPreview: {
     backgroundColor: palette.backgroundSurface,
     borderRadius: 14,

@@ -1,4 +1,6 @@
-import { StyleSheet, Text, View, Pressable, Linking } from 'react-native';
+import { Image, StyleSheet, Text, View, Pressable, Linking } from 'react-native';
+
+const BALL_IMG = require('../assets/images/ballon.png');
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -23,7 +25,7 @@ export default function AboutScreen() {
 
       {/* App identity */}
       <View style={styles.heroBlock}>
-        <Text style={styles.heroEmoji}>🏐</Text>
+        <Image source={BALL_IMG} style={styles.heroEmoji} resizeMode="contain" />
         <Text style={styles.heroName}>VolleyManager</Text>
         <Text style={styles.heroVersion}>{t('about.version')} {APP_VERSION}</Text>
       </View>
@@ -83,7 +85,7 @@ const styles = StyleSheet.create({
   backBtn: { padding: 8 },
   headerTitle: { flex: 1, fontSize: 17, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary, textAlign: 'center' },
   heroBlock: { alignItems: 'center', paddingVertical: 36, gap: 6 },
-  heroEmoji: { fontSize: 52 },
+  heroEmoji: { width: 72, height: 72 },
   heroName: { fontSize: 26, fontFamily: 'Inter_900Black', color: palette.textPrimary, marginTop: 8 },
   heroVersion: { fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textMuted },
   section: { paddingHorizontal: 16 },
