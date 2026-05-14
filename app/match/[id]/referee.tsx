@@ -186,6 +186,7 @@ export default function RefereeScreen() {
 
   const handlePoint = useCallback(async (team: 'home' | 'away') => {
     if (!match || !currentSet) return;
+    if (currentSet.winnerTeamId) return;
 
     const eventType = team === 'home' ? 'point_home' : 'point_away';
     const newEvent = await addEvent({
@@ -346,6 +347,7 @@ export default function RefereeScreen() {
   const maxSets = getTotalSets(match.config);
   const currentSetNum = currentSet?.setNumber ?? 1;
   const maxTimeouts = match.config.timeoutsPerSet ?? 2;
+  const setIsOver = !!currentSet?.winnerTeamId;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -366,7 +368,7 @@ export default function RefereeScreen() {
           teamColor={homeTeam.color || palette.teamHome}
           onPress={() => handlePoint('home')}
           onRemove={() => handleRemovePoint('home')}
-          disabled={false}
+          disabled={setIsOver}
         />
 
         <View style={styles.scoreSeparator}>
@@ -380,7 +382,7 @@ export default function RefereeScreen() {
           teamColor={palette.teamAway}
           onPress={() => handlePoint('away')}
           onRemove={() => handleRemovePoint('away')}
-          disabled={false}
+          disabled={setIsOver}
         />
       </View>
 
@@ -473,7 +475,7 @@ export default function RefereeScreen() {
           <ArrowLeft size={16} color={palette.textSecondary} />
           <Text style={styles.actionText}>{t('home.backToMenu')}</Text>
         </Pressable>
-        <UndoButton onPress={handleUndo} disabled={false} />
+        <UndoButton onPress={handleUndo} disabled={setIsOver} />
         <Pressable
           style={({ pressed }) => [styles.tacticalBtn, pressed && styles.actionBtnPressed]}
           onPress={() => setShowTactical(true)}
