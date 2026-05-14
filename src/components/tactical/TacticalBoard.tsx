@@ -572,6 +572,9 @@ export function TacticalBoard({
     .onEnd(() => { runOnJS(onCurvedEnd)(); })
     .onFinalize(() => { runOnJS(onCurvedEnd)(); });
 
+  // One gesture that covers all drawing tools — each sub-gesture self-disables via .enabled()
+  const allDrawGesture = Gesture.Exclusive(drawGesture, curvedGesture, pencilGesture);
+
   const displayPositions = playbackPositions ?? positions;
 
   function handleCourtLayout() {
@@ -809,23 +812,44 @@ export function TacticalBoard({
           )}
 
           <View ref={courtRef} onLayout={handleCourtLayout} style={[styles.court, { width: courtW, height: courtH }]}>
-            {/* Visual court + arrows — clipped to rounded rect, no tokens inside */}
-            <View style={styles.courtClip}>
-              <CourtSVG width={courtW} height={courtH} format={currentFormat} />
-              <ArrowOverlay
-                arrows={arrows}
-                freehandPaths={freehandPaths}
-                courtWidth={courtW}
-                courtHeight={courtH}
-                eraserMode={selectedTool === 'eraser'}
-                drawPreview={drawPreview}
-                pencilPreviewD={pencilPreviewD}
-                pencilColor={pencilColor}
-                onRemoveArrow={removeArrow}
-              />
+            {/* Court background — SVG draws its own background, no RN clip needed */}
+            <CourtSVG width={courtW} height={courtH} format={currentFormat} />
+
+            {/* Drawing layer: gesture wraps ArrowOverlay so e.x/e.y are in court coords.
+                Eraser mode skips the GestureDetector so SVG onPress events reach ArrowPath. */}
+            <View style={styles.drawLayer}>
+              {selectedTool === 'eraser' ? (
+                <ArrowOverlay
+                  arrows={arrows}
+                  freehandPaths={freehandPaths}
+                  courtWidth={courtW}
+                  courtHeight={courtH}
+                  eraserMode={true}
+                  drawPreview={null}
+                  pencilPreviewD={null}
+                  pencilColor={pencilColor}
+                  onRemoveArrow={removeArrow}
+                />
+              ) : (
+                <GestureDetector gesture={allDrawGesture}>
+                  <Animated.View style={{ flex: 1 }}>
+                    <ArrowOverlay
+                      arrows={arrows}
+                      freehandPaths={freehandPaths}
+                      courtWidth={courtW}
+                      courtHeight={courtH}
+                      eraserMode={false}
+                      drawPreview={drawPreview}
+                      pencilPreviewD={pencilPreviewD}
+                      pencilColor={pencilColor}
+                      onRemoveArrow={removeArrow}
+                    />
+                  </Animated.View>
+                </GestureDetector>
+              )}
             </View>
 
-            {/* Player tokens — outside clip so drag never gets hidden */}
+            {/* Player tokens — rendered above drawing layer; zIndex 9999 on active drag */}
             {displayPositions.map((player) => (
               <PlayerToken
                 key={player.playerId}
@@ -840,25 +864,6 @@ export function TacticalBoard({
                 isFaulty={faultPlayerIds.has(player.playerId)}
               />
             ))}
-
-            {/* Drawing gesture overlay (on top of everything in draw mode) */}
-            {isDrawMode && (
-              <GestureDetector gesture={drawGesture}>
-                <Animated.View style={StyleSheet.absoluteFill} />
-              </GestureDetector>
-            )}
-            {/* Pencil gesture overlay */}
-            {isPencilMode && (
-              <GestureDetector gesture={pencilGesture}>
-                <Animated.View style={StyleSheet.absoluteFill} />
-              </GestureDetector>
-            )}
-            {/* Curved (freehand with arrowhead) gesture overlay */}
-            {isCurvedMode && (
-              <GestureDetector gesture={curvedGesture}>
-                <Animated.View style={StyleSheet.absoluteFill} />
-              </GestureDetector>
-            )}
           </View>
 
           {/* Away bench — right column */}
@@ -1060,13 +1065,15 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_400Regular',
   },
   court: {
-    borderRadius: 12,
     position: 'relative',
     overflow: 'visible',
   },
-  courtClip: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: 12,
-    overflow: 'hidden',
+  drawLayer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1,
   },
 });
