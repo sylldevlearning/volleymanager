@@ -56,6 +56,7 @@ export function PlayerToken({
   }
 
   const tapGesture = Gesture.Tap()
+    .enabled(canDrag)
     .maxDuration(200)
     .maxDistance(10)
     .onEnd((_e, success) => {
@@ -117,6 +118,7 @@ export function PlayerToken({
   return (
     <GestureDetector gesture={gesture}>
       <Animated.View
+        pointerEvents={canDrag ? 'auto' : 'none'}
         style={[
           styles.wrapper,
           {
