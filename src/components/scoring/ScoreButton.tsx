@@ -29,6 +29,7 @@ export function ScoreButton({ teamName, score, teamColor, onPress, onRemove, dis
   const { scoreFontSize, scoreButtonSize } = useResponsive();
   const scale = useSharedValue(1);
   const lastPressTime = useSharedValue(0);
+  const shouldFire = useSharedValue(false);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -42,15 +43,19 @@ export function ScoreButton({ teamName, score, teamColor, onPress, onRemove, dis
     .enabled(!disabled)
     .onStart(() => {
       const now = Date.now();
-      if (now - lastPressTime.value < DEBOUNCE_MS) return;
+      if (now - lastPressTime.value < DEBOUNCE_MS) {
+        shouldFire.value = false;
+        return;
+      }
+      shouldFire.value = true;
       lastPressTime.value = now;
-
       scale.value = withTiming(0.93, { duration: ANIMATION_DURATION_SHORT });
       if (hapticsEnabled) {
         runOnJS(triggerHaptic)();
       }
     })
     .onEnd(() => {
+      if (!shouldFire.value) return;
       scale.value = withSpring(1, { damping: 12, stiffness: 180 });
       runOnJS(onPress)();
     });
@@ -60,7 +65,7 @@ export function ScoreButton({ teamName, score, teamColor, onPress, onRemove, dis
       <Text style={styles.teamName} numberOfLines={1}>
         {teamName}
       </Text>
-      {/* GestureDetector covers only the score circle — keeps -1 Pressable separate */}
+      {/* GestureDetector covers only the score circle — keeps badges separate */}
       <GestureDetector gesture={gesture}>
         <Animated.View style={animatedStyle}>
           <View style={[styles.button, { backgroundColor: teamColor + '20', borderColor: teamColor, minHeight: scoreButtonSize }]}>
@@ -73,15 +78,21 @@ export function ScoreButton({ teamName, score, teamColor, onPress, onRemove, dis
           <Pressable
             style={[styles.minusBadge, { borderColor: teamColor }]}
             onPress={onRemove}
+            disabled={disabled}
             accessibilityRole="button"
             accessibilityLabel="-1"
           >
             <Text style={[styles.minusText, { color: teamColor }]}>-1</Text>
           </Pressable>
         )}
-        <View style={[styles.addBadge, { backgroundColor: teamColor }]}>
+        <Pressable
+          style={[styles.addBadge, { backgroundColor: disabled ? teamColor + '40' : teamColor }]}
+          onPress={disabled ? undefined : onPress}
+          accessibilityRole="button"
+          accessibilityLabel="+1"
+        >
           <Text style={styles.addText}>+1</Text>
-        </View>
+        </Pressable>
       </View>
     </View>
   );
