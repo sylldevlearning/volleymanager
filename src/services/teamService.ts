@@ -30,16 +30,34 @@ export async function getTeamById(id: string): Promise<Team | null> {
   return row ? rowToTeam(row) : null;
 }
 
+export async function getTeamByName(name: string): Promise<Team | null> {
+  const db = await getDb();
+  const row = await db.getFirstAsync<Record<string, unknown>>(
+    'SELECT * FROM teams WHERE name = ?',
+    [name]
+  );
+  return row ? rowToTeam(row) : null;
+}
+
 export async function createTeam(input: TeamInput): Promise<Team> {
   const db = await getDb();
   const id = generateId();
   const now = new Date().toISOString();
-  await db.runAsync(
-    `INSERT INTO teams (id, name, short_name, logo_uri, color, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [id, input.name, input.shortName, input.logoUri, input.color, now, now]
-  );
-  return { id, ...input, createdAt: now, updatedAt: now };
+  try {
+    await db.runAsync(
+      `INSERT INTO teams (id, name, short_name, logo_uri, color, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [id, input.name, input.shortName, input.logoUri, input.color, now, now]
+    );
+    return { id, ...input, createdAt: now, updatedAt: now };
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (msg.includes('UNIQUE constraint failed')) {
+      const existing = await getTeamByName(input.name);
+      if (existing) return existing;
+    }
+    throw e;
+  }
 }
 
 export async function updateTeam(id: string, input: Partial<TeamInput>): Promise<void> {

@@ -1,4 +1,4 @@
-import { getAllTeams, createTeam } from './teamService';
+import { getAllTeams, createTeam, getTeamByName } from './teamService';
 import { createPlayer, getPlayersByTeam } from './playerService';
 import type { PlayerPosition } from '../models/player';
 
@@ -66,9 +66,10 @@ export async function seedDefaultDataIfEmpty(): Promise<void> {
     const teams = await getAllTeams();
 
     if (teams.length === 0) {
-      // First launch: create teams then players
+      // First launch: check by name first (UNIQUE guard), then create
       for (const def of SEED_TEAMS) {
-        const team = await createTeam({ name: def.name, shortName: def.shortName, logoUri: null, color: def.color });
+        const existing = await getTeamByName(def.name);
+        const team = existing ?? await createTeam({ name: def.name, shortName: def.shortName, logoUri: null, color: def.color });
         if (!team?.id) { console.error(`[seed] createTeam returned no id for ${def.name}`); continue; }
         await seedPlayersForTeam(team.id, def.players);
       }
