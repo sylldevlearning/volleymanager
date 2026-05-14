@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { Plus, Trash2, X, BarChart2 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getTeamById, updateTeam, deleteTeam } from '../../src/services/teamService';
+import { getMatchesByTeam } from '../../src/services/matchService';
 import { getPlayersByTeam, createPlayer, deletePlayer } from '../../src/services/playerService';
 import type { Team } from '../../src/models/team';
 import type { Player, PlayerPosition as PPos } from '../../src/models/player';
@@ -39,17 +40,24 @@ export default function TeamDetailScreen() {
 
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
-  const handleDeleteTeam = () => {
+  const handleDeleteTeam = async () => {
+    if (!id || !team) return;
+    const matches = await getMatchesByTeam(id);
+    const matchCount = matches.length;
+    const message = matchCount > 0
+      ? `${t('team.deleteConfirm', { name: team.name })}\n\n${t('team.deleteWithMatches', { count: matchCount })}`
+      : t('team.deleteConfirm', { name: team.name });
     Alert.alert(
-      t('common.delete'),
-      t('team.deleteConfirm', { name: team?.name }),
+      t('team.delete'),
+      message,
       [
         { text: t('common.cancel'), style: 'cancel' },
         {
           text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
-            if (id) { await deleteTeam(id); router.back(); }
+            await deleteTeam(id);
+            router.back();
           },
         },
       ]

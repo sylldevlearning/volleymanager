@@ -141,7 +141,10 @@
     "createFirst": "Créez votre première équipe",
     "players": "Joueurs",
     "addPlayer": "Ajouter un joueur",
-    "deleteConfirm": "Supprimer l'équipe \"{{name}}\" ?",
+    "delete": "Supprimer l'équipe",
+    "deleteConfirm": "Supprimer {{name}} et tous ses joueurs ?",
+    "deleteWithMatches": "Cette équipe a {{count}} matchs en historique. La suppression est irréversible.",
+    "deleted": "Équipe supprimée",
     "playerCount": "{{count}} joueur",
     "playerCount_other": "{{count}} joueurs"
   },

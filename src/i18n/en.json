@@ -141,7 +141,10 @@
     "createFirst": "Create your first team",
     "players": "Players",
     "addPlayer": "Add player",
-    "deleteConfirm": "Delete team \"{{name}}\"?",
+    "delete": "Delete team",
+    "deleteConfirm": "Delete {{name}} and all players?",
+    "deleteWithMatches": "This team has {{count}} matches in history. Deletion is irreversible.",
+    "deleted": "Deleted team",
     "playerCount": "{{count}} player",
     "playerCount_other": "{{count}} players"
   },
