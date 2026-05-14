@@ -220,6 +220,15 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
       `);
     });
   }
+
+  if (version < 6) {
+    await db.withExclusiveTransactionAsync(async () => {
+      await db.execAsync(`
+        ALTER TABLE matches ADD COLUMN first_serve_team_id TEXT REFERENCES teams(id);
+        PRAGMA user_version = 6;
+      `);
+    });
+  }
 }
 
 export function generateId(): string {

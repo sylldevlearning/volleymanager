@@ -12,6 +12,7 @@ function rowToMatch(row: Record<string, unknown>): Match {
     status: row.status as Match['status'],
     config: JSON.parse(row.config_json as string),
     winnerTeamId: row.winner_team_id as string | null,
+    firstServeTeamId: row.first_serve_team_id as string | null ?? null,
     createdAt: row.created_at as string,
     finishedAt: row.finished_at as string | null,
   };
@@ -60,10 +61,11 @@ export async function createMatch(input: MatchInput): Promise<Match> {
   const db = await getDb();
   const id = generateId();
   const now = new Date().toISOString();
+  const firstServeTeamId = input.firstServeTeamId ?? null;
   await db.runAsync(
-    `INSERT INTO matches (id, date, format, mode, team_home_id, team_away_id, status, config_json, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, 'created', ?, ?)`,
-    [id, now, input.format, input.mode, input.teamHomeId, input.teamAwayId, JSON.stringify(input.config), now]
+    `INSERT INTO matches (id, date, format, mode, team_home_id, team_away_id, status, config_json, first_serve_team_id, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, 'created', ?, ?, ?)`,
+    [id, now, input.format, input.mode, input.teamHomeId, input.teamAwayId, JSON.stringify(input.config), firstServeTeamId, now]
   );
   return {
     id,
@@ -75,6 +77,7 @@ export async function createMatch(input: MatchInput): Promise<Match> {
     status: 'created',
     config: input.config,
     winnerTeamId: null,
+    firstServeTeamId,
     createdAt: now,
     finishedAt: null,
   };

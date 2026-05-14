@@ -52,6 +52,7 @@ export interface Match {
   status: MatchStatus;
   config: MatchConfig;
   winnerTeamId: string | null;
+  firstServeTeamId: string | null;
   createdAt: string;
   finishedAt: string | null;
 }
@@ -67,4 +68,6 @@ export interface MatchSet {
   finishedAt: string | null;
 }
 
-export type MatchInput = Pick<Match, 'format' | 'mode' | 'teamHomeId' | 'teamAwayId' | 'config'>;
+export type MatchInput = Pick<Match, 'format' | 'mode' | 'teamHomeId' | 'teamAwayId' | 'config'> & {
+  firstServeTeamId?: string | null;
+};
