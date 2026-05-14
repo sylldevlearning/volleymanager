@@ -67,7 +67,7 @@ export default function MatchStatsScreen() {
   const setsAway = sets.filter((s) => s.winnerTeamId === match.teamAwayId).length;
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backBtn} accessibilityRole="button">

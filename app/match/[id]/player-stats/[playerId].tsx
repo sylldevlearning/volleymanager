@@ -100,7 +100,7 @@ export default function PlayerStatsScreen() {
   }));
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backBtn} accessibilityRole="button">
           <ArrowLeft size={22} color={palette.textSecondary} />
