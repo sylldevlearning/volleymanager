@@ -150,18 +150,18 @@ export function TacticalBoard({
 
   // Court dimensions: portrait, height = 2 * width
   const HEADER_H = 48;
-  const SAVEBAR_H = 44;
   const PLAYBACK_H = 60;
   const TOOLBAR_H = 106;
   const PADDING = 16;
   const safeH = screenH - insets.top - insets.bottom;
-  const availableH = safeH - HEADER_H - SAVEBAR_H - PLAYBACK_H - TOOLBAR_H - PADDING * 2;
+  const availableH = safeH - HEADER_H - PLAYBACK_H - TOOLBAR_H - PADDING * 2;
   const courtW = Math.max(80, Math.min(screenW - PADDING * 2, availableH / 2));
   const courtH = courtW * 2;
 
   const [drawPreview, setDrawPreview] = useState<DrawPreviewState | null>(null);
   const [pencilPreviewD, setPencilPreviewD] = useState<string | null>(null);
   const [showPlaybook, setShowPlaybook] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<PlayerPosition | null>(null);
   const [playbookMode, setPlaybookMode] = useState<'load' | 'save'>('load');
   const [playbackPositions, setPlaybackPositions] = useState<PlayerPosition[] | null>(null);
@@ -198,37 +198,72 @@ export function TacticalBoard({
     };
   }, [isPlaying]);
 
+  function parseFreehandPoints(d: string): { x: number; y: number }[] {
+    const pts: { x: number; y: number }[] = [];
+    const re = /[ML]\s*([\d.]+)\s+([\d.]+)/g;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(d)) !== null) {
+      pts.push({ x: parseFloat(m[1]) / courtW, y: parseFloat(m[2]) / courtH });
+    }
+    return pts;
+  }
+
+  type AnimSegment =
+    | { kind: 'arrow'; fromX: number; fromY: number; toX: number; toY: number }
+    | { kind: 'path'; points: { x: number; y: number }[] };
+
   function startAnimation() {
-    // Build ordered list of groups: each group is an array of arrows to animate simultaneously
-    const sorted = [...arrows].sort((a, b) => a.order - b.order);
-    const groupMap = new Map<number, typeof arrows>();
-    for (const arrow of sorted) {
+    // Merge arrows and freehand paths (hasArrow=true) into unified group map
+    const groupMap = new Map<number, Array<{ nearestId: string; segment: AnimSegment; startX: number; startY: number }>>();
+
+    const sortedArrows = [...arrows].sort((a, b) => a.order - b.order);
+    for (const arrow of sortedArrows) {
       const g = arrow.group ?? arrow.order;
       if (!groupMap.has(g)) groupMap.set(g, []);
-      groupMap.get(g)!.push(arrow);
+      groupMap.get(g)!.push({
+        nearestId: '',
+        segment: { kind: 'arrow', fromX: arrow.fromX, fromY: arrow.fromY, toX: arrow.toX, toY: arrow.toY },
+        startX: 0, startY: 0,
+      });
     }
-    const groups = [...groupMap.values()];
+
+    for (const fp of freehandPaths) {
+      if (!fp.hasArrow) continue;
+      const points = parseFreehandPoints(fp.d);
+      if (points.length < 2) continue;
+      const g = fp.group ?? 1;
+      if (!groupMap.has(g)) groupMap.set(g, []);
+      groupMap.get(g)!.push({
+        nearestId: '',
+        segment: { kind: 'path', points },
+        startX: 0, startY: 0,
+      });
+    }
+
+    if (groupMap.size === 0) { setPlaying(false); return; }
+
+    const groups = [...groupMap.entries()].sort(([a], [b]) => a - b).map(([, v]) => v);
 
     let animPositions = [...positionsRef.current];
     setPlaybackPositions([...animPositions]);
 
     let groupIdx = 0;
     let animStart: number | null = null;
-    // Per arrow in current group: nearest player + start coords
-    let groupMeta: Array<{ nearestId: string; startX: number; startY: number }> = [];
+    let groupItems: typeof groups[number] = [];
 
     function step(now: number) {
       if (!isPlayingRef.current) { setPlaybackPositions(null); return; }
       if (groupIdx >= groups.length) { setPlaying(false); return; }
 
-      const group = groups[groupIdx];
-
       if (animStart === null) {
-        groupMeta = group.map((arrow) => {
-          const nearest = findNearestPlayer(animPositions, arrow.fromX, arrow.fromY);
+        groupItems = groups[groupIdx].map((item) => {
+          const startPt = item.segment.kind === 'arrow'
+            ? { x: item.segment.fromX, y: item.segment.fromY }
+            : item.segment.points[0];
+          const nearest = findNearestPlayer(animPositions, startPt.x, startPt.y);
           return nearest
-            ? { nearestId: nearest.playerId, startX: nearest.x, startY: nearest.y }
-            : { nearestId: '', startX: 0, startY: 0 };
+            ? { ...item, nearestId: nearest.playerId, startX: nearest.x, startY: nearest.y }
+            : { ...item, nearestId: '', startX: 0, startY: 0 };
         });
         animStart = now;
       }
@@ -238,13 +273,21 @@ export function TacticalBoard({
       const progress = Math.min(elapsed / duration, 1);
       const eased = easeInOut(progress);
 
-      // Animate all arrows in the group simultaneously
       animPositions = animPositions.map((p) => {
-        for (let i = 0; i < group.length; i++) {
-          const meta = groupMeta[i];
-          if (meta.nearestId && p.playerId === meta.nearestId) {
-            const arrow = group[i];
-            return { ...p, x: meta.startX + (arrow.toX - meta.startX) * eased, y: meta.startY + (arrow.toY - meta.startY) * eased };
+        for (const item of groupItems) {
+          if (!item.nearestId || p.playerId !== item.nearestId) continue;
+          const seg = item.segment;
+          if (seg.kind === 'arrow') {
+            return { ...p, x: item.startX + (seg.toX - item.startX) * eased, y: item.startY + (seg.toY - item.startY) * eased };
+          } else {
+            // Interpolate along multi-point path
+            const pts = seg.points;
+            const totalSegments = pts.length - 1;
+            const rawIdx = eased * totalSegments;
+            const segIdx = Math.min(Math.floor(rawIdx), totalSegments - 1);
+            const localT = rawIdx - segIdx;
+            const a = pts[segIdx], b = pts[segIdx + 1];
+            return { ...p, x: a.x + (b.x - a.x) * localT, y: a.y + (b.y - a.y) * localT };
           }
         }
         return p;
@@ -355,7 +398,7 @@ export function TacticalBoard({
   function onCurvedEnd() {
     const pts = pencilPointsRef.current;
     if (pts.length > 3) {
-      addFreehandPath(buildPathD(pts), drawColor, true);
+      addFreehandPath(buildPathD(pts), drawColor, true, currentGroup);
     }
     pencilPointsRef.current = [];
     setPencilPreviewD(null);
@@ -480,30 +523,47 @@ export function TacticalBoard({
             accessibilityLabel="Nouveau schéma">
             <Text style={styles.headerBtnText}>🗒</Text>
           </Pressable>
+
+          <Pressable
+            onPress={() => setShowMenu((v) => !v)}
+            style={styles.headerBtn}
+            accessibilityRole="button"
+            accessibilityLabel={t('tactical.menu')}
+          >
+            <Text style={styles.headerBtnText}>⋮</Text>
+          </Pressable>
         </View>
 
-        {/* Save / Load bar */}
-        <View style={styles.saveBar}>
-          <Pressable
-            style={styles.saveBarBtn}
-            onPress={() => { setPlaybookMode('load'); setShowPlaybook(true); }}
-            accessibilityRole="button"
-          >
-            <Text style={styles.saveBarIcon}>📂</Text>
-            <Text style={styles.saveBarText}>{t('tactical.playbook.load')}</Text>
+        {/* Hamburger menu overlay */}
+        {showMenu && (
+          <Pressable style={styles.menuBackdrop} onPress={() => setShowMenu(false)}>
+            <View style={styles.menuCard}>
+              <Pressable
+                style={styles.menuItem}
+                onPress={() => { setShowMenu(false); setPlaybookMode('load'); setShowPlaybook(true); }}
+              >
+                <Text style={styles.menuItemIcon}>📂</Text>
+                <Text style={styles.menuItemText}>{t('tactical.loadPlay')}</Text>
+              </Pressable>
+              <View style={styles.menuDivider} />
+              <Pressable
+                style={styles.menuItem}
+                onPress={() => { setShowMenu(false); setPlaybookMode('save'); setShowPlaybook(true); }}
+              >
+                <Text style={styles.menuItemIcon}>💾</Text>
+                <Text style={styles.menuItemText}>{t('tactical.savePlay')}</Text>
+              </Pressable>
+              <View style={styles.menuDivider} />
+              <Pressable
+                style={styles.menuItem}
+                onPress={() => { setShowMenu(false); clearArrows(); }}
+              >
+                <Text style={styles.menuItemIcon}>🧺</Text>
+                <Text style={[styles.menuItemText, { color: palette.error }]}>{t('tactical.tools.clearAll')}</Text>
+              </Pressable>
+            </View>
           </Pressable>
-          <View style={styles.saveBarDivider} />
-          <Pressable
-            style={[styles.saveBarBtn, styles.saveBarBtnPrimary]}
-            onPress={() => { setPlaybookMode('save'); setShowPlaybook(true); }}
-            accessibilityRole="button"
-          >
-            <Text style={styles.saveBarIcon}>💾</Text>
-            <Text style={[styles.saveBarText, styles.saveBarTextPrimary]}>
-              {t('tactical.playbook.save')}
-            </Text>
-          </Pressable>
-        </View>
+        )}
 
         {/* Court container */}
         <View style={styles.courtContainer}>
@@ -564,13 +624,12 @@ export function TacticalBoard({
         <PlaybackControls
           isPlaying={isPlaying}
           speed={playbackSpeed}
-          hasArrows={arrows.length > 0}
+          hasArrows={arrows.length > 0 || freehandPaths.some((fp) => fp.hasArrow)}
           onPlay={() => setPlaying(true)}
           onPause={() => {
             isPlayingRef.current = false;
             setPlaying(false);
           }}
-          onReset={handleReset}
           onSetSpeed={setPlaybackSpeed}
         />
 
@@ -677,42 +736,47 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold',
     color: palette.textPrimary,
   },
-  saveBar: {
-    flexDirection: 'row',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    gap: 8,
-    backgroundColor: palette.backgroundSurface,
-    borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
+  menuBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 100,
   },
-  saveBarBtn: {
-    flex: 1,
+  menuCard: {
+    position: 'absolute',
+    top: 52,
+    right: 8,
+    minWidth: 200,
+    backgroundColor: palette.backgroundSurface,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: palette.backgroundElevated,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 12,
+    zIndex: 101,
+  },
+  menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 8,
-    borderRadius: 10,
-    backgroundColor: palette.backgroundElevated,
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
   },
-  saveBarBtnPrimary: {
-    backgroundColor: palette.accentPrimaryMuted,
-    borderWidth: 1,
-    borderColor: palette.accentPrimary + '50',
-  },
-  saveBarDivider: {
-    width: 1,
-    backgroundColor: palette.backgroundElevated,
-  },
-  saveBarIcon: { fontSize: 15 },
-  saveBarText: {
-    fontSize: 13,
+  menuItemIcon: { fontSize: 16 },
+  menuItemText: {
+    fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textSecondary,
+    color: palette.textPrimary,
   },
-  saveBarTextPrimary: {
-    color: palette.accentPrimary,
+  menuDivider: {
+    height: 1,
+    backgroundColor: palette.backgroundElevated,
+    marginHorizontal: 12,
   },
   courtContainer: {
     flex: 1,

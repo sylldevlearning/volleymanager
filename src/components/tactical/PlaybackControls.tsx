@@ -9,7 +9,6 @@ interface PlaybackControlsProps {
   hasArrows: boolean;
   onPlay: () => void;
   onPause: () => void;
-  onReset: () => void;
   onSetSpeed: (speed: 0.5 | 1 | 2) => void;
 }
 
@@ -21,7 +20,6 @@ export function PlaybackControls({
   hasArrows,
   onPlay,
   onPause,
-  onReset,
   onSetSpeed,
 }: PlaybackControlsProps) {
   const { t } = useTranslation();
@@ -36,16 +34,6 @@ export function PlaybackControls({
         accessibilityLabel={isPlaying ? t('tactical.playback.pause') : t('tactical.playback.play')}
       >
         <Text style={styles.playIcon}>{isPlaying ? '⏸' : '▶'}</Text>
-      </Pressable>
-
-      <Pressable
-        style={[styles.resetBtn, !hasArrows && styles.disabled]}
-        onPress={onReset}
-        disabled={!hasArrows}
-        accessibilityRole="button"
-        accessibilityLabel={t('tactical.playback.reset')}
-      >
-        <Text style={styles.resetText}>⏹</Text>
       </Pressable>
 
       <View style={styles.speedRow}>
@@ -88,18 +76,6 @@ const styles = StyleSheet.create({
   playIcon: {
     fontSize: 18,
     color: '#FFFFFF',
-  },
-  resetBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: palette.backgroundElevated,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  resetText: {
-    fontSize: 16,
-    color: palette.textSecondary,
   },
   speedRow: {
     flex: 1,

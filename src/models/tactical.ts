@@ -52,11 +52,13 @@ export type TacticalTool =
 
 export interface FreehandPath {
   id: string;
-  /** SVG path data string (M x y L x y ...) */
+  /** SVG path data string (M x y L x y ...) — coordinates in court pixels */
   d: string;
   color: string;
   /** When true, an arrowhead is drawn at the last point */
   hasArrow?: boolean;
+  /** Animation group — paths in the same group animate simultaneously */
+  group?: number;
 }
 
 export interface TacticalPlay {

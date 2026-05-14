@@ -19,8 +19,9 @@ export function CourtSVG({ width, height, format }: CourtSVGProps) {
 
   // Key y-positions (relative to court area starting at pad)
   const netY = pad + h * 0.5;
-  const homeAttackY = pad + h * 0.75;
-  const awayAttackY = pad + h * 0.25;
+  // 3m from net on a 9m half = 1/3 of half = 1/6 of total court height
+  const homeAttackY = pad + h * (2 / 3);
+  const awayAttackY = pad + h * (1 / 3);
 
   return (
     <Svg width={width} height={height}>
