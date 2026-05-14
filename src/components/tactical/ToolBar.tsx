@@ -7,16 +7,16 @@ import { palette } from '../../theme/tokens';
 interface ToolBarProps {
   selectedTool: TacticalTool;
   arrowThickness: ArrowThickness;
-  groupMode: boolean;
   currentGroup: number;
+  currentGroupColor: string;
   hasDrawings: boolean;
   onSelectTool: (tool: TacticalTool) => void;
-  onToggleGroupMode: () => void;
+  onAdvanceGroup: () => void;
+  onResetGroup: () => void;
   onUndoDrawing: () => void;
   onClearAll: () => void;
 }
 
-// Only 3 tools exposed: move, traced arrow (arrow_curved), pencil
 const TOOLS: { key: TacticalTool; icon: string; labelKey: string }[] = [
   { key: 'move', icon: '✋', labelKey: 'tactical.tools.move' },
   { key: 'arrow_curved', icon: '↝', labelKey: 'tactical.tools.tracedArrow' },
@@ -26,11 +26,12 @@ const TOOLS: { key: TacticalTool; icon: string; labelKey: string }[] = [
 export function ToolBar({
   selectedTool,
   arrowThickness,
-  groupMode,
   currentGroup,
+  currentGroupColor,
   hasDrawings,
   onSelectTool,
-  onToggleGroupMode,
+  onAdvanceGroup,
+  onResetGroup,
   onUndoDrawing,
   onClearAll,
 }: ToolBarProps) {
@@ -48,10 +49,6 @@ export function ToolBar({
     );
   }
 
-  const linkLabel = groupMode
-    ? t('tactical.tools.linkActive', { number: currentGroup })
-    : t('tactical.tools.link');
-
   return (
     <View style={styles.container}>
       <ScrollView
@@ -59,6 +56,7 @@ export function ToolBar({
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.toolsRow}
       >
+        {/* Draw tool chips */}
         {TOOLS.map((tool) => {
           const active = selectedTool === tool.key;
           const label = t(tool.labelKey).split(' ')[0];
@@ -93,18 +91,20 @@ export function ToolBar({
 
         <View style={styles.divider} />
 
+        {/* Group cycling button — tap to advance, long-press to reset to T1 */}
         <Pressable
-          style={[styles.toolBtn, groupMode && styles.toolBtnGroupActive]}
-          onPress={onToggleGroupMode}
-          accessibilityLabel={linkLabel}
+          style={[styles.groupBtn, { backgroundColor: currentGroupColor }]}
+          onPress={onAdvanceGroup}
+          onLongPress={onResetGroup}
+          delayLongPress={500}
           accessibilityRole="button"
+          accessibilityLabel={`T${currentGroup}`}
         >
-          <Text style={[styles.toolLabel, styles.linkLabel, groupMode && styles.toolLabelActive]}>
-            {linkLabel}
-          </Text>
+          <Text style={styles.groupBtnText}>T{currentGroup}</Text>
         </Pressable>
 
         <View style={styles.divider} />
+
         <Pressable
           style={styles.clearBtn}
           onPress={handleClearAll}
@@ -145,9 +145,6 @@ const styles = StyleSheet.create({
   toolBtnActive: {
     backgroundColor: palette.accentPrimary,
   },
-  toolBtnGroupActive: {
-    backgroundColor: '#1D4ED8',
-  },
   toolIcon: {
     fontSize: 18,
   },
@@ -159,10 +156,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_500Medium',
     color: palette.textMuted,
     marginTop: 2,
-  },
-  linkLabel: {
-    fontSize: 10,
-    marginTop: 0,
   },
   toolLabelActive: {
     color: 'rgba(255,255,255,0.9)',
@@ -184,6 +177,20 @@ const styles = StyleSheet.create({
   },
   undoIconActive: {
     color: '#FFFFFF',
+  },
+  groupBtn: {
+    height: 36,
+    minWidth: 44,
+    paddingHorizontal: 10,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  groupBtnText: {
+    fontSize: 13,
+    fontFamily: 'Inter_700Bold',
+    color: '#FFFFFF',
+    letterSpacing: 0.3,
   },
   divider: {
     width: 8,

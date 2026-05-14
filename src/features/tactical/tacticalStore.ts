@@ -14,10 +14,8 @@ interface TacticalState {
   arrowThickness: ArrowThickness;
   currentPlayId: string | null;
   currentPlayName: string | null;
-  /** Current group number for new arrows */
+  /** Current group number — all new drawings are stamped with this group */
   currentGroup: number;
-  /** When true, successive arrows share the same group (animate simultaneously) */
-  groupMode: boolean;
 
   setPositions: (positions: PlayerPosition[]) => void;
   movePlayer: (playerId: string, x: number, y: number) => void;
@@ -28,7 +26,10 @@ interface TacticalState {
   addFreehandPath: (d: string, color: string, hasArrow?: boolean, group?: number) => void;
   clearFreehandPaths: () => void;
   undoLastDrawing: () => void;
-  toggleGroupMode: () => void;
+  /** Advance to the next group (tap the group button) */
+  advanceGroup: () => void;
+  /** Reset to group 1 (long-press the group button) */
+  resetGroup: () => void;
   setTool: (tool: TacticalTool) => void;
   setArrowThickness: (thickness: ArrowThickness) => void;
   loadPlay: (play: TacticalPlay) => void;
@@ -45,7 +46,6 @@ export const useTacticalStore = create<TacticalState>()((set) => ({
   currentPlayId: null,
   currentPlayName: null,
   currentGroup: 1,
-  groupMode: false,
 
   setPositions: (positions) => set({ positions }),
 
@@ -68,22 +68,12 @@ export const useTacticalStore = create<TacticalState>()((set) => ({
       const order = state.arrows.length > 0
         ? Math.max(...state.arrows.map((a) => a.order)) + 1
         : 1;
-      const group = state.currentGroup;
-      const nextGroup = state.groupMode ? group : group + 1;
       const newId = generateId();
       return {
-        arrows: [...state.arrows, { ...arrow, id: newId, order, group }],
+        arrows: [...state.arrows, { ...arrow, id: newId, order, group: state.currentGroup }],
         drawingOrder: [...state.drawingOrder, { type: 'arrow', id: newId }],
-        currentGroup: nextGroup,
+        // currentGroup stays — user advances manually via advanceGroup
       };
-    }),
-
-  toggleGroupMode: () =>
-    set((state) => {
-      if (state.groupMode) {
-        return { groupMode: false, currentGroup: state.currentGroup + 1 };
-      }
-      return { groupMode: true };
     }),
 
   removeArrow: (id) =>
@@ -92,7 +82,7 @@ export const useTacticalStore = create<TacticalState>()((set) => ({
       drawingOrder: state.drawingOrder.filter((d) => d.id !== id),
     })),
 
-  clearArrows: () => set({ arrows: [], freehandPaths: [], drawingOrder: [], currentGroup: 1, groupMode: false }),
+  clearArrows: () => set({ arrows: [], freehandPaths: [], drawingOrder: [], currentGroup: 1 }),
 
   addFreehandPath: (d, color, hasArrow, group) =>
     set((state) => {
@@ -119,6 +109,10 @@ export const useTacticalStore = create<TacticalState>()((set) => ({
       return { freehandPaths: state.freehandPaths.filter((fp) => fp.id !== last.id), drawingOrder: newOrder };
     }),
 
+  advanceGroup: () => set((state) => ({ currentGroup: state.currentGroup + 1 })),
+
+  resetGroup: () => set({ currentGroup: 1 }),
+
   setTool: (tool) => set({ selectedTool: tool }),
 
   setArrowThickness: (thickness) => set({ arrowThickness: thickness }),
@@ -131,7 +125,6 @@ export const useTacticalStore = create<TacticalState>()((set) => ({
       drawingOrder: [],
       selectedTool: 'move',
       currentGroup: 1,
-      groupMode: false,
       currentPlayId: play.isDefault ? null : play.id,
       currentPlayName: play.name,
     }),
@@ -144,7 +137,6 @@ export const useTacticalStore = create<TacticalState>()((set) => ({
       drawingOrder: [],
       selectedTool: 'move',
       currentGroup: 1,
-      groupMode: false,
       currentPlayId: null,
       currentPlayName: null,
     }),

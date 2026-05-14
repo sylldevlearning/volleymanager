@@ -4,9 +4,9 @@ const { getState, setState } = useTacticalStore;
 
 function reset() {
   setState({
-    positions: [], arrows: [], freehandPaths: [],
+    positions: [], arrows: [], freehandPaths: [], drawingOrder: [],
     selectedTool: 'move', arrowThickness: 'thin',
-    currentGroup: 1, groupMode: false,
+    currentGroup: 1,
     currentPlayId: null, currentPlayName: null,
   });
 }
@@ -19,49 +19,50 @@ const baseArrow = () => ({
   thickness: 'thin' as const,
 });
 
-describe('tacticalStore — group mode', () => {
+describe('tacticalStore — group cycling', () => {
   beforeEach(reset);
 
-  it('sequential mode: each arrow gets an incrementing group', () => {
+  it('all arrows use currentGroup by default (no auto-increment)', () => {
     const { addArrow } = getState();
     addArrow(baseArrow());
     addArrow(baseArrow());
     const { arrows } = getState();
     expect(arrows[0].group).toBe(1);
-    expect(arrows[1].group).toBe(2);
+    expect(arrows[1].group).toBe(1);
   });
 
-  it('group mode ON: successive arrows share the same group', () => {
-    const store = getState();
-    store.toggleGroupMode(); // enter group mode
-    store.addArrow(baseArrow());
-    store.addArrow(baseArrow());
-    const { arrows } = getState();
-    expect(arrows[0].group).toBe(arrows[1].group);
+  it('advanceGroup increments currentGroup', () => {
+    getState().advanceGroup();
+    expect(getState().currentGroup).toBe(2);
+    getState().advanceGroup();
+    expect(getState().currentGroup).toBe(3);
   });
 
-  it('group mode OFF after toggle: next arrow gets new group', () => {
-    const store = getState();
-    store.addArrow(baseArrow()); // group 1
-    store.toggleGroupMode();     // ON: currentGroup stays 2 (after sequential increment)
-    store.addArrow(baseArrow()); // group 2
-    store.addArrow(baseArrow()); // group 2 still
-    store.toggleGroupMode();     // OFF: currentGroup becomes 3
-    store.addArrow(baseArrow()); // group 3
+  it('arrows after advanceGroup get the new group', () => {
+    getState().addArrow(baseArrow()); // group 1
+    getState().advanceGroup();
+    getState().addArrow(baseArrow()); // group 2
+    getState().addArrow(baseArrow()); // group 2 still
     const { arrows } = getState();
     expect(arrows[0].group).toBe(1);
-    expect(arrows[1].group).toBe(arrows[2].group); // same group
-    expect(arrows[3].group).toBeGreaterThan(arrows[2].group);
+    expect(arrows[1].group).toBe(2);
+    expect(arrows[2].group).toBe(2);
   });
 
-  it('clearArrows resets group state', () => {
-    const store = getState();
-    store.addArrow(baseArrow());
-    store.toggleGroupMode();
-    store.clearArrows();
-    const { currentGroup, groupMode, arrows, freehandPaths } = getState();
+  it('resetGroup goes back to group 1', () => {
+    getState().advanceGroup();
+    getState().advanceGroup();
+    expect(getState().currentGroup).toBe(3);
+    getState().resetGroup();
+    expect(getState().currentGroup).toBe(1);
+  });
+
+  it('clearArrows resets to group 1', () => {
+    getState().advanceGroup();
+    getState().addArrow(baseArrow());
+    getState().clearArrows();
+    const { currentGroup, arrows, freehandPaths } = getState();
     expect(currentGroup).toBe(1);
-    expect(groupMode).toBe(false);
     expect(arrows).toHaveLength(0);
     expect(freehandPaths).toHaveLength(0);
   });
@@ -74,5 +75,11 @@ describe('tacticalStore — group mode', () => {
     expect(freehandPaths[0].d).toBe('M 10 10 L 50 50');
     expect(freehandPaths[0].color).toBe('#E63946');
     expect(freehandPaths[0].id).toBeTruthy();
+  });
+
+  it('freehand paths use currentGroup', () => {
+    getState().advanceGroup(); // group 2
+    getState().addFreehandPath('M 0 0 L 1 1', '#fff');
+    expect(getState().freehandPaths[0].group).toBe(2);
   });
 });

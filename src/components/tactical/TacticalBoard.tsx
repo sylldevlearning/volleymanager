@@ -259,7 +259,6 @@ export function TacticalBoard({
     currentGroup,
     currentPlayId,
     currentPlayName,
-    groupMode,
     setPositions,
     movePlayer,
     updatePlayerInfo,
@@ -268,7 +267,8 @@ export function TacticalBoard({
     clearArrows,
     addFreehandPath,
     undoLastDrawing,
-    toggleGroupMode,
+    advanceGroup,
+    resetGroup,
     setTool,
     setArrowThickness,
     loadPlay,
@@ -1020,11 +1020,12 @@ export function TacticalBoard({
         <ToolBar
           selectedTool={selectedTool}
           arrowThickness={arrowThickness}
-          groupMode={groupMode}
           currentGroup={currentGroup}
+          currentGroupColor={groupColor}
           hasDrawings={drawingOrder.length > 0}
           onSelectTool={setTool}
-          onToggleGroupMode={toggleGroupMode}
+          onAdvanceGroup={advanceGroup}
+          onResetGroup={resetGroup}
           onUndoDrawing={undoLastDrawing}
           onClearAll={() => { clearArrows(); handleReset(); }}
         />

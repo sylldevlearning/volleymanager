@@ -52,8 +52,8 @@ describe('useTacticalStore — initial state', () => {
     expect(useTacticalStore.getState().currentGroup).toBe(1);
   });
 
-  it('starts with groupMode off', () => {
-    expect(useTacticalStore.getState().groupMode).toBe(false);
+  it('starts with currentGroup 1', () => {
+    expect(useTacticalStore.getState().currentGroup).toBe(1);
   });
 });
 
