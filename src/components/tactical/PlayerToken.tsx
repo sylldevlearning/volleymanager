@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
   },
   liberoBadgeText: {
     color: '#fff',
-    fontSize: 8,
+    fontSize: 10,
     fontFamily: 'Inter_700Bold',
   },
   label: {

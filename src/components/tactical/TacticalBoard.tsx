@@ -9,7 +9,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { useSharedValue, runOnJS } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, runOnJS } from 'react-native-reanimated';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useTranslation } from 'react-i18next';
 
@@ -26,9 +26,97 @@ import { HOME_POSITION_COORDS, AWAY_POSITION_COORDS, findNearestPlayer, clamp, e
 import { useScoringStore } from '../../stores/scoringStore';
 import { useSettingsStore } from '../../stores/settingsStore';
 import type { PlayerPosition, TacticalPlay } from '../../models/tactical';
+import type { Player } from '../../models/player';
 import { updatePlayer } from '../../services/playerService';
 import type { MatchFormat } from '../../models/match';
 import { palette } from '../../theme/tokens';
+
+const BENCH_W = 52;
+const BENCH_TOKEN_SIZE = 32;
+
+// ── Bench token — draggable bench player chip ─────────────────────────────────
+
+interface BenchTokenItemProps {
+  player: Player;
+  isHome: boolean;
+  onDrop: (player: Player, isHome: boolean, absX: number, absY: number) => void;
+}
+
+function BenchTokenItem({ player, isHome, onDrop }: BenchTokenItemProps) {
+  const tx = useSharedValue(0);
+  const ty = useSharedValue(0);
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(0.6);
+
+  function notifyDrop(absX: number, absY: number) {
+    onDrop(player, isHome, absX, absY);
+  }
+
+  const pan = Gesture.Pan()
+    .onBegin(() => {
+      scale.value = withSpring(1.15);
+      opacity.value = withTiming(0.95, { duration: 120 });
+    })
+    .onUpdate((e) => {
+      tx.value = e.translationX;
+      ty.value = e.translationY;
+    })
+    .onEnd((e) => {
+      runOnJS(notifyDrop)(e.absoluteX, e.absoluteY);
+      tx.value = withSpring(0);
+      ty.value = withSpring(0);
+      scale.value = withSpring(1);
+      opacity.value = withTiming(0.6, { duration: 200 });
+    })
+    .onFinalize(() => {
+      tx.value = withSpring(0);
+      ty.value = withSpring(0);
+      scale.value = withSpring(1);
+      opacity.value = withTiming(0.6, { duration: 200 });
+    });
+
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: tx.value }, { translateY: ty.value }, { scale: scale.value }],
+    opacity: opacity.value,
+  }));
+
+  const bgColor = isHome ? '#1D4ED8' : '#E63946';
+
+  return (
+    <GestureDetector gesture={pan}>
+      <Animated.View
+        style={[
+          benchStyles.token,
+          { width: BENCH_TOKEN_SIZE, height: BENCH_TOKEN_SIZE, borderRadius: BENCH_TOKEN_SIZE / 2, backgroundColor: bgColor },
+          animStyle,
+        ]}
+      >
+        <Text style={benchStyles.tokenLabel}>{String(player.number)}</Text>
+      </Animated.View>
+    </GestureDetector>
+  );
+}
+
+const benchStyles = StyleSheet.create({
+  token: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.6)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.35,
+    shadowRadius: 3,
+    elevation: 8,
+  },
+  tokenLabel: {
+    color: '#fff',
+    fontSize: 11,
+    fontFamily: 'Inter_700Bold',
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 interface TacticalBoardProps {
   visible: boolean;
@@ -195,17 +283,15 @@ export function TacticalBoard({
     resetBoard,
   } = useTacticalStore();
 
-  const { rotationHome, rotationAway, scoreHome, scoreAway, setsHome, setsAway } = useScoringStore();
+  const { rotationHome, rotationAway, scoreHome, scoreAway, setsHome, setsAway, benchHome, benchAway } = useScoringStore();
 
-  // Court dimensions: portrait, height = 2 * width
+  // Court dimension constants (computed after all state so currentFormat is available)
   const HEADER_H = 48;
   const PLAYBACK_H = 60;
   const TOOLBAR_H = 106;
   const PADDING = 16;
   const safeH = screenH - insets.top - insets.bottom;
   const availableH = safeH - HEADER_H - PLAYBACK_H - TOOLBAR_H - PADDING * 2;
-  const courtW = Math.max(80, Math.min(screenW - PADDING * 2, availableH / 2));
-  const courtH = courtW * 2;
 
   const [drawPreview, setDrawPreview] = useState<DrawPreviewState | null>(null);
   const [pencilPreviewD, setPencilPreviewD] = useState<string | null>(null);
@@ -217,6 +303,18 @@ export function TacticalBoard({
   const [currentFormat, setCurrentFormat] = useState<MatchFormat>(format);
   const [faultPlayerIds, setFaultPlayerIds] = useState<Set<string>>(new Set());
 
+  const courtRef = useRef<View>(null);
+  const [courtPageX, setCourtPageX] = useState(0);
+  const [courtPageY, setCourtPageY] = useState(0);
+  const [localBenchHome, setLocalBenchHome] = useState<Player[]>([]);
+  const [localBenchAway, setLocalBenchAway] = useState<Player[]>([]);
+
+  // Bench columns appear only in indoor mode when there are substitutes available
+  const hasBench = currentFormat === 'indoor_6v6' && (benchHome.length > 0 || benchAway.length > 0);
+  const benchOffset = hasBench ? BENCH_W * 2 : 0;
+  const courtW = Math.max(80, Math.min(screenW - PADDING * 2 - benchOffset, availableH / 2));
+  const courtH = courtW * 2;
+
   const drawStartX = useSharedValue(0);
   const drawStartY = useSharedValue(0);
   const pencilPointsRef = useRef<{ x: number; y: number }[]>([]);
@@ -226,6 +324,10 @@ export function TacticalBoard({
 
   // Keep ref in sync
   useEffect(() => { positionsRef.current = positions; }, [positions]);
+
+  // Sync local bench when store bench changes (e.g. on substitution from referee screen)
+  useEffect(() => { setLocalBenchHome(benchHome); }, [benchHome]);
+  useEffect(() => { setLocalBenchAway(benchAway); }, [benchAway]);
 
   // Initialize on open
   useEffect(() => {
@@ -472,6 +574,56 @@ export function TacticalBoard({
 
   const displayPositions = playbackPositions ?? positions;
 
+  function handleCourtLayout() {
+    courtRef.current?.measure((_x, _y, _w, _h, pageX, pageY) => {
+      setCourtPageX(pageX);
+      setCourtPageY(pageY);
+    });
+  }
+
+  function handleBenchSwap(benchPlayer: Player, isHome: boolean, absX: number, absY: number) {
+    const relX = (absX - courtPageX) / courtW;
+    const relY = (absY - courtPageY) / courtH;
+    if (relX < 0 || relX > 1 || relY < 0 || relY > 1) return;
+
+    const teamPlayers = positions.filter((p) => !p.isBall && p.isHome === isHome);
+    const nearest = findNearestPlayer(teamPlayers, relX, relY);
+    if (!nearest) return;
+
+    // Swap: bench player takes court player's number/label
+    setPositions(
+      positions.map((p) => {
+        if (p.playerId !== nearest.playerId) return p;
+        return {
+          ...p,
+          number: benchPlayer.number,
+          label: String(benchPlayer.number),
+          firstName: benchPlayer.firstName,
+          lastName: benchPlayer.lastName,
+        };
+      }),
+    );
+
+    // Old court player goes to bench
+    const outgoing: Player = {
+      id: nearest.playerId,
+      teamId: nearest.teamId,
+      firstName: nearest.firstName ?? null,
+      lastName: nearest.lastName ?? null,
+      number: nearest.number,
+      position: null,
+      photoUri: null,
+      isActive: true,
+      createdAt: '',
+    };
+
+    if (isHome) {
+      setLocalBenchHome((prev) => [...prev.filter((p) => p.id !== benchPlayer.id), outgoing]);
+    } else {
+      setLocalBenchAway((prev) => [...prev.filter((p) => p.id !== benchPlayer.id), outgoing]);
+    }
+  }
+
   function handleDragEnd(playerId: string, x: number, y: number) {
     movePlayer(playerId, x, y);
     if (faultPlayerIds.size > 0) setFaultPlayerIds(new Set());
@@ -644,7 +796,19 @@ export function TacticalBoard({
 
         {/* Court container */}
         <View style={styles.courtContainer}>
-          <View style={[styles.court, { width: courtW, height: courtH }]}>
+          {/* Home bench — left column */}
+          {hasBench && (
+            <View style={[styles.benchColumn, { width: BENCH_W }]}>
+              {localBenchHome.map((p) => (
+                <BenchTokenItem key={p.id} player={p} isHome={true} onDrop={handleBenchSwap} />
+              ))}
+              {localBenchHome.length === 0 && (
+                <Text style={styles.benchEmptyLabel}>–</Text>
+              )}
+            </View>
+          )}
+
+          <View ref={courtRef} onLayout={handleCourtLayout} style={[styles.court, { width: courtW, height: courtH }]}>
             {/* Base court SVG */}
             <CourtSVG width={courtW} height={courtH} format={currentFormat} />
 
@@ -696,6 +860,18 @@ export function TacticalBoard({
               </GestureDetector>
             )}
           </View>
+
+          {/* Away bench — right column */}
+          {hasBench && (
+            <View style={[styles.benchColumn, { width: BENCH_W }]}>
+              {localBenchAway.map((p) => (
+                <BenchTokenItem key={p.id} player={p} isHome={false} onDrop={handleBenchSwap} />
+              ))}
+              {localBenchAway.length === 0 && (
+                <Text style={styles.benchEmptyLabel}>–</Text>
+              )}
+            </View>
+          )}
         </View>
 
         {/* Playback controls */}
@@ -863,9 +1039,22 @@ const styles = StyleSheet.create({
   },
   courtContainer: {
     flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 8,
+  },
+  benchColumn: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    zIndex: 10,
+    elevation: 10,
+  },
+  benchEmptyLabel: {
+    fontSize: 16,
+    color: palette.textMuted,
+    fontFamily: 'Inter_400Regular',
   },
   court: {
     borderRadius: 12,
