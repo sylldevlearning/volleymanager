@@ -354,6 +354,22 @@ export function TacticalBoard({
   useEffect(() => { setLocalBenchHome(benchHome); }, [benchHome]);
   useEffect(() => { setLocalBenchAway(benchAway); }, [benchAway]);
 
+  // When drawings change while in playback mode, invalidate stale snapshots.
+  // Without this, stepSnapshots[stepIdx+1] can be undefined if more groups
+  // were added after snapshots were computed, causing a crash in animateFromTo.
+  const stepSnapshotsRef = useRef(stepSnapshots);
+  useEffect(() => { stepSnapshotsRef.current = stepSnapshots; }, [stepSnapshots]);
+  useEffect(() => {
+    if (stepSnapshotsRef.current !== null) {
+      setStepSnapshots(null);
+      setCurrentStep(0);
+      setStepPhase('idle');
+      setActiveGroup(null);
+      setArrowOpacity(1);
+      setPlaybackPositions(null);
+    }
+  }, [arrows, freehandPaths]);
+
   useEffect(() => {
     return () => {
       if (animFrameRef.current != null) cancelAnimationFrame(animFrameRef.current);
@@ -425,6 +441,8 @@ export function TacticalBoard({
     durationMs: number,
     onComplete: () => void,
   ) {
+    // Defensive: snapshots can be stale if drawings changed mid-playback
+    if (!fromPositions || !toPositions) { onComplete(); return; }
     if (animFrameRef.current != null) cancelAnimationFrame(animFrameRef.current);
     let start: number | null = null;
 
@@ -489,6 +507,13 @@ export function TacticalBoard({
 
     const fromPos = snaps[stepIdx];
     const toPos = snaps[stepIdx + 1];
+    // Guard: stale snapshot (drawings changed between compute and press)
+    if (!fromPos || !toPos) {
+      setStepSnapshots(null);
+      setStepPhase('idle');
+      setActiveGroup(null);
+      return;
+    }
     const duration = 800 / playbackSpeed;
 
     animateFromTo(fromPos, toPos, duration, () => {
