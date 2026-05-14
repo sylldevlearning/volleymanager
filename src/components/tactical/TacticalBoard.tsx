@@ -809,23 +809,23 @@ export function TacticalBoard({
           )}
 
           <View ref={courtRef} onLayout={handleCourtLayout} style={[styles.court, { width: courtW, height: courtH }]}>
-            {/* Base court SVG */}
-            <CourtSVG width={courtW} height={courtH} format={currentFormat} />
+            {/* Visual court + arrows — clipped to rounded rect, no tokens inside */}
+            <View style={styles.courtClip}>
+              <CourtSVG width={courtW} height={courtH} format={currentFormat} />
+              <ArrowOverlay
+                arrows={arrows}
+                freehandPaths={freehandPaths}
+                courtWidth={courtW}
+                courtHeight={courtH}
+                eraserMode={selectedTool === 'eraser'}
+                drawPreview={drawPreview}
+                pencilPreviewD={pencilPreviewD}
+                pencilColor={pencilColor}
+                onRemoveArrow={removeArrow}
+              />
+            </View>
 
-            {/* Arrow + freehand layer */}
-            <ArrowOverlay
-              arrows={arrows}
-              freehandPaths={freehandPaths}
-              courtWidth={courtW}
-              courtHeight={courtH}
-              eraserMode={selectedTool === 'eraser'}
-              drawPreview={drawPreview}
-              pencilPreviewD={pencilPreviewD}
-              pencilColor={pencilColor}
-              onRemoveArrow={removeArrow}
-            />
-
-            {/* Player tokens */}
+            {/* Player tokens — outside clip so drag never gets hidden */}
             {displayPositions.map((player) => (
               <PlayerToken
                 key={player.playerId}
@@ -931,6 +931,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: palette.background,
+    overflow: 'visible',
   },
   header: {
     height: 48,
@@ -1039,10 +1040,12 @@ const styles = StyleSheet.create({
   },
   courtContainer: {
     flex: 1,
+    width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 8,
+    overflow: 'visible',
   },
   benchColumn: {
     alignItems: 'center',
@@ -1058,7 +1061,12 @@ const styles = StyleSheet.create({
   },
   court: {
     borderRadius: 12,
-    overflow: 'hidden',
     position: 'relative',
+    overflow: 'visible',
+  },
+  courtClip: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 12,
+    overflow: 'hidden',
   },
 });

@@ -43,6 +43,7 @@ export function PlayerToken({
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const scale = useSharedValue(1);
+  const zIdx = useSharedValue(1);
 
   const basePixelX = player.x * courtWidth;
   const basePixelY = player.y * courtHeight;
@@ -66,6 +67,7 @@ export function PlayerToken({
     .minDistance(10)
     .onBegin(() => {
       scale.value = withSpring(1.2);
+      zIdx.value = 9999;
       runOnJS(triggerHaptic)();
     })
     .onUpdate((e) => {
@@ -81,9 +83,11 @@ export function PlayerToken({
       translateX.value = withSpring(0);
       translateY.value = withSpring(0);
       scale.value = withSpring(1);
+      zIdx.value = 1;
     })
     .onFinalize(() => {
       scale.value = withSpring(1);
+      zIdx.value = 1;
     });
 
   // Pan must be first: it activates on movement (minDistance 10), letting Tap handle quick taps.
@@ -97,6 +101,7 @@ export function PlayerToken({
       { translateY: translateY.value },
       { scale: scale.value },
     ],
+    zIndex: zIdx.value,
   }));
 
   const isBall = player.isBall === true;
