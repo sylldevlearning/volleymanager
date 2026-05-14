@@ -9,6 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { palette } from '../../src/theme/tokens';
 import { COMPANY } from '../../src/utils/constants';
 import { TacticalBoard } from '../../src/components/tactical/TacticalBoard';
+import { TacticalBoardIcon } from '../../src/components/ui/TacticalBoardIcon';
 import { createTeam } from '../../src/services/teamService';
 import { createMatch } from '../../src/services/matchService';
 import { DEFAULT_INDOOR_CONFIG } from '../../src/models/match';
@@ -89,7 +90,7 @@ export default function HomeScreen() {
           accessibilityLabel={t('tactical.title')}
           accessibilityRole="button"
         >
-          <Text style={styles.tacticalEmoji}>📋</Text>
+          <TacticalBoardIcon size={28} color={palette.textSecondary} />
           <View style={styles.tacticalContent}>
             <Text style={styles.tacticalTitle}>{t('tactical.title')}</Text>
             <Text style={styles.tacticalDesc}>{t('home.tacticalDesc')}</Text>
@@ -240,11 +241,6 @@ const styles = StyleSheet.create({
   tacticalButtonPressed: {
     opacity: 0.8,
     backgroundColor: palette.backgroundElevated,
-  },
-  tacticalEmoji: {
-    fontSize: 28,
-    width: 48,
-    textAlign: 'center',
   },
   tacticalContent: {
     flex: 1,

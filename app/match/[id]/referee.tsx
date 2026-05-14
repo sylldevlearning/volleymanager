@@ -24,6 +24,7 @@ import { SubstitutionSheet } from '../../../src/components/scoring/SubstitutionS
 import { TimeoutTimerSheet } from '../../../src/components/scoring/TimeoutTimerSheet';
 import { AdBanner } from '../../../src/components/ads/AdBanner';
 import { TacticalBoard } from '../../../src/components/tactical/TacticalBoard';
+import { TacticalBoardIcon } from '../../../src/components/ui/TacticalBoardIcon';
 import type { Match } from '../../../src/models/match';
 import type { Team } from '../../../src/models/team';
 import type { Player } from '../../../src/models/player';
@@ -484,7 +485,7 @@ export default function RefereeScreen() {
           accessibilityLabel={t('tactical.title')}
           accessibilityRole="button"
         >
-          <Text style={styles.tacticalIcon}>📋</Text>
+          <TacticalBoardIcon size={20} color={palette.textSecondary} />
         </Pressable>
         <Pressable
           style={({ pressed }) => [styles.actionBtnEnd, pressed && styles.actionBtnPressed]}
@@ -910,7 +911,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  tacticalIcon: { fontSize: 20 },
+  tacticalIcon: { alignItems: 'center', justifyContent: 'center' },
   actionBtnPressed: { opacity: 0.7 },
   actionText: { fontSize: 12, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
   changeEndsOverlay: {
