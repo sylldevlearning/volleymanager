@@ -38,72 +38,53 @@ const BRAZIL_PLAYERS: SeedPlayer[] = [
   { number: 28, lastName: 'Darlan',     position: 'opposite' },
 ];
 
+const SEED_TEAMS = [
+  { name: 'France', shortName: 'FRA', color: '#1D4ED8', players: FRANCE_PLAYERS },
+  { name: 'Brésil',  shortName: 'BRA', color: '#F59E0B', players: BRAZIL_PLAYERS },
+] as const;
+
+async function seedPlayersForTeam(teamId: string, players: readonly SeedPlayer[]): Promise<void> {
+  for (const p of players) {
+    try {
+      await createPlayer({
+        teamId,
+        firstName: p.firstName ?? null,
+        lastName: p.lastName,
+        number: p.number,
+        position: p.position,
+        photoUri: null,
+        isActive: true,
+      });
+    } catch (e) {
+      console.error('[seed] Failed to create player', p.number, p.lastName, e);
+    }
+  }
+}
+
 export async function seedDefaultDataIfEmpty(): Promise<void> {
   try {
     const teams = await getAllTeams();
 
-    if (teams.length > 0) {
-      // Guard: if teams already have players, skip seeding
-      const firstTeamPlayers = await getPlayersByTeam(teams[0].id);
-      if (firstTeamPlayers.length > 0) return;
-      // Teams exist but no players → bad state from a previous failed seed — fall through to re-seed
-      console.warn('[seed] Teams exist but no players found, re-seeding players');
-    }
-
-    const france = await createTeam({
-      name: 'France',
-      shortName: 'FRA',
-      logoUri: null,
-      color: '#1D4ED8',
-    });
-
-    if (!france?.id) {
-      console.error('[seed] createTeam returned no id for France');
+    if (teams.length === 0) {
+      // First launch: create teams then players
+      for (const def of SEED_TEAMS) {
+        const team = await createTeam({ name: def.name, shortName: def.shortName, logoUri: null, color: def.color });
+        if (!team?.id) { console.error(`[seed] createTeam returned no id for ${def.name}`); continue; }
+        await seedPlayersForTeam(team.id, def.players);
+      }
       return;
     }
 
-    const brazil = await createTeam({
-      name: 'Brésil',
-      shortName: 'BRA',
-      logoUri: null,
-      color: '#F59E0B',
-    });
+    // Teams exist — check if first team has players
+    const firstTeamPlayers = await getPlayersByTeam(teams[0].id);
+    if (firstTeamPlayers.length > 0) return;
 
-    if (!brazil?.id) {
-      console.error('[seed] createTeam returned no id for Brésil');
-      return;
-    }
-
-    for (const p of FRANCE_PLAYERS) {
-      try {
-        await createPlayer({
-          teamId: france.id,
-          firstName: p.firstName ?? null,
-          lastName: p.lastName,
-          number: p.number,
-          position: p.position,
-          photoUri: null,
-          isActive: true,
-        });
-      } catch (e) {
-        console.error('[seed] Failed to create France player', p.number, p.lastName, e);
-      }
-    }
-
-    for (const p of BRAZIL_PLAYERS) {
-      try {
-        await createPlayer({
-          teamId: brazil.id,
-          firstName: p.firstName ?? null,
-          lastName: p.lastName,
-          number: p.number,
-          position: p.position,
-          photoUri: null,
-          isActive: true,
-        });
-      } catch (e) {
-        console.error('[seed] Failed to create Brazil player', p.number, p.lastName, e);
-      }
+    // Teams exist but no players → seed players into existing teams matched by name
+    console.warn('[seed] Teams exist but no players found, re-seeding players');
+    for (const team of teams) {
+      const def = SEED_TEAMS.find((d) => d.name === team.name);
+      if (!def) continue;
+      await seedPlayersForTeam(team.id, def.players);
     }
   } catch (e) {
     console.error('[seed] seedDefaultDataIfEmpty failed:', e);

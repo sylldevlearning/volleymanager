@@ -229,6 +229,23 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
       `);
     });
   }
+
+  if (version < 7) {
+    await db.withExclusiveTransactionAsync(async () => {
+      // Remove duplicate team names — keep the oldest row (smallest rowid)
+      await db.execAsync(`
+        DELETE FROM teams
+        WHERE rowid NOT IN (
+          SELECT MIN(rowid) FROM teams GROUP BY name
+        )
+      `);
+      // Unique index prevents future duplicates
+      await db.execAsync(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_teams_name_unique ON teams(name)'
+      );
+      await db.execAsync('PRAGMA user_version = 7');
+    });
+  }
 }
 
 export function generateId(): string {
