@@ -485,7 +485,7 @@ export default function RefereeScreen() {
           accessibilityLabel={t('tactical.title')}
           accessibilityRole="button"
         >
-          <TacticalBoardIcon size={20} color={palette.textSecondary} />
+          <TacticalBoardIcon size={20} />
         </Pressable>
         <Pressable
           style={({ pressed }) => [styles.actionBtnEnd, pressed && styles.actionBtnPressed]}

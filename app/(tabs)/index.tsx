@@ -90,7 +90,7 @@ export default function HomeScreen() {
           accessibilityLabel={t('tactical.title')}
           accessibilityRole="button"
         >
-          <TacticalBoardIcon size={28} color={palette.textSecondary} />
+          <TacticalBoardIcon size={28} />
           <View style={styles.tacticalContent}>
             <Text style={styles.tacticalTitle}>{t('tactical.title')}</Text>
             <Text style={styles.tacticalDesc}>{t('home.tacticalDesc')}</Text>
