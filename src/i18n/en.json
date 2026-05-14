@@ -57,6 +57,8 @@
     "teamAway": "Away team",
     "selectTeam": "Select a team",
     "start": "Start match",
+    "chooseService": "Who serves first?",
+    "firstService": "First serve",
     "coach": "Coach",
     "stats": "Stats",
     "set": "Set",

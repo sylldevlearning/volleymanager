@@ -49,11 +49,17 @@ export default function NewMatchScreen() {
   const [mode, setMode] = useState<MatchMode>('competition');
   const [teamHomeId, setTeamHomeId] = useState<string>('');
   const [teamAwayId, setTeamAwayId] = useState<string>('');
+  const [firstServeTeamId, setFirstServeTeamId] = useState<string>('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     getAllTeams().then(setTeams);
   }, []);
+
+  // Default first serve to home team when home team is selected
+  useEffect(() => {
+    if (teamHomeId && !firstServeTeamId) setFirstServeTeamId(teamHomeId);
+  }, [teamHomeId]);
 
   const handleStart = async () => {
     if (!teamHomeId || !teamAwayId) {
@@ -67,7 +73,10 @@ export default function NewMatchScreen() {
     setLoading(true);
     try {
       const config = getDefaultConfig(format, mode);
-      const match = await createMatch({ format, mode, teamHomeId, teamAwayId, config });
+      const match = await createMatch({
+        format, mode, teamHomeId, teamAwayId, config,
+        firstServeTeamId: firstServeTeamId || teamHomeId,
+      });
       router.replace(`/match/${match.id}/referee`);
     } catch (e) {
       Alert.alert(t('common.error'), String(e));
@@ -115,6 +124,17 @@ export default function NewMatchScreen() {
             placeholder={t('match.selectTeam')}
           />
         </Section>
+
+        {/* First serve picker — only when both teams are chosen */}
+        {teamHomeId && teamAwayId && (
+          <Section title={t('match.firstService')}>
+            <ServePicker
+              teams={teams.filter((t) => t.id === teamHomeId || t.id === teamAwayId)}
+              selected={firstServeTeamId || teamHomeId}
+              onSelect={setFirstServeTeamId}
+            />
+          </Section>
+        )}
 
         {/* Config preview */}
         <ConfigPreview format={format} mode={mode} />
@@ -210,6 +230,40 @@ function TeamPicker({
   );
 }
 
+function ServePicker({
+  teams,
+  selected,
+  onSelect,
+}: {
+  teams: Team[];
+  selected: string;
+  onSelect: (id: string) => void;
+}) {
+  return (
+    <View style={styles.serveRow}>
+      {teams.map((team) => {
+        const isSelected = selected === team.id;
+        return (
+          <Pressable
+            key={team.id}
+            style={[styles.serveOption, isSelected && { borderColor: team.color ?? palette.accentPrimary }]}
+            onPress={() => onSelect(team.id)}
+            accessibilityRole="radio"
+            accessibilityState={{ selected: isSelected }}
+            accessibilityLabel={team.name}
+          >
+            <View style={[styles.teamDot, { backgroundColor: team.color }]} />
+            <Text style={[styles.serveOptionText, isSelected && styles.serveOptionTextActive]}>
+              {team.name}
+            </Text>
+            {isSelected && <Text style={styles.serveIcon}>🏐</Text>}
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
 function ConfigPreview({ format, mode }: { format: MatchFormat; mode: MatchMode }) {
   const { t } = useTranslation();
   const config = getDefaultConfig(format, mode);
@@ -286,6 +340,21 @@ const styles = StyleSheet.create({
   teamOptionText: { fontSize: 15, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
   teamOptionTextActive: { color: palette.textPrimary, fontFamily: 'Inter_600SemiBold' },
   noTeamText: { fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textMuted, padding: 12 },
+  serveRow: { flexDirection: 'row', gap: 10 },
+  serveOption: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: palette.backgroundSurface,
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  serveOptionText: { flex: 1, fontSize: 14, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
+  serveOptionTextActive: { color: palette.textPrimary, fontFamily: 'Inter_700Bold' },
+  serveIcon: { fontSize: 18 },
   configPreview: {
     backgroundColor: palette.backgroundSurface,
     borderRadius: 14,
