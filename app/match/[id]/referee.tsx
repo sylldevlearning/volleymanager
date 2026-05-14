@@ -122,8 +122,6 @@ export default function RefereeScreen() {
 
       const homeLineup = buildLineup(homePlrs);
       const awayLineup = buildLineup(awayPlrs);
-      initLineup('home', homeLineup.courtMap, homeLineup.bench, homeLineup.liberoState);
-      initLineup('away', awayLineup.courtMap, awayLineup.bench, awayLineup.liberoState);
 
       if (m.status === 'created') {
         await updateMatchStatus(id, 'live');
@@ -138,6 +136,9 @@ export default function RefereeScreen() {
           (await createSet(id, 1));
         initMatch(m, activeSet);
       }
+      // initLineup AFTER initMatch — initMatch resets court to EMPTY_COURT
+      initLineup('home', homeLineup.courtMap, homeLineup.bench, homeLineup.liberoState);
+      initLineup('away', awayLineup.courtMap, awayLineup.bench, awayLineup.liberoState);
       setLoading(false);
     }
     load();
