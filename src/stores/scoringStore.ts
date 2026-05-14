@@ -48,6 +48,8 @@ interface ScoringState {
   setsAway: number;
   setScores: SetScore[];
   servingTeam: 'home' | 'away';
+  /** Serving team at the start of the current set — used to recompute after undo */
+  initialServingTeam: 'home' | 'away';
 
   // Actions
   initMatch: (match: Match, firstSet: MatchSet) => void;
@@ -81,6 +83,19 @@ interface ScoringState {
 
 const INITIAL_ROTATION = [1, 2, 3, 4, 5, 6];
 const EMPTY_COURT: CourtMap = {};
+
+/**
+ * Determines which team serves at the start of a given set.
+ * Set 1 = firstServeTeam, set 2 = other team, set 3 = firstServeTeam, etc.
+ * Defaults to home team when firstServeTeamId is not set.
+ */
+function resolveInitialServing(match: Match, setNumber: number): 'home' | 'away' {
+  const firstServeIsHome =
+    !match.firstServeTeamId || match.firstServeTeamId === match.teamHomeId;
+  const isFirstServeTurn = setNumber % 2 === 1;
+  if (isFirstServeTurn) return firstServeIsHome ? 'home' : 'away';
+  return firstServeIsHome ? 'away' : 'home';
+}
 
 function computeServingTeam(events: MatchEvent[], initialServing: 'home' | 'away'): 'home' | 'away' {
   let serving = initialServing;
@@ -140,8 +155,10 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
   setsAway: 0,
   setScores: [],
   servingTeam: 'home',
+  initialServingTeam: 'home',
 
   initMatch: (match, firstSet) => {
+    const initialServing = resolveInitialServing(match, firstSet.setNumber);
     set({
       match,
       currentSet: firstSet,
@@ -158,7 +175,8 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
       setsHome: 0,
       setsAway: 0,
       setScores: [],
-      servingTeam: 'home',
+      servingTeam: initialServing,
+      initialServingTeam: initialServing,
       lastScoringTeam: null,
       showChangeEnds: false,
       onCourtHome: EMPTY_COURT,
@@ -242,8 +260,9 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
     const newEvents = state.events.map((e) =>
       e.id === cancelledEventId ? { ...e, isCancelled: true } : e
     );
-    const { home, away } = computeScore(newEvents.filter((e) => !e.isCancelled));
-    const serving = computeServingTeam(newEvents.filter((e) => !e.isCancelled), 'home');
+    const active = newEvents.filter((e) => !e.isCancelled);
+    const { home, away } = computeScore(active);
+    const serving = computeServingTeam(active, state.initialServingTeam);
     set({ events: newEvents, scoreHome: home, scoreAway: away, servingTeam: serving });
   },
 
@@ -254,7 +273,7 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
     );
     const active = newEvents.filter((e) => !e.isCancelled);
     const { home, away } = computeScore(active);
-    const serving = computeServingTeam(active, 'home');
+    const serving = computeServingTeam(active, state.initialServingTeam);
     set({ events: newEvents, scoreHome: home, scoreAway: away, servingTeam: serving });
   },
 
@@ -268,26 +287,30 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
   },
 
   startNewSet: (newSet) => {
-    set((state) => ({
-      currentSet: newSet,
-      sets: [...state.sets, newSet],
-      events: [],
-      scoreHome: 0,
-      scoreAway: 0,
-      timeoutsHome: 0,
-      timeoutsAway: 0,
-      substitutionsHome: 0,
-      substitutionsAway: 0,
-      rotationHome: [...INITIAL_ROTATION],
-      rotationAway: [...INITIAL_ROTATION],
-      lastScoringTeam: null,
-      showChangeEnds: false,
-      pairsHome: [],
-      pairsAway: [],
-      // Reset libero to bench at new set
-      liberoHome: state.liberoHome ? { ...state.liberoHome, isOnCourt: false, replacedPlayerId: null, replacedPosition: null } : null,
-      liberoAway: state.liberoAway ? { ...state.liberoAway, isOnCourt: false, replacedPlayerId: null, replacedPosition: null } : null,
-    }));
+    set((state) => {
+      const initialServing = resolveInitialServing(state.match!, newSet.setNumber);
+      return {
+        currentSet: newSet,
+        sets: [...state.sets, newSet],
+        events: [],
+        scoreHome: 0,
+        scoreAway: 0,
+        timeoutsHome: 0,
+        timeoutsAway: 0,
+        substitutionsHome: 0,
+        substitutionsAway: 0,
+        rotationHome: [...INITIAL_ROTATION],
+        rotationAway: [...INITIAL_ROTATION],
+        servingTeam: initialServing,
+        initialServingTeam: initialServing,
+        lastScoringTeam: null,
+        showChangeEnds: false,
+        pairsHome: [],
+        pairsAway: [],
+        liberoHome: state.liberoHome ? { ...state.liberoHome, isOnCourt: false, replacedPlayerId: null, replacedPosition: null } : null,
+        liberoAway: state.liberoAway ? { ...state.liberoAway, isOnCourt: false, replacedPlayerId: null, replacedPosition: null } : null,
+      };
+    });
   },
 
   requestTimeout: (team) => {
@@ -305,7 +328,7 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
     const newEvents = [...state.events, newEvent];
     const active = newEvents.filter((e) => !e.isCancelled);
     const { home, away } = computeScore(active);
-    const serving = computeServingTeam(active, 'home');
+    const serving = computeServingTeam(active, state.initialServingTeam);
     set({ events: newEvents, scoreHome: home, scoreAway: away, servingTeam: serving });
   },
 
