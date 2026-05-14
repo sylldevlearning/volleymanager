@@ -20,7 +20,7 @@ interface TacticalState {
 
   setPositions: (positions: PlayerPosition[]) => void;
   movePlayer: (playerId: string, x: number, y: number) => void;
-  updatePlayerInfo: (playerId: string, data: { number?: number; firstName?: string | null; lastName?: string | null; label?: string }) => void;
+  updatePlayerInfo: (playerId: string, data: { number?: number; firstName?: string | null; lastName?: string | null; label?: string; customColor?: string }) => void;
   addArrow: (arrow: Omit<Arrow, 'id' | 'order' | 'group'>) => void;
   removeArrow: (id: string) => void;
   clearArrows: () => void;

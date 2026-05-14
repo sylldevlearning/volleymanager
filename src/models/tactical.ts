@@ -13,6 +13,8 @@ export interface PlayerPosition {
   isLibero?: boolean;
   /** Special ball token — yellow, rendered as 🏐 */
   isBall?: boolean;
+  /** Override the default team colour for this token (tactical board only) */
+  customColor?: string;
 }
 
 export type ArrowType = 'solid' | 'dashed' | 'curved';

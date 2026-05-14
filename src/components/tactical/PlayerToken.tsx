@@ -107,7 +107,8 @@ export function PlayerToken({
 
   const isBall = player.isBall === true;
   const BALL_SIZE = 32;
-  const bgColor = player.isLibero ? palette.libero : (player.isHome ? '#1D4ED8' : '#E63946');
+  const defaultColor = player.isLibero ? '#FBBF24' : (player.isHome ? '#1D4ED8' : '#E63946');
+  const bgColor = player.customColor ?? defaultColor;
   const diameter = TOKEN_RADIUS * 2;
   const shortName = isBall ? '' : getPlayerShortName(player);
   const insideLabel = showName && !player.isLibero

@@ -159,6 +159,7 @@
     "numberDuplicate": "Ce numéro existe déjà dans l'équipe",
     "namePlaceholder": "Nom (optionnel)",
     "quickEdit": "Modifier le joueur",
+    "color": "Couleur maillot",
     "addAnother": "Ajouter un autre",
     "done": "Terminé",
     "batchMode": "Ajout rapide",

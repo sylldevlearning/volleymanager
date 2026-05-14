@@ -14,23 +14,39 @@ import { useTranslation } from 'react-i18next';
 import { palette } from '../../theme/tokens';
 import type { PlayerPosition } from '../../models/tactical';
 
+const JERSEY_COLORS = [
+  '#1D4ED8',
+  '#E63946',
+  '#FBBF24',
+  '#2EA043',
+  '#F59E0B',
+  '#8B5CF6',
+  '#EC4899',
+  '#FFFFFF',
+] as const;
+
 interface PlayerEditSheetProps {
   visible: boolean;
   player: PlayerPosition | null;
   onClose: () => void;
-  onSave: (playerId: string, updates: { number: number; firstName: string; lastName: string }) => void;
+  onSave: (
+    playerId: string,
+    updates: { number: number; firstName: string; lastName: string; customColor?: string },
+  ) => void;
 }
 
 export function PlayerEditSheet({ visible, player, onClose, onSave }: PlayerEditSheetProps) {
   const { t } = useTranslation();
   const [numberStr, setNumberStr] = useState('');
   const [lastName, setLastName] = useState('');
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (player && visible) {
       setNumberStr(String(player.number));
       setLastName((player.lastName ?? '').trim());
+      setSelectedColor(player.customColor ?? null);
       setError('');
     }
   }, [player?.playerId, visible]);
@@ -46,13 +62,15 @@ export function PlayerEditSheet({ visible, player, onClose, onSave }: PlayerEdit
       number: num,
       firstName: (player.firstName ?? '').trim(),
       lastName: lastName.trim(),
+      customColor: selectedColor ?? undefined,
     });
     onClose();
   }
 
   if (!player) return null;
 
-  const bgColor = player.isHome ? palette.teamHome : palette.teamAway;
+  const teamColor = player.isHome ? palette.teamHome : palette.teamAway;
+  const headerColor = player.customColor ?? (player.isLibero ? '#FBBF24' : teamColor);
 
   return (
     <Modal
@@ -72,7 +90,7 @@ export function PlayerEditSheet({ visible, player, onClose, onSave }: PlayerEdit
             <View style={styles.handle} />
 
             <View style={styles.header}>
-              <View style={[styles.headerDot, { backgroundColor: bgColor }]} />
+              <View style={[styles.headerDot, { backgroundColor: headerColor }]} />
               <Text style={styles.title}>{t('player.quickEdit')}</Text>
               <Pressable onPress={onClose} style={styles.closeBtn} accessibilityRole="button">
                 <X size={18} color={palette.textSecondary} />
@@ -110,6 +128,49 @@ export function PlayerEditSheet({ visible, player, onClose, onSave }: PlayerEdit
               </View>
             </View>
 
+            {/* Jersey colour picker */}
+            <View style={styles.colorSection}>
+              <Text style={styles.fieldLabel}>{t('player.color')}</Text>
+              <View style={styles.colorRow}>
+                {/* Reset to team default */}
+                <Pressable
+                  style={[styles.colorSwatch, styles.colorSwatchReset, selectedColor === null && styles.colorSwatchActive]}
+                  onPress={() => setSelectedColor(null)}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected: selectedColor === null }}
+                  accessibilityLabel="Équipe"
+                >
+                  <View style={[styles.colorSwatchInner, { backgroundColor: teamColor }]} />
+                  <View style={styles.resetX}>
+                    <Text style={styles.resetXText}>↺</Text>
+                  </View>
+                </Pressable>
+
+                {JERSEY_COLORS.map((color) => {
+                  const active = selectedColor === color;
+                  return (
+                    <Pressable
+                      key={color}
+                      style={[
+                        styles.colorSwatch,
+                        { backgroundColor: color },
+                        color === '#FFFFFF' && styles.colorSwatchWhiteBorder,
+                        active && styles.colorSwatchActive,
+                      ]}
+                      onPress={() => setSelectedColor(color)}
+                      accessibilityRole="radio"
+                      accessibilityState={{ selected: active }}
+                      accessibilityLabel={color}
+                    >
+                      {active && (
+                        <Text style={[styles.checkmark, { color: color === '#FFFFFF' || color === '#FBBF24' || color === '#F59E0B' ? '#000' : '#fff' }]}>✓</Text>
+                      )}
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+
             {!!error && <Text style={styles.error}>{error}</Text>}
 
             <Pressable
@@ -125,6 +186,8 @@ export function PlayerEditSheet({ visible, player, onClose, onSave }: PlayerEdit
     </Modal>
   );
 }
+
+const SWATCH_SIZE = 32;
 
 const styles = StyleSheet.create({
   overlay: {
@@ -193,6 +256,60 @@ const styles = StyleSheet.create({
   inputNumber: {
     textAlign: 'center',
     fontSize: 20,
+    fontFamily: 'Inter_700Bold',
+  },
+  // Colour picker
+  colorSection: {
+    paddingHorizontal: 20,
+    paddingBottom: 12,
+  },
+  colorRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  colorSwatch: {
+    width: SWATCH_SIZE,
+    height: SWATCH_SIZE,
+    borderRadius: SWATCH_SIZE / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  colorSwatchActive: {
+    borderColor: '#fff',
+  },
+  colorSwatchWhiteBorder: {
+    borderColor: palette.backgroundHover,
+  },
+  colorSwatchReset: {
+    backgroundColor: palette.backgroundElevated,
+    overflow: 'hidden',
+  },
+  colorSwatchInner: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+  },
+  resetX: {
+    position: 'absolute',
+    bottom: 1,
+    right: 1,
+    width: 13,
+    height: 13,
+    borderRadius: 6,
+    backgroundColor: palette.backgroundSurface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  resetXText: {
+    fontSize: 8,
+    color: palette.textSecondary,
+    lineHeight: 10,
+  },
+  checkmark: {
+    fontSize: 14,
     fontFamily: 'Inter_700Bold',
   },
   error: {

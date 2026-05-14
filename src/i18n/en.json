@@ -159,6 +159,7 @@
     "numberDuplicate": "This number already exists in the team",
     "namePlaceholder": "Name (optional)",
     "quickEdit": "Edit player",
+    "color": "Jersey color",
     "addAnother": "Add another",
     "done": "Done",
     "batchMode": "Quick add",

@@ -640,7 +640,7 @@ export function TacticalBoard({
 
   async function handleEditSave(
     playerId: string,
-    updates: { number: number; firstName: string; lastName: string },
+    updates: { number: number; firstName: string; lastName: string; customColor?: string },
   ) {
     const newLabel = String(updates.number);
     updatePlayerInfo(playerId, {
@@ -648,6 +648,7 @@ export function TacticalBoard({
       firstName: updates.firstName || null,
       lastName: updates.lastName || null,
       label: newLabel,
+      customColor: updates.customColor,
     });
     // Only persist to DB for real (non-synthetic) player IDs
     const isSynthetic = playerId.startsWith('home_') || playerId.startsWith('away_');
