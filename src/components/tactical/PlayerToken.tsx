@@ -12,7 +12,7 @@ import type { PlayerPosition } from '../../models/tactical';
 import { clamp } from '../../features/tactical/positionUtils';
 import { getPlayerShortName } from '../../features/players/player-helpers';
 import { palette } from '../../theme/tokens';
-import { VolleyballBallSVG } from './VolleyballBallSVG';
+import { BallToken } from './BallToken';
 
 const TOKEN_RADIUS = 20;
 const WRAPPER_WIDTH = 64;
@@ -26,6 +26,7 @@ interface PlayerTokenProps {
   onDragEnd: (playerId: string, x: number, y: number) => void;
   onTap?: (playerId: string) => void;
   hapticsEnabled: boolean;
+  isFaulty?: boolean;
 }
 
 export function PlayerToken({
@@ -37,6 +38,7 @@ export function PlayerToken({
   onDragEnd,
   onTap,
   hapticsEnabled,
+  isFaulty = false,
 }: PlayerTokenProps) {
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
@@ -120,13 +122,14 @@ export function PlayerToken({
         ]}
       >
         {isBall ? (
-          <VolleyballBallSVG size={BALL_SIZE} />
+          <BallToken size={BALL_SIZE} />
         ) : (
           <View style={{ position: 'relative' }}>
             <View
               style={[
                 styles.circle,
                 player.isLibero && styles.liberoCircle,
+                isFaulty && styles.faultyCircle,
                 {
                   width: diameter,
                   height: diameter,
@@ -175,6 +178,14 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
     borderColor: '#fff',
     borderWidth: 2,
+  },
+  faultyCircle: {
+    borderColor: '#E63946',
+    borderWidth: 3,
+    shadowColor: '#E63946',
+    shadowOpacity: 0.8,
+    shadowRadius: 6,
+    elevation: 10,
   },
   liberoBadge: {
     position: 'absolute',
