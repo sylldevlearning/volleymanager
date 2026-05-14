@@ -2,10 +2,14 @@ import { create } from 'zustand';
 import type { PlayerPosition, Arrow, FreehandPath, TacticalPlay, TacticalTool, ArrowThickness } from '../../models/tactical';
 import { generateId } from '../../services/database';
 
+type DrawingEntry = { type: 'arrow'; id: string } | { type: 'freehand'; id: string };
+
 interface TacticalState {
   positions: PlayerPosition[];
   arrows: Arrow[];
   freehandPaths: FreehandPath[];
+  /** LIFO stack tracking insertion order across arrows and freehand paths */
+  drawingOrder: DrawingEntry[];
   selectedTool: TacticalTool;
   arrowThickness: ArrowThickness;
   currentPlayId: string | null;
@@ -23,6 +27,7 @@ interface TacticalState {
   clearArrows: () => void;
   addFreehandPath: (d: string, color: string, hasArrow?: boolean, group?: number) => void;
   clearFreehandPaths: () => void;
+  undoLastDrawing: () => void;
   toggleGroupMode: () => void;
   setTool: (tool: TacticalTool) => void;
   setArrowThickness: (thickness: ArrowThickness) => void;
@@ -34,6 +39,7 @@ export const useTacticalStore = create<TacticalState>()((set) => ({
   positions: [],
   arrows: [],
   freehandPaths: [],
+  drawingOrder: [],
   selectedTool: 'move',
   arrowThickness: 'thin',
   currentPlayId: null,
@@ -64,8 +70,10 @@ export const useTacticalStore = create<TacticalState>()((set) => ({
         : 1;
       const group = state.currentGroup;
       const nextGroup = state.groupMode ? group : group + 1;
+      const newId = generateId();
       return {
-        arrows: [...state.arrows, { ...arrow, id: generateId(), order, group }],
+        arrows: [...state.arrows, { ...arrow, id: newId, order, group }],
+        drawingOrder: [...state.drawingOrder, { type: 'arrow', id: newId }],
         currentGroup: nextGroup,
       };
     }),
@@ -81,19 +89,35 @@ export const useTacticalStore = create<TacticalState>()((set) => ({
   removeArrow: (id) =>
     set((state) => ({
       arrows: state.arrows.filter((a) => a.id !== id),
+      drawingOrder: state.drawingOrder.filter((d) => d.id !== id),
     })),
 
-  clearArrows: () => set({ arrows: [], freehandPaths: [], currentGroup: 1, groupMode: false }),
+  clearArrows: () => set({ arrows: [], freehandPaths: [], drawingOrder: [], currentGroup: 1, groupMode: false }),
 
   addFreehandPath: (d, color, hasArrow, group) =>
-    set((state) => ({
-      freehandPaths: [
-        ...state.freehandPaths,
-        { id: generateId(), d, color, hasArrow, group: group ?? state.currentGroup },
-      ],
-    })),
+    set((state) => {
+      const newId = generateId();
+      return {
+        freehandPaths: [
+          ...state.freehandPaths,
+          { id: newId, d, color, hasArrow, group: group ?? state.currentGroup },
+        ],
+        drawingOrder: [...state.drawingOrder, { type: 'freehand', id: newId }],
+      };
+    }),
 
   clearFreehandPaths: () => set({ freehandPaths: [] }),
+
+  undoLastDrawing: () =>
+    set((state) => {
+      if (state.drawingOrder.length === 0) return state;
+      const last = state.drawingOrder[state.drawingOrder.length - 1];
+      const newOrder = state.drawingOrder.slice(0, -1);
+      if (last.type === 'arrow') {
+        return { arrows: state.arrows.filter((a) => a.id !== last.id), drawingOrder: newOrder };
+      }
+      return { freehandPaths: state.freehandPaths.filter((fp) => fp.id !== last.id), drawingOrder: newOrder };
+    }),
 
   setTool: (tool) => set({ selectedTool: tool }),
 
@@ -104,6 +128,7 @@ export const useTacticalStore = create<TacticalState>()((set) => ({
       positions: play.positions,
       arrows: play.arrows,
       freehandPaths: [],
+      drawingOrder: [],
       selectedTool: 'move',
       currentGroup: 1,
       groupMode: false,
@@ -116,6 +141,7 @@ export const useTacticalStore = create<TacticalState>()((set) => ({
       positions: [],
       arrows: [],
       freehandPaths: [],
+      drawingOrder: [],
       selectedTool: 'move',
       currentGroup: 1,
       groupMode: false,

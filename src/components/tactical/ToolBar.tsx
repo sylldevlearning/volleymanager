@@ -9,8 +9,10 @@ interface ToolBarProps {
   arrowThickness: ArrowThickness;
   groupMode: boolean;
   currentGroup: number;
+  hasDrawings: boolean;
   onSelectTool: (tool: TacticalTool) => void;
   onToggleGroupMode: () => void;
+  onUndoDrawing: () => void;
   onClearAll: () => void;
 }
 
@@ -26,8 +28,10 @@ export function ToolBar({
   arrowThickness,
   groupMode,
   currentGroup,
+  hasDrawings,
   onSelectTool,
   onToggleGroupMode,
+  onUndoDrawing,
   onClearAll,
 }: ToolBarProps) {
   const { t } = useTranslation();
@@ -75,6 +79,19 @@ export function ToolBar({
             </Pressable>
           );
         })}
+
+        {/* Undo last drawing */}
+        <Pressable
+          style={[styles.undoBtn, !hasDrawings && styles.undoBtnDisabled]}
+          onPress={onUndoDrawing}
+          disabled={!hasDrawings}
+          accessibilityRole="button"
+          accessibilityLabel="Undo"
+        >
+          <Text style={[styles.undoIcon, hasDrawings && styles.undoIconActive]}>↩</Text>
+        </Pressable>
+
+        <View style={styles.divider} />
 
         <Pressable
           style={[styles.toolBtn, groupMode && styles.toolBtnGroupActive]}
@@ -149,6 +166,24 @@ const styles = StyleSheet.create({
   },
   toolLabelActive: {
     color: 'rgba(255,255,255,0.9)',
+  },
+  undoBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 9,
+    backgroundColor: palette.backgroundElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  undoBtnDisabled: {
+    opacity: 0.35,
+  },
+  undoIcon: {
+    fontSize: 18,
+    color: '#8B949E',
+  },
+  undoIconActive: {
+    color: '#FFFFFF',
   },
   divider: {
     width: 8,

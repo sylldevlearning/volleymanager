@@ -253,6 +253,7 @@ export function TacticalBoard({
     positions,
     arrows,
     freehandPaths,
+    drawingOrder,
     selectedTool,
     arrowThickness,
     currentGroup,
@@ -266,6 +267,7 @@ export function TacticalBoard({
     removeArrow,
     clearArrows,
     addFreehandPath,
+    undoLastDrawing,
     toggleGroupMode,
     setTool,
     setArrowThickness,
@@ -995,8 +997,10 @@ export function TacticalBoard({
           arrowThickness={arrowThickness}
           groupMode={groupMode}
           currentGroup={currentGroup}
+          hasDrawings={drawingOrder.length > 0}
           onSelectTool={setTool}
           onToggleGroupMode={toggleGroupMode}
+          onUndoDrawing={undoLastDrawing}
           onClearAll={() => { clearArrows(); handleReset(); }}
         />
 
