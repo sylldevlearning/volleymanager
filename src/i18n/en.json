@@ -324,7 +324,12 @@
       "play": "Play",
       "pause": "Pause",
       "reset": "Reset",
-      "speed": "Speed"
+      "speed": "Speed",
+      "stepOf": "Step {{current}} / {{total}}",
+      "forward": "Forward",
+      "back": "Back",
+      "start": "Start",
+      "end": "End"
     },
     "playbook": {
       "save": "Save",

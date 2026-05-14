@@ -1,5 +1,5 @@
 import React from 'react';
-import Svg, { Path, Polygon } from 'react-native-svg';
+import Svg, { G, Path, Polygon } from 'react-native-svg';
 import { ArrowPath } from './ArrowPath';
 import type { Arrow, FreehandPath } from '../../models/tactical';
 
@@ -43,6 +43,12 @@ interface ArrowOverlayProps {
   pencilPreviewD: string | null;
   pencilColor: string;
   onRemoveArrow: (id: string) => void;
+  /** When true (edit mode), all drawings visible regardless of group */
+  isEditMode: boolean;
+  /** Active group number during playback — only this group's arrows are shown */
+  activeGroup: number | null;
+  /** Opacity to apply to active-group arrows (0–1, animated during fade) */
+  arrowOpacity: number;
 }
 
 export function ArrowOverlay({
@@ -55,6 +61,9 @@ export function ArrowOverlay({
   pencilPreviewD,
   pencilColor,
   onRemoveArrow,
+  isEditMode,
+  activeGroup,
+  arrowOpacity,
 }: ArrowOverlayProps) {
   return (
     <Svg
@@ -63,11 +72,17 @@ export function ArrowOverlay({
       style={{ position: 'absolute', top: 0, left: 0 }}
       pointerEvents={eraserMode ? 'auto' : 'none'}
     >
-      {/* Committed freehand paths */}
+      {/* Freehand paths: pencil = permanent, traced-arrow = ephemeral */}
       {freehandPaths.map((fp) => {
+        const isEphemeral = fp.hasArrow === true;
+        if (!isEditMode && isEphemeral) {
+          // Only show if this is the currently active group
+          if (fp.group !== activeGroup) return null;
+        }
+        const opacity = (!isEditMode && isEphemeral) ? arrowOpacity : 1;
         const arrowhead = fp.hasArrow ? computeArrowhead(fp.d, fp.color) : null;
         return (
-          <React.Fragment key={fp.id}>
+          <G key={fp.id} opacity={opacity}>
             <Path
               d={fp.d}
               stroke={fp.color}
@@ -77,20 +92,26 @@ export function ArrowOverlay({
               strokeLinejoin="round"
             />
             {arrowhead}
-          </React.Fragment>
+          </G>
         );
       })}
 
-      {arrows.map((arrow) => (
-        <ArrowPath
-          key={arrow.id}
-          arrow={arrow}
-          courtWidth={courtWidth}
-          courtHeight={courtHeight}
-          eraserMode={eraserMode}
-          onPress={eraserMode ? () => onRemoveArrow(arrow.id) : undefined}
-        />
-      ))}
+      {/* Committed arrows: always ephemeral */}
+      {arrows.map((arrow) => {
+        if (!isEditMode && arrow.group !== activeGroup) return null;
+        const opacity = isEditMode ? 1 : arrowOpacity;
+        return (
+          <ArrowPath
+            key={arrow.id}
+            arrow={arrow}
+            courtWidth={courtWidth}
+            courtHeight={courtHeight}
+            eraserMode={eraserMode}
+            opacity={opacity}
+            onPress={eraserMode ? () => onRemoveArrow(arrow.id) : undefined}
+          />
+        );
+      })}
 
       {/* Live pencil preview */}
       {pencilPreviewD && (

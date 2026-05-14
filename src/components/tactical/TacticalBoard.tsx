@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Modal,
@@ -171,7 +171,6 @@ function buildDefaultPositions(
     );
   }
 
-  // Ball token at center of court
   positions.push({
     playerId: 'ball',
     x: 0.5, y: 0.5,
@@ -185,10 +184,6 @@ function buildDefaultPositions(
   return positions;
 }
 
-// FIVB position fault check:
-// y=0 top (away back line) → y=1 bottom (home back line); net at y=0.5
-// For each team, split players into front row (closer to net) and back row,
-// then verify depth and left-right column order.
 function computePositionFaults(positions: PlayerPosition[]): Set<string> {
   const faults = new Set<string>();
 
@@ -196,18 +191,15 @@ function computePositionFaults(positions: PlayerPosition[]): Set<string> {
     const onCourt = players.filter((p) => !p.isBall);
     if (onCourt.length < 6) return;
 
-    // Front row = 3 players closest to net; for home: smaller y; for away: larger y
     const byDepth = [...onCourt].sort((a, b) => isHome ? a.y - b.y : b.y - a.y);
     const front = byDepth.slice(0, 3).sort((a, b) => a.x - b.x);
     const back = byDepth.slice(3).sort((a, b) => a.x - b.x);
 
-    // Rule 1 — depth: each front player must be closer to the net than column-matched back player
     for (let i = 0; i < 3; i++) {
       const ok = isHome ? front[i].y < back[i].y : front[i].y > back[i].y;
       if (!ok) { faults.add(front[i].playerId); faults.add(back[i].playerId); }
     }
 
-    // Rule 2 — column crossing: front player must not cross adjacent back player's x
     for (let i = 0; i < 3; i++) {
       if (i < 2 && front[i].x > back[i + 1].x) {
         faults.add(front[i].playerId); faults.add(back[i + 1].playerId);
@@ -217,7 +209,6 @@ function computePositionFaults(positions: PlayerPosition[]): Set<string> {
       }
     }
 
-    // Rule 3 — same for back row relative to front row
     for (let i = 0; i < 3; i++) {
       if (i < 2 && back[i].x > front[i + 1].x) {
         faults.add(back[i].playerId); faults.add(front[i + 1].playerId);
@@ -242,6 +233,8 @@ interface DrawPreviewState {
   type: 'solid' | 'dashed' | 'curved';
 }
 
+type StepPhase = 'idle' | 'showing' | 'animating' | 'done';
+
 export function TacticalBoard({
   visible,
   onClose,
@@ -262,12 +255,10 @@ export function TacticalBoard({
     freehandPaths,
     selectedTool,
     arrowThickness,
-    isPlaying,
-    playbackSpeed,
-    groupMode,
     currentGroup,
     currentPlayId,
     currentPlayName,
+    groupMode,
     setPositions,
     movePlayer,
     updatePlayerInfo,
@@ -277,15 +268,13 @@ export function TacticalBoard({
     addFreehandPath,
     toggleGroupMode,
     setTool,
-    setPlaying,
-    setPlaybackSpeed,
+    setArrowThickness,
     loadPlay,
     resetBoard,
   } = useTacticalStore();
 
   const { rotationHome, rotationAway, scoreHome, scoreAway, setsHome, setsAway, benchHome, benchAway } = useScoringStore();
 
-  // Court dimension constants (computed after all state so currentFormat is available)
   const HEADER_H = 48;
   const PLAYBACK_H = 60;
   const TOOLBAR_H = 106;
@@ -293,43 +282,64 @@ export function TacticalBoard({
   const safeH = screenH - insets.top - insets.bottom;
   const availableH = safeH - HEADER_H - PLAYBACK_H - TOOLBAR_H - PADDING * 2;
 
+  // ── UI state ──────────────────────────────────────────────────────────────
   const [drawPreview, setDrawPreview] = useState<DrawPreviewState | null>(null);
   const [pencilPreviewD, setPencilPreviewD] = useState<string | null>(null);
   const [showPlaybook, setShowPlaybook] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<PlayerPosition | null>(null);
   const [playbookMode, setPlaybookMode] = useState<'load' | 'save'>('load');
-  const [playbackPositions, setPlaybackPositions] = useState<PlayerPosition[] | null>(null);
   const [currentFormat, setCurrentFormat] = useState<MatchFormat>(format);
   const [faultPlayerIds, setFaultPlayerIds] = useState<Set<string>>(new Set());
 
+  // ── Bench ─────────────────────────────────────────────────────────────────
   const courtRef = useRef<View>(null);
   const [courtPageX, setCourtPageX] = useState(0);
   const [courtPageY, setCourtPageY] = useState(0);
   const [localBenchHome, setLocalBenchHome] = useState<Player[]>([]);
   const [localBenchAway, setLocalBenchAway] = useState<Player[]>([]);
 
-  // Bench columns appear only in indoor mode when there are substitutes available
   const hasBench = currentFormat === 'indoor_6v6' && (benchHome.length > 0 || benchAway.length > 0);
   const benchOffset = hasBench ? BENCH_W * 2 : 0;
   const courtW = Math.max(80, Math.min(screenW - PADDING * 2 - benchOffset, availableH / 2));
   const courtH = courtW * 2;
 
+  // ── Step-based playback state ─────────────────────────────────────────────
+  const [playbackPositions, setPlaybackPositions] = useState<PlayerPosition[] | null>(null);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [stepPhase, setStepPhase] = useState<StepPhase>('idle');
+  const [stepSnapshots, setStepSnapshots] = useState<PlayerPosition[][] | null>(null);
+  const [activeGroup, setActiveGroup] = useState<number | null>(null);
+  const [arrowOpacity, setArrowOpacity] = useState(1);
+  const [playbackSpeed] = useState<0.5 | 1 | 2>(1);
+
+  const animFrameRef = useRef<number | null>(null);
+  const fadeIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Sorted unique groups from all ephemeral drawings
+  const sortedGroupNums = useMemo(() => {
+    const groups = new Set<number>();
+    arrows.forEach((a) => groups.add(a.group));
+    freehandPaths.filter((fp) => fp.hasArrow).forEach((fp) => {
+      if (fp.group != null) groups.add(fp.group);
+    });
+    return [...groups].sort((a, b) => a - b);
+  }, [arrows, freehandPaths]);
+
+  const totalSteps = sortedGroupNums.length;
+  const hasArrows = arrows.length > 0 || freehandPaths.some((fp) => fp.hasArrow);
+
+  // Edit mode = no playback started yet (all arrows visible)
+  const isEditMode = stepSnapshots === null;
+
+  const displayPositions = playbackPositions ?? positions;
+
+  // ── Gesture refs ──────────────────────────────────────────────────────────
   const drawStartX = useSharedValue(0);
   const drawStartY = useSharedValue(0);
   const pencilPointsRef = useRef<{ x: number; y: number }[]>([]);
-  const isPlayingRef = useRef(false);
-  const animFrameRef = useRef<number | null>(null);
-  const positionsRef = useRef(positions);
 
-  // Keep ref in sync
-  useEffect(() => { positionsRef.current = positions; }, [positions]);
-
-  // Sync local bench when store bench changes (e.g. on substitution from referee screen)
-  useEffect(() => { setLocalBenchHome(benchHome); }, [benchHome]);
-  useEffect(() => { setLocalBenchAway(benchAway); }, [benchAway]);
-
-  // Initialize on open
+  // ── Lifecycle ─────────────────────────────────────────────────────────────
   useEffect(() => {
     if (visible) {
       seedDefaultPlays().catch(console.error);
@@ -339,17 +349,17 @@ export function TacticalBoard({
     }
   }, [visible]);
 
-  // Playback control
+  useEffect(() => { setLocalBenchHome(benchHome); }, [benchHome]);
+  useEffect(() => { setLocalBenchAway(benchAway); }, [benchAway]);
+
   useEffect(() => {
-    isPlayingRef.current = isPlaying;
-    if (isPlaying) {
-      startAnimation();
-    }
     return () => {
       if (animFrameRef.current != null) cancelAnimationFrame(animFrameRef.current);
+      if (fadeIntervalRef.current != null) clearInterval(fadeIntervalRef.current);
     };
-  }, [isPlaying]);
+  }, []);
 
+  // ── Freehand path helpers ─────────────────────────────────────────────────
   function parseFreehandPoints(d: string): { x: number; y: number }[] {
     const pts: { x: number; y: number }[] = [];
     const re = /[ML]\s*([\d.]+)\s+([\d.]+)/g;
@@ -360,123 +370,218 @@ export function TacticalBoard({
     return pts;
   }
 
-  type AnimSegment =
-    | { kind: 'arrow'; fromX: number; fromY: number; toX: number; toY: number }
-    | { kind: 'path'; points: { x: number; y: number }[] };
+  // ── Snapshot computation ──────────────────────────────────────────────────
+  function applyGroupMovement(currentPositions: PlayerPosition[], groupNum: number): PlayerPosition[] {
+    const groupArrows = arrows.filter((a) => a.group === groupNum);
+    const groupPaths = freehandPaths.filter((fp) => fp.hasArrow && fp.group === groupNum);
 
-  function startAnimation() {
-    // Merge arrows and freehand paths (hasArrow=true) into unified group map
-    const groupMap = new Map<number, Array<{ nearestId: string; segment: AnimSegment; startX: number; startY: number }>>();
+    const claimed = new Set<string>();
+    const movements: { playerId: string; toX: number; toY: number }[] = [];
 
-    const sortedArrows = [...arrows].sort((a, b) => a.order - b.order);
-    for (const arrow of sortedArrows) {
-      const g = arrow.group ?? arrow.order;
-      if (!groupMap.has(g)) groupMap.set(g, []);
-      groupMap.get(g)!.push({
-        nearestId: '',
-        segment: { kind: 'arrow', fromX: arrow.fromX, fromY: arrow.fromY, toX: arrow.toX, toY: arrow.toY },
-        startX: 0, startY: 0,
-      });
+    for (const arrow of groupArrows) {
+      const candidates = currentPositions.filter((p) => !claimed.has(p.playerId));
+      const nearest = findNearestPlayer(candidates, arrow.fromX, arrow.fromY);
+      if (nearest) {
+        claimed.add(nearest.playerId);
+        movements.push({ playerId: nearest.playerId, toX: arrow.toX, toY: arrow.toY });
+      }
     }
 
-    for (const fp of freehandPaths) {
-      if (!fp.hasArrow) continue;
+    for (const fp of groupPaths) {
       const points = parseFreehandPoints(fp.d);
       if (points.length < 2) continue;
-      const g = fp.group ?? 1;
-      if (!groupMap.has(g)) groupMap.set(g, []);
-      groupMap.get(g)!.push({
-        nearestId: '',
-        segment: { kind: 'path', points },
-        startX: 0, startY: 0,
-      });
-    }
-
-    if (groupMap.size === 0) { setPlaying(false); return; }
-
-    const groups = [...groupMap.entries()].sort(([a], [b]) => a - b).map(([, v]) => v);
-
-    let animPositions = [...positionsRef.current];
-    setPlaybackPositions([...animPositions]);
-
-    let groupIdx = 0;
-    let animStart: number | null = null;
-    let groupItems: typeof groups[number] = [];
-
-    function step(now: number) {
-      if (!isPlayingRef.current) { setPlaybackPositions(null); return; }
-      if (groupIdx >= groups.length) { setPlaying(false); return; }
-
-      if (animStart === null) {
-        groupItems = groups[groupIdx].map((item) => {
-          const startPt = item.segment.kind === 'arrow'
-            ? { x: item.segment.fromX, y: item.segment.fromY }
-            : item.segment.points[0];
-          const nearest = findNearestPlayer(animPositions, startPt.x, startPt.y);
-          return nearest
-            ? { ...item, nearestId: nearest.playerId, startX: nearest.x, startY: nearest.y }
-            : { ...item, nearestId: '', startX: 0, startY: 0 };
-        });
-        animStart = now;
-      }
-
-      const duration = 800 / playbackSpeed;
-      const elapsed = now - animStart;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = easeInOut(progress);
-
-      animPositions = animPositions.map((p) => {
-        for (const item of groupItems) {
-          if (!item.nearestId || p.playerId !== item.nearestId) continue;
-          const seg = item.segment;
-          if (seg.kind === 'arrow') {
-            return { ...p, x: item.startX + (seg.toX - item.startX) * eased, y: item.startY + (seg.toY - item.startY) * eased };
-          } else {
-            // Interpolate along multi-point path
-            const pts = seg.points;
-            const totalSegments = pts.length - 1;
-            const rawIdx = eased * totalSegments;
-            const segIdx = Math.min(Math.floor(rawIdx), totalSegments - 1);
-            const localT = rawIdx - segIdx;
-            const a = pts[segIdx], b = pts[segIdx + 1];
-            return { ...p, x: a.x + (b.x - a.x) * localT, y: a.y + (b.y - a.y) * localT };
-          }
-        }
-        return p;
-      });
-      setPlaybackPositions([...animPositions]);
-
-      if (progress < 1) {
-        animFrameRef.current = requestAnimationFrame(step);
-      } else {
-        groupIdx++;
-        animStart = null;
-        animFrameRef.current = requestAnimationFrame(step);
+      const startPt = points[0];
+      const endPt = points[points.length - 1];
+      const candidates = currentPositions.filter((p) => !claimed.has(p.playerId));
+      const nearest = findNearestPlayer(candidates, startPt.x, startPt.y);
+      if (nearest) {
+        claimed.add(nearest.playerId);
+        movements.push({ playerId: nearest.playerId, toX: endPt.x, toY: endPt.y });
       }
     }
 
-    animFrameRef.current = requestAnimationFrame(step);
+    return currentPositions.map((p) => {
+      const m = movements.find((mv) => mv.playerId === p.playerId);
+      return m ? { ...p, x: m.toX, y: m.toY } : p;
+    });
   }
 
-  function handleReset() {
-    isPlayingRef.current = false;
+  function computeSnapshots(initialPositions: PlayerPosition[]): PlayerPosition[][] {
+    const snaps: PlayerPosition[][] = [[...initialPositions]];
+    let current = initialPositions;
+    for (const groupNum of sortedGroupNums) {
+      current = applyGroupMovement(current, groupNum);
+      snaps.push([...current]);
+    }
+    return snaps;
+  }
+
+  // ── Animation helpers ─────────────────────────────────────────────────────
+  function animateFromTo(
+    fromPositions: PlayerPosition[],
+    toPositions: PlayerPosition[],
+    durationMs: number,
+    onComplete: () => void,
+  ) {
     if (animFrameRef.current != null) cancelAnimationFrame(animFrameRef.current);
-    setPlaying(false);
+    let start: number | null = null;
+
+    function frame(now: number) {
+      if (start === null) start = now;
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / durationMs, 1);
+      const eased = easeInOut(progress);
+
+      const interpolated = fromPositions.map((p) => {
+        const target = toPositions.find((t) => t.playerId === p.playerId);
+        if (!target) return p;
+        return {
+          ...p,
+          x: p.x + (target.x - p.x) * eased,
+          y: p.y + (target.y - p.y) * eased,
+        };
+      });
+      setPlaybackPositions(interpolated);
+
+      if (progress < 1) {
+        animFrameRef.current = requestAnimationFrame(frame);
+      } else {
+        onComplete();
+      }
+    }
+
+    animFrameRef.current = requestAnimationFrame(frame);
+  }
+
+  function fadeOutArrows(onComplete: () => void) {
+    if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+    const startTime = Date.now();
+    const duration = 300;
+    fadeIntervalRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      setArrowOpacity(1 - progress);
+      if (progress >= 1) {
+        clearInterval(fadeIntervalRef.current!);
+        fadeIntervalRef.current = null;
+        onComplete();
+      }
+    }, 16);
+  }
+
+  // ── Playback controls ─────────────────────────────────────────────────────
+  function handleStepForward() {
+    if (stepPhase !== 'idle' || currentStep >= totalSteps) return;
+
+    let snaps = stepSnapshots;
+    if (snaps === null) {
+      snaps = computeSnapshots(positions);
+      setStepSnapshots(snaps);
+    }
+
+    const stepIdx = currentStep;
+    const groupNum = sortedGroupNums[stepIdx];
+    setActiveGroup(groupNum);
+    setArrowOpacity(1);
+    setStepPhase('animating');
+
+    const fromPos = snaps[stepIdx];
+    const toPos = snaps[stepIdx + 1];
+    const duration = 800 / playbackSpeed;
+
+    animateFromTo(fromPos, toPos, duration, () => {
+      setStepPhase('done');
+      fadeOutArrows(() => {
+        setArrowOpacity(1);
+        setCurrentStep(stepIdx + 1);
+        setStepPhase('idle');
+        setActiveGroup(null);
+      });
+    });
+  }
+
+  function handleStepBack() {
+    if (stepPhase !== 'idle' || currentStep <= 0) return;
+
+    let snaps = stepSnapshots;
+    if (snaps === null) {
+      snaps = computeSnapshots(positions);
+      setStepSnapshots(snaps);
+    }
+
+    const prevStep = currentStep - 1;
+    const groupNum = sortedGroupNums[prevStep];
+
+    // Snap back instantly
+    setPlaybackPositions([...snaps[prevStep]]);
+    setCurrentStep(prevStep);
+
+    // Briefly show the arrows for the step we reversed
+    setActiveGroup(groupNum);
+    setArrowOpacity(0.65);
+    setStepPhase('showing');
+
+    const t = setTimeout(() => {
+      fadeOutArrows(() => {
+        setArrowOpacity(1);
+        setStepPhase('idle');
+        setActiveGroup(null);
+      });
+    }, 450);
+
+    // Cleanup timeout on unmount (best-effort — the component is long-lived)
+    return () => clearTimeout(t);
+  }
+
+  function handleGoToStart() {
+    if (animFrameRef.current != null) cancelAnimationFrame(animFrameRef.current);
+    if (fadeIntervalRef.current != null) clearInterval(fadeIntervalRef.current);
+    // Reset to edit mode: all arrows visible, original positions
+    setCurrentStep(0);
+    setStepPhase('idle');
+    setActiveGroup(null);
+    setArrowOpacity(1);
+    setStepSnapshots(null);
     setPlaybackPositions(null);
   }
 
-  // Group colors — each group gets a distinct color that cycles
+  function handleGoToEnd() {
+    if (animFrameRef.current != null) cancelAnimationFrame(animFrameRef.current);
+    if (fadeIntervalRef.current != null) clearInterval(fadeIntervalRef.current);
+
+    let snaps = stepSnapshots;
+    if (snaps === null) {
+      snaps = computeSnapshots(positions);
+      setStepSnapshots(snaps);
+    }
+
+    setPlaybackPositions([...snaps[totalSteps]]);
+    setCurrentStep(totalSteps);
+    setStepPhase('idle');
+    setActiveGroup(null);
+    setArrowOpacity(1);
+  }
+
+  function handleReset() {
+    if (animFrameRef.current != null) cancelAnimationFrame(animFrameRef.current);
+    if (fadeIntervalRef.current != null) clearInterval(fadeIntervalRef.current);
+    setCurrentStep(0);
+    setStepPhase('idle');
+    setActiveGroup(null);
+    setArrowOpacity(1);
+    setStepSnapshots(null);
+    setPlaybackPositions(null);
+  }
+
+  // ── Group colors ──────────────────────────────────────────────────────────
   const GROUP_COLORS = ['#E63946', '#1D4ED8', '#2EA043', '#F59E0B', '#8B5CF6', '#EC4899'];
   const groupColor = GROUP_COLORS[(currentGroup - 1) % GROUP_COLORS.length];
 
-  // Drawing gesture
+  // ── Drawing gestures ──────────────────────────────────────────────────────
   const isDrawMode = selectedTool === 'arrow_solid' || selectedTool === 'arrow_dashed';
   const isCurvedMode = selectedTool === 'arrow_curved';
-  // Curved arrows use group color; pencil uses red annotation color
   const drawColor = groupColor;
-  // Precompute as primitive string so the worklet can capture it safely
-  const drawType: 'solid' | 'dashed' =
-    selectedTool === 'arrow_dashed' ? 'dashed' : 'solid';
+  const drawType: 'solid' | 'dashed' = selectedTool === 'arrow_dashed' ? 'dashed' : 'solid';
 
   const drawGesture = Gesture.Pan()
     .enabled(isDrawMode)
@@ -519,7 +624,6 @@ export function TacticalBoard({
       runOnJS(setDrawPreview)(null);
     });
 
-  // Pencil/Curved freehand gestures
   const isPencilMode = selectedTool === 'pencil';
   const pencilColor = isCurvedMode ? drawColor : '#E63946';
 
@@ -572,11 +676,9 @@ export function TacticalBoard({
     .onEnd(() => { runOnJS(onCurvedEnd)(); })
     .onFinalize(() => { runOnJS(onCurvedEnd)(); });
 
-  // One gesture that covers all drawing tools — each sub-gesture self-disables via .enabled()
   const allDrawGesture = Gesture.Exclusive(drawGesture, curvedGesture, pencilGesture);
 
-  const displayPositions = playbackPositions ?? positions;
-
+  // ── Court layout ──────────────────────────────────────────────────────────
   function handleCourtLayout() {
     courtRef.current?.measure((_x, _y, _w, _h, pageX, pageY) => {
       setCourtPageX(pageX);
@@ -593,7 +695,6 @@ export function TacticalBoard({
     const nearest = findNearestPlayer(teamPlayers, relX, relY);
     if (!nearest) return;
 
-    // Swap: bench player takes court player's number/label
     setPositions(
       positions.map((p) => {
         if (p.playerId !== nearest.playerId) return p;
@@ -607,7 +708,6 @@ export function TacticalBoard({
       }),
     );
 
-    // Old court player goes to bench
     const outgoing: Player = {
       id: nearest.playerId,
       teamId: nearest.teamId,
@@ -650,7 +750,6 @@ export function TacticalBoard({
       label: newLabel,
       customColor: updates.customColor,
     });
-    // Only persist to DB for real (non-synthetic) player IDs
     const isSynthetic = playerId.startsWith('home_') || playerId.startsWith('away_');
     if (!isSynthetic) {
       try {
@@ -660,7 +759,7 @@ export function TacticalBoard({
           number: updates.number,
         });
       } catch {
-        // Best-effort — store already updated, DB update non-blocking
+        // Best-effort
       }
     }
   }
@@ -668,7 +767,7 @@ export function TacticalBoard({
   function handleLoadPlay(play: TacticalPlay) {
     loadPlay(play);
     setCurrentFormat(play.format);
-    setPlaybackPositions(null);
+    handleReset();
   }
 
   function handleNewBoard() {
@@ -682,6 +781,7 @@ export function TacticalBoard({
     const next: MatchFormat = currentFormat === 'indoor_6v6' ? 'beach_2v2' : 'indoor_6v6';
     setCurrentFormat(next);
     clearArrows();
+    handleReset();
     setPositions(buildDefaultPositions(homeTeamId, awayTeamId, rotationHome, rotationAway, next));
   }
 
@@ -712,7 +812,6 @@ export function TacticalBoard({
       presentationStyle="fullScreen"
       onRequestClose={handleClose}
     >
-      {/* GestureHandlerRootView inside Modal fixes drag on Android */}
       <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView style={styles.safeArea}>
         {/* Header */}
@@ -721,7 +820,6 @@ export function TacticalBoard({
             <Text style={styles.headerBtnText}>✕</Text>
           </Pressable>
 
-          {/* Format toggle (only in standalone mode) */}
           {!homeTeamName && (
             <Pressable onPress={handleToggleFormat} style={styles.formatChip} accessibilityRole="button">
               <Text style={styles.formatChipText}>
@@ -732,7 +830,6 @@ export function TacticalBoard({
 
           <Text style={styles.title}>{t('tactical.title')}</Text>
 
-          {/* Live score pill — shown when a match is active */}
           {(scoreHome > 0 || scoreAway > 0 || setsHome > 0 || setsAway > 0) && (
             <View style={styles.scorePill}>
               <Text style={styles.scorePillText}>
@@ -767,7 +864,7 @@ export function TacticalBoard({
           </Pressable>
         </View>
 
-        {/* Hamburger menu overlay */}
+        {/* Hamburger menu */}
         {showMenu && (
           <Pressable style={styles.menuBackdrop} onPress={() => setShowMenu(false)}>
             <View style={styles.menuCard}>
@@ -789,7 +886,7 @@ export function TacticalBoard({
               <View style={styles.menuDivider} />
               <Pressable
                 style={styles.menuItem}
-                onPress={() => { setShowMenu(false); clearArrows(); }}
+                onPress={() => { setShowMenu(false); clearArrows(); handleReset(); }}
               >
                 <Text style={styles.menuItemIcon}>🧺</Text>
                 <Text style={[styles.menuItemText, { color: palette.error }]}>{t('tactical.tools.clearAll')}</Text>
@@ -800,7 +897,6 @@ export function TacticalBoard({
 
         {/* Court container */}
         <View style={styles.courtContainer}>
-          {/* Home bench — left column */}
           {hasBench && (
             <View style={[styles.benchColumn, { width: BENCH_W }]}>
               {localBenchHome.map((p) => (
@@ -813,11 +909,8 @@ export function TacticalBoard({
           )}
 
           <View ref={courtRef} onLayout={handleCourtLayout} style={[styles.court, { width: courtW, height: courtH }]}>
-            {/* Court background — SVG draws its own background, no RN clip needed */}
             <CourtSVG width={courtW} height={courtH} format={currentFormat} />
 
-            {/* Drawing layer: gesture wraps ArrowOverlay so e.x/e.y are in court coords.
-                Eraser mode skips the GestureDetector so SVG onPress events reach ArrowPath. */}
             <View style={styles.drawLayer}>
               {selectedTool === 'eraser' ? (
                 <ArrowOverlay
@@ -830,6 +923,9 @@ export function TacticalBoard({
                   pencilPreviewD={null}
                   pencilColor={pencilColor}
                   onRemoveArrow={removeArrow}
+                  isEditMode={true}
+                  activeGroup={null}
+                  arrowOpacity={1}
                 />
               ) : (
                 <GestureDetector gesture={allDrawGesture}>
@@ -844,20 +940,22 @@ export function TacticalBoard({
                       pencilPreviewD={pencilPreviewD}
                       pencilColor={pencilColor}
                       onRemoveArrow={removeArrow}
+                      isEditMode={isEditMode}
+                      activeGroup={activeGroup}
+                      arrowOpacity={arrowOpacity}
                     />
                   </Animated.View>
                 </GestureDetector>
               )}
             </View>
 
-            {/* Player tokens — rendered above drawing layer; zIndex 9999 on active drag */}
             {displayPositions.map((player) => (
               <PlayerToken
                 key={player.playerId}
                 player={player}
                 courtWidth={courtW}
                 courtHeight={courtH}
-                canDrag={selectedTool === 'move' && !isPlaying}
+                canDrag={selectedTool === 'move' && isEditMode}
                 showName={false}
                 onDragEnd={handleDragEnd}
                 onTap={handleTokenTap}
@@ -867,7 +965,6 @@ export function TacticalBoard({
             ))}
           </View>
 
-          {/* Away bench — right column */}
           {hasBench && (
             <View style={[styles.benchColumn, { width: BENCH_W }]}>
               {localBenchAway.map((p) => (
@@ -882,15 +979,14 @@ export function TacticalBoard({
 
         {/* Playback controls */}
         <PlaybackControls
-          isPlaying={isPlaying}
-          speed={playbackSpeed}
-          hasArrows={arrows.length > 0 || freehandPaths.some((fp) => fp.hasArrow)}
-          onPlay={() => setPlaying(true)}
-          onPause={() => {
-            isPlayingRef.current = false;
-            setPlaying(false);
-          }}
-          onSetSpeed={setPlaybackSpeed}
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+          stepPhase={stepPhase}
+          hasArrows={hasArrows}
+          onStepForward={handleStepForward}
+          onStepBack={handleStepBack}
+          onGoToStart={handleGoToStart}
+          onGoToEnd={handleGoToEnd}
         />
 
         {/* Toolbar */}
@@ -901,10 +997,9 @@ export function TacticalBoard({
           currentGroup={currentGroup}
           onSelectTool={setTool}
           onToggleGroupMode={toggleGroupMode}
-          onClearAll={clearArrows}
+          onClearAll={() => { clearArrows(); handleReset(); }}
         />
 
-        {/* Player quick-edit sheet */}
         <PlayerEditSheet
           visible={editingPlayer !== null}
           player={editingPlayer}
@@ -912,7 +1007,6 @@ export function TacticalBoard({
           onSave={handleEditSave}
         />
 
-        {/* Playbook sheet */}
         <PlaybookSheet
           visible={showPlaybook}
           mode={playbookMode}
@@ -960,9 +1054,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: palette.textSecondary,
     fontFamily: 'Inter_700Bold',
-  },
-  headerBtnActive: {
-    color: palette.accentPrimary,
   },
   headerBtnFault: {
     backgroundColor: palette.error + '30',

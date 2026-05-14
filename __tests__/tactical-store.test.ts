@@ -1,8 +1,7 @@
-import { act, renderHook } from '@testing-library/react-native';
+import { act } from '@testing-library/react-native';
 import { useTacticalStore } from '../src/features/tactical/tacticalStore';
 import type { PlayerPosition, Arrow } from '../src/models/tactical';
 
-// Mock database for generateId
 jest.mock('../src/services/database', () => ({
   generateId: () => `mock-id-${Math.random().toString(36).slice(2, 8)}`,
   getDb: jest.fn(),
@@ -38,25 +37,23 @@ describe('useTacticalStore — initial state', () => {
   beforeEach(reset);
 
   it('starts with empty positions', () => {
-    const { positions } = useTacticalStore.getState();
-    expect(positions).toHaveLength(0);
+    expect(useTacticalStore.getState().positions).toHaveLength(0);
   });
 
   it('starts with empty arrows', () => {
-    const { arrows } = useTacticalStore.getState();
-    expect(arrows).toHaveLength(0);
+    expect(useTacticalStore.getState().arrows).toHaveLength(0);
   });
 
   it('starts with move tool', () => {
     expect(useTacticalStore.getState().selectedTool).toBe('move');
   });
 
-  it('starts with playback speed 1', () => {
-    expect(useTacticalStore.getState().playbackSpeed).toBe(1);
+  it('starts with group 1', () => {
+    expect(useTacticalStore.getState().currentGroup).toBe(1);
   });
 
-  it('starts not playing', () => {
-    expect(useTacticalStore.getState().isPlaying).toBe(false);
+  it('starts with groupMode off', () => {
+    expect(useTacticalStore.getState().groupMode).toBe(false);
   });
 });
 
@@ -64,9 +61,8 @@ describe('useTacticalStore — setPositions', () => {
   beforeEach(reset);
 
   it('sets positions array', () => {
-    const { setPositions } = useTacticalStore.getState();
     act(() => {
-      setPositions([mockPos('p1', 0.5, 0.7), mockPos('p2', 0.2, 0.8)]);
+      useTacticalStore.getState().setPositions([mockPos('p1', 0.5, 0.7), mockPos('p2', 0.2, 0.8)]);
     });
     expect(useTacticalStore.getState().positions).toHaveLength(2);
   });
@@ -126,8 +122,7 @@ describe('useTacticalStore — addArrow', () => {
       useTacticalStore.getState().addArrow(mockArrow(0.1, 0.1, 0.5, 0.5));
       useTacticalStore.getState().addArrow(mockArrow(0.5, 0.5, 0.9, 0.9));
     });
-    const { arrows } = useTacticalStore.getState();
-    expect(arrows[1].order).toBe(2);
+    expect(useTacticalStore.getState().arrows[1].order).toBe(2);
   });
 
   it('preserves all arrow fields', () => {
@@ -196,50 +191,10 @@ describe('useTacticalStore — setTool', () => {
   });
 });
 
-describe('useTacticalStore — setPlaying', () => {
-  beforeEach(reset);
-
-  it('sets isPlaying to true and resets currentStep', () => {
-    act(() => {
-      useTacticalStore.getState().setCurrentStep(3);
-      useTacticalStore.getState().setPlaying(true);
-    });
-    expect(useTacticalStore.getState().isPlaying).toBe(true);
-    expect(useTacticalStore.getState().currentStep).toBe(0);
-  });
-
-  it('sets isPlaying to false without resetting step', () => {
-    act(() => {
-      useTacticalStore.getState().setCurrentStep(2);
-      useTacticalStore.getState().setPlaying(false);
-    });
-    expect(useTacticalStore.getState().isPlaying).toBe(false);
-    expect(useTacticalStore.getState().currentStep).toBe(2);
-  });
-});
-
-describe('useTacticalStore — setPlaybackSpeed', () => {
-  beforeEach(reset);
-
-  it('sets speed to 0.5', () => {
-    act(() => {
-      useTacticalStore.getState().setPlaybackSpeed(0.5);
-    });
-    expect(useTacticalStore.getState().playbackSpeed).toBe(0.5);
-  });
-
-  it('sets speed to 2', () => {
-    act(() => {
-      useTacticalStore.getState().setPlaybackSpeed(2);
-    });
-    expect(useTacticalStore.getState().playbackSpeed).toBe(2);
-  });
-});
-
 describe('useTacticalStore — loadPlay', () => {
   beforeEach(reset);
 
-  it('loads positions and arrows from play', () => {
+  it('loads positions and arrows from play, resets to move tool', () => {
     const play = {
       id: 'test',
       name: 'Test',
@@ -256,7 +211,7 @@ describe('useTacticalStore — loadPlay', () => {
     });
     expect(useTacticalStore.getState().positions).toHaveLength(1);
     expect(useTacticalStore.getState().selectedTool).toBe('move');
-    expect(useTacticalStore.getState().isPlaying).toBe(false);
+    expect(useTacticalStore.getState().currentGroup).toBe(1);
   });
 });
 
@@ -268,13 +223,12 @@ describe('useTacticalStore — resetBoard', () => {
       useTacticalStore.getState().setPositions([mockPos('p1', 0.5, 0.5)]);
       useTacticalStore.getState().addArrow(mockArrow(0.1, 0.1, 0.9, 0.9));
       useTacticalStore.getState().setTool('arrow_dashed');
-      useTacticalStore.getState().setPlaying(true);
       useTacticalStore.getState().resetBoard();
     });
     const state = useTacticalStore.getState();
     expect(state.positions).toHaveLength(0);
     expect(state.arrows).toHaveLength(0);
     expect(state.selectedTool).toBe('move');
-    expect(state.isPlaying).toBe(false);
+    expect(state.currentGroup).toBe(1);
   });
 });

@@ -8,6 +8,7 @@ interface ArrowPathProps {
   courtHeight: number;
   onPress?: () => void;
   eraserMode?: boolean;
+  opacity?: number;
 }
 
 function toPixel(rel: number, size: number): number {
@@ -48,7 +49,7 @@ function arrowHeadPoints(
   return `${tx},${ty} ${x1},${y1} ${x2},${y2}`;
 }
 
-export function ArrowPath({ arrow, courtWidth, courtHeight, onPress, eraserMode }: ArrowPathProps) {
+export function ArrowPath({ arrow, courtWidth, courtHeight, onPress, eraserMode, opacity: opacityProp = 1 }: ArrowPathProps) {
   const fx = toPixel(arrow.fromX, courtWidth);
   const fy = toPixel(arrow.fromY, courtHeight);
   const tx = toPixel(arrow.toX, courtWidth);
@@ -64,7 +65,7 @@ export function ArrowPath({ arrow, courtWidth, courtHeight, onPress, eraserMode 
     : buildSolidPath(fx, fy, tx, ty);
 
   const headPoints = arrowHeadPoints(fx, fy, tx, ty, cx, cy);
-  const opacity = eraserMode ? 0.5 : 1;
+  const opacity = eraserMode ? 0.5 : opacityProp;
 
   return (
     <G opacity={opacity} onPress={onPress}>

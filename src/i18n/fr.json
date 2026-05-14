@@ -324,7 +324,12 @@
       "play": "Lecture",
       "pause": "Pause",
       "reset": "Remettre à zéro",
-      "speed": "Vitesse"
+      "speed": "Vitesse",
+      "stepOf": "Étape {{current}} / {{total}}",
+      "forward": "Avancer",
+      "back": "Reculer",
+      "start": "Début",
+      "end": "Fin"
     },
     "playbook": {
       "save": "Sauvegarder",

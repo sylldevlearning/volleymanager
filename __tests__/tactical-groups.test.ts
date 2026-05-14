@@ -6,7 +6,6 @@ function reset() {
   setState({
     positions: [], arrows: [], freehandPaths: [],
     selectedTool: 'move', arrowThickness: 'thin',
-    isPlaying: false, playbackSpeed: 1, currentStep: 0,
     currentGroup: 1, groupMode: false,
     currentPlayId: null, currentPlayName: null,
   });

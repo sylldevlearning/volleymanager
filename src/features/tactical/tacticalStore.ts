@@ -8,9 +8,6 @@ interface TacticalState {
   freehandPaths: FreehandPath[];
   selectedTool: TacticalTool;
   arrowThickness: ArrowThickness;
-  isPlaying: boolean;
-  playbackSpeed: 0.5 | 1 | 2;
-  currentStep: number;
   currentPlayId: string | null;
   currentPlayName: string | null;
   /** Current group number for new arrows */
@@ -29,22 +26,16 @@ interface TacticalState {
   toggleGroupMode: () => void;
   setTool: (tool: TacticalTool) => void;
   setArrowThickness: (thickness: ArrowThickness) => void;
-  setPlaying: (playing: boolean) => void;
-  setPlaybackSpeed: (speed: 0.5 | 1 | 2) => void;
-  setCurrentStep: (step: number) => void;
   loadPlay: (play: TacticalPlay) => void;
   resetBoard: () => void;
 }
 
-export const useTacticalStore = create<TacticalState>()((set, get) => ({
+export const useTacticalStore = create<TacticalState>()((set) => ({
   positions: [],
   arrows: [],
   freehandPaths: [],
   selectedTool: 'move',
   arrowThickness: 'thin',
-  isPlaying: false,
-  playbackSpeed: 1,
-  currentStep: 0,
   currentPlayId: null,
   currentPlayName: null,
   currentGroup: 1,
@@ -82,7 +73,6 @@ export const useTacticalStore = create<TacticalState>()((set, get) => ({
   toggleGroupMode: () =>
     set((state) => {
       if (state.groupMode) {
-        // Leaving group mode: advance to a new group for the next arrow
         return { groupMode: false, currentGroup: state.currentGroup + 1 };
       }
       return { groupMode: true };
@@ -109,20 +99,12 @@ export const useTacticalStore = create<TacticalState>()((set, get) => ({
 
   setArrowThickness: (thickness) => set({ arrowThickness: thickness }),
 
-  setPlaying: (playing) => set({ isPlaying: playing, currentStep: playing ? 0 : get().currentStep }),
-
-  setPlaybackSpeed: (speed) => set({ playbackSpeed: speed }),
-
-  setCurrentStep: (step) => set({ currentStep: step }),
-
   loadPlay: (play) =>
     set({
       positions: play.positions,
       arrows: play.arrows,
       freehandPaths: [],
       selectedTool: 'move',
-      isPlaying: false,
-      currentStep: 0,
       currentGroup: 1,
       groupMode: false,
       currentPlayId: play.isDefault ? null : play.id,
@@ -135,8 +117,6 @@ export const useTacticalStore = create<TacticalState>()((set, get) => ({
       arrows: [],
       freehandPaths: [],
       selectedTool: 'move',
-      isPlaying: false,
-      currentStep: 0,
       currentGroup: 1,
       groupMode: false,
       currentPlayId: null,

@@ -3,53 +3,93 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { palette } from '../../theme/tokens';
 
+type StepPhase = 'idle' | 'showing' | 'animating' | 'done';
+
 interface PlaybackControlsProps {
-  isPlaying: boolean;
-  speed: 0.5 | 1 | 2;
+  currentStep: number;
+  totalSteps: number;
+  stepPhase: StepPhase;
   hasArrows: boolean;
-  onPlay: () => void;
-  onPause: () => void;
-  onSetSpeed: (speed: 0.5 | 1 | 2) => void;
+  onStepForward: () => void;
+  onStepBack: () => void;
+  onGoToStart: () => void;
+  onGoToEnd: () => void;
 }
 
-const SPEEDS: (0.5 | 1 | 2)[] = [0.5, 1, 2];
-
 export function PlaybackControls({
-  isPlaying,
-  speed,
+  currentStep,
+  totalSteps,
+  stepPhase,
   hasArrows,
-  onPlay,
-  onPause,
-  onSetSpeed,
+  onStepForward,
+  onStepBack,
+  onGoToStart,
+  onGoToEnd,
 }: PlaybackControlsProps) {
   const { t } = useTranslation();
+  const isAnimating = stepPhase !== 'idle';
+  const atStart = currentStep <= 0;
+  const atEnd = currentStep >= totalSteps;
+
+  const canBack = hasArrows && !isAnimating && !atStart;
+  const canForward = hasArrows && !isAnimating && !atEnd;
 
   return (
     <View style={styles.container}>
+      {/* ⏮ */}
       <Pressable
-        style={[styles.playBtn, !hasArrows && styles.disabled]}
-        onPress={isPlaying ? onPause : onPlay}
-        disabled={!hasArrows}
+        style={[styles.btn, !canBack && styles.btnDisabled]}
+        onPress={onGoToStart}
+        disabled={!canBack}
         accessibilityRole="button"
-        accessibilityLabel={isPlaying ? t('tactical.playback.pause') : t('tactical.playback.play')}
+        accessibilityLabel={t('tactical.playback.start')}
       >
-        <Text style={styles.playIcon}>{isPlaying ? '⏸' : '▶'}</Text>
+        <Text style={[styles.btnIcon, !canBack && styles.btnIconDisabled]}>⏮</Text>
       </Pressable>
 
-      <View style={styles.speedRow}>
-        {SPEEDS.map((s) => (
-          <Pressable
-            key={s}
-            style={[styles.speedBtn, s === speed && styles.speedBtnActive]}
-            onPress={() => onSetSpeed(s)}
-            accessibilityRole="button"
-          >
-            <Text style={[styles.speedText, s === speed && styles.speedTextActive]}>
-              x{s}
-            </Text>
-          </Pressable>
-        ))}
+      {/* ◀ */}
+      <Pressable
+        style={[styles.btn, !canBack && styles.btnDisabled]}
+        onPress={onStepBack}
+        disabled={!canBack}
+        accessibilityRole="button"
+        accessibilityLabel={t('tactical.playback.back')}
+      >
+        <Text style={[styles.btnIcon, !canBack && styles.btnIconDisabled]}>◀</Text>
+      </Pressable>
+
+      {/* Step indicator */}
+      <View style={styles.indicator}>
+        {hasArrows && totalSteps > 0 ? (
+          <Text style={styles.indicatorText}>
+            {t('tactical.playback.stepOf', { current: currentStep, total: totalSteps })}
+          </Text>
+        ) : (
+          <Text style={styles.indicatorTextMuted}>—</Text>
+        )}
       </View>
+
+      {/* ▶ */}
+      <Pressable
+        style={[styles.btn, styles.btnPrimary, !canForward && styles.btnDisabled]}
+        onPress={onStepForward}
+        disabled={!canForward}
+        accessibilityRole="button"
+        accessibilityLabel={t('tactical.playback.forward')}
+      >
+        <Text style={[styles.btnIcon, !canForward && styles.btnIconDisabled]}>▶</Text>
+      </Pressable>
+
+      {/* ⏭ */}
+      <Pressable
+        style={[styles.btn, !canForward && styles.btnDisabled]}
+        onPress={onGoToEnd}
+        disabled={!canForward}
+        accessibilityRole="button"
+        accessibilityLabel={t('tactical.playback.end')}
+      >
+        <Text style={[styles.btnIcon, !canForward && styles.btnIconDisabled]}>⏭</Text>
+      </Pressable>
     </View>
   );
 }
@@ -58,51 +98,49 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    paddingVertical: 6,
+    gap: 6,
+    paddingVertical: 8,
     paddingHorizontal: 12,
     backgroundColor: palette.backgroundSurface,
     borderTopWidth: 1,
     borderTopColor: palette.backgroundElevated,
   },
-  playBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: palette.accentPrimary,
+  btn: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: palette.backgroundElevated,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  playIcon: {
-    fontSize: 18,
-    color: '#FFFFFF',
+  btnPrimary: {
+    backgroundColor: palette.accentPrimary,
   },
-  speedRow: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 6,
+  btnDisabled: {
+    opacity: 0.35,
   },
-  speedBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    backgroundColor: palette.backgroundElevated,
+  btnIcon: {
+    fontSize: 16,
+    color: palette.textPrimary,
   },
-  speedBtnActive: {
-    backgroundColor: palette.accentPrimaryMuted,
-    borderWidth: 1,
-    borderColor: palette.accentPrimary + '60',
-  },
-  speedText: {
-    fontSize: 12,
-    fontFamily: 'Inter_600SemiBold',
+  btnIconDisabled: {
     color: palette.textMuted,
   },
-  speedTextActive: {
-    color: palette.accentPrimary,
+  indicator: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  disabled: {
-    opacity: 0.4,
+  indicatorText: {
+    fontSize: 13,
+    fontFamily: 'Inter_600SemiBold',
+    color: palette.textPrimary,
+    textAlign: 'center',
+  },
+  indicatorTextMuted: {
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+    color: palette.textMuted,
+    textAlign: 'center',
   },
 });
