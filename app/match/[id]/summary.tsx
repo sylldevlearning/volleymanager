@@ -177,6 +177,14 @@ export default function SummaryScreen() {
             })}
           </View>
         )}
+
+        <Pressable
+          style={({ pressed }) => [styles.backToMenuBtn, pressed && { opacity: 0.75 }]}
+          onPress={() => router.replace('/')}
+          accessibilityRole="button"
+        >
+          <Text style={styles.backToMenuText}>🏠  {t('summary.backToMenu')}</Text>
+        </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
@@ -396,5 +404,20 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: 'Inter_600SemiBold',
     color: palette.accentSecondary,
+  },
+  backToMenuBtn: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: palette.backgroundSurface,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: palette.backgroundElevated,
+    paddingVertical: 18,
+    marginTop: 8,
+  },
+  backToMenuText: {
+    fontSize: 16,
+    fontFamily: 'Inter_700Bold',
+    color: palette.textPrimary,
   },
 });

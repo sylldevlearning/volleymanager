@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { Audio } from 'expo-av';
+import { useAudioPlayer, setAudioModeAsync } from 'expo-audio';
 import { useTranslation } from 'react-i18next';
 import { palette } from '../../theme/tokens';
 
@@ -20,23 +20,13 @@ export function TimeoutTimerSheet({ visible, teamName, teamColor, onEnd, onCance
   const [seconds, setSeconds] = useState(TIMEOUT_DURATION);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const hasBuzzed = useRef(false);
-  const soundRef = useRef<Audio.Sound | null>(null);
 
-  // Preload buzzer sound
+  // expo-audio: hook manages lifecycle automatically
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const player = useAudioPlayer(require('../../../assets/sounds/buzzer.wav'));
+
   useEffect(() => {
-    let mounted = true;
-    Audio.setAudioModeAsync({ playsInSilentModeIOS: true }).catch(() => {});
-    Audio.Sound.createAsync(
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      require('../../../assets/sounds/buzzer.wav'),
-    ).then(({ sound }) => {
-      if (mounted) soundRef.current = sound;
-    }).catch(() => { /* fallback to haptics only */ });
-    return () => {
-      mounted = false;
-      soundRef.current?.unloadAsync().catch(() => {});
-      soundRef.current = null;
-    };
+    setAudioModeAsync({ playsInSilentMode: true }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -63,15 +53,11 @@ export function TimeoutTimerSheet({ visible, teamName, teamColor, onEnd, onCance
     };
   }, [visible]);
 
-  async function playBuzzer() {
-    // Play real audio — always (regardless of haptics setting)
-    if (soundRef.current) {
-      try {
-        await soundRef.current.setPositionAsync(0);
-        await soundRef.current.playAsync();
-      } catch { /* ignore */ }
-    }
-    // Haptic reinforcement
+  function playBuzzer() {
+    try {
+      player.seekTo(0);
+      player.play();
+    } catch { /* ignore */ }
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     setTimeout(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning), 300);
     setTimeout(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning), 600);

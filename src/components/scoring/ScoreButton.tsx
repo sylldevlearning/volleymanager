@@ -28,8 +28,6 @@ export function ScoreButton({ teamName, score, teamColor, onPress, onRemove, dis
   const hapticsEnabled = useSettingsStore((s) => s.hapticsEnabled);
   const { scoreFontSize, scoreButtonSize } = useResponsive();
   const scale = useSharedValue(1);
-  // useSharedValue instead of useRef — refs are JS-side objects and cannot be
-  // safely read or mutated from a Reanimated worklet (UI thread).
   const lastPressTime = useSharedValue(0);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -58,31 +56,34 @@ export function ScoreButton({ teamName, score, teamColor, onPress, onRemove, dis
     });
 
   return (
-    <GestureDetector gesture={gesture}>
-      <Animated.View style={[styles.container, animatedStyle]}>
-        <Text style={styles.teamName} numberOfLines={1}>
-          {teamName}
-        </Text>
-        <View style={[styles.button, { backgroundColor: teamColor + '20', borderColor: teamColor, minHeight: scoreButtonSize }]}>
-          <Text style={[styles.score, { color: teamColor, fontSize: scoreFontSize, lineHeight: scoreFontSize }]}>{score}</Text>
-        </View>
-        <View style={styles.badgeRow}>
-          {onRemove && (
-            <Pressable
-              style={[styles.minusBadge, { borderColor: teamColor }]}
-              onPress={onRemove}
-              accessibilityRole="button"
-              accessibilityLabel="-1"
-            >
-              <Text style={[styles.minusText, { color: teamColor }]}>-1</Text>
-            </Pressable>
-          )}
-          <View style={[styles.addBadge, { backgroundColor: teamColor }]}>
-            <Text style={styles.addText}>+1</Text>
+    <View style={styles.container}>
+      <Text style={styles.teamName} numberOfLines={1}>
+        {teamName}
+      </Text>
+      {/* GestureDetector covers only the score circle — keeps -1 Pressable separate */}
+      <GestureDetector gesture={gesture}>
+        <Animated.View style={animatedStyle}>
+          <View style={[styles.button, { backgroundColor: teamColor + '20', borderColor: teamColor, minHeight: scoreButtonSize }]}>
+            <Text style={[styles.score, { color: teamColor, fontSize: scoreFontSize, lineHeight: scoreFontSize }]}>{score}</Text>
           </View>
+        </Animated.View>
+      </GestureDetector>
+      <View style={styles.badgeRow}>
+        {onRemove && (
+          <Pressable
+            style={[styles.minusBadge, { borderColor: teamColor }]}
+            onPress={onRemove}
+            accessibilityRole="button"
+            accessibilityLabel="-1"
+          >
+            <Text style={[styles.minusText, { color: teamColor }]}>-1</Text>
+          </Pressable>
+        )}
+        <View style={[styles.addBadge, { backgroundColor: teamColor }]}>
+          <Text style={styles.addText}>+1</Text>
         </View>
-      </Animated.View>
-    </GestureDetector>
+      </View>
+    </View>
   );
 }
 
@@ -101,7 +102,7 @@ const styles = StyleSheet.create({
     maxWidth: '90%',
   },
   button: {
-    width: '90%',
+    width: 140,
     aspectRatio: 1,
     maxWidth: 160,
     borderRadius: 24,
