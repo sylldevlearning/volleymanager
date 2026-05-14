@@ -344,7 +344,10 @@
     },
     "arrows_one": "arrow",
     "arrows_other": "arrows",
-    "clearConfirm": "Clear all drawings?"
+    "clearConfirm": "Clear all drawings?",
+    "positionOk": "✓ All positions comply with FIVB rules.",
+    "positionFaults": "⚠️ {{count}} player(s) with position faults.",
+    "positionCheckTitle": "Position fault"
   },
   "substitution": {
     "title": "Substitution",

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  Alert,
   Modal,
   Pressable,
   StyleSheet,
@@ -96,6 +97,54 @@ function buildDefaultPositions(
   return positions;
 }
 
+// FIVB position fault check:
+// y=0 top (away back line) → y=1 bottom (home back line); net at y=0.5
+// For each team, split players into front row (closer to net) and back row,
+// then verify depth and left-right column order.
+function computePositionFaults(positions: PlayerPosition[]): Set<string> {
+  const faults = new Set<string>();
+
+  function checkTeam(players: PlayerPosition[], isHome: boolean) {
+    const onCourt = players.filter((p) => !p.isBall);
+    if (onCourt.length < 6) return;
+
+    // Front row = 3 players closest to net; for home: smaller y; for away: larger y
+    const byDepth = [...onCourt].sort((a, b) => isHome ? a.y - b.y : b.y - a.y);
+    const front = byDepth.slice(0, 3).sort((a, b) => a.x - b.x);
+    const back = byDepth.slice(3).sort((a, b) => a.x - b.x);
+
+    // Rule 1 — depth: each front player must be closer to the net than column-matched back player
+    for (let i = 0; i < 3; i++) {
+      const ok = isHome ? front[i].y < back[i].y : front[i].y > back[i].y;
+      if (!ok) { faults.add(front[i].playerId); faults.add(back[i].playerId); }
+    }
+
+    // Rule 2 — column crossing: front player must not cross adjacent back player's x
+    for (let i = 0; i < 3; i++) {
+      if (i < 2 && front[i].x > back[i + 1].x) {
+        faults.add(front[i].playerId); faults.add(back[i + 1].playerId);
+      }
+      if (i > 0 && front[i].x < back[i - 1].x) {
+        faults.add(front[i].playerId); faults.add(back[i - 1].playerId);
+      }
+    }
+
+    // Rule 3 — same for back row relative to front row
+    for (let i = 0; i < 3; i++) {
+      if (i < 2 && back[i].x > front[i + 1].x) {
+        faults.add(back[i].playerId); faults.add(front[i + 1].playerId);
+      }
+      if (i > 0 && back[i].x < front[i - 1].x) {
+        faults.add(back[i].playerId); faults.add(front[i - 1].playerId);
+      }
+    }
+  }
+
+  checkTeam(positions.filter((p) => p.isHome), true);
+  checkTeam(positions.filter((p) => !p.isHome && !p.isBall), false);
+  return faults;
+}
+
 interface DrawPreviewState {
   fromX: number;
   fromY: number;
@@ -166,6 +215,7 @@ export function TacticalBoard({
   const [playbookMode, setPlaybookMode] = useState<'load' | 'save'>('load');
   const [playbackPositions, setPlaybackPositions] = useState<PlayerPosition[] | null>(null);
   const [currentFormat, setCurrentFormat] = useState<MatchFormat>(format);
+  const [faultPlayerIds, setFaultPlayerIds] = useState<Set<string>>(new Set());
 
   const drawStartX = useSharedValue(0);
   const drawStartY = useSharedValue(0);
@@ -424,6 +474,7 @@ export function TacticalBoard({
 
   function handleDragEnd(playerId: string, x: number, y: number) {
     movePlayer(playerId, x, y);
+    if (faultPlayerIds.size > 0) setFaultPlayerIds(new Set());
   }
 
   function handleTokenTap(playerId: string) {
@@ -483,6 +534,21 @@ export function TacticalBoard({
     onClose();
   }
 
+  function handleCheckPositions() {
+    if (currentFormat !== 'indoor_6v6') return;
+    const faults = computePositionFaults(positions);
+    setFaultPlayerIds(faults);
+    if (faults.size === 0) {
+      Alert.alert(t('tactical.positionCheckTitle'), t('tactical.positionOk'));
+    } else {
+      Alert.alert(
+        t('tactical.positionCheckTitle'),
+        t('tactical.positionFaults', { count: faults.size }),
+        [{ text: 'OK' }],
+      );
+    }
+  }
+
   return (
     <Modal
       visible={visible}
@@ -517,6 +583,17 @@ export function TacticalBoard({
                 {setsHome}–{setsAway} ({scoreHome}–{scoreAway})
               </Text>
             </View>
+          )}
+
+          {currentFormat === 'indoor_6v6' && (
+            <Pressable
+              onPress={handleCheckPositions}
+              style={[styles.headerBtn, faultPlayerIds.size > 0 && styles.headerBtnFault]}
+              accessibilityRole="button"
+              accessibilityLabel={t('tactical.positionCheckTitle')}
+            >
+              <Text style={styles.headerBtnText}>⚠️</Text>
+            </Pressable>
           )}
 
           <Pressable onPress={handleNewBoard} style={styles.headerBtn} accessibilityRole="button"
@@ -596,6 +673,7 @@ export function TacticalBoard({
                 onDragEnd={handleDragEnd}
                 onTap={handleTokenTap}
                 hapticsEnabled={hapticsEnabled}
+                isFaulty={faultPlayerIds.has(player.playerId)}
               />
             ))}
 
@@ -702,6 +780,11 @@ const styles = StyleSheet.create({
   },
   headerBtnActive: {
     color: palette.accentPrimary,
+  },
+  headerBtnFault: {
+    backgroundColor: palette.error + '30',
+    borderWidth: 1,
+    borderColor: palette.error,
   },
   formatChip: {
     paddingHorizontal: 10,
