@@ -42,7 +42,7 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
-      seedDefaultDataIfEmpty().catch(() => {});
+      seedDefaultDataIfEmpty().catch(console.error);
     }
   }, [loaded]);
 
