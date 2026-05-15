@@ -317,6 +317,7 @@ export function TacticalBoard({
 
   const animFrameRef = useRef<number | null>(null);
   const fadeIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const playbackPositionsRef = useRef<PlayerPosition[] | null>(null);
 
   // Sorted unique groups from all ephemeral drawings
   const sortedGroupNums = useMemo(() => {
@@ -359,8 +360,15 @@ export function TacticalBoard({
   // were added after snapshots were computed, causing a crash in animateFromTo.
   const stepSnapshotsRef = useRef(stepSnapshots);
   useEffect(() => { stepSnapshotsRef.current = stepSnapshots; }, [stepSnapshots]);
+  useEffect(() => { playbackPositionsRef.current = playbackPositions; }, [playbackPositions]);
   useEffect(() => {
     if (stepSnapshotsRef.current !== null) {
+      // Commit the animated positions to the store before exiting playback so
+      // that clearing playbackPositions does not snap players back to their
+      // original (pre-animation) positions.
+      if (playbackPositionsRef.current !== null) {
+        setPositions(playbackPositionsRef.current);
+      }
       setStepSnapshots(null);
       setCurrentStep(0);
       setStepPhase('idle');
@@ -368,7 +376,10 @@ export function TacticalBoard({
       setArrowOpacity(1);
       setPlaybackPositions(null);
     }
-  }, [arrows, freehandPaths]);
+  // drawingOrder changes on every add/remove — it does NOT change when only
+  // currentGroup changes, so this effect never fires just because the user
+  // tapped the group-advance button.
+  }, [drawingOrder]);
 
   useEffect(() => {
     return () => {
@@ -603,6 +614,30 @@ export function TacticalBoard({
   // ── Group colors ──────────────────────────────────────────────────────────
   const GROUP_COLORS = ['#E63946', '#1D4ED8', '#2EA043', '#F59E0B', '#8B5CF6', '#EC4899'];
   const groupColor = GROUP_COLORS[(currentGroup - 1) % GROUP_COLORS.length];
+
+  // ── Group advance / reset — exit playback first, keep current positions ───
+  function exitPlaybackWithCommit() {
+    if (stepSnapshots === null) return;
+    if (animFrameRef.current != null) cancelAnimationFrame(animFrameRef.current);
+    if (fadeIntervalRef.current != null) clearInterval(fadeIntervalRef.current);
+    if (playbackPositions !== null) setPositions(playbackPositions);
+    setStepSnapshots(null);
+    setCurrentStep(0);
+    setStepPhase('idle');
+    setActiveGroup(null);
+    setArrowOpacity(1);
+    setPlaybackPositions(null);
+  }
+
+  function handleAdvanceGroup() {
+    exitPlaybackWithCommit();
+    advanceGroup();
+  }
+
+  function handleResetGroup() {
+    exitPlaybackWithCommit();
+    resetGroup();
+  }
 
   // ── Drawing gestures ──────────────────────────────────────────────────────
   const isDrawMode = selectedTool === 'arrow_solid' || selectedTool === 'arrow_dashed';
@@ -1024,8 +1059,8 @@ export function TacticalBoard({
           currentGroupColor={groupColor}
           hasDrawings={drawingOrder.length > 0}
           onSelectTool={setTool}
-          onAdvanceGroup={advanceGroup}
-          onResetGroup={resetGroup}
+          onAdvanceGroup={handleAdvanceGroup}
+          onResetGroup={handleResetGroup}
           onUndoDrawing={undoLastDrawing}
           onClearAll={() => { clearArrows(); handleReset(); }}
         />
