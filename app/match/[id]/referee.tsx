@@ -193,6 +193,8 @@ export default function RefereeScreen() {
     if (!match || !currentSet) return;
     if (currentSet.winnerTeamId) return;
 
+    if (hapticsEnabled) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
     const eventType = team === 'home' ? 'point_home' : 'point_away';
     const newEvent = await addEvent({
       matchId: match.id,
@@ -374,7 +376,7 @@ export default function RefereeScreen() {
           teamColor={homeTeam.color || palette.teamHome}
           onPress={() => handlePoint('home')}
           onRemove={() => handleRemovePoint('home')}
-          disabled={setIsOver}
+          disabled={setIsOver || showTimeoutSheet}
         />
 
         <View style={styles.scoreSeparator}>
@@ -388,7 +390,7 @@ export default function RefereeScreen() {
           teamColor={palette.teamAway}
           onPress={() => handlePoint('away')}
           onRemove={() => handleRemovePoint('away')}
-          disabled={setIsOver}
+          disabled={setIsOver || showTimeoutSheet}
         />
       </View>
 
