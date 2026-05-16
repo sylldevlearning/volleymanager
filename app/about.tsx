@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, Mail, Globe, Info } from 'lucide-react-native';
 import { palette } from '../src/theme/tokens';
-import { APP_VERSION, COMPANY } from '../src/utils/constants';
+import { APP_VERSION, COMPANY, COMPANY_EMAIL, COMPANY_WEBSITE } from '../src/utils/constants';
 
 export default function AboutScreen() {
   const { t } = useTranslation();
@@ -35,8 +35,11 @@ export default function AboutScreen() {
         <View style={styles.card}>
           <InfoRow icon={<Info size={18} color={palette.textMuted} />} label={t('about.developedBy')} value={COMPANY} />
           <View style={styles.divider} />
-          <InfoRow icon={<Mail size={18} color={palette.textMuted} />} label={t('about.contact')} value="csgonesse@hotmail.fr"
-            onPress={() => Linking.openURL('mailto:csgonesse@hotmail.fr')} />
+          <InfoRow icon={<Mail size={18} color={palette.textMuted} />} label={t('about.contact')} value={COMPANY_EMAIL}
+            onPress={() => Linking.openURL(`mailto:${COMPANY_EMAIL}`)} />
+          <View style={styles.divider} />
+          <InfoRow icon={<Globe size={18} color={palette.textMuted} />} label={t('about.website')} value="GitHub"
+            onPress={() => Linking.openURL(COMPANY_WEBSITE)} />
         </View>
       </View>
     </SafeAreaView>
