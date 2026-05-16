@@ -8,6 +8,7 @@ import { getAllTeams } from '../../src/services/teamService';
 import { getPlayersByTeam } from '../../src/services/playerService';
 import type { Team } from '../../src/models/team';
 import { palette } from '../../src/theme/tokens';
+import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
 
 interface TeamWithCount {
   team: Team;
@@ -37,6 +38,9 @@ export default function TeamsScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
+      <View style={styles.topBar}>
+        <InfoTooltip textKey="help.teams" />
+      </View>
       <FlatList
         data={teams}
         keyExtractor={(item) => item.team.id}
@@ -80,6 +84,7 @@ export default function TeamsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
+  topBar: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 16, paddingTop: 8 },
   list: { padding: 16, gap: 10, paddingBottom: 80 },
   empty: { alignItems: 'center', paddingTop: 80, gap: 12 },
   emptyTitle: { fontSize: 18, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary },

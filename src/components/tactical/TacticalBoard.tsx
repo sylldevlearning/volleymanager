@@ -30,6 +30,7 @@ import type { Player } from '../../models/player';
 import { updatePlayer } from '../../services/playerService';
 import type { MatchFormat } from '../../models/match';
 import { palette } from '../../theme/tokens';
+import { InfoTooltip } from '../ui/InfoTooltip';
 
 const BENCH_W = 52;
 const BENCH_TOKEN_SIZE = 32;
@@ -924,6 +925,7 @@ export function TacticalBoard({
           >
             <Text style={styles.headerBtnText}>⋮</Text>
           </Pressable>
+          <InfoTooltip textKey="help.tactical" />
         </View>
 
         {/* Hamburger menu */}

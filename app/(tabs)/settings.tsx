@@ -7,6 +7,7 @@ import { useSettingsStore } from '../../src/stores/settingsStore';
 import { palette } from '../../src/theme/tokens';
 import i18n from '../../src/i18n';
 import { APP_VERSION } from '../../src/utils/constants';
+import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
@@ -20,6 +21,9 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
+      <View style={styles.topBar}>
+        <InfoTooltip textKey="help.settings" />
+      </View>
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{t('settings.language')}</Text>
         <View style={styles.card}>
@@ -121,6 +125,7 @@ function LanguageOption({
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background, padding: 16, gap: 0 },
+  topBar: { flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 4 },
   section: { marginBottom: 20 },
   sectionTitle: {
     fontSize: 12,

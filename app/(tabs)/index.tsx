@@ -10,6 +10,7 @@ import { palette } from '../../src/theme/tokens';
 import { COMPANY } from '../../src/utils/constants';
 import { TacticalBoard } from '../../src/components/tactical/TacticalBoard';
 import { TacticalBoardIcon } from '../../src/components/ui/TacticalBoardIcon';
+import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
 import { createTeam } from '../../src/services/teamService';
 import { createMatch } from '../../src/services/matchService';
 import { DEFAULT_INDOOR_CONFIG } from '../../src/models/match';
@@ -50,6 +51,9 @@ export default function HomeScreen() {
           <Image source={BALL_IMG} style={styles.logo} resizeMode="contain" />
           <Text style={styles.title}>{t('home.title')}</Text>
           <Text style={styles.subtitle}>{t('home.subtitle')}</Text>
+          <View style={styles.headerTooltip}>
+            <InfoTooltip textKey="help.home" />
+          </View>
         </View>
 
         {/* Quick Match CTA */}
@@ -160,6 +164,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 32,
     paddingBottom: 32,
+  },
+  headerTooltip: {
+    position: 'absolute',
+    top: 32,
+    right: 0,
   },
   logo: {
     width: 72,

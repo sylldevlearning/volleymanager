@@ -10,6 +10,7 @@ import type { Match } from '../../src/models/match';
 import type { Team } from '../../src/models/team';
 import { useResponsive } from '../../src/hooks/useResponsive';
 import { palette } from '../../src/theme/tokens';
+import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
 
 type StatusFilter = 'all' | 'live' | 'finished';
 
@@ -69,7 +70,8 @@ export default function MatchesScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       {/* Filter bar */}
-      <View style={styles.filterBar}>
+      <View style={styles.filterBarRow}>
+        <View style={styles.filterBar}>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -111,6 +113,8 @@ export default function MatchesScreen() {
             </Pressable>
           ))}
         </ScrollView>
+        </View>
+        <InfoTooltip textKey="help.history" />
       </View>
 
       <FlatList
@@ -250,10 +254,16 @@ function MatchCard({
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
 
-  filterBar: {
+  filterBarRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderBottomWidth: 1,
     borderBottomColor: palette.backgroundElevated,
     backgroundColor: palette.backgroundSurface,
+    paddingRight: 12,
+  },
+  filterBar: {
+    flex: 1,
   },
   filterRow: {
     flexDirection: 'row',

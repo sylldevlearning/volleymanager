@@ -428,5 +428,17 @@
   },
   "ads": {
     "loading": "Advertisement"
+  },
+  "help": {
+    "home": "Start a quick match or create a new one. Manage teams and check history.",
+    "referee": "Tap +1 to score. -1 corrects mistakes. Rotations are automatic on service change. 🔄 for substitutions.",
+    "coach": "Select a player then tap the action. Stats update in real time.",
+    "tactical": "Drag players. Draw arrows. ◀▶ to step through. Save via ⋮ menu.",
+    "teams": "Create teams. Only jersey number is required. Tap a player to edit.",
+    "newMatch": "Choose teams, format, and who serves first.",
+    "stats": "Radar shows overall profile, bars detail each skill.",
+    "history": "Tap a match for details and statistics.",
+    "settings": "Change language and toggle vibrations.",
+    "substitution": "Choose who goes out then who comes in. Libero ⚡ doesn't count toward 6-sub limit."
   }
 }

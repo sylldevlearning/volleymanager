@@ -25,6 +25,7 @@ import { TimeoutTimerSheet } from '../../../src/components/scoring/TimeoutTimerS
 import { AdBanner } from '../../../src/components/ads/AdBanner';
 import { TacticalBoard } from '../../../src/components/tactical/TacticalBoard';
 import { TacticalBoardIcon } from '../../../src/components/ui/TacticalBoardIcon';
+import { InfoTooltip } from '../../../src/components/ui/InfoTooltip';
 import type { Match } from '../../../src/models/match';
 import type { Team } from '../../../src/models/team';
 import type { Player } from '../../../src/models/player';
@@ -362,6 +363,7 @@ export default function RefereeScreen() {
           currentSetNumber={currentSetNum}
           maxSets={maxSets}
         />
+        <InfoTooltip textKey="help.referee" />
       </View>
 
       {/* Score area */}
@@ -810,7 +812,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
   loading: { flex: 1, backgroundColor: palette.background, alignItems: 'center', justifyContent: 'center' },
   loadingText: { color: palette.textSecondary, fontFamily: 'Inter_400Regular' },
-  setsRow: { paddingTop: 12, paddingBottom: 8 },
+  setsRow: { paddingTop: 12, paddingBottom: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingRight: 12 },
   scoreArea: {
     flex: 1,
     flexDirection: 'row',

@@ -12,6 +12,7 @@ import { MirrorBar } from '../../../src/components/charts/MirrorBar';
 import { TopPerformerCard } from '../../../src/components/charts/TopPerformerCard';
 import { StatCard } from '../../../src/components/charts/StatCard';
 import { palette } from '../../../src/theme/tokens';
+import { InfoTooltip } from '../../../src/components/ui/InfoTooltip';
 
 export default function MatchStatsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -79,6 +80,7 @@ export default function MatchStatsScreen() {
             {homeTeam.teamName} {setsHome} — {setsAway} {awayTeam.teamName}
           </Text>
         </View>
+        <InfoTooltip textKey="help.stats" />
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll}>

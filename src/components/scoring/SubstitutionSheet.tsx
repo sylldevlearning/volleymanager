@@ -10,6 +10,7 @@ import type { LiberoState, SubstitutionPair } from '../../models/substitution';
 import type { MatchConfig, MatchFormat } from '../../models/match';
 import { palette } from '../../theme/tokens';
 import { validateSubstitution, validateLiberoSubstitution } from '../../utils/substitutionRules';
+import { InfoTooltip } from '../ui/InfoTooltip';
 
 const LIBERO_COLOR = palette.libero;
 
@@ -133,6 +134,7 @@ export function SubstitutionSheet({
                 ? t('substitution.counter', { used: subsUsed, max: maxSubs })
                 : t('substitution.counterUnlimited', { used: subsUsed })}
             </Text>
+            <InfoTooltip textKey="help.substitution" />
             <Pressable onPress={handleClose} style={subStyles.closeBtn} accessibilityRole="button">
               <X size={20} color={palette.textSecondary} />
             </Pressable>

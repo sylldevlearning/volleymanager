@@ -24,6 +24,7 @@ import {
   DEFAULT_LEISURE_CONFIG,
 } from '../../src/models/match';
 import { palette } from '../../src/theme/tokens';
+import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
 
 type FormatOption = { id: MatchFormat; label: string };
 type ModeOption = { id: MatchMode; label: string };
@@ -90,6 +91,9 @@ export default function NewMatchScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
+      <View style={styles.topBar}>
+        <InfoTooltip textKey="help.newMatch" />
+      </View>
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* Format */}
         <Section title={t('match.format')}>
@@ -301,6 +305,7 @@ function ConfigRow({ label, value }: { label: string; value: string }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
+  topBar: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 16, paddingTop: 8 },
   scroll: { padding: 20, gap: 0, paddingBottom: 40 },
   section: { marginBottom: 20 },
   sectionTitle: {

@@ -428,5 +428,17 @@
   },
   "ads": {
     "loading": "Publicité"
+  },
+  "help": {
+    "home": "Lancez un match rapide ou créez un nouveau match. Gérez vos équipes et consultez l'historique.",
+    "referee": "Tapez +1 pour marquer. Le -1 corrige une erreur. Les rotations sont automatiques au changement de service. 🔄 pour les remplacements.",
+    "coach": "Sélectionnez un joueur puis tapez l'action réalisée. Les stats se calculent en temps réel.",
+    "tactical": "Déplacez les joueurs. Tracez des flèches. ◀▶ pour avancer pas à pas. Sauvegardez via le menu ⋮.",
+    "teams": "Créez vos équipes. Seul le numéro est obligatoire. Tapez un joueur pour le modifier.",
+    "newMatch": "Choisissez les équipes, le format et qui sert en premier.",
+    "stats": "Le radar montre le profil global, les barres détaillent chaque compétence.",
+    "history": "Tapez un match pour voir le détail et les statistiques.",
+    "settings": "Changez la langue et activez les vibrations.",
+    "substitution": "Choisissez qui sort puis qui entre. Le libéro ⚡ ne compte pas dans les 6 remplacements."
   }
 }

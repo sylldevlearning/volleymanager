@@ -18,6 +18,7 @@ import type { PlayerStats } from '../../../src/models/stats';
 import { StatButton } from '../../../src/components/stats/StatButton';
 import { useResponsive } from '../../../src/hooks/useResponsive';
 import { palette } from '../../../src/theme/tokens';
+import { InfoTooltip } from '../../../src/components/ui/InfoTooltip';
 
 interface StatAction {
   type: StatEventType;
@@ -181,6 +182,7 @@ export default function CoachScreen() {
         >
           <BarChart2 size={20} color={palette.accentSecondary} />
         </Pressable>
+        <InfoTooltip textKey="help.coach" />
       </View>
 
       {/* Player selector */}
