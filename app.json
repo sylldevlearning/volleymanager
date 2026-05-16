@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "volleymanager",
+    "name": "VolleyManager",
     "slug": "volleymanager",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "volleymanager",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "dark",
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
@@ -20,7 +20,10 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#0D1117"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.sylldevlearning.volleymanager",
+      "versionCode": 1,
+      "permissions": ["android.permission.VIBRATE"]
     },
     "web": {
       "bundler": "metro",
