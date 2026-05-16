@@ -1,4 +1,4 @@
-import { getAllTeams, createTeam, getTeamByName } from './teamService';
+import { getAllTeams, createTeam } from './teamService';
 import { createPlayer, getPlayersByTeam } from './playerService';
 import type { PlayerPosition } from '../models/player';
 
@@ -65,26 +65,17 @@ export async function seedDefaultDataIfEmpty(): Promise<void> {
   try {
     const teams = await getAllTeams();
 
-    if (teams.length === 0) {
-      // First launch: check by name first (UNIQUE guard), then create
-      for (const def of SEED_TEAMS) {
-        const existing = await getTeamByName(def.name);
-        const team = existing ?? await createTeam({ name: def.name, shortName: def.shortName, logoUri: null, color: def.color });
-        if (!team?.id) { console.error(`[seed] createTeam returned no id for ${def.name}`); continue; }
-        await seedPlayersForTeam(team.id, def.players);
-      }
-      return;
+    // If teams exist and first team already has players → nothing to do
+    if (teams.length > 0) {
+      const firstTeamPlayers = await getPlayersByTeam(teams[0].id);
+      if (firstTeamPlayers.length > 0) return;
     }
 
-    // Teams exist — check if first team has players
-    const firstTeamPlayers = await getPlayersByTeam(teams[0].id);
-    if (firstTeamPlayers.length > 0) return;
-
-    // Teams exist but no players → seed players into existing teams matched by name
-    console.warn('[seed] Teams exist but no players found, re-seeding players');
-    for (const team of teams) {
-      const def = SEED_TEAMS.find((d) => d.name === team.name);
-      if (!def) continue;
+    // No teams, or teams exist but no players → full re-seed
+    // createTeam handles UNIQUE constraint internally (returns existing on conflict)
+    for (const def of SEED_TEAMS) {
+      const team = await createTeam({ name: def.name, shortName: def.shortName, logoUri: null, color: def.color });
+      if (!team?.id) { console.error(`[seed] createTeam returned no id for ${def.name}`); continue; }
       await seedPlayersForTeam(team.id, def.players);
     }
   } catch (e) {
