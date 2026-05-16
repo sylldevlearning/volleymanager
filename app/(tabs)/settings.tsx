@@ -8,6 +8,7 @@ import { palette } from '../../src/theme/tokens';
 import i18n from '../../src/i18n';
 import { APP_VERSION } from '../../src/utils/constants';
 import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
+import { AdBanner } from '../../src/components/ads/AdBanner';
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
@@ -78,6 +79,7 @@ export default function SettingsScreen() {
           />
         </View>
       </View>
+      <AdBanner />
     </SafeAreaView>
   );
 }

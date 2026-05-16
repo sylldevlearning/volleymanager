@@ -11,6 +11,7 @@ import type { Team } from '../../src/models/team';
 import { useResponsive } from '../../src/hooks/useResponsive';
 import { palette } from '../../src/theme/tokens';
 import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
+import { AdBanner } from '../../src/components/ads/AdBanner';
 
 type StatusFilter = 'all' | 'live' | 'finished';
 
@@ -155,6 +156,7 @@ export default function MatchesScreen() {
         )}
       />
 
+      <AdBanner />
       <Pressable
         style={({ pressed }) => [styles.fab, pressed && styles.fabPressed]}
         onPress={() => router.push('/match/new')}

@@ -11,6 +11,7 @@ import { COMPANY } from '../../src/utils/constants';
 import { TacticalBoard } from '../../src/components/tactical/TacticalBoard';
 import { TacticalBoardIcon } from '../../src/components/ui/TacticalBoardIcon';
 import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
+import { AdBanner } from '../../src/components/ads/AdBanner';
 import { createTeam } from '../../src/services/teamService';
 import { createMatch } from '../../src/services/matchService';
 import { DEFAULT_INDOOR_CONFIG } from '../../src/models/match';
@@ -125,6 +126,7 @@ export default function HomeScreen() {
         visible={showTactical}
         onClose={() => setShowTactical(false)}
       />
+      <AdBanner />
     </SafeAreaView>
   );
 }
