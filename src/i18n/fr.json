@@ -93,7 +93,12 @@
       "substitutionsPerSet": "Remplacements / set",
       "unlimitedTimeouts": "Temps morts illimités",
       "unlimitedSubstitutions": "Remplacements illimités"
-    }
+    },
+    "delete": "Supprimer le match",
+    "deleteConfirm": "Supprimer ce match et toutes ses données ?",
+    "deleteAll": "Supprimer tout l'historique",
+    "deleteAllConfirm": "Supprimer TOUS les matchs ?",
+    "irreversible": "Cette action est irréversible."
   },
   "referee": {
     "title": "Arbitre",

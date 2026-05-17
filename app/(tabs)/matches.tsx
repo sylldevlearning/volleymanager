@@ -1,10 +1,10 @@
 import { useState, useCallback, useMemo } from 'react';
-import { FlatList, ScrollView, StyleSheet, Text, View, Pressable, RefreshControl } from 'react-native';
+import { Alert, FlatList, ScrollView, StyleSheet, Text, View, Pressable, RefreshControl } from 'react-native';
 import { useRouter, useFocusEffect, Router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Plus, Calendar } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getAllMatches } from '../../src/services/matchService';
+import { getAllMatches, deleteMatch } from '../../src/services/matchService';
 import { getAllTeams } from '../../src/services/teamService';
 import type { Match } from '../../src/models/match';
 import type { Team } from '../../src/models/team';
@@ -61,6 +61,24 @@ export default function MatchesScreen() {
     }
     return result;
   }, [matches, filterStatus, filterTeamId]);
+
+  const handleDelete = useCallback((matchId: string) => {
+    Alert.alert(
+      t('match.delete'),
+      `${t('match.deleteConfirm')}\n${t('match.irreversible')}`,
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: async () => {
+            await deleteMatch(matchId);
+            load();
+          },
+        },
+      ]
+    );
+  }, [t, load]);
 
   const STATUS_FILTERS: { key: StatusFilter; label: string }[] = [
     { key: 'all', label: t('history.statusAll') },
@@ -152,6 +170,7 @@ export default function MatchesScreen() {
                 router.push(`/match/${item.id}/referee`);
               }
             }}
+            onDelete={() => handleDelete(item.id)}
           />
         )}
       />
@@ -175,12 +194,14 @@ function MatchCard({
   awayTeam,
   router,
   onPress,
+  onDelete,
 }: {
   match: Match;
   homeTeam?: Team;
   awayTeam?: Team;
   router: Router;
   onPress: () => void;
+  onDelete: () => void;
 }) {
   const { t } = useTranslation();
   const date = new Date(match.date).toLocaleDateString();
@@ -193,6 +214,8 @@ function MatchCard({
     <Pressable
       style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
       onPress={onPress}
+      onLongPress={onDelete}
+      delayLongPress={500}
       accessibilityRole="button"
     >
       <View style={styles.cardHeader}>

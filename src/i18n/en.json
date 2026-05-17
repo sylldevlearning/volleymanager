@@ -93,7 +93,12 @@
       "substitutionsPerSet": "Substitutions / set",
       "unlimitedTimeouts": "Unlimited timeouts",
       "unlimitedSubstitutions": "Unlimited substitutions"
-    }
+    },
+    "delete": "Delete match",
+    "deleteConfirm": "Delete this match and all its data?",
+    "deleteAll": "Delete all history",
+    "deleteAllConfirm": "Delete ALL matches?",
+    "irreversible": "This action is irreversible."
   },
   "referee": {
     "title": "Referee",

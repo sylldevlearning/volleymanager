@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Switch, Pressable } from 'react-native';
+import { Alert, StyleSheet, Text, View, Switch, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Zap, Globe, Info, ChevronRight } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,6 +9,7 @@ import i18n from '../../src/i18n';
 import { APP_VERSION } from '../../src/utils/constants';
 import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
 import { AdBanner } from '../../src/components/ads/AdBanner';
+import { deleteAllMatches } from '../../src/services/matchService';
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
@@ -77,6 +78,32 @@ export default function SettingsScreen() {
             label={`${t('settings.version')} ${APP_VERSION}`}
             right={null}
           />
+        </View>
+      </View>
+      <View style={styles.section}>
+        <View style={styles.card}>
+          <Pressable
+            style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+            onPress={() => {
+              Alert.alert(
+                t('match.deleteAll'),
+                `${t('match.deleteAllConfirm')}\n${t('match.irreversible')}`,
+                [
+                  { text: t('common.cancel'), style: 'cancel' },
+                  {
+                    text: t('common.delete'),
+                    style: 'destructive',
+                    onPress: () => deleteAllMatches(),
+                  },
+                ]
+              );
+            }}
+            accessibilityRole="button"
+          >
+            <Text style={[styles.rowLabel, { color: palette.error }]}>
+              {t('match.deleteAll')}
+            </Text>
+          </Pressable>
         </View>
       </View>
       <AdBanner />

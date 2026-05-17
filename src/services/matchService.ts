@@ -116,6 +116,16 @@ export async function getSetsForMatch(matchId: string): Promise<MatchSet[]> {
   return rows.map(rowToSet);
 }
 
+export async function deleteMatch(id: string): Promise<void> {
+  const db = await getDb();
+  await db.runAsync('DELETE FROM matches WHERE id = ?', [id]);
+}
+
+export async function deleteAllMatches(): Promise<void> {
+  const db = await getDb();
+  await db.runAsync('DELETE FROM matches');
+}
+
 export async function updateSet(
   setId: string,
   scoreHome: number,
