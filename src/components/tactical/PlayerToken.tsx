@@ -26,7 +26,6 @@ interface PlayerTokenProps {
   onDragEnd: (playerId: string, x: number, y: number) => void;
   onTap?: (playerId: string) => void;
   hapticsEnabled: boolean;
-  isFaulty?: boolean;
 }
 
 export function PlayerToken({
@@ -38,7 +37,6 @@ export function PlayerToken({
   onDragEnd,
   onTap,
   hapticsEnabled,
-  isFaulty = false,
 }: PlayerTokenProps) {
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
@@ -137,7 +135,6 @@ export function PlayerToken({
               style={[
                 styles.circle,
                 player.isLibero && styles.liberoCircle,
-                isFaulty && styles.faultyCircle,
                 {
                   width: diameter,
                   height: diameter,
@@ -186,14 +183,6 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
     borderColor: '#fff',
     borderWidth: 2,
-  },
-  faultyCircle: {
-    borderColor: '#E63946',
-    borderWidth: 3,
-    shadowColor: '#E63946',
-    shadowOpacity: 0.8,
-    shadowRadius: 6,
-    elevation: 10,
   },
   liberoBadge: {
     position: 'absolute',
