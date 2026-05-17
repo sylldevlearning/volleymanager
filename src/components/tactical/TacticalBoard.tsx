@@ -29,6 +29,9 @@ import type { PlayerPosition, TacticalPlay } from '../../models/tactical';
 import type { Player } from '../../models/player';
 import { updatePlayer } from '../../services/playerService';
 import type { MatchFormat } from '../../models/match';
+import type { CourtMap } from '../../stores/scoringStore';
+import type { LiberoState } from '../../models/substitution';
+import { getPlayerShortName } from '../../features/players/player-helpers';
 import { palette } from '../../theme/tokens';
 import { InfoTooltip } from '../ui/InfoTooltip';
 
@@ -127,6 +130,9 @@ interface TacticalBoardProps {
   awayTeamId?: string;
   homeTeamName?: string;
   awayTeamName?: string;
+  matchId?: string;
+  homePlayers?: Player[];
+  awayPlayers?: Player[];
 }
 
 function buildDefaultPositions(
@@ -175,6 +181,65 @@ function buildDefaultPositions(
   positions.push({
     playerId: 'ball',
     x: 0.5, y: 0.5,
+    teamId: '',
+    number: 0,
+    label: '🏐',
+    isHome: false,
+    isBall: true,
+  });
+
+  return positions;
+}
+
+function buildSyncedPositions(
+  homeTeamId: string,
+  awayTeamId: string,
+  onCourtHome: CourtMap,
+  onCourtAway: CourtMap,
+  liberoHome: LiberoState | null,
+  liberoAway: LiberoState | null,
+  homePlayers: Player[],
+  awayPlayers: Player[],
+  existingBall: PlayerPosition | undefined,
+): PlayerPosition[] {
+  const positions: PlayerPosition[] = [];
+
+  function addTeam(
+    courtMap: CourtMap,
+    libero: LiberoState | null,
+    players: Player[],
+    teamId: string,
+    isHome: boolean,
+    coords: typeof HOME_POSITION_COORDS,
+  ) {
+    for (const posStr of Object.keys(courtMap)) {
+      const pos = Number(posStr) as 1 | 2 | 3 | 4 | 5 | 6;
+      const ownerId = courtMap[pos];
+      if (!ownerId) continue;
+      const isLiberoSlot = libero?.isOnCourt && libero.replacedPosition === pos;
+      const actualId = isLiberoSlot ? libero!.liberoId : ownerId;
+      const p = players.find((pl) => pl.id === actualId);
+      const coord = coords[pos] ?? coords[1];
+      positions.push({
+        playerId: actualId,
+        x: coord.x,
+        y: coord.y,
+        teamId,
+        number: p?.number ?? pos,
+        label: p ? getPlayerShortName(p) : String(pos),
+        isHome,
+        isLibero: actualId === libero?.liberoId,
+      });
+    }
+  }
+
+  addTeam(onCourtHome, liberoHome, homePlayers, homeTeamId, true, HOME_POSITION_COORDS);
+  addTeam(onCourtAway, liberoAway, awayPlayers, awayTeamId, false, AWAY_POSITION_COORDS);
+
+  positions.push({
+    playerId: 'ball',
+    x: existingBall?.x ?? 0.5,
+    y: existingBall?.y ?? 0.5,
     teamId: '',
     number: 0,
     label: '🏐',
@@ -244,6 +309,9 @@ export function TacticalBoard({
   awayTeamId = 'away',
   homeTeamName,
   awayTeamName,
+  matchId,
+  homePlayers = [],
+  awayPlayers = [],
 }: TacticalBoardProps) {
   const { t } = useTranslation();
   const { width: screenW, height: screenH } = useWindowDimensions();
@@ -276,7 +344,13 @@ export function TacticalBoard({
     resetBoard,
   } = useTacticalStore();
 
-  const { rotationHome, rotationAway, scoreHome, scoreAway, setsHome, setsAway, benchHome, benchAway } = useScoringStore();
+  const {
+    rotationHome, rotationAway,
+    scoreHome, scoreAway, setsHome, setsAway,
+    benchHome, benchAway,
+    onCourtHome, onCourtAway,
+    liberoHome, liberoAway,
+  } = useScoringStore();
 
   const HEADER_H = 48;
   const PLAYBACK_H = 60;
@@ -294,6 +368,7 @@ export function TacticalBoard({
   const [playbookMode, setPlaybookMode] = useState<'load' | 'save'>('load');
   const [currentFormat, setCurrentFormat] = useState<MatchFormat>(format);
   const [faultPlayerIds, setFaultPlayerIds] = useState<Set<string>>(new Set());
+  const [isSyncedWithMatch, setIsSyncedWithMatch] = useState(false);
 
   // ── Bench ─────────────────────────────────────────────────────────────────
   const courtRef = useRef<View>(null);
@@ -355,6 +430,24 @@ export function TacticalBoard({
 
   useEffect(() => { setLocalBenchHome(benchHome); }, [benchHome]);
   useEffect(() => { setLocalBenchAway(benchAway); }, [benchAway]);
+
+  // ── Match sync: when opened from a live match, populate positions from scoringStore ──
+  useEffect(() => {
+    if (!matchId || !visible) return;
+    const hasCourtData = Object.keys(onCourtHome).length > 0;
+    if (!hasCourtData) return; // lineup not initialized yet, keep defaults
+    const ball = positions.find((p) => p.isBall);
+    const synced = buildSyncedPositions(
+      homeTeamId, awayTeamId,
+      onCourtHome, onCourtAway,
+      liberoHome, liberoAway,
+      homePlayers, awayPlayers,
+      ball,
+    );
+    setPositions(synced);
+    setIsSyncedWithMatch(true);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matchId, visible, onCourtHome, onCourtAway, liberoHome, liberoAway]);
 
   // When drawings change while in playback mode, invalidate stale snapshots.
   // Without this, stepSnapshots[stepIdx+1] can be undefined if more groups
@@ -793,6 +886,7 @@ export function TacticalBoard({
   function handleDragEnd(playerId: string, x: number, y: number) {
     movePlayer(playerId, x, y);
     if (faultPlayerIds.size > 0) setFaultPlayerIds(new Set());
+    if (isSyncedWithMatch) setIsSyncedWithMatch(false);
   }
 
   function handleTokenTap(playerId: string) {

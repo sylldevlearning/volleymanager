@@ -540,6 +540,9 @@ export default function RefereeScreen() {
         awayTeamId={match.teamAwayId}
         homeTeamName={homeTeam.name}
         awayTeamName={awayTeam.name}
+        matchId={match.id}
+        homePlayers={homePlayers}
+        awayPlayers={awayPlayers}
       />
 
       {/* Change ends modal (beach) */}
