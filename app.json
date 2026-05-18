@@ -36,13 +36,7 @@
       "expo-router",
       "expo-sqlite",
       "expo-localization",
-      "expo-audio",
-      [
-        "react-native-google-mobile-ads",
-        {
-          "androidAppId": "ca-app-pub-3940256099942544~3347511713"
-        }
-      ]
+      "expo-audio"
     ],
     "experiments": {
       "typedRoutes": false

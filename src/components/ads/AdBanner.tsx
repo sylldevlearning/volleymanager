@@ -1,35 +1,33 @@
-import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { palette } from '../../theme/tokens';
 
-// Dynamic require so the component silently does nothing on Expo Go
-// (react-native-google-mobile-ads requires a native build).
-let BannerAd: React.ComponentType<Record<string, unknown>> | null = null;
-let BannerAdSize: Record<string, string> | null = null;
-let TestIds: Record<string, string> | null = null;
-try {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const admob = require('react-native-google-mobile-ads');
-  BannerAd = admob.BannerAd;
-  BannerAdSize = admob.BannerAdSize;
-  TestIds = admob.TestIds;
-} catch {
-  // Module unavailable (Expo Go) — ads will simply not render
-}
-
+// Placeholder — real AdMob integration via react-native-google-mobile-ads
+// will be added at EAS Build time (requires native build, not Expo Go).
+// Unit IDs are defined in src/utils/constants.ts (ADMOB_IDS).
 interface AdBannerProps {
   unitId: string;
 }
 
-export function AdBanner({ unitId }: AdBannerProps) {
-  if (!BannerAd || !BannerAdSize || !TestIds) return null;
-
+export function AdBanner({ unitId: _unitId }: AdBannerProps) {
   return (
-    <BannerAd
-      unitId={__DEV__ ? TestIds.BANNER : unitId}
-      size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-      requestOptions={{ requestNonPersonalizedAdsOnly: true }}
-      onAdFailedToLoad={(error: unknown) => {
-        if (__DEV__) console.log('Ad failed to load:', error);
-      }}
-    />
+    <View style={styles.container} accessibilityLabel="Advertisement">
+      <Text style={styles.label}>Publicité</Text>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    height: 50,
+    backgroundColor: palette.backgroundSurface,
+    borderTopWidth: 1,
+    borderTopColor: palette.backgroundElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  label: {
+    fontSize: 12,
+    fontFamily: 'Inter_400Regular',
+    color: palette.textMuted,
+  },
+});
