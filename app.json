@@ -2,8 +2,8 @@
   "expo": {
     "name": "VolleyManager",
     "slug": "volleymanager",
-    "version": "1.0.0",
-    "orientation": "default",
+    "version": "1.0.3",
+    "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "volleymanager",
     "userInterfaceStyle": "dark",
