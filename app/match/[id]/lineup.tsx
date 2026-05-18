@@ -391,11 +391,11 @@ const styles = StyleSheet.create({
     minWidth: 58,
     alignItems: 'center',
   },
-  badgeText: { fontSize: 11, fontFamily: 'Inter_700Bold', letterSpacing: 0.3 },
+  badgeText: { fontSize: 11, fontFamily: 'Inter_700Bold', letterSpacing: 0.3, color: palette.textPrimary },
   badgeStarter: { backgroundColor: 'rgba(230,57,70,0.15)', borderWidth: 1, borderColor: palette.accentPrimary },
   badgeBench: { backgroundColor: palette.backgroundElevated },
   badgeAbsent: { backgroundColor: 'transparent', borderWidth: 1, borderColor: palette.backgroundElevated },
-  badgeLibero: { backgroundColor: 'rgba(29,78,216,0.15)', borderWidth: 1, borderColor: '#1D4ED8' },
+  badgeLibero: { backgroundColor: palette.libero + '25', borderWidth: 1, borderColor: palette.libero },
 
   emptyText: { fontSize: 13, color: palette.textMuted, padding: 14, textAlign: 'center' },
 
