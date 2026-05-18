@@ -107,6 +107,20 @@ function computeServingTeam(events: MatchEvent[], initialServing: 'home' | 'away
   return serving;
 }
 
+/**
+ * Side-out rotation: each player moves one slot clockwise (P2→P1, P3→P2, …, P1→P6).
+ * Creates a new object so Zustand / React detect the reference change.
+ */
+function rotateCourt(court: CourtMap): CourtMap {
+  const rotated: CourtMap = {};
+  for (const [posStr, playerId] of Object.entries(court)) {
+    const pos = Number(posStr);
+    const newPos = pos === 1 ? 6 : pos - 1;
+    rotated[newPos] = playerId;
+  }
+  return rotated;
+}
+
 function applySubOnMap(
   court: CourtMap,
   bench: Player[],
@@ -217,27 +231,40 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
 
     let rotationHome = state.rotationHome;
     let rotationAway = state.rotationAway;
-    if (team === 'home' && prevServing === 'away') {
-      rotationHome = rotationHome.map((p) => (p === 6 ? 1 : p + 1));
-    } else if (team === 'away' && prevServing === 'home') {
-      rotationAway = rotationAway.map((p) => (p === 6 ? 1 : p + 1));
-    }
-
-    // Check libero auto-exit after rotation
+    let onCourtHome = state.onCourtHome;
+    let onCourtAway = state.onCourtAway;
     let liberoHome = state.liberoHome;
     let liberoAway = state.liberoAway;
 
-    if (team === 'home' && prevServing === 'away' && liberoHome?.isOnCourt && liberoHome.replacedPosition) {
-      const newLiberoPos = liberoHome.replacedPosition === 6 ? 1 : liberoHome.replacedPosition + 1;
-      if (liberoMustExit(newLiberoPos)) {
-        // Libero auto-exits; restore original player
-        liberoHome = { ...liberoHome, isOnCourt: false, replacedPlayerId: null, replacedPosition: null };
+    if (team === 'home' && prevServing === 'away') {
+      // Side-out: home team rotates
+      rotationHome = rotationHome.map((p) => (p === 6 ? 1 : p + 1));
+      onCourtHome = rotateCourt(state.onCourtHome);
+
+      // Libero: track new position or auto-exit into front row
+      if (liberoHome?.isOnCourt && liberoHome.replacedPosition) {
+        const newLiberoPos = liberoHome.replacedPosition === 1 ? 6 : liberoHome.replacedPosition - 1;
+        if (liberoMustExit(newLiberoPos)) {
+          // Restore original player at the rotated slot and clear libero state
+          onCourtHome = { ...onCourtHome, [newLiberoPos]: liberoHome.replacedPlayerId! };
+          liberoHome = { ...liberoHome, isOnCourt: false, replacedPlayerId: null, replacedPosition: null };
+        } else {
+          liberoHome = { ...liberoHome, replacedPosition: newLiberoPos };
+        }
       }
-    }
-    if (team === 'away' && prevServing === 'home' && liberoAway?.isOnCourt && liberoAway.replacedPosition) {
-      const newLiberoPos = liberoAway.replacedPosition === 6 ? 1 : liberoAway.replacedPosition + 1;
-      if (liberoMustExit(newLiberoPos)) {
-        liberoAway = { ...liberoAway, isOnCourt: false, replacedPlayerId: null, replacedPosition: null };
+    } else if (team === 'away' && prevServing === 'home') {
+      // Side-out: away team rotates
+      rotationAway = rotationAway.map((p) => (p === 6 ? 1 : p + 1));
+      onCourtAway = rotateCourt(state.onCourtAway);
+
+      if (liberoAway?.isOnCourt && liberoAway.replacedPosition) {
+        const newLiberoPos = liberoAway.replacedPosition === 1 ? 6 : liberoAway.replacedPosition - 1;
+        if (liberoMustExit(newLiberoPos)) {
+          onCourtAway = { ...onCourtAway, [newLiberoPos]: liberoAway.replacedPlayerId! };
+          liberoAway = { ...liberoAway, isOnCourt: false, replacedPlayerId: null, replacedPosition: null };
+        } else {
+          liberoAway = { ...liberoAway, replacedPosition: newLiberoPos };
+        }
       }
     }
 
@@ -248,6 +275,8 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
       servingTeam: newServing,
       rotationHome,
       rotationAway,
+      onCourtHome,
+      onCourtAway,
       lastScoringTeam: team,
       showChangeEnds,
       liberoHome,
