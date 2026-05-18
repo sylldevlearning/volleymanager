@@ -14,6 +14,12 @@ interface PlaybackControlsProps {
   onStepBack: () => void;
   onGoToStart: () => void;
   onGoToEnd: () => void;
+  hasHistory: boolean;
+  isPlayingAll: boolean;
+  historyStep: number;
+  historyTotal: number;
+  onPlayAll: () => void;
+  onStopPlayAll: () => void;
 }
 
 export function PlaybackControls({
@@ -25,26 +31,37 @@ export function PlaybackControls({
   onStepBack,
   onGoToStart,
   onGoToEnd,
+  hasHistory,
+  isPlayingAll,
+  historyStep,
+  historyTotal,
+  onPlayAll,
+  onStopPlayAll,
 }: PlaybackControlsProps) {
   const { t } = useTranslation();
   const isAnimating = stepPhase !== 'idle';
   const atStart = currentStep <= 0;
   const atEnd = currentStep >= totalSteps;
 
-  const canBack = hasArrows && !isAnimating && !atStart;
-  const canForward = hasArrows && !isAnimating && !atEnd;
+  // History-only mode: current drawings are gone, history exists
+  const historyMode = !hasArrows && hasHistory;
+
+  const canBack = hasArrows && !isAnimating && !isPlayingAll && !atStart;
+  const canForward = hasArrows && !isAnimating && !isPlayingAll && !atEnd;
+  const canGoToStart = (hasArrows && !atStart) || (historyMode && !isPlayingAll);
+  const canPlayAll = historyMode && !isPlayingAll && !isAnimating;
 
   return (
     <View style={styles.container}>
       {/* ⏮ */}
       <Pressable
-        style={[styles.btn, !canBack && styles.btnDisabled]}
+        style={[styles.btn, !canGoToStart && styles.btnDisabled]}
         onPress={onGoToStart}
-        disabled={!canBack}
+        disabled={!canGoToStart}
         accessibilityRole="button"
         accessibilityLabel={t('tactical.playback.start')}
       >
-        <Text style={[styles.btnIcon, !canBack && styles.btnIconDisabled]}>⏮</Text>
+        <Text style={[styles.btnIcon, !canGoToStart && styles.btnIconDisabled]}>⏮</Text>
       </Pressable>
 
       {/* ◀ */}
@@ -58,27 +75,46 @@ export function PlaybackControls({
         <Text style={[styles.btnIcon, !canBack && styles.btnIconDisabled]}>◀</Text>
       </Pressable>
 
-      {/* Step indicator */}
+      {/* Step / history indicator */}
       <View style={styles.indicator}>
-        {hasArrows && totalSteps > 0 ? (
+        {isPlayingAll ? (
+          <Text style={styles.indicatorText}>
+            {t('tactical.playback.stepOf', { current: historyStep, total: historyTotal })}
+          </Text>
+        ) : hasArrows && totalSteps > 0 ? (
           <Text style={styles.indicatorText}>
             {t('tactical.playback.stepOf', { current: currentStep, total: totalSteps })}
+          </Text>
+        ) : historyMode ? (
+          <Text style={styles.indicatorTextMuted}>
+            {t('tactical.playback.historyCount', { count: historyTotal })}
           </Text>
         ) : (
           <Text style={styles.indicatorTextMuted}>—</Text>
         )}
       </View>
 
-      {/* ▶ */}
-      <Pressable
-        style={[styles.btn, styles.btnPrimary, !canForward && styles.btnDisabled]}
-        onPress={onStepForward}
-        disabled={!canForward}
-        accessibilityRole="button"
-        accessibilityLabel={t('tactical.playback.forward')}
-      >
-        <Text style={[styles.btnIcon, !canForward && styles.btnIconDisabled]}>▶</Text>
-      </Pressable>
+      {/* ▶ / ⏹ */}
+      {isPlayingAll ? (
+        <Pressable
+          style={[styles.btn, styles.btnStop]}
+          onPress={onStopPlayAll}
+          accessibilityRole="button"
+          accessibilityLabel={t('tactical.playback.stop')}
+        >
+          <Text style={styles.btnIcon}>⏹</Text>
+        </Pressable>
+      ) : (
+        <Pressable
+          style={[styles.btn, styles.btnPrimary, !canForward && !canPlayAll && styles.btnDisabled]}
+          onPress={historyMode ? onPlayAll : onStepForward}
+          disabled={!canForward && !canPlayAll}
+          accessibilityRole="button"
+          accessibilityLabel={historyMode ? t('tactical.playback.playAll') : t('tactical.playback.forward')}
+        >
+          <Text style={[styles.btnIcon, !canForward && !canPlayAll && styles.btnIconDisabled]}>▶</Text>
+        </Pressable>
+      )}
 
       {/* ⏭ */}
       <Pressable
@@ -115,6 +151,9 @@ const styles = StyleSheet.create({
   },
   btnPrimary: {
     backgroundColor: palette.accentPrimary,
+  },
+  btnStop: {
+    backgroundColor: palette.accentSecondary,
   },
   btnDisabled: {
     opacity: 0.35,

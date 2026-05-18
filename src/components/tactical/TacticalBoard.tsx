@@ -25,7 +25,7 @@ import { seedDefaultPlays } from '../../features/tactical/tacticalService';
 import { HOME_POSITION_COORDS, AWAY_POSITION_COORDS, findNearestPlayer, clamp, easeInOut } from '../../features/tactical/positionUtils';
 import { useScoringStore } from '../../stores/scoringStore';
 import { useSettingsStore } from '../../stores/settingsStore';
-import type { PlayerPosition, TacticalPlay } from '../../models/tactical';
+import type { PlayerPosition, TacticalPlay, StepSnapshot } from '../../models/tactical';
 import type { Player } from '../../models/player';
 import { updatePlayer } from '../../services/playerService';
 import type { MatchFormat } from '../../models/match';
@@ -299,6 +299,8 @@ export function TacticalBoard({
     advanceGroup,
     resetGroup,
     removeGroupDrawings,
+    addHistorySnapshot,
+    history,
     setTool,
     setArrowThickness,
     loadPlay,
@@ -351,6 +353,13 @@ export function TacticalBoard({
   const [arrowOpacity, setArrowOpacity] = useState(1);
   const [playbackSpeed] = useState<0.5 | 1 | 2>(1);
 
+  // ── History playback state ────────────────────────────────────────────────
+  const [isPlayingAll, setIsPlayingAll] = useState(false);
+  const [historyPlaybackStep, setHistoryPlaybackStep] = useState(0);
+  const [overlayArrows, setOverlayArrows] = useState<StepSnapshot['drawings']>([]);
+  const [overlayFreehand, setOverlayFreehand] = useState<StepSnapshot['freehandDrawings']>([]);
+  const playAllCancelRef = useRef(false);
+
   const animFrameRef = useRef<number | null>(null);
   const fadeIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const playbackPositionsRef = useRef<PlayerPosition[] | null>(null);
@@ -366,12 +375,16 @@ export function TacticalBoard({
   }, [arrows, freehandPaths]);
 
   const totalSteps = sortedGroupNums.length;
-  const hasArrows = arrows.length > 0 || freehandPaths.some((fp) => fp.hasArrow);
+  const hasCurrentArrows = arrows.length > 0 || freehandPaths.some((fp) => fp.hasArrow);
+  const hasArrows = hasCurrentArrows || history.length > 0;
 
   // Edit mode = no playback started yet (all arrows visible)
-  const isEditMode = stepSnapshots === null;
+  const isEditMode = stepSnapshots === null && !isPlayingAll;
 
   const displayPositions = playbackPositions ?? positions;
+  // During history playback show the step's stored drawings instead of live store arrows
+  const overlayArrowsDisplay = isPlayingAll ? overlayArrows : arrows;
+  const overlayFreehandDisplay = isPlayingAll ? overlayFreehand : freehandPaths;
 
   // ── Gesture refs ──────────────────────────────────────────────────────────
   const drawStartX = useSharedValue(0);
@@ -640,13 +653,19 @@ export function TacticalBoard({
   function handleGoToStart() {
     if (animFrameRef.current != null) cancelAnimationFrame(animFrameRef.current);
     if (fadeIntervalRef.current != null) clearInterval(fadeIntervalRef.current);
-    // Reset to edit mode: all arrows visible, original positions
+    if (isPlayingAll) { stopPlayAll(); return; }
     setCurrentStep(0);
     setStepPhase('idle');
     setActiveGroup(null);
     setArrowOpacity(1);
     setStepSnapshots(null);
-    setPlaybackPositions(null);
+    // When there's history but no current arrows, reset view to initial positions
+    if (history.length > 0 && !hasCurrentArrows) {
+      setPlaybackPositions([...history[0].positionsBefore]);
+      setHistoryPlaybackStep(0);
+    } else {
+      setPlaybackPositions(null);
+    }
   }
 
   function handleGoToEnd() {
@@ -701,9 +720,9 @@ export function TacticalBoard({
 
     exitPlaybackWithCommit();
 
-    const hasGroupDrawings =
-      arrows.some((a) => a.group === groupNum) ||
-      freehandPaths.some((fp) => fp.hasArrow && fp.group === groupNum);
+    const groupArrows = arrows.filter((a) => a.group === groupNum);
+    const groupFreehand = freehandPaths.filter((fp) => fp.hasArrow && fp.group === groupNum);
+    const hasGroupDrawings = groupArrows.length > 0 || groupFreehand.length > 0;
 
     if (!hasGroupDrawings) {
       advanceGroup();
@@ -711,8 +730,17 @@ export function TacticalBoard({
     }
 
     const targetPositions = applyGroupMovement(basePositions, groupNum);
-    setStepPhase('animating');
 
+    // Save snapshot BEFORE drawings are removed so history can replay them
+    addHistorySnapshot({
+      group: groupNum,
+      positionsBefore: [...basePositions],
+      positionsAfter: [...targetPositions],
+      drawings: groupArrows,
+      freehandDrawings: groupFreehand,
+    });
+
+    setStepPhase('animating');
     animateFromTo(basePositions, targetPositions, 400, () => {
       setPositions(targetPositions);
       setPlaybackPositions(null);
@@ -720,6 +748,84 @@ export function TacticalBoard({
       advanceGroup();
       setStepPhase('idle');
     });
+  }
+
+  // ── History playback ──────────────────────────────────────────────────────
+  function animateHistoryStep(from: PlayerPosition[], to: PlayerPosition[], duration: number): Promise<void> {
+    return new Promise((resolve) => {
+      if (animFrameRef.current != null) cancelAnimationFrame(animFrameRef.current);
+      let start: number | null = null;
+      function frame(now: number) {
+        if (playAllCancelRef.current) { resolve(); return; }
+        if (start === null) start = now;
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = easeInOut(progress);
+        const interpolated = from.map((p) => {
+          const target = to.find((t) => t.playerId === p.playerId);
+          if (!target) return p;
+          return { ...p, x: p.x + (target.x - p.x) * eased, y: p.y + (target.y - p.y) * eased };
+        });
+        setPlaybackPositions(interpolated);
+        if (progress < 1) {
+          animFrameRef.current = requestAnimationFrame(frame);
+        } else {
+          resolve();
+        }
+      }
+      animFrameRef.current = requestAnimationFrame(frame);
+    });
+  }
+
+  function stopPlayAll() {
+    playAllCancelRef.current = true;
+    if (animFrameRef.current != null) cancelAnimationFrame(animFrameRef.current);
+    setIsPlayingAll(false);
+    setOverlayArrows([]);
+    setOverlayFreehand([]);
+    setPlaybackPositions(null);
+    setHistoryPlaybackStep(0);
+  }
+
+  async function handlePlayAll() {
+    if (history.length === 0 || isPlayingAll) return;
+    playAllCancelRef.current = false;
+    setIsPlayingAll(true);
+    setHistoryPlaybackStep(0);
+
+    setPlaybackPositions([...history[0].positionsBefore]);
+    setOverlayArrows([]);
+    setOverlayFreehand([]);
+
+    await new Promise<void>((r) => setTimeout(r, 300));
+
+    for (let i = 0; i < history.length; i++) {
+      if (playAllCancelRef.current) break;
+      const step = history[i];
+
+      setOverlayArrows(step.drawings);
+      setOverlayFreehand(step.freehandDrawings);
+      setHistoryPlaybackStep(i + 1);
+
+      await new Promise<void>((r) => setTimeout(r, 500));
+      if (playAllCancelRef.current) break;
+
+      await animateHistoryStep([...step.positionsBefore], [...step.positionsAfter], 400);
+      if (playAllCancelRef.current) break;
+
+      await new Promise<void>((r) => setTimeout(r, 300));
+      setOverlayArrows([]);
+      setOverlayFreehand([]);
+      await new Promise<void>((r) => setTimeout(r, 200));
+    }
+
+    if (!playAllCancelRef.current) {
+      setIsPlayingAll(false);
+      setPlaybackPositions(null);
+      setHistoryPlaybackStep(0);
+      setOverlayArrows([]);
+      setOverlayFreehand([]);
+    }
   }
 
   function handleResetGroup() {
@@ -1070,7 +1176,7 @@ export function TacticalBoard({
             <CourtSVG width={courtW} height={courtH} format={currentFormat} />
 
             <View style={styles.drawLayer}>
-              {selectedTool === 'eraser' ? (
+              {selectedTool === 'eraser' && !isPlayingAll ? (
                 <ArrowOverlay
                   arrows={arrows}
                   freehandPaths={freehandPaths}
@@ -1089,13 +1195,13 @@ export function TacticalBoard({
                 <GestureDetector gesture={allDrawGesture}>
                   <Animated.View style={{ flex: 1 }}>
                     <ArrowOverlay
-                      arrows={arrows}
-                      freehandPaths={freehandPaths}
+                      arrows={overlayArrowsDisplay}
+                      freehandPaths={overlayFreehandDisplay}
                       courtWidth={courtW}
                       courtHeight={courtH}
                       eraserMode={false}
-                      drawPreview={drawPreview}
-                      pencilPreviewD={pencilPreviewD}
+                      drawPreview={isPlayingAll ? null : drawPreview}
+                      pencilPreviewD={isPlayingAll ? null : pencilPreviewD}
                       pencilColor={pencilColor}
                       onRemoveArrow={removeArrow}
                       isEditMode={isEditMode}
@@ -1139,11 +1245,17 @@ export function TacticalBoard({
           currentStep={currentStep}
           totalSteps={totalSteps}
           stepPhase={stepPhase}
-          hasArrows={hasArrows}
+          hasArrows={hasCurrentArrows}
           onStepForward={handleStepForward}
           onStepBack={handleStepBack}
           onGoToStart={handleGoToStart}
           onGoToEnd={handleGoToEnd}
+          hasHistory={history.length > 0}
+          isPlayingAll={isPlayingAll}
+          historyStep={historyPlaybackStep}
+          historyTotal={history.length}
+          onPlayAll={handlePlayAll}
+          onStopPlayAll={stopPlayAll}
         />
 
         {/* Toolbar */}

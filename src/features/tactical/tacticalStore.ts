@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { PlayerPosition, Arrow, FreehandPath, TacticalPlay, TacticalTool, ArrowThickness } from '../../models/tactical';
+import type { PlayerPosition, Arrow, FreehandPath, TacticalPlay, TacticalTool, ArrowThickness, StepSnapshot } from '../../models/tactical';
 import { generateId } from '../../services/database';
 
 type DrawingEntry = { type: 'arrow'; id: string } | { type: 'freehand'; id: string };
@@ -17,6 +17,9 @@ interface TacticalState {
   /** Current group number — all new drawings are stamped with this group */
   currentGroup: number;
 
+  /** Ordered list of every group that was advanced via handleAdvanceGroup */
+  history: StepSnapshot[];
+
   setPositions: (positions: PlayerPosition[]) => void;
   movePlayer: (playerId: string, x: number, y: number) => void;
   updatePlayerInfo: (playerId: string, data: { number?: number; firstName?: string | null; lastName?: string | null; label?: string; customColor?: string }) => void;
@@ -32,6 +35,8 @@ interface TacticalState {
   resetGroup: () => void;
   /** Remove all arrows and traced-arrow freehand paths from a given group */
   removeGroupDrawings: (group: number) => void;
+  /** Push a snapshot of a completed step into history */
+  addHistorySnapshot: (snapshot: StepSnapshot) => void;
   setTool: (tool: TacticalTool) => void;
   setArrowThickness: (thickness: ArrowThickness) => void;
   loadPlay: (play: TacticalPlay) => void;
@@ -48,6 +53,7 @@ export const useTacticalStore = create<TacticalState>()((set) => ({
   currentPlayId: null,
   currentPlayName: null,
   currentGroup: 1,
+  history: [],
 
   setPositions: (positions) => set({ positions }),
 
@@ -84,7 +90,7 @@ export const useTacticalStore = create<TacticalState>()((set) => ({
       drawingOrder: state.drawingOrder.filter((d) => d.id !== id),
     })),
 
-  clearArrows: () => set({ arrows: [], freehandPaths: [], drawingOrder: [], currentGroup: 1 }),
+  clearArrows: () => set({ arrows: [], freehandPaths: [], drawingOrder: [], currentGroup: 1, history: [] }),
 
   addFreehandPath: (d, color, hasArrow, group, linkedPlayerId) =>
     set((state) => {
@@ -128,6 +134,9 @@ export const useTacticalStore = create<TacticalState>()((set) => ({
       };
     }),
 
+  addHistorySnapshot: (snapshot) =>
+    set((state) => ({ history: [...state.history, snapshot] })),
+
   setTool: (tool) => set({ selectedTool: tool }),
 
   setArrowThickness: (thickness) => set({ arrowThickness: thickness }),
@@ -142,6 +151,7 @@ export const useTacticalStore = create<TacticalState>()((set) => ({
       currentGroup: 1,
       currentPlayId: play.isDefault ? null : play.id,
       currentPlayName: play.name,
+      history: [],
     }),
 
   resetBoard: () =>
@@ -154,5 +164,6 @@ export const useTacticalStore = create<TacticalState>()((set) => ({
       currentGroup: 1,
       currentPlayId: null,
       currentPlayName: null,
+      history: [],
     }),
 }));

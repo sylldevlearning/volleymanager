@@ -67,6 +67,14 @@ export interface FreehandPath {
   linkedPlayerId?: string | null;
 }
 
+export interface StepSnapshot {
+  group: number;
+  positionsBefore: PlayerPosition[];
+  positionsAfter: PlayerPosition[];
+  drawings: Arrow[];
+  freehandDrawings: FreehandPath[];
+}
+
 export interface TacticalPlay {
   id: string;
   name: string;
