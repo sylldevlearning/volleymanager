@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View, Pressable } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -27,6 +27,7 @@ import { getPlayerDisplayName } from '../../../src/features/players/player-helpe
 import { RadarChart } from '../../../src/components/stats/RadarChart';
 import { BarChart } from '../../../src/components/stats/BarChart';
 import { palette } from '../../../src/theme/tokens';
+import { useInterstitialAd } from '../../../src/components/ads/useInterstitialAd';
 
 export default function SummaryScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -39,6 +40,16 @@ export default function SummaryScreen() {
   const [awayTeam, setAwayTeam] = useState<Team | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [stats, setStats] = useState<PlayerStats[]>([]);
+
+  const { show } = useInterstitialAd();
+  const hasShownAd = useRef(false);
+  useEffect(() => {
+    if (!hasShownAd.current) {
+      hasShownAd.current = true;
+      show();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     async function load() {

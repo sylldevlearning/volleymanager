@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Volleyball, Users, History, ChevronRight, Zap } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { palette } from '../../src/theme/tokens';
-import { COMPANY } from '../../src/utils/constants';
+import { COMPANY, ADMOB_IDS } from '../../src/utils/constants';
 import { TacticalBoard } from '../../src/components/tactical/TacticalBoard';
 import { TacticalBoardIcon } from '../../src/components/ui/TacticalBoardIcon';
 import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
@@ -126,7 +126,7 @@ export default function HomeScreen() {
         visible={showTactical}
         onClose={() => setShowTactical(false)}
       />
-      <AdBanner />
+      <AdBanner unitId={ADMOB_IDS.BANNER_HOME} />
     </SafeAreaView>
   );
 }

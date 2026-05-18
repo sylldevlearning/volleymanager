@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Plus, Calendar } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getAllMatches, deleteMatch } from '../../src/services/matchService';
+import { ADMOB_IDS } from '../../src/utils/constants';
 import { getAllTeams } from '../../src/services/teamService';
 import type { Match } from '../../src/models/match';
 import type { Team } from '../../src/models/team';
@@ -175,7 +176,7 @@ export default function MatchesScreen() {
         )}
       />
 
-      <AdBanner />
+      <AdBanner unitId={ADMOB_IDS.BANNER_HISTORY} />
       <Pressable
         style={({ pressed }) => [styles.fab, pressed && styles.fabPressed]}
         onPress={() => router.push('/match/new')}

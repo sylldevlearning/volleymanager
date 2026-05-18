@@ -23,7 +23,9 @@
       "predictiveBackGestureEnabled": false,
       "package": "com.sylldevlearning.volleymanager",
       "versionCode": 1,
-      "permissions": ["android.permission.VIBRATE"]
+      "permissions": [
+        "android.permission.VIBRATE"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -34,7 +36,13 @@
       "expo-router",
       "expo-sqlite",
       "expo-localization",
-      "expo-audio"
+      "expo-audio",
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-3940256099942544~3347511713"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": false

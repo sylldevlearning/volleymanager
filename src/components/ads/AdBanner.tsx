@@ -1,33 +1,35 @@
-import { StyleSheet, Text, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
-import { palette } from '../../theme/tokens';
+import React from 'react';
 
-/**
- * Placeholder AdBanner — replace with real ad SDK (e.g. expo-ads-admob) when ready.
- * Renders a subtle strip that won't distract from the UI.
- */
-export function AdBanner() {
-  const { t } = useTranslation();
-  return (
-    <View style={styles.container} accessibilityLabel="Advertisement">
-      <Text style={styles.label}>{t('ads.loading')}</Text>
-    </View>
-  );
+// Dynamic require so the component silently does nothing on Expo Go
+// (react-native-google-mobile-ads requires a native build).
+let BannerAd: React.ComponentType<Record<string, unknown>> | null = null;
+let BannerAdSize: Record<string, string> | null = null;
+let TestIds: Record<string, string> | null = null;
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const admob = require('react-native-google-mobile-ads');
+  BannerAd = admob.BannerAd;
+  BannerAdSize = admob.BannerAdSize;
+  TestIds = admob.TestIds;
+} catch {
+  // Module unavailable (Expo Go) — ads will simply not render
 }
 
-const styles = StyleSheet.create({
-  container: {
-    height: 50,
-    backgroundColor: palette.backgroundSurface,
-    borderTopWidth: 1,
-    borderTopColor: palette.backgroundElevated,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  label: {
-    fontSize: 11,
-    fontFamily: 'Inter_400Regular',
-    color: palette.textMuted,
-    letterSpacing: 0.5,
-  },
-});
+interface AdBannerProps {
+  unitId: string;
+}
+
+export function AdBanner({ unitId }: AdBannerProps) {
+  if (!BannerAd || !BannerAdSize || !TestIds) return null;
+
+  return (
+    <BannerAd
+      unitId={__DEV__ ? TestIds.BANNER : unitId}
+      size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+      requestOptions={{ requestNonPersonalizedAdsOnly: true }}
+      onAdFailedToLoad={(error: unknown) => {
+        if (__DEV__) console.log('Ad failed to load:', error);
+      }}
+    />
+  );
+}

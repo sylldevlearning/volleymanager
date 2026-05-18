@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import { useSettingsStore } from '../../src/stores/settingsStore';
 import { palette } from '../../src/theme/tokens';
 import i18n from '../../src/i18n';
-import { APP_VERSION } from '../../src/utils/constants';
+import { APP_VERSION, ADMOB_IDS } from '../../src/utils/constants';
 import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
 import { AdBanner } from '../../src/components/ads/AdBanner';
 import { deleteAllMatches } from '../../src/services/matchService';
@@ -106,7 +106,7 @@ export default function SettingsScreen() {
           </Pressable>
         </View>
       </View>
-      <AdBanner />
+      <AdBanner unitId={ADMOB_IDS.BANNER_SETTINGS} />
     </SafeAreaView>
   );
 }
