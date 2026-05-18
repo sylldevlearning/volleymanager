@@ -29,6 +29,7 @@ import type { Match } from '../../../src/models/match';
 import type { Team } from '../../../src/models/team';
 import type { Player } from '../../../src/models/player';
 import { getPlayerShortName } from '../../../src/features/players/player-helpers';
+import { takeLineupDraft } from '../../../src/features/lineup/lineupDraft';
 import { palette } from '../../../src/theme/tokens';
 
 type PointAction =
@@ -119,8 +120,9 @@ export default function RefereeScreen() {
         return { courtMap, bench: benchPlayers, liberoState };
       }
 
-      const homeLineup = buildLineup(homePlrs);
-      const awayLineup = buildLineup(awayPlrs);
+      const draft = takeLineupDraft();
+      const homeLineup = draft?.home ?? buildLineup(homePlrs);
+      const awayLineup = draft?.away ?? buildLineup(awayPlrs);
 
       if (m.status === 'created') {
         await updateMatchStatus(id, 'live');

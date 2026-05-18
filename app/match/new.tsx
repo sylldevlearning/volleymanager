@@ -81,7 +81,7 @@ export default function NewMatchScreen() {
         format, mode, teamHomeId, teamAwayId, config,
         firstServeTeamId: firstServeTeamId || teamHomeId,
       });
-      router.replace(`/match/${match.id}/referee`);
+      router.replace(`/match/${match.id}/lineup`);
     } catch (e) {
       Alert.alert(t('common.error'), String(e));
     } finally {

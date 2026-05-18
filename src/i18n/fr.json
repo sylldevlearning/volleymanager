@@ -445,6 +445,19 @@
   "ads": {
     "loading": "Publicité"
   },
+  "lineup": {
+    "title": "Composition de départ",
+    "starters": "Titulaires",
+    "startersCount": "{{count}}/{{max}} titulaires",
+    "validate": "Démarrer le match",
+    "tooMany": "Maximum {{count}} titulaires atteint",
+    "notEnough": "Sélectionnez {{count}} titulaires par équipe",
+    "starter": "Titulaire",
+    "bench": "Remplaçant",
+    "absent": "Absent",
+    "libero": "Libéro",
+    "selectStarters": "Appuyez sur le badge pour définir les titulaires"
+  },
   "help": {
     "home": "Lancez un match rapide ou créez un nouveau match. Gérez vos équipes et consultez l'historique.",
     "referee": "Tapez +1 pour marquer. Le -1 corrige une erreur. Les rotations sont automatiques au changement de service. 🔄 pour les remplacements.",

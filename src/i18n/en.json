@@ -445,6 +445,19 @@
   "ads": {
     "loading": "Advertisement"
   },
+  "lineup": {
+    "title": "Starting Lineup",
+    "starters": "Starters",
+    "startersCount": "{{count}}/{{max}} starters",
+    "validate": "Start match",
+    "tooMany": "Maximum {{count}} starters reached",
+    "notEnough": "Select {{count}} starters per team",
+    "starter": "Starter",
+    "bench": "Bench",
+    "absent": "Absent",
+    "libero": "Libero",
+    "selectStarters": "Tap the badge to toggle starters"
+  },
   "help": {
     "home": "Start a quick match or create a new one. Manage teams and check history.",
     "referee": "Tap +1 to score. -1 corrects mistakes. Rotations are automatic on service change. 🔄 for substitutions.",

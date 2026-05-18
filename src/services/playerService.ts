@@ -64,7 +64,7 @@ export async function updatePlayer(id: string, input: Partial<PlayerInput>): Pro
   if (input.number !== undefined) { fields.push('number = ?'); values.push(input.number); }
   if (input.position !== undefined) { fields.push('position = ?'); values.push(input.position); }
   if (input.photoUri !== undefined) { fields.push('photo_uri = ?'); values.push(input.photoUri); }
-  if (input.licenseNumber !== undefined) { fields.push('license_number = ?'); values.push(input.licenseNumber); }
+  if ('licenseNumber' in input) { fields.push('license_number = ?'); values.push(input.licenseNumber ?? null); }
 
   if (fields.length === 0) return;
   values.push(id);
