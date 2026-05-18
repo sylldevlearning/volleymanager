@@ -24,7 +24,9 @@
       "package": "com.sylldevlearning.volleymanager",
       "versionCode": 1,
       "permissions": [
-        "android.permission.VIBRATE"
+        "android.permission.VIBRATE",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
       ]
     },
     "web": {
@@ -40,6 +42,12 @@
     ],
     "experiments": {
       "typedRoutes": false
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "1a64a930-67f6-425a-bb93-5add83d5b81d"
+      }
     }
   }
 }
