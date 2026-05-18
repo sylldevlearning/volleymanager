@@ -14,6 +14,7 @@ export interface Player {
   number: number;
   position: PlayerPosition | null;
   photoUri: string | null;
+  licenseNumber: string | null;
   isActive: boolean;
   createdAt: string;
 }

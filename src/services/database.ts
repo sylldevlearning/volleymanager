@@ -246,6 +246,15 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
       await db.execAsync('PRAGMA user_version = 7');
     });
   }
+
+  if (version < 8) {
+    await db.withExclusiveTransactionAsync(async () => {
+      await db.execAsync(`
+        ALTER TABLE players ADD COLUMN license_number TEXT;
+        PRAGMA user_version = 8;
+      `);
+    });
+  }
 }
 
 export function generateId(): string {

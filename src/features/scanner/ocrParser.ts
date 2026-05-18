@@ -3,6 +3,7 @@ export interface DetectedPlayer {
   lastName: string;
   firstName: string;
   number: number | null;
+  licenseNumber: string | null;
   isSelected: boolean;
 }
 
@@ -45,10 +46,18 @@ export function parseNames(blocks: TextBlock[]): DetectedPlayer[] {
       if (text.length < 3 || text.length > 50) continue;
       // Skip dates (dd/mm/yyyy or dd-mm-yyyy)
       if (/^\d{2}[\/\-]\d{2}[\/\-]\d{4}$/.test(text)) continue;
-      // Skip long numeric IDs (license numbers)
-      if (/^\d{8,}$/.test(text)) continue;
       // Skip column headers
       if (/^(nom|prénom|prenom|licence|date|club|saison|catégorie|categorie|sexe|équipe|equipe)/i.test(text)) continue;
+
+      // Capture license numbers (6-12 digits) and attach to previous player
+      if (/^\d{6,12}$/.test(text)) {
+        if (players.length > 0 && players[players.length - 1].licenseNumber === null) {
+          players[players.length - 1] = { ...players[players.length - 1], licenseNumber: text };
+        }
+        continue;
+      }
+      // Skip purely numeric tokens beyond 12 digits
+      if (/^\d{13,}$/.test(text)) continue;
 
       const parts = text.split(/\s+/);
       if (parts.length >= 2) {
@@ -60,6 +69,7 @@ export function parseNames(blocks: TextBlock[]): DetectedPlayer[] {
           lastName: capitalize(lastName),
           firstName: capitalize(firstName),
           number: null,
+          licenseNumber: null,
           isSelected: true,
         });
       }

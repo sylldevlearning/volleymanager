@@ -126,7 +126,7 @@ export function ScannerSheet({
   function addManually() {
     setDetected((prev) => [
       ...prev,
-      { id: `manual_${Date.now()}`, lastName: '', firstName: '', number: null, isSelected: true },
+      { id: `manual_${Date.now()}`, lastName: '', firstName: '', number: null, licenseNumber: null, isSelected: true },
     ]);
   }
 
@@ -155,6 +155,7 @@ export function ScannerSheet({
           number: player.number!,
           position: null,
           photoUri: null,
+          licenseNumber: player.licenseNumber ?? null,
           isActive: true,
         });
         imported++;
@@ -319,9 +320,16 @@ function PlayerResultRow({
       >
         {player.isSelected && <Text style={styles.checkMark}>✓</Text>}
       </Pressable>
-      <Text style={[styles.playerName, !player.isSelected && styles.playerNameDimmed]} numberOfLines={1}>
-        {player.lastName}{player.firstName ? ` ${player.firstName}` : ''}
-      </Text>
+      <View style={styles.playerInfo}>
+        <Text style={[styles.playerName, !player.isSelected && styles.playerNameDimmed]} numberOfLines={1}>
+          {player.lastName}{player.firstName ? ` ${player.firstName}` : ''}
+        </Text>
+        {player.licenseNumber && (
+          <Text style={[styles.licenseText, !player.isSelected && styles.playerNameDimmed]}>
+            Lic. {player.licenseNumber}
+          </Text>
+        )}
+      </View>
       <TextInput
         style={[styles.numberInput, !player.isSelected && styles.numberInputDimmed]}
         placeholder="#"
@@ -460,11 +468,17 @@ const styles = StyleSheet.create({
     borderColor: palette.accentPrimary,
   },
   checkMark: { fontSize: 13, color: '#fff', fontFamily: 'Inter_700Bold' },
+  playerInfo: { flex: 1 },
   playerName: {
-    flex: 1,
     fontSize: 15,
     fontFamily: 'Inter_500Medium',
     color: palette.textPrimary,
+  },
+  licenseText: {
+    fontSize: 11,
+    fontFamily: 'Inter_400Regular',
+    color: palette.textMuted,
+    marginTop: 1,
   },
   playerNameDimmed: { color: palette.textMuted },
   numberInput: {

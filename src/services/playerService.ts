@@ -10,6 +10,7 @@ function rowToPlayer(row: Record<string, unknown>): Player {
     number: row.number as number,
     position: row.position as Player['position'],
     photoUri: row.photo_uri as string | null,
+    licenseNumber: (row.license_number as string | null) ?? null,
     isActive: Boolean(row.is_active),
     createdAt: row.created_at as string,
   };
@@ -39,9 +40,9 @@ export async function createPlayer(input: PlayerInput): Promise<Player> {
   const now = new Date().toISOString();
   try {
     await db.runAsync(
-      `INSERT INTO players (id, team_id, first_name, last_name, number, position, photo_uri, is_active, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)`,
-      [id, input.teamId, input.firstName ?? null, input.lastName ?? null, input.number, input.position, input.photoUri, now]
+      `INSERT INTO players (id, team_id, first_name, last_name, number, position, photo_uri, license_number, is_active, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?)`,
+      [id, input.teamId, input.firstName ?? null, input.lastName ?? null, input.number, input.position, input.photoUri, input.licenseNumber ?? null, now]
     );
   } catch (e) {
     const msg = String(e);
@@ -63,6 +64,7 @@ export async function updatePlayer(id: string, input: Partial<PlayerInput>): Pro
   if (input.number !== undefined) { fields.push('number = ?'); values.push(input.number); }
   if (input.position !== undefined) { fields.push('position = ?'); values.push(input.position); }
   if (input.photoUri !== undefined) { fields.push('photo_uri = ?'); values.push(input.photoUri); }
+  if (input.licenseNumber !== undefined) { fields.push('license_number = ?'); values.push(input.licenseNumber); }
 
   if (fields.length === 0) return;
   values.push(id);
