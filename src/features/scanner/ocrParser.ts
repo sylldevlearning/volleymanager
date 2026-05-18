@@ -16,9 +16,13 @@ export interface TextBlock {
   lines: TextLine[];
 }
 
-function capitalize(str: string): string {
-  if (!str) return '';
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+function capitalize(word: string): string {
+  if (!word) return '';
+  return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+}
+
+function capitalizeName(str: string): string {
+  return str.trim().split(/\s+/).map(capitalize).join(' ');
 }
 
 function deduplicateByName(players: DetectedPlayer[]): DetectedPlayer[] {
@@ -36,40 +40,127 @@ function uid(): string {
   return String(++_uid);
 }
 
+const DATE_RE = /^\d{2}[\/\-]\d{2}[\/\-]\d{4}/;
+const HEADER_RE = /^(nom|pr[eé]nom|licence|date|club|saison|cat[eé]gorie|sexe|[eé]quipe|n°|no\s*lic)/i;
+const CIVILITY_RE = /^(?:MME?\.?\s*|MLLE?\.?\s*|M\.?\s+)/i;
+const LICENSE_PREFIX_RE = /^(\d{6,12})\s+/;
+const STANDALONE_LICENSE_RE = /^\d{6,12}$/;
+
+/**
+ * Split "LASTNAME [LASTNAME2] Firstname [Firstname2...]" from text.
+ * Rules:
+ *  - All-uppercase words (may have hyphens/apostrophes) → lastName
+ *  - First mixed/lowercase word and everything after → firstName
+ *  - If everything is uppercase (OCR all-caps), last word becomes firstName
+ */
+function splitNameParts(text: string): [string, string] | null {
+  const withoutCiv = text.replace(CIVILITY_RE, '').trim();
+  if (!withoutCiv) return null;
+
+  const words = withoutCiv.split(/\s+/);
+  const lastWords: string[] = [];
+  const firstWords: string[] = [];
+  let foundFirst = false;
+
+  for (const w of words) {
+    if (/^\d/.test(w) || DATE_RE.test(w)) break; // stop at numbers / dates
+    if (foundFirst) {
+      firstWords.push(w);
+    } else if (/^[A-ZÀ-Ÿ][-A-ZÀ-Ÿ']*$/.test(w)) {
+      // Strictly all-uppercase (accented caps included)
+      lastWords.push(w);
+    } else {
+      foundFirst = true;
+      firstWords.push(w);
+    }
+  }
+
+  // All-caps OCR fallback: split at last uppercase word
+  if (firstWords.length === 0 && lastWords.length >= 2) {
+    const fn = lastWords.pop()!;
+    return [lastWords.join(' '), fn];
+  }
+
+  if (lastWords.length === 0 || firstWords.length === 0) return null;
+  return [lastWords.join(' '), firstWords.join(' ')];
+}
+
+/**
+ * Parse FFVB license sheet OCR output into DetectedPlayer list.
+ *
+ * Expected per-player format (one or two lines):
+ *   {LICENSE} {MR|MME|MLLE} {LASTNAME} {Firstname} [extra fields...]
+ *
+ * Scanning starts after the "Ligue ..." header line when present.
+ */
 export function parseNames(blocks: TextBlock[]): DetectedPlayer[] {
+  const allLines = blocks
+    .flatMap((b) => b.lines.map((l) => l.text.trim()))
+    .filter((l) => l.length >= 2);
+
+  // Skip everything before "Ligue ..." line (federation/club header)
+  const startIdx = allLines.findIndex((l) => /^ligue\s/i.test(l));
+  const lines = startIdx >= 0 ? allLines.slice(startIdx + 1) : allLines;
+
   const players: DetectedPlayer[] = [];
+  let pendingLicense: string | null = null;
 
-  for (const block of blocks) {
-    for (const line of block.lines) {
-      const text = line.text.trim();
+  for (const line of lines) {
+    if (DATE_RE.test(line)) continue;
+    if (HEADER_RE.test(line)) continue;
 
-      if (text.length < 3 || text.length > 50) continue;
-      // Skip dates (dd/mm/yyyy or dd-mm-yyyy)
-      if (/^\d{2}[\/\-]\d{2}[\/\-]\d{4}$/.test(text)) continue;
-      // Skip column headers
-      if (/^(nom|prénom|prenom|licence|date|club|saison|catégorie|categorie|sexe|équipe|equipe)/i.test(text)) continue;
-
-      // Capture license numbers (6-12 digits) and attach to previous player
-      if (/^\d{6,12}$/.test(text)) {
-        if (players.length > 0 && players[players.length - 1].licenseNumber === null) {
-          players[players.length - 1] = { ...players[players.length - 1], licenseNumber: text };
-        }
-        continue;
-      }
-      // Skip purely numeric tokens beyond 12 digits
-      if (/^\d{13,}$/.test(text)) continue;
-
-      const parts = text.split(/\s+/);
-      if (parts.length >= 2) {
-        const lastName =
-          parts.find((p) => p === p.toUpperCase() && p.length > 1) ?? parts[0];
-        const firstName = parts.filter((p) => p !== lastName).join(' ');
+    // Full FFVB line: LICENSE [CIVILITY] LASTNAME Firstname [extra...]
+    const licMatch = line.match(LICENSE_PREFIX_RE);
+    if (licMatch) {
+      const rest = line.slice(licMatch[0].length).trim();
+      const nameParts = splitNameParts(rest);
+      if (nameParts) {
+        pendingLicense = null;
         players.push({
           id: uid(),
-          lastName: capitalize(lastName),
-          firstName: capitalize(firstName),
+          licenseNumber: licMatch[1],
+          lastName: capitalizeName(nameParts[0]),
+          firstName: capitalizeName(nameParts[1]),
           number: null,
+          isSelected: true,
+        });
+        continue;
+      }
+    }
+
+    // Standalone license number → expect name on next line
+    if (STANDALONE_LICENSE_RE.test(line)) {
+      pendingLicense = line;
+      continue;
+    }
+
+    // Name line following a standalone license
+    if (pendingLicense) {
+      const nameParts = splitNameParts(line);
+      if (nameParts) {
+        players.push({
+          id: uid(),
+          licenseNumber: pendingLicense,
+          lastName: capitalizeName(nameParts[0]),
+          firstName: capitalizeName(nameParts[1]),
+          number: null,
+          isSelected: true,
+        });
+      }
+      pendingLicense = null;
+      continue;
+    }
+
+    // Generic fallback: no license number — detect UPPERCASE last name
+    if (!/\d{4,}/.test(line)) {
+      const nameParts = splitNameParts(line);
+      if (nameParts) {
+        players.push({
+          id: uid(),
           licenseNumber: null,
+          lastName: capitalizeName(nameParts[0]),
+          firstName: capitalizeName(nameParts[1]),
+          number: null,
           isSelected: true,
         });
       }
