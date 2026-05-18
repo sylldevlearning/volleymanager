@@ -381,11 +381,15 @@ export function TacticalBoard({
   useEffect(() => {
     if (visible) {
       seedDefaultPlays().catch(console.error);
-      if (positions.length === 0) {
+      if (matchId) {
+        // Always re-sync from live match state on every open, regardless of
+        // whether the user had dragged players before closing.
+        setIsSyncedWithMatch(true);
+      } else if (positions.length === 0) {
         setPositions(buildDefaultPositions(homeTeamId, awayTeamId, rotationHome, rotationAway, format));
       }
     }
-  }, [visible]);
+  }, [visible]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { setLocalBenchHome(benchHome); }, [benchHome]);
   useEffect(() => { setLocalBenchAway(benchAway); }, [benchAway]);
