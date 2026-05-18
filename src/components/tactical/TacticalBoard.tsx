@@ -298,6 +298,7 @@ export function TacticalBoard({
     undoLastDrawing,
     advanceGroup,
     resetGroup,
+    removeGroupDrawings,
     setTool,
     setArrowThickness,
     loadPlay,
@@ -376,6 +377,8 @@ export function TacticalBoard({
   const drawStartX = useSharedValue(0);
   const drawStartY = useSharedValue(0);
   const pencilPointsRef = useRef<{ x: number; y: number }[]>([]);
+  /** The playerId touched at the start of the current drawing gesture */
+  const linkedPlayerIdRef = useRef<string | null>(null);
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -464,11 +467,15 @@ export function TacticalBoard({
     const movements: { playerId: string; toX: number; toY: number }[] = [];
 
     for (const arrow of groupArrows) {
-      const candidates = currentPositions.filter((p) => !claimed.has(p.playerId));
-      const nearest = findNearestPlayer(candidates, arrow.fromX, arrow.fromY);
-      if (nearest) {
-        claimed.add(nearest.playerId);
-        movements.push({ playerId: nearest.playerId, toX: arrow.toX, toY: arrow.toY });
+      // Use linkedPlayerId if recorded, otherwise fall back to nearest-player heuristic
+      let playerId = arrow.linkedPlayerId ?? null;
+      if (!playerId || claimed.has(playerId)) {
+        const candidates = currentPositions.filter((p) => !claimed.has(p.playerId));
+        playerId = findNearestPlayer(candidates, arrow.fromX, arrow.fromY)?.playerId ?? null;
+      }
+      if (playerId && !claimed.has(playerId)) {
+        claimed.add(playerId);
+        movements.push({ playerId, toX: arrow.toX, toY: arrow.toY });
       }
     }
 
@@ -477,11 +484,14 @@ export function TacticalBoard({
       if (points.length < 2) continue;
       const startPt = points[0];
       const endPt = points[points.length - 1];
-      const candidates = currentPositions.filter((p) => !claimed.has(p.playerId));
-      const nearest = findNearestPlayer(candidates, startPt.x, startPt.y);
-      if (nearest) {
-        claimed.add(nearest.playerId);
-        movements.push({ playerId: nearest.playerId, toX: endPt.x, toY: endPt.y });
+      let playerId = fp.linkedPlayerId ?? null;
+      if (!playerId || claimed.has(playerId)) {
+        const candidates = currentPositions.filter((p) => !claimed.has(p.playerId));
+        playerId = findNearestPlayer(candidates, startPt.x, startPt.y)?.playerId ?? null;
+      }
+      if (playerId && !claimed.has(playerId)) {
+        claimed.add(playerId);
+        movements.push({ playerId, toX: endPt.x, toY: endPt.y });
       }
     }
 
@@ -686,8 +696,30 @@ export function TacticalBoard({
   }
 
   function handleAdvanceGroup() {
+    const groupNum = currentGroup;
+    const basePositions = playbackPositions ?? positions;
+
     exitPlaybackWithCommit();
-    advanceGroup();
+
+    const hasGroupDrawings =
+      arrows.some((a) => a.group === groupNum) ||
+      freehandPaths.some((fp) => fp.hasArrow && fp.group === groupNum);
+
+    if (!hasGroupDrawings) {
+      advanceGroup();
+      return;
+    }
+
+    const targetPositions = applyGroupMovement(basePositions, groupNum);
+    setStepPhase('animating');
+
+    animateFromTo(basePositions, targetPositions, 400, () => {
+      setPositions(targetPositions);
+      setPlaybackPositions(null);
+      removeGroupDrawings(groupNum);
+      advanceGroup();
+      setStepPhase('idle');
+    });
   }
 
   function handleResetGroup() {
@@ -701,12 +733,42 @@ export function TacticalBoard({
   const drawColor = groupColor;
   const drawType: 'solid' | 'dashed' = selectedTool === 'arrow_dashed' ? 'dashed' : 'solid';
 
+  function captureLinkedPlayer(touchX: number, touchY: number) {
+    const TOUCH_RADIUS_PX = 30;
+    let bestId: string | null = null;
+    let bestDist = Infinity;
+    for (const p of displayPositions) {
+      if (p.isBall) continue;
+      const px = p.x * courtW;
+      const py = p.y * courtH;
+      const dist = Math.hypot(touchX - px, touchY - py);
+      if (dist < TOUCH_RADIUS_PX && dist < bestDist) {
+        bestDist = dist;
+        bestId = p.playerId;
+      }
+    }
+    linkedPlayerIdRef.current = bestId;
+  }
+
+  function commitArrow(fromXR: number, fromYR: number, toXR: number, toYR: number) {
+    addArrow({
+      type: drawType,
+      fromX: fromXR, fromY: fromYR,
+      toX: toXR, toY: toYR,
+      color: drawColor,
+      thickness: arrowThickness,
+      linkedPlayerId: linkedPlayerIdRef.current,
+    });
+    linkedPlayerIdRef.current = null;
+  }
+
   const drawGesture = Gesture.Pan()
     .enabled(isDrawMode)
     .minDistance(8)
     .onBegin((e) => {
       drawStartX.value = e.x;
       drawStartY.value = e.y;
+      runOnJS(captureLinkedPlayer)(e.x, e.y);
       runOnJS(setDrawPreview)({
         fromX: e.x, fromY: e.y,
         toX: e.x, toY: e.y,
@@ -731,13 +793,9 @@ export function TacticalBoard({
         const fromYR = clamp(drawStartY.value / courtH, 0, 1);
         const toXR = clamp((drawStartX.value + e.translationX) / courtW, 0, 1);
         const toYR = clamp((drawStartY.value + e.translationY) / courtH, 0, 1);
-        runOnJS(addArrow)({
-          type: drawType,
-          fromX: fromXR, fromY: fromYR,
-          toX: toXR, toY: toYR,
-          color: drawColor,
-          thickness: arrowThickness,
-        });
+        runOnJS(commitArrow)(fromXR, fromYR, toXR, toYR);
+      } else {
+        linkedPlayerIdRef.current = null;
       }
       runOnJS(setDrawPreview)(null);
     });
@@ -750,7 +808,8 @@ export function TacticalBoard({
     return pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
   }
 
-  function onPencilBegin(x: number, y: number) {
+  function onPencilBegin(x: number, y: number, captureLinked = false) {
+    if (captureLinked) captureLinkedPlayer(x, y);
     pencilPointsRef.current = [{ x, y }];
     setPencilPreviewD(`M ${x.toFixed(1)} ${y.toFixed(1)}`);
   }
@@ -772,10 +831,11 @@ export function TacticalBoard({
   function onCurvedEnd() {
     const pts = pencilPointsRef.current;
     if (pts.length > 3) {
-      addFreehandPath(buildPathD(pts), drawColor, true, currentGroup);
+      addFreehandPath(buildPathD(pts), drawColor, true, currentGroup, linkedPlayerIdRef.current);
     }
     pencilPointsRef.current = [];
     setPencilPreviewD(null);
+    linkedPlayerIdRef.current = null;
   }
 
   const pencilGesture = Gesture.Pan()
@@ -789,7 +849,7 @@ export function TacticalBoard({
   const curvedGesture = Gesture.Pan()
     .enabled(isCurvedMode)
     .minDistance(0)
-    .onBegin((e) => { runOnJS(onPencilBegin)(e.x, e.y); })
+    .onBegin((e) => { runOnJS(onPencilBegin)(e.x, e.y, true); })
     .onUpdate((e) => { runOnJS(onPencilUpdate)(e.x, e.y); })
     .onEnd(() => { runOnJS(onCurvedEnd)(); })
     .onFinalize(() => { runOnJS(onCurvedEnd)(); });

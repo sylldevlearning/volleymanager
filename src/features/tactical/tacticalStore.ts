@@ -23,13 +23,15 @@ interface TacticalState {
   addArrow: (arrow: Omit<Arrow, 'id' | 'order' | 'group'>) => void;
   removeArrow: (id: string) => void;
   clearArrows: () => void;
-  addFreehandPath: (d: string, color: string, hasArrow?: boolean, group?: number) => void;
+  addFreehandPath: (d: string, color: string, hasArrow?: boolean, group?: number, linkedPlayerId?: string | null) => void;
   clearFreehandPaths: () => void;
   undoLastDrawing: () => void;
   /** Advance to the next group (tap the group button) */
   advanceGroup: () => void;
   /** Reset to group 1 (long-press the group button) */
   resetGroup: () => void;
+  /** Remove all arrows and traced-arrow freehand paths from a given group */
+  removeGroupDrawings: (group: number) => void;
   setTool: (tool: TacticalTool) => void;
   setArrowThickness: (thickness: ArrowThickness) => void;
   loadPlay: (play: TacticalPlay) => void;
@@ -84,13 +86,13 @@ export const useTacticalStore = create<TacticalState>()((set) => ({
 
   clearArrows: () => set({ arrows: [], freehandPaths: [], drawingOrder: [], currentGroup: 1 }),
 
-  addFreehandPath: (d, color, hasArrow, group) =>
+  addFreehandPath: (d, color, hasArrow, group, linkedPlayerId) =>
     set((state) => {
       const newId = generateId();
       return {
         freehandPaths: [
           ...state.freehandPaths,
-          { id: newId, d, color, hasArrow, group: group ?? state.currentGroup },
+          { id: newId, d, color, hasArrow, group: group ?? state.currentGroup, linkedPlayerId: linkedPlayerId ?? null },
         ],
         drawingOrder: [...state.drawingOrder, { type: 'freehand', id: newId }],
       };
@@ -112,6 +114,19 @@ export const useTacticalStore = create<TacticalState>()((set) => ({
   advanceGroup: () => set((state) => ({ currentGroup: state.currentGroup + 1 })),
 
   resetGroup: () => set({ currentGroup: 1 }),
+
+  removeGroupDrawings: (group) =>
+    set((state) => {
+      const removedArrowIds = new Set(state.arrows.filter((a) => a.group === group).map((a) => a.id));
+      const removedPathIds = new Set(
+        state.freehandPaths.filter((fp) => fp.hasArrow && fp.group === group).map((fp) => fp.id)
+      );
+      return {
+        arrows: state.arrows.filter((a) => a.group !== group),
+        freehandPaths: state.freehandPaths.filter((fp) => !(fp.hasArrow && fp.group === group)),
+        drawingOrder: state.drawingOrder.filter((d) => !removedArrowIds.has(d.id) && !removedPathIds.has(d.id)),
+      };
+    }),
 
   setTool: (tool) => set({ selectedTool: tool }),
 

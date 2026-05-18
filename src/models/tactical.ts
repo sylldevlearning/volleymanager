@@ -34,6 +34,8 @@ export interface Arrow {
   order: number;
   /** Arrows sharing the same group number animate simultaneously */
   group: number;
+  /** Player touched when the arrow was drawn — follows this trajectory */
+  linkedPlayerId?: string | null;
 }
 
 export type TacticalCategory =
@@ -61,6 +63,8 @@ export interface FreehandPath {
   hasArrow?: boolean;
   /** Animation group — paths in the same group animate simultaneously */
   group?: number;
+  /** Player touched when the path was drawn — follows this trajectory */
+  linkedPlayerId?: string | null;
 }
 
 export interface TacticalPlay {
