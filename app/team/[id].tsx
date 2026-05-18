@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Plus, Trash2, X, BarChart2 } from 'lucide-react-native';
+import { Plus, Trash2, X, BarChart2, ScanLine } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getTeamById, updateTeam, deleteTeam } from '../../src/services/teamService';
 import { getMatchesByTeam } from '../../src/services/matchService';
@@ -19,6 +19,7 @@ import { getPlayersByTeam, createPlayer, deletePlayer } from '../../src/services
 import type { Team } from '../../src/models/team';
 import type { Player, PlayerPosition as PPos } from '../../src/models/player';
 import { getPlayerDisplayName } from '../../src/features/players/player-helpers';
+import { ScannerSheet } from '../../src/features/scanner/ScannerSheet';
 import { palette } from '../../src/theme/tokens';
 
 const POSITIONS: PPos[] = ['setter', 'outside', 'opposite', 'middle', 'libero', 'universal'];
@@ -30,6 +31,7 @@ export default function TeamDetailScreen() {
   const [team, setTeam] = useState<Team | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [showAddPlayer, setShowAddPlayer] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -100,6 +102,15 @@ export default function TeamDetailScreen() {
       />
 
       <Pressable
+        style={({ pressed }) => [styles.fabScanner, pressed && styles.fabPressed]}
+        onPress={() => setShowScanner(true)}
+        accessibilityLabel={t('scanner.title')}
+        accessibilityRole="button"
+      >
+        <ScanLine size={22} color="#fff" />
+      </Pressable>
+
+      <Pressable
         style={({ pressed }) => [styles.fab, pressed && styles.fabPressed]}
         onPress={() => setShowAddPlayer(true)}
         accessibilityLabel={t('team.addPlayer')}
@@ -107,6 +118,14 @@ export default function TeamDetailScreen() {
       >
         <Plus size={26} color="#fff" />
       </Pressable>
+
+      <ScannerSheet
+        visible={showScanner}
+        teamId={id!}
+        existingPlayers={players}
+        onClose={() => setShowScanner(false)}
+        onImported={() => { setShowScanner(false); load(); }}
+      />
 
       <AddPlayerModal
         visible={showAddPlayer}
@@ -397,6 +416,22 @@ const styles = StyleSheet.create({
   },
   statsRowBtn: { padding: 8 },
   deleteRowBtn: { padding: 8 },
+  fabScanner: {
+    position: 'absolute',
+    bottom: 92,
+    right: 20,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: palette.accentSecondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: palette.accentSecondary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
+    elevation: 6,
+  },
   fab: {
     position: 'absolute',
     bottom: 24,

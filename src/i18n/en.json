@@ -363,6 +363,19 @@
     "clearConfirm": "Clear all drawings?",
     "syncFromMatch": "Sync match"
   },
+  "scanner": {
+    "title": "Scan licenses",
+    "takePhoto": "Take a photo",
+    "choosePhoto": "From gallery",
+    "addPage": "Add page",
+    "analyze": "Analyze",
+    "analyzing": "Analyzing...",
+    "detected": "{{count}} players detected",
+    "import": "Import",
+    "imported": "{{count}} players imported",
+    "addManually": "Add manually",
+    "notAvailable": "Scanner available after native install (EAS Build)"
+  },
   "substitution": {
     "title": "Substitution",
     "onCourt": "On court",
