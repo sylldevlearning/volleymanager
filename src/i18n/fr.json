@@ -374,7 +374,8 @@
     "import": "Importer",
     "imported": "{{count}} joueurs importés",
     "addManually": "Ajouter manuellement",
-    "notAvailable": "Scanner disponible après installation native (EAS Build)"
+    "notAvailable": "Scanner disponible après installation native (EAS Build)",
+    "hint": "Prenez en photo les cartes de licence pour remplir l'effectif automatiquement"
   },
   "substitution": {
     "title": "Remplacement",

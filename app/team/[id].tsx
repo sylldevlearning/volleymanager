@@ -107,7 +107,8 @@ export default function TeamDetailScreen() {
         accessibilityLabel={t('scanner.title')}
         accessibilityRole="button"
       >
-        <ScanLine size={22} color="#fff" />
+        <ScanLine size={20} color="#fff" />
+        <Text style={styles.fabScannerText}>{t('scanner.hint')}</Text>
       </Pressable>
 
       <Pressable
@@ -420,17 +421,24 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 92,
     right: 20,
-    width: 48,
-    height: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     borderRadius: 24,
     backgroundColor: palette.accentSecondary,
-    alignItems: 'center',
-    justifyContent: 'center',
     shadowColor: palette.accentSecondary,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.35,
     shadowRadius: 6,
     elevation: 6,
+  },
+  fabScannerText: {
+    fontSize: 12,
+    fontFamily: 'Inter_500Medium',
+    color: '#8B949E',
+    maxWidth: 160,
   },
   fab: {
     position: 'absolute',
