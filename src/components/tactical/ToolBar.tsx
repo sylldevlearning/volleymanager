@@ -15,6 +15,7 @@ interface ToolBarProps {
   onResetGroup: () => void;
   onUndoDrawing: () => void;
   onClearAll: () => void;
+  onSyncFromMatch?: () => void;
 }
 
 const TOOLS: { key: TacticalTool; icon: string; labelKey: string }[] = [
@@ -34,6 +35,7 @@ export function ToolBar({
   onResetGroup,
   onUndoDrawing,
   onClearAll,
+  onSyncFromMatch,
 }: ToolBarProps) {
   const { t } = useTranslation();
 
@@ -104,6 +106,18 @@ export function ToolBar({
         </Pressable>
 
         <View style={styles.divider} />
+
+        {onSyncFromMatch !== undefined && (
+          <Pressable
+            style={styles.syncBtn}
+            onPress={onSyncFromMatch}
+            accessibilityLabel={t('tactical.syncFromMatch')}
+            accessibilityRole="button"
+          >
+            <Text style={styles.syncBtnIcon}>🔄</Text>
+            <Text style={styles.syncBtnText}>{t('tactical.syncFromMatch')}</Text>
+          </Pressable>
+        )}
 
         <Pressable
           style={styles.clearBtn}
@@ -194,6 +208,23 @@ const styles = StyleSheet.create({
   },
   divider: {
     width: 8,
+  },
+  syncBtn: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 10,
+    backgroundColor: palette.accentSecondary + '20',
+    borderWidth: 1,
+    borderColor: palette.accentSecondary + '50',
+  },
+  syncBtnIcon: { fontSize: 16 },
+  syncBtnText: {
+    fontSize: 9,
+    fontFamily: 'Inter_500Medium',
+    color: palette.accentSecondary,
+    marginTop: 2,
   },
   clearBtn: {
     alignItems: 'center',

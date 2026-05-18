@@ -847,6 +847,20 @@ export function TacticalBoard({
     if (isSyncedWithMatch) setIsSyncedWithMatch(false);
   }
 
+  function handleSyncFromMatch() {
+    if (!matchId) return;
+    const ball = positions.find((p) => p.isBall);
+    const synced = buildSyncedPositions(
+      homeTeamId, awayTeamId,
+      onCourtHome, onCourtAway,
+      liberoHome, liberoAway,
+      homePlayers, awayPlayers,
+      ball,
+    );
+    setPositions(synced);
+    setIsSyncedWithMatch(true);
+  }
+
   function handleTokenTap(playerId: string) {
     if (playerId === 'ball') return;
     const found = positions.find((p) => p.playerId === playerId);
@@ -1090,6 +1104,7 @@ export function TacticalBoard({
           onResetGroup={handleResetGroup}
           onUndoDrawing={undoLastDrawing}
           onClearAll={() => { clearArrows(); handleReset(); }}
+          onSyncFromMatch={matchId ? handleSyncFromMatch : undefined}
         />
 
         <PlayerEditSheet

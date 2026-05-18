@@ -361,9 +361,7 @@
     "arrows_one": "flèche",
     "arrows_other": "flèches",
     "clearConfirm": "Effacer tous les tracés ?",
-    "positionOk": "✓ Toutes les positions respectent les règles FIVB.",
-    "positionFaults": "⚠️ {{count}} joueur(s) en faute de position.",
-    "positionCheckTitle": "Faute de position"
+    "syncFromMatch": "Sync match"
   },
   "substitution": {
     "title": "Remplacement",
