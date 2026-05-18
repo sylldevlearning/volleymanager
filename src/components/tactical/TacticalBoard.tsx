@@ -327,7 +327,7 @@ export function TacticalBoard({
   const [editingPlayer, setEditingPlayer] = useState<PlayerPosition | null>(null);
   const [playbookMode, setPlaybookMode] = useState<'load' | 'save'>('load');
   const [currentFormat, setCurrentFormat] = useState<MatchFormat>(format);
-  const [isSyncedWithMatch, setIsSyncedWithMatch] = useState(false);
+  const [isSyncedWithMatch, setIsSyncedWithMatch] = useState(true);
 
   // ── Bench ─────────────────────────────────────────────────────────────────
   const courtRef = useRef<View>(null);
@@ -390,11 +390,11 @@ export function TacticalBoard({
   useEffect(() => { setLocalBenchHome(benchHome); }, [benchHome]);
   useEffect(() => { setLocalBenchAway(benchAway); }, [benchAway]);
 
-  // ── Match sync: when opened from a live match, populate positions from scoringStore ──
+  // ── Match sync: auto-follow rotations & substitutions while isSyncedWithMatch is true ──
   useEffect(() => {
-    if (!matchId || !visible) return;
+    if (!matchId || !visible || !isSyncedWithMatch) return;
     const hasCourtData = Object.keys(onCourtHome).length > 0;
-    if (!hasCourtData) return; // lineup not initialized yet, keep defaults
+    if (!hasCourtData) return;
     const ball = positions.find((p) => p.isBall);
     const synced = buildSyncedPositions(
       homeTeamId, awayTeamId,
@@ -404,9 +404,8 @@ export function TacticalBoard({
       ball,
     );
     setPositions(synced);
-    setIsSyncedWithMatch(true);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [matchId, visible, onCourtHome, onCourtAway, liberoHome, liberoAway]);
+  }, [matchId, visible, isSyncedWithMatch, onCourtHome, onCourtAway, liberoHome, liberoAway]);
 
   // When drawings change while in playback mode, invalidate stale snapshots.
   // Without this, stepSnapshots[stepIdx+1] can be undefined if more groups
@@ -848,17 +847,8 @@ export function TacticalBoard({
   }
 
   function handleSyncFromMatch() {
-    if (!matchId) return;
-    const ball = positions.find((p) => p.isBall);
-    const synced = buildSyncedPositions(
-      homeTeamId, awayTeamId,
-      onCourtHome, onCourtAway,
-      liberoHome, liberoAway,
-      homePlayers, awayPlayers,
-      ball,
-    );
-    setPositions(synced);
     setIsSyncedWithMatch(true);
+    // isSyncedWithMatch entering deps array triggers the sync useEffect automatically
   }
 
   function handleTokenTap(playerId: string) {
