@@ -20,6 +20,20 @@ const VARIANT_COLORS: Record<StatVariant, string> = {
   neutral: palette.info,
 };
 
+const VARIANT_BG: Record<StatVariant, string> = {
+  success: palette.success + '18',
+  error: palette.error + '28',
+  warning: palette.warning + '18',
+  neutral: palette.info + '18',
+};
+
+const VARIANT_BORDER: Record<StatVariant, string> = {
+  success: palette.success + '50',
+  error: palette.error + '80',
+  warning: palette.warning + '50',
+  neutral: palette.info + '50',
+};
+
 export function StatButton({ label, emoji, variant = 'neutral', count = 0, onPress }: StatButtonProps) {
   const hapticsEnabled = useSettingsStore((s) => s.hapticsEnabled);
   const color = VARIANT_COLORS[variant];
@@ -33,7 +47,7 @@ export function StatButton({ label, emoji, variant = 'neutral', count = 0, onPre
     <Pressable
       style={({ pressed }) => [
         styles.button,
-        { borderColor: color + '40', backgroundColor: color + '10' },
+        { borderColor: VARIANT_BORDER[variant], backgroundColor: VARIANT_BG[variant] },
         pressed && styles.buttonPressed,
       ]}
       onPress={handlePress}
@@ -52,11 +66,11 @@ export function StatButton({ label, emoji, variant = 'neutral', count = 0, onPre
 const styles = StyleSheet.create({
   button: {
     flex: 1,
-    minWidth: 72,
-    paddingVertical: 10,
+    minWidth: 80,
+    paddingVertical: 12,
     paddingHorizontal: 8,
     borderRadius: 10,
-    borderWidth: 1,
+    borderWidth: 1.5,
     alignItems: 'center',
     gap: 2,
   },
