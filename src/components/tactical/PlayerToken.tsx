@@ -105,8 +105,10 @@ export function PlayerToken({
 
   const isBall = player.isBall === true;
   const BALL_SIZE = 32;
-  const defaultColor = player.isLibero ? '#FBBF24' : (player.isHome ? '#1D4ED8' : '#E63946');
-  const bgColor = player.customColor ?? defaultColor;
+  // Libero is always gold — customColor cannot override it
+  const bgColor = player.isLibero
+    ? '#FBBF24'
+    : (player.customColor ?? (player.isHome ? '#1D4ED8' : '#E63946'));
   const diameter = TOKEN_RADIUS * 2;
   const shortName = isBall ? '' : getPlayerShortName(player);
   const insideLabel = showName && !player.isLibero
