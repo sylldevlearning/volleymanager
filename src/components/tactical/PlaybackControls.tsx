@@ -6,54 +6,50 @@ import { palette } from '../../theme/tokens';
 type StepPhase = 'idle' | 'showing' | 'animating' | 'done';
 
 interface PlaybackControlsProps {
-  currentStep: number;
-  totalSteps: number;
+  historyViewStep: number; // -1 = live, ≥0 = browsing history at that index
+  historyTotal: number;    // number of completed steps saved in history
+  totalSteps: number;      // historyTotal + pending groups still on board
   stepPhase: StepPhase;
-  hasArrows: boolean;
+  hasArrows: boolean;      // current live drawings exist
   onStepForward: () => void;
   onStepBack: () => void;
   onGoToStart: () => void;
-  onGoToEnd: () => void;
-  hasHistory: boolean;
-  isPlayingAll: boolean;
-  historyStep: number;
-  historyTotal: number;
-  onPlayAll: () => void;
-  onStopPlayAll: () => void;
 }
 
 export function PlaybackControls({
-  currentStep,
+  historyViewStep,
+  historyTotal,
   totalSteps,
   stepPhase,
   hasArrows,
   onStepForward,
   onStepBack,
   onGoToStart,
-  onGoToEnd,
-  hasHistory,
-  isPlayingAll,
-  historyStep,
-  historyTotal,
-  onPlayAll,
-  onStopPlayAll,
 }: PlaybackControlsProps) {
   const { t } = useTranslation();
   const isAnimating = stepPhase !== 'idle';
-  const atStart = currentStep <= 0;
-  const atEnd = currentStep >= totalSteps;
+  const inHistory = historyViewStep >= 0;
 
-  // History-only mode: current drawings are gone, history exists
-  const historyMode = !hasArrows && hasHistory;
+  const canGoToStart = !isAnimating && historyTotal > 0;
+  const canBack = !isAnimating && (inHistory ? historyViewStep > 0 : historyTotal > 0);
+  const canForward = !isAnimating && (hasArrows || inHistory);
 
-  const canBack = hasArrows && !isAnimating && !isPlayingAll && !atStart;
-  const canForward = hasArrows && !isAnimating && !isPlayingAll && !atEnd;
-  const canGoToStart = (hasArrows && !atStart) || (historyMode && !isPlayingAll);
-  const canPlayAll = historyMode && !isPlayingAll && !isAnimating;
+  let stepLabel: string;
+  if (inHistory) {
+    stepLabel = t('tactical.playback.stepOf', { current: historyViewStep + 1, total: totalSteps });
+  } else if (hasArrows && totalSteps > 0) {
+    stepLabel = t('tactical.playback.stepOf', { current: historyTotal + 1, total: totalSteps });
+  } else if (historyTotal > 0) {
+    stepLabel = t('tactical.playback.historyCount', { count: historyTotal });
+  } else {
+    stepLabel = '—';
+  }
+
+  const labelActive = inHistory || (hasArrows && totalSteps > 0);
 
   return (
     <View style={styles.container}>
-      {/* ⏮ */}
+      {/* ⏮ Go to start */}
       <Pressable
         style={[styles.btn, !canGoToStart && styles.btnDisabled]}
         onPress={onGoToStart}
@@ -64,7 +60,7 @@ export function PlaybackControls({
         <Text style={[styles.btnIcon, !canGoToStart && styles.btnIconDisabled]}>⏮</Text>
       </Pressable>
 
-      {/* ◀ */}
+      {/* ◀ Step back */}
       <Pressable
         style={[styles.btn, !canBack && styles.btnDisabled]}
         onPress={onStepBack}
@@ -75,56 +71,22 @@ export function PlaybackControls({
         <Text style={[styles.btnIcon, !canBack && styles.btnIconDisabled]}>◀</Text>
       </Pressable>
 
-      {/* Step / history indicator */}
+      {/* Step indicator */}
       <View style={styles.indicator}>
-        {isPlayingAll ? (
-          <Text style={styles.indicatorText}>
-            {t('tactical.playback.stepOf', { current: historyStep, total: historyTotal })}
-          </Text>
-        ) : hasArrows && totalSteps > 0 ? (
-          <Text style={styles.indicatorText}>
-            {t('tactical.playback.stepOf', { current: currentStep, total: totalSteps })}
-          </Text>
-        ) : historyMode ? (
-          <Text style={styles.indicatorTextMuted}>
-            {t('tactical.playback.historyCount', { count: historyTotal })}
-          </Text>
-        ) : (
-          <Text style={styles.indicatorTextMuted}>—</Text>
-        )}
+        <Text style={labelActive ? styles.indicatorText : styles.indicatorTextMuted}>
+          {stepLabel}
+        </Text>
       </View>
 
-      {/* ▶ / ⏹ */}
-      {isPlayingAll ? (
-        <Pressable
-          style={[styles.btn, styles.btnStop]}
-          onPress={onStopPlayAll}
-          accessibilityRole="button"
-          accessibilityLabel={t('tactical.playback.stop')}
-        >
-          <Text style={styles.btnIcon}>⏹</Text>
-        </Pressable>
-      ) : (
-        <Pressable
-          style={[styles.btn, styles.btnPrimary, !canForward && !canPlayAll && styles.btnDisabled]}
-          onPress={historyMode ? onPlayAll : onStepForward}
-          disabled={!canForward && !canPlayAll}
-          accessibilityRole="button"
-          accessibilityLabel={historyMode ? t('tactical.playback.playAll') : t('tactical.playback.forward')}
-        >
-          <Text style={[styles.btnIcon, !canForward && !canPlayAll && styles.btnIconDisabled]}>▶</Text>
-        </Pressable>
-      )}
-
-      {/* ⏭ */}
+      {/* ▶ Step forward / advance */}
       <Pressable
-        style={[styles.btn, !canForward && styles.btnDisabled]}
-        onPress={onGoToEnd}
+        style={[styles.btn, styles.btnPrimary, !canForward && styles.btnDisabled]}
+        onPress={onStepForward}
         disabled={!canForward}
         accessibilityRole="button"
-        accessibilityLabel={t('tactical.playback.end')}
+        accessibilityLabel={t('tactical.playback.forward')}
       >
-        <Text style={[styles.btnIcon, !canForward && styles.btnIconDisabled]}>⏭</Text>
+        <Text style={[styles.btnIcon, !canForward && styles.btnIconDisabled]}>▶</Text>
       </Pressable>
     </View>
   );
@@ -151,9 +113,6 @@ const styles = StyleSheet.create({
   },
   btnPrimary: {
     backgroundColor: palette.accentPrimary,
-  },
-  btnStop: {
-    backgroundColor: palette.accentSecondary,
   },
   btnDisabled: {
     opacity: 0.35,
