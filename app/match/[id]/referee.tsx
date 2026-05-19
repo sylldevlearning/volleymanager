@@ -36,6 +36,18 @@ type PointAction =
   | 'serve_ace' | 'attack_kill' | 'block_kill'
   | 'serve_fault' | 'attack_fault' | 'block_fault' | 'defense_fault';
 
+interface PendingSetEnd {
+  winnerId: string;
+  winnerSide: 'home' | 'away';
+  newScoreHome: number;
+  newScoreAway: number;
+  newSetsHome: number;
+  newSetsAway: number;
+  setNum: number;
+  isMatchEnd: boolean;
+  matchWinnerName: string;
+}
+
 const FAULT_ACTIONS = new Set<PointAction>(['serve_fault', 'attack_fault', 'block_fault', 'defense_fault']);
 
 interface AttributionState {
@@ -74,6 +86,8 @@ export default function RefereeScreen() {
   const [timeoutTeamName, setTimeoutTeamName] = useState('');
   const [timeoutTeamColor, setTimeoutTeamColor] = useState<string>(palette.teamHome);
   const attributionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [pendingSetEnd, setPendingSetEnd] = useState<PendingSetEnd | null>(null);
+  const pendingSetEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Animated ball bounce for service indicator
   const ballY = useSharedValue(0);
@@ -155,6 +169,11 @@ export default function RefereeScreen() {
     return () => { if (attributionTimerRef.current) clearTimeout(attributionTimerRef.current); };
   }, [attribution]);
 
+  // Clean up pending-set-end timer on unmount
+  useEffect(() => {
+    return () => { if (pendingSetEndTimerRef.current) clearTimeout(pendingSetEndTimerRef.current); };
+  }, []);
+
   const handleAttributionSelect = useCallback(
     async (update: Partial<Pick<AttributionState, 'playerId' | 'action'>>) => {
       if (!match || !currentSet || !attribution) return;
@@ -188,6 +207,33 @@ export default function RefereeScreen() {
     },
     [match, currentSet, attribution],
   );
+
+  const finalizePendingSetEnd = useCallback((info: PendingSetEnd) => {
+    if (pendingSetEndTimerRef.current) clearTimeout(pendingSetEndTimerRef.current);
+    setPendingSetEnd(null);
+    setAttribution(null);
+
+    if (info.isMatchEnd) {
+      Alert.alert(
+        t('match.matchOver'),
+        t('referee.winsMatch', { name: info.matchWinnerName }),
+        [{ text: t('common.done'), onPress: () => router.replace(`/match/${match?.id}/summary`) }],
+      );
+    } else {
+      Alert.alert(
+        t('match.setOver'),
+        t('referee.setsScore', { home: info.newSetsHome, away: info.newSetsAway }),
+        [{
+          text: t('referee.nextSet'),
+          onPress: async () => {
+            if (!match) return;
+            const nextSet = await createSet(match.id, info.setNum + 1);
+            startNewSet(nextSet);
+          },
+        }],
+      );
+    }
+  }, [match, t, router, startNewSet]);
 
   const handlePoint = useCallback(async (team: 'home' | 'away') => {
     if (!match || !currentSet) return;
@@ -225,9 +271,7 @@ export default function RefereeScreen() {
       const winnerTeamId = homeWins ? match.teamHomeId : match.teamAwayId;
       const winnerSide = homeWins ? 'home' : 'away';
 
-      if (hapticsEnabled) {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
+      if (hapticsEnabled) Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
       await updateSet(currentSet.id, newScoreHome, newScoreAway, winnerTeamId);
       const updatedSet = { ...currentSet, scoreHome: newScoreHome, scoreAway: newScoreAway, winnerTeamId };
@@ -235,35 +279,30 @@ export default function RefereeScreen() {
 
       const newSetsHome = setsHome + (homeWins ? 1 : 0);
       const newSetsAway = setsAway + (awayWins ? 1 : 0);
+      const isMatchEnd = isMatchWon(newSetsHome, match.config) || isMatchWon(newSetsAway, match.config);
 
-      if (isMatchWon(newSetsHome, match.config) || isMatchWon(newSetsAway, match.config)) {
-        // Match over
+      if (isMatchEnd) {
         const matchWinnerId = isMatchWon(newSetsHome, match.config) ? match.teamHomeId : match.teamAwayId;
         await updateMatchStatus(match.id, 'finished', matchWinnerId);
-        if (hapticsEnabled) {
-          setTimeout(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success), 300);
-        }
-        Alert.alert(
-          t('match.matchOver'),
-          t('referee.winsMatch', { name: isMatchWon(newSetsHome, match.config) ? homeTeam?.name : awayTeam?.name }),
-          [{ text: t('common.done'), onPress: () => router.replace(`/match/${match.id}/summary`) }]
-        );
-      } else {
-        // Next set
-        Alert.alert(
-          t('match.setOver'),
-          t('referee.setsScore', { home: newSetsHome, away: newSetsAway }),
-          [{
-            text: t('referee.nextSet'),
-            onPress: async () => {
-              const nextSet = await createSet(match.id, setNum + 1);
-              startNewSet(nextSet);
-            },
-          }]
-        );
+        if (hapticsEnabled) setTimeout(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success), 300);
       }
+
+      const pendingInfo: PendingSetEnd = {
+        winnerId: winnerTeamId,
+        winnerSide,
+        newScoreHome,
+        newScoreAway,
+        newSetsHome,
+        newSetsAway,
+        setNum,
+        isMatchEnd,
+        matchWinnerName: homeWins ? (homeTeam?.name ?? '') : (awayTeam?.name ?? ''),
+      };
+      setPendingSetEnd(pendingInfo);
+      if (pendingSetEndTimerRef.current) clearTimeout(pendingSetEndTimerRef.current);
+      pendingSetEndTimerRef.current = setTimeout(() => finalizePendingSetEnd(pendingInfo), 3000);
     }
-  }, [match, currentSet, scoreHome, scoreAway, setsHome, setsAway, homeTeam, awayTeam, homePlayers, awayPlayers]);
+  }, [match, currentSet, scoreHome, scoreAway, setsHome, setsAway, homeTeam, awayTeam, homePlayers, awayPlayers, finalizePendingSetEnd]);
 
   const handleUndo = useCallback(async () => {
     if (!match || !currentSet) return;
@@ -460,6 +499,27 @@ export default function RefereeScreen() {
           onDismiss={() => setAttribution(null)}
           t={t}
         />
+      )}
+
+      {/* Set-end banner — visible for 3 s after the last point */}
+      {pendingSetEnd && (
+        <View style={styles.setEndBanner}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.setEndBannerTitle}>
+              {pendingSetEnd.isMatchEnd ? t('match.matchOver') : t('match.setOver')} !
+            </Text>
+            <Text style={styles.setEndBannerSubtitle}>{t('stats.setEndStats')}</Text>
+          </View>
+          <Pressable
+            onPress={() => finalizePendingSetEnd(pendingSetEnd)}
+            style={styles.setEndBannerBtn}
+            accessibilityRole="button"
+          >
+            <Text style={styles.setEndBannerBtnText}>
+              {pendingSetEnd.isMatchEnd ? t('common.done') : t('referee.nextSet')} →
+            </Text>
+          </Pressable>
+        </View>
       )}
 
       {/* Bottom actions */}
@@ -919,6 +979,36 @@ const styles = StyleSheet.create({
   tacticalIcon: { alignItems: 'center', justifyContent: 'center' },
   actionBtnPressed: { opacity: 0.7 },
   actionText: { fontSize: 12, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
+  setEndBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#2EA043',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    gap: 12,
+  },
+  setEndBannerTitle: {
+    fontSize: 14,
+    fontFamily: 'Inter_700Bold',
+    color: '#fff',
+  },
+  setEndBannerSubtitle: {
+    fontSize: 11,
+    fontFamily: 'Inter_400Regular',
+    color: 'rgba(255,255,255,0.85)',
+    marginTop: 1,
+  },
+  setEndBannerBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,255,255,0.22)',
+  },
+  setEndBannerBtnText: {
+    fontSize: 13,
+    fontFamily: 'Inter_600SemiBold',
+    color: '#fff',
+  },
   changeEndsOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.7)',

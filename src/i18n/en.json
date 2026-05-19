@@ -293,7 +293,8 @@
       "opponentFault": "Opponent error"
     },
     "noData": "No statistics available",
-    "noMatches": "No matches played"
+    "noMatches": "No matches played",
+    "setEndStats": "Enter stats for the last point"
   },
   "history": {
     "title": "History",

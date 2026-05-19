@@ -293,7 +293,8 @@
       "opponentFault": "Faute adverse"
     },
     "noData": "Aucune donnée statistique",
-    "noMatches": "Aucun match joué"
+    "noMatches": "Aucun match joué",
+    "setEndStats": "Saisissez les stats du dernier point"
   },
   "history": {
     "title": "Historique",
