@@ -351,6 +351,8 @@ export function TacticalBoard({
   const [historyViewStep, setHistoryViewStep] = useState(-1);
   /** Opacity of ephemeral drawings — animated to 0 during fade-out after advance */
   const [drawingFadeOpacity, setDrawingFadeOpacity] = useState(1);
+  /** Non-null while replaying a history step: the group number being replayed */
+  const [replayGroupNum, setReplayGroupNum] = useState<number | null>(null);
 
   const animFrameRef = useRef<number | null>(null);
   const fadeIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -380,10 +382,13 @@ export function TacticalBoard({
   const overlayFreehandDisplay = inHistory ? (history[historyViewStep]?.freehandDrawings ?? []) : freehandPaths;
 
   // ArrowOverlay display mode:
-  //   edit mode OR history browse → show all drawings at full opacity (isEditMode=true)
-  //   animating/fading → show only current group's arrows, opacity driven by drawingFadeOpacity
-  const arrowEditMode = isEditMode || inHistory;
-  const activeGroupForOverlay = (!isEditMode && !inHistory) ? currentGroup : null;
+  //   edit mode OR history browse (idle) → show all drawings at full opacity
+  //   animating live advance OR replaying history → show only active group at drawingFadeOpacity
+  const isReplayingHistory = replayGroupNum !== null;
+  const arrowEditMode = isEditMode || (inHistory && !isReplayingHistory);
+  const activeGroupForOverlay = isReplayingHistory
+    ? replayGroupNum
+    : (!isEditMode && !inHistory ? currentGroup : null);
 
   // ── Gesture refs ──────────────────────────────────────────────────────────
   const drawStartX = useSharedValue(0);
@@ -432,6 +437,8 @@ export function TacticalBoard({
     if (historyViewStep >= 0) {
       setHistoryViewStep(-1);
       setPlaybackPositions(null);
+      setReplayGroupNum(null);
+      setDrawingFadeOpacity(1);
     }
   }, [drawingOrder]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -592,20 +599,38 @@ export function TacticalBoard({
   }
 
   // ── Step controls (history-browse mode) ──────────────────────────────────
+
+  /** Replay history[stepIndex] with full path animation + fade, then advance to next step. */
+  function handleReplayHistoryStep(stepIndex: number) {
+    const step = history[stepIndex];
+    if (!step) return;
+
+    setReplayGroupNum(step.group);
+    setStepPhase('animating');
+    setPlaybackPositions([...step.positionsBefore]);
+
+    animateAlongPaths(step.positionsBefore, step.drawings, step.freehandDrawings, 800, () => {
+      setPlaybackPositions([...step.positionsAfter]);
+      fadeOutDrawings(300, () => {
+        setReplayGroupNum(null);
+        setStepPhase('idle');
+        if (stepIndex < history.length - 1) {
+          setHistoryViewStep(stepIndex + 1);
+          setPlaybackPositions([...history[stepIndex + 1].positionsBefore]);
+        } else {
+          setHistoryViewStep(-1);
+          setPlaybackPositions(null);
+        }
+      });
+    });
+  }
+
   function handleStepForward() {
     if (stepPhase !== 'idle') return;
 
     if (inHistory) {
-      // Navigate forward through history view
-      if (historyViewStep < history.length - 1) {
-        const next = historyViewStep + 1;
-        setHistoryViewStep(next);
-        setPlaybackPositions([...history[next].positionsBefore]);
-      } else {
-        // Last history step → go back to live
-        setHistoryViewStep(-1);
-        setPlaybackPositions(null);
-      }
+      // Replay this step with animation along saved trajectory
+      handleReplayHistoryStep(historyViewStep);
       return;
     }
 
@@ -636,6 +661,8 @@ export function TacticalBoard({
   function handleGoToStart() {
     if (animFrameRef.current != null) cancelAnimationFrame(animFrameRef.current);
     setStepPhase('idle');
+    setReplayGroupNum(null);
+    setDrawingFadeOpacity(1);
     if (history.length > 0) {
       setHistoryViewStep(0);
       setPlaybackPositions([...history[0].positionsBefore]);
@@ -649,6 +676,8 @@ export function TacticalBoard({
     if (animFrameRef.current != null) cancelAnimationFrame(animFrameRef.current);
     if (fadeIntervalRef.current != null) clearInterval(fadeIntervalRef.current);
     setStepPhase('idle');
+    setReplayGroupNum(null);
+    setDrawingFadeOpacity(1);
     setHistoryViewStep(-1);
     setPlaybackPositions(null);
   }
@@ -679,10 +708,10 @@ export function TacticalBoard({
 
     addHistorySnapshot({
       group: groupNum,
-      positionsBefore: [...basePositions],
-      positionsAfter: [...targetPositions],
-      drawings: groupArrows,
-      freehandDrawings: groupFreehand,
+      positionsBefore: JSON.parse(JSON.stringify(basePositions)),
+      positionsAfter: JSON.parse(JSON.stringify(targetPositions)),
+      drawings: JSON.parse(JSON.stringify(groupArrows)),
+      freehandDrawings: JSON.parse(JSON.stringify(groupFreehand)),
     });
 
     setStepPhase('animating');
@@ -702,6 +731,8 @@ export function TacticalBoard({
     setHistoryViewStep(-1);
     setPlaybackPositions(null);
     setStepPhase('idle');
+    setReplayGroupNum(null);
+    setDrawingFadeOpacity(1);
     resetGroup();
   }
 
