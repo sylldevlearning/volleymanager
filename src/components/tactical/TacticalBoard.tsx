@@ -25,7 +25,7 @@ import { seedDefaultPlays } from '../../features/tactical/tacticalService';
 import { HOME_POSITION_COORDS, AWAY_POSITION_COORDS, findNearestPlayer, clamp, easeInOut } from '../../features/tactical/positionUtils';
 import { useScoringStore } from '../../stores/scoringStore';
 import { useSettingsStore } from '../../stores/settingsStore';
-import type { PlayerPosition, TacticalPlay, StepSnapshot } from '../../models/tactical';
+import type { PlayerPosition, TacticalPlay, StepSnapshot, Arrow, FreehandPath } from '../../models/tactical';
 import type { Player } from '../../models/player';
 import { updatePlayer } from '../../services/playerService';
 import type { MatchFormat } from '../../models/match';
@@ -349,6 +349,8 @@ export function TacticalBoard({
   const [stepPhase, setStepPhase] = useState<StepPhase>('idle');
   /** -1 = live (normal); ≥ 0 = browsing history at that index */
   const [historyViewStep, setHistoryViewStep] = useState(-1);
+  /** Opacity of ephemeral drawings — animated to 0 during fade-out after advance */
+  const [drawingFadeOpacity, setDrawingFadeOpacity] = useState(1);
 
   const animFrameRef = useRef<number | null>(null);
   const fadeIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -376,6 +378,12 @@ export function TacticalBoard({
   // In history browse show the snapshot's stored drawings, otherwise show live store arrows
   const overlayArrowsDisplay = inHistory ? (history[historyViewStep]?.drawings ?? []) : arrows;
   const overlayFreehandDisplay = inHistory ? (history[historyViewStep]?.freehandDrawings ?? []) : freehandPaths;
+
+  // ArrowOverlay display mode:
+  //   edit mode OR history browse → show all drawings at full opacity (isEditMode=true)
+  //   animating/fading → show only current group's arrows, opacity driven by drawingFadeOpacity
+  const arrowEditMode = isEditMode || inHistory;
+  const activeGroupForOverlay = (!isEditMode && !inHistory) ? currentGroup : null;
 
   // ── Gesture refs ──────────────────────────────────────────────────────────
   const drawStartX = useSharedValue(0);
@@ -489,37 +497,93 @@ export function TacticalBoard({
   }
 
   // ── Animation helpers ─────────────────────────────────────────────────────
-  function animateFromTo(
-    fromPositions: PlayerPosition[],
-    toPositions: PlayerPosition[],
+
+  /** Animate each player along its drawn trajectory (freehand = multi-waypoint, arrow = straight). */
+  function animateAlongPaths(
+    basePositions: PlayerPosition[],
+    groupArrows: Arrow[],
+    groupFreehand: FreehandPath[],
     durationMs: number,
     onComplete: () => void,
   ) {
-    // Defensive: snapshots can be stale if drawings changed mid-playback
-    if (!fromPositions || !toPositions) { onComplete(); return; }
+    type PlayerWaypoints = { playerId: string; points: { x: number; y: number }[] };
+    const playerWaypoints: PlayerWaypoints[] = [];
+    const claimed = new Set<string>();
+
+    for (const arrow of groupArrows) {
+      let playerId = arrow.linkedPlayerId ?? null;
+      if (!playerId || claimed.has(playerId)) {
+        const candidates = basePositions.filter((p) => !claimed.has(p.playerId));
+        playerId = findNearestPlayer(candidates, arrow.fromX, arrow.fromY)?.playerId ?? null;
+      }
+      if (playerId && !claimed.has(playerId)) {
+        claimed.add(playerId);
+        playerWaypoints.push({
+          playerId,
+          points: [{ x: arrow.fromX, y: arrow.fromY }, { x: arrow.toX, y: arrow.toY }],
+        });
+      }
+    }
+
+    for (const fp of groupFreehand) {
+      const points = parseFreehandPoints(fp.d);
+      if (points.length < 2) continue;
+      let playerId = fp.linkedPlayerId ?? null;
+      if (!playerId || claimed.has(playerId)) {
+        const candidates = basePositions.filter((p) => !claimed.has(p.playerId));
+        playerId = findNearestPlayer(candidates, points[0].x, points[0].y)?.playerId ?? null;
+      }
+      if (playerId && !claimed.has(playerId)) {
+        claimed.add(playerId);
+        playerWaypoints.push({ playerId, points });
+      }
+    }
+
     if (animFrameRef.current != null) cancelAnimationFrame(animFrameRef.current);
     let start: number | null = null;
 
     function frame(now: number) {
       if (start === null) start = now;
-      const elapsed = now - start;
-      const progress = Math.min(elapsed / durationMs, 1);
-      const eased = easeInOut(progress);
+      const rawProgress = Math.min((now - start) / durationMs, 1);
+      const eased = easeInOut(rawProgress);
 
-      const interpolated = fromPositions.map((p) => {
-        const target = toPositions.find((t) => t.playerId === p.playerId);
-        if (!target) return p;
-        return {
-          ...p,
-          x: p.x + (target.x - p.x) * eased,
-          y: p.y + (target.y - p.y) * eased,
-        };
+      const interpolated = basePositions.map((p) => {
+        const wp = playerWaypoints.find((w) => w.playerId === p.playerId);
+        if (!wp) return p;
+        const { points } = wp;
+        const totalSegments = points.length - 1;
+        const scaledT = eased * totalSegments;
+        const seg = Math.min(Math.floor(scaledT), totalSegments - 1);
+        const localT = scaledT - seg;
+        const from = points[seg];
+        const to = points[seg + 1];
+        return { ...p, x: from.x + (to.x - from.x) * localT, y: from.y + (to.y - from.y) * localT };
       });
+
       setPlaybackPositions(interpolated);
 
+      if (rawProgress < 1) {
+        animFrameRef.current = requestAnimationFrame(frame);
+      } else {
+        onComplete();
+      }
+    }
+
+    animFrameRef.current = requestAnimationFrame(frame);
+  }
+
+  /** Animate `drawingFadeOpacity` from 1 → 0 over `durationMs`, then call `onComplete`. */
+  function fadeOutDrawings(durationMs: number, onComplete: () => void) {
+    let start: number | null = null;
+
+    function frame(now: number) {
+      if (start === null) start = now;
+      const progress = Math.min((now - start) / durationMs, 1);
+      setDrawingFadeOpacity(1 - progress);
       if (progress < 1) {
         animFrameRef.current = requestAnimationFrame(frame);
       } else {
+        setDrawingFadeOpacity(1);
         onComplete();
       }
     }
@@ -622,12 +686,14 @@ export function TacticalBoard({
     });
 
     setStepPhase('animating');
-    animateFromTo(basePositions, targetPositions, 400, () => {
+    animateAlongPaths(basePositions, groupArrows, groupFreehand, 800, () => {
       setPositions(targetPositions);
       setPlaybackPositions(null);
-      removeGroupDrawings(groupNum);
-      advanceGroup();
-      setStepPhase('idle');
+      fadeOutDrawings(300, () => {
+        removeGroupDrawings(groupNum);
+        advanceGroup();
+        setStepPhase('idle');
+      });
     });
   }
 
@@ -997,6 +1063,7 @@ export function TacticalBoard({
                   activeGroup={null}
                   arrowOpacity={1}
                 />
+
               ) : (
                 <GestureDetector gesture={allDrawGesture}>
                   <Animated.View style={{ flex: 1 }}>
@@ -1010,9 +1077,9 @@ export function TacticalBoard({
                       pencilPreviewD={pencilPreviewD}
                       pencilColor={pencilColor}
                       onRemoveArrow={removeArrow}
-                      isEditMode={isEditMode}
-                      activeGroup={null}
-                      arrowOpacity={1}
+                      isEditMode={arrowEditMode}
+                      activeGroup={activeGroupForOverlay}
+                      arrowOpacity={drawingFadeOpacity}
                     />
                   </Animated.View>
                 </GestureDetector>
