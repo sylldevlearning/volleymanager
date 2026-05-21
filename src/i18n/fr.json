@@ -444,9 +444,8 @@
     "title": "À propos",
     "version": "Version",
     "developedBy": "Développé par",
-    "contact": "Contact",
-    "website": "Site web",
-    "company": "SyllDevLearning"
+    "company": "SyllDevLearning",
+    "contactViaStore": "Pour nous contacter, laissez un avis sur le Play Store"
   },
   "ads": {
     "loading": "Publicité"

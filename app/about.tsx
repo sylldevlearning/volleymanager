@@ -1,12 +1,12 @@
-import { Image, StyleSheet, Text, View, Pressable, Linking } from 'react-native';
+import { Image, StyleSheet, Text, View, Pressable } from 'react-native';
 
 const BALL_IMG = require('../assets/images/ballon.png');
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Mail, Globe, Info } from 'lucide-react-native';
+import { ArrowLeft, Info } from 'lucide-react-native';
 import { palette } from '../src/theme/tokens';
-import { APP_VERSION, COMPANY, COMPANY_EMAIL, COMPANY_WEBSITE } from '../src/utils/constants';
+import { APP_VERSION, COMPANY } from '../src/utils/constants';
 
 export default function AboutScreen() {
   const { t } = useTranslation();
@@ -33,46 +33,17 @@ export default function AboutScreen() {
       {/* Info rows */}
       <View style={styles.section}>
         <View style={styles.card}>
-          <InfoRow icon={<Info size={18} color={palette.textMuted} />} label={t('about.developedBy')} value={COMPANY} />
-          <View style={styles.divider} />
-          <InfoRow icon={<Mail size={18} color={palette.textMuted} />} label={t('about.contact')} value={COMPANY_EMAIL}
-            onPress={() => Linking.openURL(`mailto:${COMPANY_EMAIL}`)} />
-          <View style={styles.divider} />
-          <InfoRow icon={<Globe size={18} color={palette.textMuted} />} label={t('about.website')} value="GitHub"
-            onPress={() => Linking.openURL(COMPANY_WEBSITE)} />
+          <View style={styles.row}>
+            <Info size={18} color={palette.textMuted} />
+            <Text style={styles.rowLabel}>{t('about.developedBy')}</Text>
+            <Text style={styles.rowValue}>{COMPANY}</Text>
+          </View>
         </View>
+
+        <Text style={styles.storeHint}>{t('about.contactViaStore')}</Text>
       </View>
     </SafeAreaView>
   );
-}
-
-function InfoRow({
-  icon,
-  label,
-  value,
-  onPress,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  onPress?: () => void;
-}) {
-  const Inner = (
-    <View style={styles.row}>
-      {icon}
-      <Text style={styles.rowLabel}>{label}</Text>
-      <Text style={[styles.rowValue, onPress && styles.rowValueLink]}>{value}</Text>
-    </View>
-  );
-
-  if (onPress) {
-    return (
-      <Pressable onPress={onPress} style={({ pressed }) => [pressed && styles.rowPressed]} accessibilityRole="link">
-        {Inner}
-      </Pressable>
-    );
-  }
-  return Inner;
 }
 
 const styles = StyleSheet.create({
@@ -91,7 +62,7 @@ const styles = StyleSheet.create({
   heroEmoji: { width: 72, height: 72 },
   heroName: { fontSize: 26, fontFamily: 'Inter_900Black', color: palette.textPrimary, marginTop: 8 },
   heroVersion: { fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textMuted },
-  section: { paddingHorizontal: 16 },
+  section: { paddingHorizontal: 16, gap: 16 },
   card: {
     backgroundColor: palette.backgroundSurface,
     borderRadius: 14,
@@ -100,9 +71,13 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 },
-  rowPressed: { backgroundColor: palette.backgroundElevated },
   rowLabel: { flex: 1, fontSize: 15, fontFamily: 'Inter_400Regular', color: palette.textPrimary },
   rowValue: { fontSize: 14, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
-  rowValueLink: { color: palette.accentSecondary },
-  divider: { height: 1, backgroundColor: palette.backgroundElevated, marginLeft: 14 },
+  storeHint: {
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+    color: palette.textMuted,
+    textAlign: 'center',
+    lineHeight: 18,
+  },
 });
