@@ -12,6 +12,7 @@
               "suppressHighlighting": true
             },
             "inlineWhenUnflattened": {},
+            "inlineProps": {},
             "variants": {
               "ellipsis": {
                 "true": {
@@ -1868,6 +1869,7 @@
               "role": "link"
             },
             "inlineWhenUnflattened": {},
+            "inlineProps": {},
             "variants": {
               "ellipsis": {
                 "true": {
@@ -3396,16 +3398,23 @@
             },
             "variants": {
               "unstyled": {
+                "true": {
+                  "outlineWidth": 0,
+                  "borderWidth": 0,
+                  "backgroundColor": "transparent"
+                },
                 "false": {
                   "size": "$true",
                   "justifyContent": "center",
                   "alignItems": "center",
                   "flexWrap": "nowrap",
                   "flexDirection": "row",
-                  "cursor": "pointer",
                   "backgroundColor": "$background",
                   "borderWidth": 1,
                   "borderColor": "transparent",
+                  "$platform-web": {
+                    "cursor": "pointer"
+                  },
                   "hoverStyle": {
                     "backgroundColor": "$backgroundHover",
                     "borderColor": "$borderColorHover"
@@ -6990,6 +6999,7 @@
               "whiteSpace": "normal"
             },
             "inlineWhenUnflattened": {},
+            "inlineProps": {},
             "variants": {
               "ellipsis": {
                 "true": {
@@ -7939,6 +7949,7 @@
               "unstyled": false
             },
             "inlineWhenUnflattened": {},
+            "inlineProps": {},
             "variants": {
               "ellipsis": {
                 "true": {
@@ -8377,6 +8388,7 @@
               "fontStyle": "italic"
             },
             "inlineWhenUnflattened": {},
+            "inlineProps": {},
             "variants": {
               "ellipsis": {
                 "true": {
@@ -8608,6 +8620,7 @@
               "pointerEvents": "none"
             },
             "inlineWhenUnflattened": {},
+            "inlineProps": {},
             "variants": {
               "ellipsis": {
                 "true": {
@@ -10538,6 +10551,7 @@
               "unstyled": false
             },
             "inlineWhenUnflattened": {},
+            "inlineProps": {},
             "variants": {
               "ellipsis": {
                 "true": {
@@ -10784,6 +10798,7 @@
               "unstyled": false
             },
             "inlineWhenUnflattened": {},
+            "inlineProps": {},
             "variants": {
               "ellipsis": {
                 "true": {
@@ -11030,6 +11045,7 @@
               "unstyled": false
             },
             "inlineWhenUnflattened": {},
+            "inlineProps": {},
             "variants": {
               "ellipsis": {
                 "true": {
@@ -11276,6 +11292,7 @@
               "unstyled": false
             },
             "inlineWhenUnflattened": {},
+            "inlineProps": {},
             "variants": {
               "ellipsis": {
                 "true": {
@@ -11522,6 +11539,7 @@
               "unstyled": false
             },
             "inlineWhenUnflattened": {},
+            "inlineProps": {},
             "variants": {
               "ellipsis": {
                 "true": {
@@ -11768,6 +11786,7 @@
               "unstyled": false
             },
             "inlineWhenUnflattened": {},
+            "inlineProps": {},
             "variants": {
               "ellipsis": {
                 "true": {
@@ -12456,6 +12475,7 @@
               "margin": 0
             },
             "inlineWhenUnflattened": {},
+            "inlineProps": {},
             "variants": {
               "ellipsis": {
                 "true": {
@@ -12909,6 +12929,11 @@
             },
             "variants": {
               "unstyled": {
+                "true": {
+                  "outlineWidth": 0,
+                  "borderWidth": 0,
+                  "backgroundColor": "transparent"
+                },
                 "false": {
                   "size": "$true",
                   "fontFamily": "$body",
@@ -12967,6 +12992,7 @@
               "unstyled": false
             },
             "inlineWhenUnflattened": {},
+            "inlineProps": {},
             "variants": {
               "ellipsis": {
                 "true": {
@@ -13219,6 +13245,7 @@
               "unstyled": false
             },
             "inlineWhenUnflattened": {},
+            "inlineProps": {},
             "variants": {
               "ellipsis": {
                 "true": {
@@ -14372,6 +14399,7 @@
               "whiteSpace": "normal"
             },
             "inlineWhenUnflattened": {},
+            "inlineProps": {},
             "variants": {
               "ellipsis": {
                 "true": {
@@ -17251,8 +17279,7 @@
                   "width": "33%",
                   "height": "33%",
                   "borderRadius": 1000,
-                  "backgroundColor": "$color",
-                  "pressTheme": true
+                  "backgroundColor": "$color"
                 }
               }
             },
@@ -18929,6 +18956,7 @@
               "unstyled": false
             },
             "inlineWhenUnflattened": {},
+            "inlineProps": {},
             "variants": {
               "ellipsis": {
                 "true": {
@@ -20658,6 +20686,7 @@
               "render": "span"
             },
             "inlineWhenUnflattened": {},
+            "inlineProps": {},
             "variants": {
               "ellipsis": {
                 "true": {
@@ -21369,6 +21398,7 @@
               "fontWeight": "bold"
             },
             "inlineWhenUnflattened": {},
+            "inlineProps": {},
             "variants": {
               "ellipsis": {
                 "true": {
@@ -22574,6 +22604,7 @@
               "unstyled": false
             },
             "inlineWhenUnflattened": {},
+            "inlineProps": {},
             "variants": {
               "ellipsis": {
                 "true": {
@@ -24065,6 +24096,7 @@
               "pointerEvents": "none"
             },
             "inlineWhenUnflattened": {},
+            "inlineProps": {},
             "variants": {
               "ellipsis": {
                 "true": {
@@ -28289,88 +28321,7 @@
         "xxs": false
       }
     },
-    "animations": {
-      "isReactNative": true,
-      "inputStyle": "value",
-      "outputStyle": "inline",
-      "avoidReRenders": true,
-      "animations": {
-        "0ms": {
-          "type": "timing",
-          "duration": 0
-        },
-        "50ms": {
-          "type": "timing",
-          "duration": 50
-        },
-        "75ms": {
-          "type": "timing",
-          "duration": 75
-        },
-        "100ms": {
-          "type": "timing",
-          "duration": 100
-        },
-        "200ms": {
-          "type": "timing",
-          "duration": 200
-        },
-        "250ms": {
-          "type": "timing",
-          "duration": 250
-        },
-        "300ms": {
-          "type": "timing",
-          "duration": 300
-        },
-        "400ms": {
-          "type": "timing",
-          "duration": 400
-        },
-        "500ms": {
-          "type": "timing",
-          "duration": 500
-        },
-        "bouncy": {
-          "damping": 9,
-          "mass": 0.9,
-          "stiffness": 150
-        },
-        "lazy": {
-          "damping": 18,
-          "stiffness": 50
-        },
-        "medium": {
-          "damping": 15,
-          "stiffness": 120,
-          "mass": 1
-        },
-        "slow": {
-          "damping": 15,
-          "stiffness": 40
-        },
-        "quick": {
-          "damping": 20,
-          "mass": 1.2,
-          "stiffness": 250
-        },
-        "tooltip": {
-          "damping": 10,
-          "mass": 0.9,
-          "stiffness": 100
-        }
-      },
-      "needsCustomComponent": true,
-      "View": "Component",
-      "Text": "Component",
-      "useAnimatedNumber": "Function",
-      "useAnimatedNumberReaction": "Function",
-      "useAnimatedNumberStyle": "Function",
-      "useAnimatedNumbersStyle": "Function",
-      "usePresence": "Function",
-      "ResetPresence": "Function",
-      "useAnimations": "Function"
-    },
+    "animations": "Function",
     "defaultTheme": "dark",
     "defaultProps": {},
     "inverseShorthands": {

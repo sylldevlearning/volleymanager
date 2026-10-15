@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { Alert, FlatList, ScrollView, StyleSheet, Text, View, Pressable, RefreshControl } from 'react-native';
-import { useRouter, useFocusEffect, Router } from 'expo-router';
+import { useRouter, useFocusEffect, type ImperativeRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Plus, Calendar } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -200,7 +200,7 @@ function MatchCard({
   match: Match;
   homeTeam?: Team;
   awayTeam?: Team;
-  router: Router;
+  router: ImperativeRouter;
   onPress: () => void;
   onDelete: () => void;
 }) {

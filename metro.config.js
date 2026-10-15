@@ -4,6 +4,7 @@ const { withTamagui } = require('@tamagui/metro-plugin');
 const config = getDefaultConfig(__dirname);
 
 config.resolver.sourceExts.push('mjs');
+config.resolver.assetExts.push('wasm');
 
 module.exports = withTamagui(config, {
   components: ['tamagui'],
