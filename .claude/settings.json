@@ -12,7 +12,13 @@
       "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\Salou\\\\OneDrive\\\\Bureau\\\\projet en cours\\\\app-volleyball\" -Recurse -Exclude \".git\", \"node_modules\", \".expo\", \".claude\" -Force | Where-Object { -not $_.FullName.Contains\\('.git'\\) -and -not $_.FullName.Contains\\('node_modules'\\) -and -not $_.FullName.Contains\\('.expo'\\) -and -not $_.FullName.Contains\\('.claude'\\) } | Select-Object -ExpandProperty FullName | Sort-Object)",
       "Bash(npx jest *)",
       "Bash(npx tsc *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(python -c ' *)",
+      "Bash(node scripts/generate-icons.js)",
+      "Bash(node -e \"console.log\\(require\\('./node_modules/react-native-google-mobile-ads/package.json'\\).version\\)\")",
+      "Bash(npm uninstall *)",
+      "Bash(eas --version)",
+      "Bash(eas build *)"
     ]
   }
 }

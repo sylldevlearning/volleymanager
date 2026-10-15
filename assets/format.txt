@@ -1,0 +1,2 @@
+Tailles des icônes à fournir
+FichierTailleUsageassets/icon.png1024 × 1024 pxIcône Play Store + fallbackassets/adaptive-icon.png1024 × 1024 pxForeground Android (mets ton design centré dans les 66% centraux — Android crop les bords)assets/splash-icon.png288 × 288 pxLogo affiché au démarrageassets/favicon.png48 × 48 pxWeb uniquem
