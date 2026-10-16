@@ -47,7 +47,13 @@ export async function addEvent(input: MatchEventInput): Promise<MatchEvent> {
   };
 }
 
-export async function undoLastEvent(matchId: string, setId: string): Promise<string | null> {
+export interface UndoResult {
+  cancelledEventId: string;
+  /** The opponent's point event cancelled alongside a penalty/delay sanction, if any. */
+  linkedCancelledEventId: string | null;
+}
+
+export async function undoLastEvent(matchId: string, setId: string): Promise<UndoResult | null> {
   const db = await getDb();
   const last = await db.getFirstAsync<Record<string, unknown>>(
     `SELECT * FROM match_events
@@ -60,21 +66,33 @@ export async function undoLastEvent(matchId: string, setId: string): Promise<str
   if (!last) return null;
 
   const cancelledId = last.id as string;
+  const eventType = last.event_type as string;
+  const details = JSON.parse((last.details_json as string) || '{}') as Record<string, unknown>;
+  const isSanction = eventType === 'sanction_home' || eventType === 'sanction_away';
+  const linkedCancelledEventId: string | null =
+    isSanction && details.awardsPoint && typeof details.pointEventId === 'string' ? details.pointEventId : null;
+
   await db.withExclusiveTransactionAsync(async () => {
     await db.runAsync(
       'UPDATE match_events SET is_cancelled = 1 WHERE id = ?',
       [cancelledId]
     );
+    if (linkedCancelledEventId) {
+      await db.runAsync(
+        'UPDATE match_events SET is_cancelled = 1 WHERE id = ?',
+        [linkedCancelledEventId]
+      );
+    }
     await addEvent({
       matchId,
       setId,
       eventType: 'undo',
       playerId: null,
       teamId: null,
-      details: { cancelledEventId: cancelledId },
+      details: { cancelledEventId: cancelledId, linkedCancelledEventId },
     });
   });
-  return cancelledId;
+  return { cancelledEventId: cancelledId, linkedCancelledEventId };
 }
 
 export async function addDirectPointCorrection(

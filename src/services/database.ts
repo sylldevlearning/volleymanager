@@ -16,7 +16,7 @@ export async function getDb(): Promise<SQLite.SQLiteDatabase> {
   return _initPromise;
 }
 
-async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
+export async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
   const current = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
   const version = current?.user_version ?? 0;
 
@@ -261,6 +261,17 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
       await db.execAsync(`
         ALTER TABLE substitution_pairs ADD COLUMN is_exceptional INTEGER DEFAULT 0;
         PRAGMA user_version = 9;
+      `);
+    });
+  }
+
+  if (version < 10) {
+    await db.withExclusiveTransactionAsync(async () => {
+      await db.execAsync(`
+        ALTER TABLE matches ADD COLUMN captain_home_id TEXT REFERENCES players(id);
+        ALTER TABLE matches ADD COLUMN captain_away_id TEXT REFERENCES players(id);
+        ALTER TABLE sets ADD COLUMN serving_team_id TEXT REFERENCES teams(id);
+        PRAGMA user_version = 10;
       `);
     });
   }

@@ -13,6 +13,8 @@ function rowToMatch(row: Record<string, unknown>): Match {
     config: JSON.parse(row.config_json as string),
     winnerTeamId: row.winner_team_id as string | null,
     firstServeTeamId: row.first_serve_team_id as string | null ?? null,
+    captainHomeId: (row.captain_home_id as string | null) ?? null,
+    captainAwayId: (row.captain_away_id as string | null) ?? null,
     createdAt: row.created_at as string,
     finishedAt: row.finished_at as string | null,
   };
@@ -26,6 +28,7 @@ function rowToSet(row: Record<string, unknown>): MatchSet {
     scoreHome: row.score_home as number,
     scoreAway: row.score_away as number,
     winnerTeamId: row.winner_team_id as string | null,
+    servingTeamId: (row.serving_team_id as string | null) ?? null,
     startedAt: row.started_at as string,
     finishedAt: row.finished_at as string | null,
   };
@@ -78,9 +81,23 @@ export async function createMatch(input: MatchInput): Promise<Match> {
     config: input.config,
     winnerTeamId: null,
     firstServeTeamId,
+    captainHomeId: null,
+    captainAwayId: null,
     createdAt: now,
     finishedAt: null,
   };
+}
+
+export async function setMatchCaptains(
+  matchId: string,
+  captainHomeId: string | null,
+  captainAwayId: string | null,
+): Promise<void> {
+  const db = await getDb();
+  await db.runAsync(
+    'UPDATE matches SET captain_home_id = ?, captain_away_id = ? WHERE id = ?',
+    [captainHomeId, captainAwayId, matchId]
+  );
 }
 
 export async function updateMatchStatus(
@@ -96,15 +113,23 @@ export async function updateMatchStatus(
   );
 }
 
-export async function createSet(matchId: string, setNumber: number): Promise<MatchSet> {
+export async function createSet(
+  matchId: string,
+  setNumber: number,
+  servingTeamId?: string,
+): Promise<MatchSet> {
   const db = await getDb();
   const id = generateId();
   const now = new Date().toISOString();
+  const resolvedServingTeamId = servingTeamId ?? null;
   await db.runAsync(
-    'INSERT INTO sets (id, match_id, set_number, score_home, score_away, started_at) VALUES (?, ?, ?, 0, 0, ?)',
-    [id, matchId, setNumber, now]
+    'INSERT INTO sets (id, match_id, set_number, score_home, score_away, serving_team_id, started_at) VALUES (?, ?, ?, 0, 0, ?, ?)',
+    [id, matchId, setNumber, resolvedServingTeamId, now]
   );
-  return { id, matchId, setNumber, scoreHome: 0, scoreAway: 0, winnerTeamId: null, startedAt: now, finishedAt: null };
+  return {
+    id, matchId, setNumber, scoreHome: 0, scoreAway: 0, winnerTeamId: null,
+    servingTeamId: resolvedServingTeamId, startedAt: now, finishedAt: null,
+  };
 }
 
 export async function getSetsForMatch(matchId: string): Promise<MatchSet[]> {

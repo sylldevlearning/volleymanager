@@ -306,9 +306,10 @@ export default function RefereeScreen() {
 
   const handleUndo = useCallback(async () => {
     if (!match || !currentSet) return;
-    const cancelledId = await undoLastEvent(match.id, currentSet.id);
-    if (cancelledId) {
-      undoPoint(cancelledId);
+    const result = await undoLastEvent(match.id, currentSet.id);
+    if (result) {
+      undoPoint(result.cancelledEventId);
+      if (result.linkedCancelledEventId) undoPoint(result.linkedCancelledEventId);
       if (hapticsEnabled) Haptics.selectionAsync();
     }
   }, [match, currentSet, hapticsEnabled]);

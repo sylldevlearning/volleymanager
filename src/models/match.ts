@@ -53,6 +53,8 @@ export interface Match {
   config: MatchConfig;
   winnerTeamId: string | null;
   firstServeTeamId: string | null;
+  captainHomeId: string | null;
+  captainAwayId: string | null;
   createdAt: string;
   finishedAt: string | null;
 }
@@ -64,6 +66,8 @@ export interface MatchSet {
   scoreHome: number;
   scoreAway: number;
   winnerTeamId: string | null;
+  /** Team serving at the start of this set — manually chosen for sets 1 & 5, auto-resolved otherwise. */
+  servingTeamId: string | null;
   startedAt: string;
   finishedAt: string | null;
 }
