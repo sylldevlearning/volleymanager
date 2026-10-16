@@ -138,6 +138,9 @@ describe('performSubstitution', () => {
     expect(result.pair.playerOutId).toBe('A');
     expect(result.pair.playerInId).toBe('B');
     expect(result.eventId).toBe('event-1');
+    // Full event object too — needed so callers can mirror it into the
+    // store's `events` array (scoringStore.recordEvent), not just its id.
+    expect(result.event).toEqual({ id: 'event-1' });
   });
 
   it('uses substitution_away event type for away team', async () => {

@@ -17,6 +17,7 @@ import {
   V8_SET_ROW,
   V8_EVENT_ROW,
   V8_SUBSTITUTION_PAIR_ROW,
+  V8_TEAM_ROW,
 } from './fixtures/migrationFixtures';
 
 type Row = Record<string, unknown>;
@@ -65,9 +66,14 @@ class FakeMigrationDb {
         }
         continue;
       }
+      // Index statements don't affect row data in this simulation — just
+      // confirm they're well-formed (DROP INDEX / CREATE [UNIQUE] INDEX).
+      if (/^DROP INDEX/i.test(stmt) || /^CREATE (UNIQUE )?INDEX/i.test(stmt)) {
+        continue;
+      }
       throw new Error(
         `FakeMigrationDb.execAsync: unsupported statement — this fake only models additive ` +
-        `ALTER TABLE ADD COLUMN and PRAGMA user_version for migrations v9+: "${stmt}"`,
+        `ALTER TABLE ADD COLUMN, PRAGMA user_version and index DDL for migrations v9+: "${stmt}"`,
       );
     }
   }
@@ -77,24 +83,28 @@ class FakeMigrationDb {
   }
 }
 
-test('migrating an existing v8 database to v10 preserves every pre-existing row intact', async () => {
+test('migrating an existing v8 database to v12 preserves every pre-existing row intact', async () => {
   const tables: Record<string, Row[]> = {
     matches: [{ ...V8_MATCH_ROW }],
     sets: [{ ...V8_SET_ROW }],
     match_events: [{ ...V8_EVENT_ROW }],
     substitution_pairs: [{ ...V8_SUBSTITUTION_PAIR_ROW }],
+    teams: [{ ...V8_TEAM_ROW }],
   };
   const db = new FakeMigrationDb(8, tables);
 
   await runMigrations(db as unknown as SQLite.SQLiteDatabase);
 
-  expect(db.userVersion).toBe(10);
+  expect(db.userVersion).toBe(12);
 
-  // matches: every pre-existing field untouched, new columns added as null
+  // matches: every pre-existing field untouched, new columns added as null/0
   expect(tables.matches[0]).toEqual({
     ...V8_MATCH_ROW,
     captain_home_id: null,
     captain_away_id: null,
+    sides_swapped: 0,
+    acting_captain_home_id: null,
+    acting_captain_away_id: null,
   });
 
   // sets: every pre-existing field untouched, new column added as null
@@ -103,7 +113,7 @@ test('migrating an existing v8 database to v10 preserves every pre-existing row 
     serving_team_id: null,
   });
 
-  // match_events: v9/v10 never touch this table — must be 100% unchanged
+  // match_events: no migration since v8 touches this table — must be 100% unchanged
   expect(tables.match_events[0]).toEqual(V8_EVENT_ROW);
 
   // substitution_pairs: every pre-existing field untouched, new column defaults to 0
@@ -111,19 +121,51 @@ test('migrating an existing v8 database to v10 preserves every pre-existing row 
     ...V8_SUBSTITUTION_PAIR_ROW,
     is_exceptional: 0,
   });
+
+  // teams: every pre-existing registered team keeps its name, gains coach_name = null
+  // and is_ad_hoc = 0 (so it keeps showing up in the team library as before)
+  expect(tables.teams[0]).toEqual({
+    ...V8_TEAM_ROW,
+    coach_name: null,
+    is_ad_hoc: 0,
+  });
 });
 
-test('a database already at v10 is a no-op (idempotent)', async () => {
+test('a database already at v12 is a no-op (idempotent)', async () => {
   const tables: Record<string, Row[]> = {
-    matches: [{ ...V8_MATCH_ROW, captain_home_id: 'P5', captain_away_id: null }],
+    matches: [{ ...V8_MATCH_ROW, captain_home_id: 'P5', captain_away_id: null, sides_swapped: 1, acting_captain_home_id: 'P6', acting_captain_away_id: null }],
+    teams: [{ ...V8_TEAM_ROW, is_ad_hoc: 1, coach_name: 'Coach Dupont' }],
   };
-  const db = new FakeMigrationDb(10, tables);
+  const db = new FakeMigrationDb(12, tables);
 
   await runMigrations(db as unknown as SQLite.SQLiteDatabase);
 
-  expect(db.userVersion).toBe(10);
-  // existing captain assignment from before must not be clobbered by a re-run
+  expect(db.userVersion).toBe(12);
+  // existing captain assignment, ad-hoc flag and referee state from before must not be clobbered by a re-run
   expect(tables.matches[0].captain_home_id).toBe('P5');
+  expect(tables.matches[0].sides_swapped).toBe(1);
+  expect(tables.matches[0].acting_captain_home_id).toBe('P6');
+  expect(tables.teams[0].is_ad_hoc).toBe(1);
+  expect(tables.teams[0].coach_name).toBe('Coach Dupont');
+});
+
+test('migrating an existing v11 database to v12 adds the referee-state columns', async () => {
+  const tables: Record<string, Row[]> = {
+    matches: [{ ...V8_MATCH_ROW, captain_home_id: 'P5', captain_away_id: null }],
+  };
+  const db = new FakeMigrationDb(11, tables);
+
+  await runMigrations(db as unknown as SQLite.SQLiteDatabase);
+
+  expect(db.userVersion).toBe(12);
+  expect(tables.matches[0]).toEqual({
+    ...V8_MATCH_ROW,
+    captain_home_id: 'P5',
+    captain_away_id: null,
+    sides_swapped: 0,
+    acting_captain_home_id: null,
+    acting_captain_away_id: null,
+  });
 });
 
 test('multiple pre-existing rows in the same table are all migrated', async () => {

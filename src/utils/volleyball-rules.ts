@@ -2,7 +2,8 @@ import type { MatchConfig, MatchFormat } from '../models/match';
 
 export function isSetWon(score: number, opponentScore: number, config: MatchConfig, isLastSet: boolean): boolean {
   const required = isLastSet ? config.pointsLastSet : config.pointsPerSet;
-  return score >= required && score - opponentScore >= 2;
+  const margin = config.winMargin ?? 2; // older stored configs predate this field
+  return score >= required && score - opponentScore >= margin;
 }
 
 export function isMatchWon(setsWon: number, config: MatchConfig): boolean {

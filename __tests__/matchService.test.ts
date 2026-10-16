@@ -3,7 +3,7 @@ jest.mock('../src/services/database', () => ({
   generateId: jest.fn(() => 'gen-id'),
 }));
 
-import { createSet, setMatchCaptains, getMatchById, getSetsForMatch } from '../src/services/matchService';
+import { createSet, setMatchCaptains, getMatchById, getSetsForMatch, setMatchRefereeState, getInProgressAdHocMatch, setFirstServeTeam } from '../src/services/matchService';
 import { getDb } from '../src/services/database';
 
 const mockGetDb = getDb as jest.Mock;
@@ -132,5 +132,80 @@ describe('getSetsForMatch', () => {
 
     const sets = await getSetsForMatch('m1');
     expect(sets[0].servingTeamId).toBeNull();
+  });
+});
+
+// ─── setFirstServeTeam — baseline for set 2-4 serve alternation ───────────
+
+describe('setFirstServeTeam', () => {
+  it('persists the given team id as first_serve_team_id', async () => {
+    const db = makeMockDb();
+    mockGetDb.mockResolvedValue(db);
+
+    await setFirstServeTeam('m1', 't2');
+
+    expect(db.runAsync).toHaveBeenCalledWith(
+      expect.stringContaining('first_serve_team_id'),
+      ['t2', 'm1'],
+    );
+  });
+});
+
+// ─── setMatchRefereeState — persists sides-swapped + acting captains ───────
+
+describe('setMatchRefereeState', () => {
+  it('persists sidesSwapped and both acting captains', async () => {
+    const db = makeMockDb();
+    mockGetDb.mockResolvedValue(db);
+
+    await setMatchRefereeState('m1', { sidesSwapped: true, actingCaptainHomeId: 'p3', actingCaptainAwayId: null });
+
+    expect(db.runAsync).toHaveBeenCalledWith(
+      expect.stringContaining('sides_swapped'),
+      [1, 'p3', null, 'm1'],
+    );
+  });
+
+  it('persists sidesSwapped=false as 0', async () => {
+    const db = makeMockDb();
+    mockGetDb.mockResolvedValue(db);
+
+    await setMatchRefereeState('m1', { sidesSwapped: false, actingCaptainHomeId: null, actingCaptainAwayId: null });
+
+    expect(db.runAsync).toHaveBeenCalledWith(
+      expect.stringContaining('sides_swapped'),
+      [0, null, null, 'm1'],
+    );
+  });
+});
+
+// ─── getInProgressAdHocMatch — resume detection on the home screen ─────────
+
+describe('getInProgressAdHocMatch', () => {
+  it('returns null when no ad-hoc match is in progress', async () => {
+    const db = makeMockDb();
+    mockGetDb.mockResolvedValue(db);
+
+    expect(await getInProgressAdHocMatch()).toBeNull();
+  });
+
+  it('maps the row into a Match, including the new referee-state fields', async () => {
+    const db = makeMockDb({
+      getFirstAsync: jest.fn().mockResolvedValue({
+        id: 'm1', date: '2026-01-01', format: 'indoor_6v6', mode: 'competition',
+        team_home_id: 't1', team_away_id: 't2', status: 'live', config_json: '{}',
+        winner_team_id: null, first_serve_team_id: null, captain_home_id: null, captain_away_id: null,
+        sides_swapped: 1, acting_captain_home_id: 'p9', acting_captain_away_id: null,
+        created_at: '2026-01-01', finished_at: null,
+      }),
+    });
+    mockGetDb.mockResolvedValue(db);
+
+    const match = await getInProgressAdHocMatch();
+
+    expect(match?.id).toBe('m1');
+    expect(match?.sidesSwapped).toBe(true);
+    expect(match?.actingCaptainHomeId).toBe('p9');
+    expect(db.getFirstAsync).toHaveBeenCalledWith(expect.stringContaining('is_ad_hoc'));
   });
 });

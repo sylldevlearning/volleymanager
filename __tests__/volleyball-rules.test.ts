@@ -41,6 +41,18 @@ describe('isSetWon', () => {
   it('wins beach set at 21 with 2-point lead', () => {
     expect(isSetWon(21, 19, DEFAULT_BEACH_CONFIG, false)).toBe(true);
   });
+
+  it('respects a custom winMargin (1-point lead allowed)', () => {
+    const casual = { ...DEFAULT_INDOOR_CONFIG, winMargin: 1 };
+    expect(isSetWon(25, 24, casual, false)).toBe(true);
+  });
+
+  it('falls back to a 2-point margin for older stored configs missing winMargin', () => {
+    const legacy = { ...DEFAULT_INDOOR_CONFIG } as Partial<typeof DEFAULT_INDOOR_CONFIG>;
+    delete legacy.winMargin;
+    expect(isSetWon(25, 24, legacy as typeof DEFAULT_INDOOR_CONFIG, false)).toBe(false);
+    expect(isSetWon(26, 24, legacy as typeof DEFAULT_INDOOR_CONFIG, false)).toBe(true);
+  });
 });
 
 describe('isMatchWon', () => {

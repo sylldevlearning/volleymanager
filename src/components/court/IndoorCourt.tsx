@@ -2,11 +2,13 @@ import { StyleSheet, Text, View, Pressable } from 'react-native';
 import Svg, { Line, Rect, Circle, Text as SvgText, G } from 'react-native-svg';
 import { palette } from '../../theme/tokens';
 
-interface PlayerInPosition {
+export interface PlayerInPosition {
   position: 1 | 2 | 3 | 4 | 5 | 6;
   name: string;
   number: number;
   isLibero?: boolean;
+  /** The player currently marked as captain on court (registered or acting stand-in). */
+  isCaptain?: boolean;
 }
 
 interface IndoorCourtProps {
@@ -15,6 +17,10 @@ interface IndoorCourtProps {
   onPositionPress?: (position: 1 | 2 | 3 | 4 | 5 | 6) => void;
   highlightServe?: boolean;
   width?: number;
+  /** Shows the shaded "ADVERSAIRE" half below the net — off when displaying two real teams side by side. */
+  showOpponentHalf?: boolean;
+  /** Shows the dashed 3m attack lines — off for a clean, minimal half-court (e.g. lineup entry). */
+  showAttackLines?: boolean;
 }
 
 // Volleyball court positions layout (from team's perspective, facing net)
@@ -29,12 +35,16 @@ const POSITION_COORDS: Record<number, { x: number; y: number }> = {
   6: { x: 0.5, y: 0.75 },  // Back center
 };
 
+const CIRCLE_RADIUS = 22;
+
 export function IndoorCourt({
   players = [],
   servingPosition,
   onPositionPress,
   highlightServe = true,
   width = 300,
+  showOpponentHalf = true,
+  showAttackLines = true,
 }: IndoorCourtProps) {
   const height = width * 0.6;
   const pad = 16;
@@ -60,36 +70,40 @@ export function IndoorCourt({
           strokeWidth={2}
         />
         {/* Attack lines (3m line) */}
-        <Line
-          x1={pad}
-          y1={pad + courtH * 0.25}
-          x2={pad + courtW}
-          y2={pad + courtH * 0.25}
-          stroke={palette.textMuted}
-          strokeWidth={1}
-          strokeDasharray="4,4"
-        />
-        <Line
-          x1={pad}
-          y1={pad + courtH * 0.75}
-          x2={pad + courtW}
-          y2={pad + courtH * 0.75}
-          stroke={palette.textMuted}
-          strokeWidth={1}
-          strokeDasharray="4,4"
-        />
+        {showAttackLines && (
+          <>
+            <Line
+              x1={pad}
+              y1={pad + courtH * 0.25}
+              x2={pad + courtW}
+              y2={pad + courtH * 0.25}
+              stroke={palette.textMuted}
+              strokeWidth={1}
+              strokeDasharray="4,4"
+            />
+            <Line
+              x1={pad}
+              y1={pad + courtH * 0.75}
+              x2={pad + courtW}
+              y2={pad + courtH * 0.75}
+              stroke={palette.textMuted}
+              strokeWidth={1}
+              strokeDasharray="4,4"
+            />
+          </>
+        )}
 
-        {/* Position slots */}
+        {/* Position slots (visuals only — touch handled by the Pressable overlay below) */}
         {([1, 2, 3, 4, 5, 6] as const).map((pos) => {
           const coord = POSITION_COORDS[pos];
           const cx = pad + coord.x * courtW;
           const cy = pad + coord.y * courtH;
           const player = playerMap.get(pos);
           const isServing = servingPosition === pos && highlightServe;
-          const r = 22;
+          const r = CIRCLE_RADIUS;
 
           return (
-            <React.Fragment key={pos}>
+            <G key={pos}>
               <Circle
                 cx={cx}
                 cy={cy}
@@ -108,7 +122,6 @@ export function IndoorCourt({
                     : palette.backgroundHover}
                 strokeWidth={isServing ? 2.5 : 1.5}
                 strokeDasharray={player?.isLibero ? '4 2' : undefined}
-                onPress={() => onPositionPress?.(pos)}
               />
               {player ? (
                 <SvgText
@@ -143,41 +156,73 @@ export function IndoorCourt({
                   <SvgText x={cx + r - 5} y={cy - r + 6} textAnchor="middle" alignmentBaseline="middle" fontSize={8} fontWeight="700" fill="#fff">L</SvgText>
                 </G>
               )}
-            </React.Fragment>
+              {player?.isCaptain && (
+                <G>
+                  <Circle cx={cx - r + 5} cy={cy - r + 5} r={7} fill={palette.warning} />
+                  <SvgText x={cx - r + 5} y={cy - r + 6} textAnchor="middle" alignmentBaseline="middle" fontSize={8} fontWeight="700" fill="#0D1117">C</SvgText>
+                </G>
+              )}
+            </G>
           );
         })}
 
         {/* Opponent side (simplified) */}
-        <Rect
-          x={pad}
-          y={pad}
-          width={courtW}
-          height={courtH / 2 - 2}
-          fill={palette.backgroundSurface}
-          rx={8}
-          opacity={0.5}
-        />
-        <SvgText
-          x={pad + courtW / 2}
-          y={pad + courtH / 4}
-          textAnchor="middle"
-          alignmentBaseline="middle"
-          fontSize={12}
-          fill={palette.textMuted}
-        >
-          ADVERSAIRE
-        </SvgText>
+        {showOpponentHalf && (
+          <>
+            <Rect
+              x={pad}
+              y={pad}
+              width={courtW}
+              height={courtH / 2 - 2}
+              fill={palette.backgroundSurface}
+              rx={8}
+              opacity={0.5}
+            />
+            <SvgText
+              x={pad + courtW / 2}
+              y={pad + courtH / 4}
+              textAnchor="middle"
+              alignmentBaseline="middle"
+              fontSize={12}
+              fill={palette.textMuted}
+            >
+              ADVERSAIRE
+            </SvgText>
+          </>
+        )}
       </Svg>
+
+      {/* Touch overlay — plain RN Pressables for reliable single-tap hit-testing
+          (SVG shape onPress can require a second tap on some devices). */}
+      {onPositionPress && ([1, 2, 3, 4, 5, 6] as const).map((pos) => {
+        const coord = POSITION_COORDS[pos];
+        const cx = pad + coord.x * courtW;
+        const cy = pad + coord.y * courtH;
+        return (
+          <Pressable
+            key={pos}
+            onPress={() => onPositionPress(pos)}
+            style={[
+              styles.touchTarget,
+              { left: cx - CIRCLE_RADIUS, top: cy - CIRCLE_RADIUS, width: CIRCLE_RADIUS * 2, height: CIRCLE_RADIUS * 2 },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel={`P${pos}`}
+          />
+        );
+      })}
     </View>
   );
 }
-
-// Import React for Fragment
-import React from 'react';
 
 const styles = StyleSheet.create({
   container: {
     borderRadius: 12,
     overflow: 'hidden',
+    position: 'relative',
+  },
+  touchTarget: {
+    position: 'absolute',
+    borderRadius: 999,
   },
 });

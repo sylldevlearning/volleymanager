@@ -1,8 +1,8 @@
 import type { Player } from '../models/player';
 import type { MatchConfig } from '../models/match';
-import type { SubstitutionPair } from '../models/substitution';
+import type { SubstitutionPair, LiberoState } from '../models/substitution';
 import type { MatchEvent } from '../models/event';
-import { isBackRow } from './substitutionRules';
+import { isBackRow, canLiberoEnter } from './substitutionRules';
 import { isPlayerExpelled, isPlayerDisqualified } from './sanctionRules';
 
 export type RuleCode =
@@ -16,6 +16,7 @@ export type RuleCode =
   | 'sub_libero_not_allowed'
   | 'libero_front_row'
   | 'libero_rally_required'
+  | 'libero_other_active'
   | 'timeout_quota_reached';
 
 export interface RuleViolation {
@@ -183,6 +184,24 @@ export function checkLiberoRallySinceLastReplacement(
     );
   }
   return { ok: true };
+}
+
+/**
+ * Only one registered libero may be on court at a time — blocks bringing in
+ * a libero while a DIFFERENT one is already active (no direct L1<->L2 swap).
+ */
+export function checkLiberoNotAlreadyActive(
+  enteringLiberoId: string,
+  /** Jersey number of the libero CURRENTLY on court (used in the message if blocked). */
+  activeLiberoNumber: number,
+  activeLibero: LiberoState | null,
+): RuleResult {
+  if (canLiberoEnter(enteringLiberoId, activeLibero)) return { ok: true };
+  return violation(
+    'libero_other_active',
+    `Le libéro n°${activeLiberoNumber} est déjà sur le terrain.`,
+    { number: activeLiberoNumber },
+  );
 }
 
 export function validateTimeoutRequest(used: number, config: MatchConfig, teamName: string): RuleResult {

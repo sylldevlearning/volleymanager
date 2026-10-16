@@ -82,6 +82,48 @@ test('does not cascade a non-sanction event even if it happens to carry a pointE
   expect(result).toEqual({ cancelledEventId: 'sub-1', linkedCancelledEventId: null });
 });
 
+test('undoing a substitution event also cancels its linked substitution_pairs row', async () => {
+  const db = makeMockDb({
+    id: 'sub-2',
+    event_type: 'substitution_home',
+    details_json: JSON.stringify({ playerOutId: 'P4', position: 1, pairId: 'pair-7', isLibero: false, isExceptional: false, isAutomatic: false }),
+  });
+  mockGetDb.mockResolvedValue(db);
+
+  await undoLastEvent('m1', 's1');
+
+  expect(db.runAsync).toHaveBeenCalledWith(
+    'UPDATE substitution_pairs SET is_cancelled = 1 WHERE id = ?',
+    ['pair-7'],
+  );
+});
+
+test('undoing a substitution_away event also cancels its pair', async () => {
+  const db = makeMockDb({
+    id: 'sub-3',
+    event_type: 'substitution_away',
+    details_json: JSON.stringify({ playerOutId: 'P9', position: 6, pairId: 'pair-8', isLibero: true, isAutomatic: true }),
+  });
+  mockGetDb.mockResolvedValue(db);
+
+  await undoLastEvent('m1', 's1');
+
+  expect(db.runAsync).toHaveBeenCalledWith(
+    'UPDATE substitution_pairs SET is_cancelled = 1 WHERE id = ?',
+    ['pair-8'],
+  );
+});
+
+test('undoing a point event does not touch substitution_pairs', async () => {
+  const db = makeMockDb({ id: 'pt-9', event_type: 'point_home', details_json: '{}' });
+  mockGetDb.mockResolvedValue(db);
+
+  await undoLastEvent('m1', 's1');
+
+  const pairCalls = db.runAsync.mock.calls.filter(([sql]) => String(sql).includes('substitution_pairs'));
+  expect(pairCalls).toHaveLength(0);
+});
+
 test('wraps the cascading cancels + undo insert in a single transaction', async () => {
   const db = makeMockDb({
     id: 'sanction-3',

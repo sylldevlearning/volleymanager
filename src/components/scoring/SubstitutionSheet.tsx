@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Modal, Pressable, ScrollView, StyleSheet, Text, View,
 } from 'react-native';
@@ -8,8 +8,17 @@ import type { Player } from '../../models/player';
 import type { CourtMap } from '../../stores/scoringStore';
 import type { LiberoState, SubstitutionPair } from '../../models/substitution';
 import type { MatchConfig, MatchFormat } from '../../models/match';
+import type { MatchEvent } from '../../models/event';
 import { palette } from '../../theme/tokens';
 import { validateSubstitution, validateLiberoSubstitution } from '../../utils/substitutionRules';
+import {
+  validateRegularSubstitution,
+  validateLiberoSubstitution as strictValidateLiberoSubstitution,
+  checkLiberoRallySinceLastReplacement,
+  checkLiberoNotAlreadyActive,
+  getExceptionalSubstitutionEligibility,
+  type RuleViolation,
+} from '../../utils/rulesValidator';
 import { InfoTooltip } from '../ui/InfoTooltip';
 
 const LIBERO_COLOR = palette.libero;
@@ -34,7 +43,18 @@ interface SubstitutionSheetProps {
     playerInId: string;
     position: number;
     isLibero: boolean;
+    isExceptional?: boolean;
   }) => void;
+  /** Strict FFVolley validation (rulesValidator) instead of the permissive default — used by the arbitrage screen. */
+  strict?: boolean;
+  /** Required when strict: this set's events, used for the libero "one rally between replacements" rule. */
+  setEvents?: MatchEvent[];
+  /** Real sanction events, used by rulesValidator to block expelled/disqualified players (strict mode only). */
+  sanctionEventsForSet?: MatchEvent[];
+  sanctionEventsForMatch?: MatchEvent[];
+  /** Pre-selects this on-court player as "out" when the sheet opens (e.g. tapped directly on the court). */
+  initialOutId?: string | null;
+  initialOutPosition?: number | null;
 }
 
 type Step = 'selectOut' | 'selectIn';
@@ -43,12 +63,32 @@ export function SubstitutionSheet({
   visible, onClose, side, teamName, teamColor,
   allPlayers, onCourt, bench, libero, pairs,
   subsUsed, config, format, mode, onConfirm,
+  strict = false, setEvents = [],
+  sanctionEventsForSet = [], sanctionEventsForMatch = [],
+  initialOutId = null, initialOutPosition = null,
 }: SubstitutionSheetProps) {
   const { t } = useTranslation();
   const [playerOutId, setPlayerOutId] = useState<string | null>(null);
   const [playerOutPos, setPlayerOutPos] = useState<number | null>(null);
   const [playerInId, setPlayerInId] = useState<string | null>(null);
   const [step, setStep] = useState<Step>('selectOut');
+
+  // When opened by tapping a player directly on the court, skip straight to
+  // choosing who enters for them.
+  useEffect(() => {
+    if (visible && initialOutId && initialOutPosition !== null) {
+      setPlayerOutId(initialOutId);
+      setPlayerOutPos(initialOutPosition);
+      setPlayerInId(null);
+      setStep('selectIn');
+    } else if (visible) {
+      setPlayerOutId(null);
+      setPlayerOutPos(null);
+      setPlayerInId(null);
+      setStep('selectOut');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible, initialOutId, initialOutPosition]);
 
   const playerMap = useMemo(
     () => new Map(allPlayers.map((p) => [p.id, p])),
@@ -87,17 +127,75 @@ export function SubstitutionSheet({
     setPlayerInId(playerId);
   }
 
+  const outPlayer = playerOutId ? playerMap.get(playerOutId) ?? null : null;
+
+  /** Strict mode only: the full violation (with allowExceptional) for a candidate entering for playerOutId. */
+  function getPlayerInViolation(playerId: string): RuleViolation | null {
+    if (!playerOutId || playerOutPos === null) return null;
+    const player = playerMap.get(playerId);
+    const isLiberoSub = player?.position === 'libero';
+
+    if (isLiberoSub && player) {
+      const activeLiberoNumber = libero ? playerMap.get(libero.liberoId)?.number ?? 0 : 0;
+      const activeCheck = checkLiberoNotAlreadyActive(player.id, activeLiberoNumber, libero);
+      if (!activeCheck.ok) return activeCheck;
+      const rowCheck = strictValidateLiberoSubstitution(playerOutPos);
+      if (!rowCheck.ok) return rowCheck;
+      const rallyCheck = checkLiberoRallySinceLastReplacement(setEvents, side);
+      if (!rallyCheck.ok) return rallyCheck;
+      return null;
+    }
+    if (!outPlayer || !player) return null;
+    const onCourtPlayerIds = Object.values(onCourt);
+    const result = validateRegularSubstitution({
+      playerOut: outPlayer,
+      playerIn: player,
+      allPlayers,
+      pairs,
+      subsUsed,
+      config,
+      onCourtPlayerIds,
+      sanctionEventsForSet,
+      sanctionEventsForMatch,
+    });
+    return result.ok ? null : result;
+  }
+
+  // When the player leaving can't be legally replaced by ANY bench candidate,
+  // the referee may force an exceptional (injury) substitution for whichever
+  // candidate they pick, bypassing quota/reciprocity — never for a libero swap.
+  const exceptionalEligibility = (() => {
+    if (!strict || !outPlayer || outPlayer.position === 'libero' || format === 'beach_2v2') return { eligible: false };
+    const benchCandidates = bench.filter((p) => p.position !== 'libero');
+    return getExceptionalSubstitutionEligibility(outPlayer, benchCandidates, {
+      allPlayers, pairs, subsUsed, config,
+      onCourtPlayerIds: Object.values(onCourt),
+      sanctionEventsForSet, sanctionEventsForMatch,
+    });
+  })();
+
+  const selectedViolation = (strict && playerInId) ? getPlayerInViolation(playerInId) : null;
+  const selectedIsExceptional = strict && exceptionalEligibility.eligible && selectedViolation?.allowExceptional === true;
+
   function handleConfirm() {
     if (!playerOutId || !playerInId || playerOutPos === null) return;
-    const isLiberoSwap = libero?.liberoId === playerInId || libero?.liberoId === playerOutId;
-    onConfirm({ playerOutId, playerInId, position: playerOutPos, isLibero: isLiberoSwap });
+    const inPlayer = playerMap.get(playerInId);
+    const isLiberoSwap = outPlayer?.position === 'libero' || inPlayer?.position === 'libero';
+    onConfirm({ playerOutId, playerInId, position: playerOutPos, isLibero: isLiberoSwap, isExceptional: selectedIsExceptional });
     resetState();
     onClose();
   }
 
   function getPlayerInError(playerId: string): string | null {
     if (!playerOutId || playerOutPos === null) return null;
-    const isLiberoSub = libero?.liberoId === playerId;
+    const player = playerMap.get(playerId);
+    const isLiberoSub = player?.position === 'libero';
+
+    if (strict) {
+      const violation = getPlayerInViolation(playerId);
+      return violation ? violation.message : null;
+    }
+
     if (isLiberoSub) {
       const r = validateLiberoSubstitution(playerOutPos, format);
       if (!r.ok) return t(`substitution.libero.backRowOnly`);
@@ -113,10 +211,10 @@ export function SubstitutionSheet({
   }
 
   const canConfirm = playerOutId && playerInId && playerOutPos !== null
-    && getPlayerInError(playerInId) === null;
+    && (getPlayerInError(playerInId) === null || selectedIsExceptional);
 
-  const isLiberoOnCourt = libero?.isOnCourt;
-  const liberoPlayer = libero ? playerMap.get(libero.liberoId) : null;
+  // Liberos still on the bench — up to 2 registered liberos (the active one, if any, is shown on court instead).
+  const benchLiberos = bench.filter((p) => p.position === 'libero');
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
@@ -193,21 +291,24 @@ export function SubstitutionSheet({
               <>
                 <Text style={[subStyles.sectionTitle, { marginTop: 16 }]}>{t('substitution.bench')}</Text>
 
-                {/* Libero (special row if on bench) */}
-                {liberoPlayer && !isLiberoOnCourt && (
+                {/* Libero(s) on the bench — special row(s); up to 2 registered liberos */}
+                {benchLiberos.map((lp) => (
                   <LiberoRow
-                    player={liberoPlayer}
-                    isSelected={playerInId === liberoPlayer.id}
-                    error={playerOutPos !== null ? getPlayerInError(liberoPlayer.id) : null}
-                    onPress={() => handleSelectIn(liberoPlayer.id)}
+                    key={lp.id}
+                    player={lp}
+                    isSelected={playerInId === lp.id}
+                    error={playerOutPos !== null ? getPlayerInError(lp.id) : null}
+                    onPress={() => handleSelectIn(lp.id)}
                   />
-                )}
+                ))}
 
                 {/* Normal bench players */}
                 {bench
-                  .filter((p) => p.id !== libero?.liberoId)
+                  .filter((p) => p.position !== 'libero')
                   .map((p) => {
-                    const err = getPlayerInError(p.id);
+                    const violation = strict ? getPlayerInViolation(p.id) : null;
+                    const err = strict ? (violation?.message ?? null) : getPlayerInError(p.id);
+                    const bypassable = strict && exceptionalEligibility.eligible && violation?.allowExceptional === true;
                     const isIn = playerInId === p.id;
                     return (
                       <BenchRow
@@ -216,12 +317,13 @@ export function SubstitutionSheet({
                         teamColor={teamColor}
                         isSelected={isIn}
                         error={err}
-                        onPress={err ? undefined : () => handleSelectIn(p.id)}
+                        exceptional={bypassable}
+                        onPress={(err && !bypassable) ? undefined : () => handleSelectIn(p.id)}
                       />
                     );
                   })}
 
-                {bench.filter((p) => p.id !== libero?.liberoId).length === 0 && !liberoPlayer && (
+                {bench.length === 0 && (
                   <Text style={subStyles.emptyBench}>{t('team.noPlayers')}</Text>
                 )}
               </>
@@ -232,11 +334,17 @@ export function SubstitutionSheet({
         {/* Confirm */}
         {canConfirm && (
           <Pressable
-            style={({ pressed }) => [subStyles.confirmBtn, pressed && { opacity: 0.8 }]}
+            style={({ pressed }) => [
+              subStyles.confirmBtn,
+              selectedIsExceptional && subStyles.confirmBtnExceptional,
+              pressed && { opacity: 0.8 },
+            ]}
             onPress={handleConfirm}
             accessibilityRole="button"
           >
-            <Text style={subStyles.confirmText}>{t('substitution.confirm')}</Text>
+            <Text style={subStyles.confirmText}>
+              {selectedIsExceptional ? t('substitution.exceptional') : t('substitution.confirm')}
+            </Text>
           </Pressable>
         )}
       </View>
@@ -268,25 +376,40 @@ function LiberoRow({
 }
 
 function BenchRow({
-  player, teamColor, isSelected, error, onPress,
-}: { player: Player; teamColor: string; isSelected: boolean; error: string | null; onPress?: () => void }) {
+  player, teamColor, isSelected, error, exceptional, onPress,
+}: {
+  player: Player;
+  teamColor: string;
+  isSelected: boolean;
+  error: string | null;
+  /** True when this blocked candidate can still be chosen via "Remplacement exceptionnel". */
+  exceptional?: boolean;
+  onPress?: () => void;
+}) {
+  const { t } = useTranslation();
+  const blocked = !!error && !exceptional;
   return (
     <Pressable
       style={[subStyles.benchRow,
         isSelected && [subStyles.benchRowSelected, { borderColor: teamColor, backgroundColor: teamColor + '15' }],
-        !!error && subStyles.benchRowDisabled]}
+        blocked && subStyles.benchRowDisabled,
+        !!error && exceptional && subStyles.benchRowExceptional]}
       onPress={onPress}
       accessibilityRole="radio"
-      accessibilityState={{ selected: isSelected, disabled: !!error }}
+      accessibilityState={{ selected: isSelected, disabled: blocked }}
     >
       <Text style={[subStyles.benchNum, { color: isSelected ? teamColor : palette.textSecondary }]}>
         #{player.number}
       </Text>
-      <Text style={[subStyles.benchName, !!error && { color: palette.textMuted }]} numberOfLines={1}>
+      <Text style={[subStyles.benchName, blocked && { color: palette.textMuted }]} numberOfLines={1}>
         {player.lastName ?? player.firstName ?? `#${player.number}`}
         {player.position === 'libero' ? ' ⚡' : ''}
       </Text>
-      {error && <Text style={subStyles.benchError} numberOfLines={1}>{error}</Text>}
+      {error && (
+        <Text style={[subStyles.benchError, exceptional && subStyles.benchErrorExceptional]} numberOfLines={1}>
+          {exceptional ? t('substitution.exceptionalHint') : error}
+        </Text>
+      )}
     </Pressable>
   );
 }
@@ -396,9 +519,11 @@ const subStyles = StyleSheet.create({
   },
   benchRowSelected: { backgroundColor: palette.accentPrimaryMuted },
   benchRowDisabled: { opacity: 0.4 },
+  benchRowExceptional: { borderColor: palette.warning, borderStyle: 'dashed' },
   benchNum: { fontSize: 16, fontFamily: 'Inter_700Bold', width: 36 },
   benchName: { flex: 1, fontSize: 14, fontFamily: 'Inter_500Medium', color: palette.textPrimary },
   benchError: { fontSize: 11, fontFamily: 'Inter_400Regular', color: palette.error },
+  benchErrorExceptional: { color: palette.warning, fontFamily: 'Inter_600SemiBold' },
   liberoTag: {
     backgroundColor: LIBERO_COLOR + '30',
     paddingHorizontal: 6,
@@ -415,5 +540,6 @@ const subStyles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: 'center',
   },
+  confirmBtnExceptional: { backgroundColor: palette.warning },
   confirmText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: '#fff' },
 });

@@ -23,3 +23,8 @@ export const V8_SUBSTITUTION_PAIR_ROW = {
   id: 'p1', match_id: 'm1', set_id: 's1', team_id: 't1',
   player_out_id: 'P1', player_in_id: 'P2', is_libero: 0, is_cancelled: 0,
 };
+
+export const V8_TEAM_ROW = {
+  id: 't1', name: 'Les Aigles', short_name: 'AIG', logo_uri: null, color: '#1D4ED8',
+  created_at: '2026-01-01', updated_at: '2026-01-01',
+};

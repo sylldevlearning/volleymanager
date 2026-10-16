@@ -69,8 +69,11 @@ export async function undoLastEvent(matchId: string, setId: string): Promise<Und
   const eventType = last.event_type as string;
   const details = JSON.parse((last.details_json as string) || '{}') as Record<string, unknown>;
   const isSanction = eventType === 'sanction_home' || eventType === 'sanction_away';
+  const isSubstitution = eventType === 'substitution_home' || eventType === 'substitution_away';
   const linkedCancelledEventId: string | null =
     isSanction && details.awardsPoint && typeof details.pointEventId === 'string' ? details.pointEventId : null;
+  const linkedPairId: string | null =
+    isSubstitution && typeof details.pairId === 'string' ? details.pairId : null;
 
   await db.withExclusiveTransactionAsync(async () => {
     await db.runAsync(
@@ -81,6 +84,16 @@ export async function undoLastEvent(matchId: string, setId: string): Promise<Und
       await db.runAsync(
         'UPDATE match_events SET is_cancelled = 1 WHERE id = ?',
         [linkedCancelledEventId]
+      );
+    }
+    if (linkedPairId) {
+      // Cancelling a substitution must also free up its substitution_pairs row —
+      // otherwise reciprocity/quota checks would keep treating the undone swap
+      // as still having happened. Inlined (not substitutionService.cancelPair)
+      // to avoid a circular import — that module already imports from this one.
+      await db.runAsync(
+        'UPDATE substitution_pairs SET is_cancelled = 1 WHERE id = ?',
+        [linkedPairId]
       );
     }
     await addEvent({

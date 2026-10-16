@@ -4,8 +4,13 @@ export interface Team {
   shortName: string | null;
   logoUri: string | null;
   color: string;
+  coachName: string | null;
+  /** True for a team created just for a single arbitrage match — hidden from the team library. */
+  isAdHoc: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
-export type TeamInput = Omit<Team, 'id' | 'createdAt' | 'updatedAt'>;
+export type TeamInput = Omit<Team, 'id' | 'createdAt' | 'updatedAt' | 'isAdHoc' | 'coachName'> & {
+  coachName?: string | null;
+};

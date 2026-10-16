@@ -10,6 +10,11 @@ export interface MatchConfig {
   substitutionsPerSet: number | null;
   unlimitedTimeouts: boolean;
   unlimitedSubstitutions: boolean;
+  /** Point lead required to win a set (FIVB = 2). */
+  winMargin: number;
+  timeoutDurationSec: number;
+  breakBetweenSetsSec: number;
+  sanctionsEnabled: boolean;
 }
 
 export const DEFAULT_INDOOR_CONFIG: MatchConfig = {
@@ -20,6 +25,10 @@ export const DEFAULT_INDOOR_CONFIG: MatchConfig = {
   substitutionsPerSet: 6,
   unlimitedTimeouts: false,
   unlimitedSubstitutions: false,
+  winMargin: 2,
+  timeoutDurationSec: 30,
+  breakBetweenSetsSec: 180,
+  sanctionsEnabled: true,
 };
 
 export const DEFAULT_BEACH_CONFIG: MatchConfig = {
@@ -30,6 +39,10 @@ export const DEFAULT_BEACH_CONFIG: MatchConfig = {
   substitutionsPerSet: null,
   unlimitedTimeouts: false,
   unlimitedSubstitutions: true,
+  winMargin: 2,
+  timeoutDurationSec: 30,
+  breakBetweenSetsSec: 60,
+  sanctionsEnabled: true,
 };
 
 export const DEFAULT_LEISURE_CONFIG: MatchConfig = {
@@ -40,6 +53,10 @@ export const DEFAULT_LEISURE_CONFIG: MatchConfig = {
   substitutionsPerSet: null,
   unlimitedTimeouts: true,
   unlimitedSubstitutions: true,
+  winMargin: 2,
+  timeoutDurationSec: 30,
+  breakBetweenSetsSec: 180,
+  sanctionsEnabled: false,
 };
 
 export interface Match {
@@ -55,6 +72,11 @@ export interface Match {
   firstServeTeamId: string | null;
   captainHomeId: string | null;
   captainAwayId: string | null;
+  /** Visual side (left/right) swap toggled by the referee — persisted so a resumed match redraws identically. */
+  sidesSwapped: boolean;
+  /** In-game acting captain stand-in while the registered captain is off court — persisted per side. */
+  actingCaptainHomeId: string | null;
+  actingCaptainAwayId: string | null;
   createdAt: string;
   finishedAt: string | null;
 }

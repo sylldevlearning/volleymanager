@@ -31,8 +31,17 @@
     "tacticalDesc": "Dessine des schémas, anime les déplacements",
     "quickMatch": "Match rapide",
     "quickMatchDesc": "France vs Brésil • Indoor 6×6 • Loisir",
+    "arbitrage": "Arbitrage",
+    "arbitrageDesc": "Match autonome, équipes saisies librement",
     "backToMenu": "Retour au menu",
-    "quitMatch": "Quitter le match ?"
+    "quitMatch": "Quitter le match ?",
+    "arbitrageResumeTitle": "Match d'arbitrage en cours",
+    "arbitrageResumeMessage": "Un match d'arbitrage n'est pas encore terminé.",
+    "arbitrageResume": "Reprendre le match en cours",
+    "arbitrageNewMatch": "Nouveau match",
+    "arbitrageAbandonConfirmTitle": "Abandonner le match en cours ?",
+    "arbitrageAbandonConfirmMessage": "Le match en cours sera marqué comme terminé et ne pourra plus être repris.",
+    "arbitrageAbandonConfirm": "Abandonner"
   },
   "tabs": {
     "home": "Accueil",
@@ -61,6 +70,7 @@
     "firstService": "Premier service",
     "coach": "Coach",
     "stats": "Stats",
+    "arbitrage": "Arbitrage",
     "set": "Set",
     "sets": "Sets",
     "point": "Point",
@@ -129,6 +139,60 @@
       "blockFault": "F. block",
       "defenseFault": "F. défense"
     }
+  },
+  "arbitrage": {
+    "title": "Arbitrage",
+    "exitLibero": "Sortir le libéro",
+    "exitLiberoConfirm": "Le n°{{number}} reprend sa place sur le terrain.",
+    "ruleViolation": "Action non autorisée",
+    "serveChoiceTitle": "Qui sert en premier ?",
+    "set5Title": "Set décisif (5e set)",
+    "changeEndsHint": "Appuyez sur les flèches ⇄ pour inverser l'affichage des équipes.",
+    "recapButton": "Récap remplacements",
+    "recapTitle": "Récapitulatif des remplacements",
+    "recapEmpty": "Aucun remplacement pour l'instant.",
+    "recapLiberoIn": "entre pour",
+    "recapLiberoOut": "sort pour",
+    "captainPickerTitle": "Le capitaine sort du terrain — désignez le capitaine en jeu",
+    "lineupTitle": "Alignement de départ",
+    "lineupFor": "Alignement — {{team}}",
+    "tapPosition": "Touchez une position pour y placer un joueur",
+    "positionLabel": "Position {{position}}",
+    "choosePlayer": "Choisir un joueur",
+    "validateLineup": "Valider l'alignement",
+    "clearPosition": "Vider la position"
+  },
+  "arbitrageSetup": {
+    "title": "Configuration du match",
+    "tabHome": "Domicile",
+    "tabAway": "Extérieur",
+    "tabRules": "Règles",
+    "teamName": "Nom de l'équipe",
+    "teamNamePlaceholder": "Ex: Domicile",
+    "jerseyColor": "Couleur du maillot",
+    "coachName": "Entraîneur",
+    "coachNamePlaceholder": "Nom (optionnel)",
+    "selectNumbers": "Numéros de maillot",
+    "selectedPlayers": "Joueurs sélectionnés",
+    "playerNamePlaceholder": "Nom (optionnel)",
+    "captain": "Capitaine",
+    "libero": "Libéro",
+    "noPlayersSelected": "Touchez des numéros ci-dessus pour composer l'effectif.",
+    "rulesPreset": "Préréglage FIVB — modifiable",
+    "setsToWin": "Sets gagnants",
+    "pointsPerSet": "Points par set",
+    "pointsLastSet": "Points au tie-break",
+    "winMarginToggle": "Écart de 2 points requis",
+    "timeoutsPerSet": "Temps morts par set",
+    "timeoutDuration": "Durée d'un temps mort",
+    "breakBetweenSets": "Pause entre les sets",
+    "substitutionsPerSet": "Remplacements par set",
+    "sanctionsEnabled": "Sanctions activées",
+    "startMatch": "Démarrer le match",
+    "fixErrors": "Corrigez ces points avant de démarrer :",
+    "confirmStart": "Confirmer le lancement du match ?",
+    "seconds": "s",
+    "minutes": "min"
   },
   "team": {
     "new": "Nouvelle équipe",
@@ -411,7 +475,24 @@
     },
     "beach": {
       "noSubstitution": "Pas de remplacement en beach volley"
-    }
+    },
+    "exceptional": "Remplacement exceptionnel",
+    "exceptionalHint": "Blessure — aucune autre solution légale n'est disponible"
+  },
+  "sanction": {
+    "button": "Carton",
+    "title": "Sanction",
+    "target": "Cible",
+    "staff": "Staff / Entraîneur",
+    "type": "Type de sanction",
+    "types": {
+      "warning": "Avertissement",
+      "penalty": "Pénalité",
+      "expulsion": "Expulsion",
+      "disqualification": "Disqualification",
+      "delay": "Retard de jeu"
+    },
+    "confirm": "Confirmer la sanction"
   },
   "settings": {
     "title": "Paramètres",

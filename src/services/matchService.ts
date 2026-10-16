@@ -15,6 +15,9 @@ function rowToMatch(row: Record<string, unknown>): Match {
     firstServeTeamId: row.first_serve_team_id as string | null ?? null,
     captainHomeId: (row.captain_home_id as string | null) ?? null,
     captainAwayId: (row.captain_away_id as string | null) ?? null,
+    sidesSwapped: Boolean(row.sides_swapped),
+    actingCaptainHomeId: (row.acting_captain_home_id as string | null) ?? null,
+    actingCaptainAwayId: (row.acting_captain_away_id as string | null) ?? null,
     createdAt: row.created_at as string,
     finishedAt: row.finished_at as string | null,
   };
@@ -83,6 +86,9 @@ export async function createMatch(input: MatchInput): Promise<Match> {
     firstServeTeamId,
     captainHomeId: null,
     captainAwayId: null,
+    sidesSwapped: false,
+    actingCaptainHomeId: null,
+    actingCaptainAwayId: null,
     createdAt: now,
     finishedAt: null,
   };
@@ -98,6 +104,52 @@ export async function setMatchCaptains(
     'UPDATE matches SET captain_home_id = ?, captain_away_id = ? WHERE id = ?',
     [captainHomeId, captainAwayId, matchId]
   );
+}
+
+/**
+ * Persists which team served first in set 1 — the baseline the auto-resolved
+ * serving alternation for sets 2-4 is computed from. Set without this, the
+ * referee's manual set-1 serve choice would never actually take effect.
+ */
+export async function setFirstServeTeam(matchId: string, teamId: string): Promise<void> {
+  const db = await getDb();
+  await db.runAsync(
+    'UPDATE matches SET first_serve_team_id = ? WHERE id = ?',
+    [teamId, matchId]
+  );
+}
+
+/**
+ * Persists referee-only screen state (visual side swap, in-game acting
+ * captains) that would otherwise be lost on app restart — the only pieces of
+ * the live arbitrage screen that aren't already derivable from match_events.
+ */
+export async function setMatchRefereeState(
+  matchId: string,
+  state: { sidesSwapped: boolean; actingCaptainHomeId: string | null; actingCaptainAwayId: string | null },
+): Promise<void> {
+  const db = await getDb();
+  await db.runAsync(
+    'UPDATE matches SET sides_swapped = ?, acting_captain_home_id = ?, acting_captain_away_id = ? WHERE id = ?',
+    [state.sidesSwapped ? 1 : 0, state.actingCaptainHomeId, state.actingCaptainAwayId, matchId]
+  );
+}
+
+/**
+ * The most recent ad-hoc (standalone arbitrage) match that isn't finished yet
+ * — used by the home screen to offer "resume" instead of silently starting a
+ * second one.
+ */
+export async function getInProgressAdHocMatch(): Promise<Match | null> {
+  const db = await getDb();
+  const row = await db.getFirstAsync<Record<string, unknown>>(
+    `SELECT m.* FROM matches m
+     JOIN teams t ON t.id = m.team_home_id
+     WHERE t.is_ad_hoc = 1 AND m.status IN ('live', 'paused')
+     ORDER BY m.created_at DESC
+     LIMIT 1`
+  );
+  return row ? rowToMatch(row) : null;
 }
 
 export async function updateMatchStatus(

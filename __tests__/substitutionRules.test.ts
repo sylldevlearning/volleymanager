@@ -18,6 +18,10 @@ const BASE_CONFIG: MatchConfig = {
   substitutionsPerSet: 6,
   unlimitedTimeouts: false,
   unlimitedSubstitutions: false,
+  winMargin: 2,
+  timeoutDurationSec: 30,
+  breakBetweenSetsSec: 180,
+  sanctionsEnabled: true,
 };
 
 const LEISURE_CONFIG: MatchConfig = {

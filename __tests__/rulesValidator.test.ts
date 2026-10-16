@@ -2,12 +2,13 @@ import {
   validateRegularSubstitution,
   validateLiberoSubstitution,
   checkLiberoRallySinceLastReplacement,
+  checkLiberoNotAlreadyActive,
   validateTimeoutRequest,
   getExceptionalSubstitutionEligibility,
   type RegularSubstitutionContext,
 } from '../src/utils/rulesValidator';
 import type { Player } from '../src/models/player';
-import type { SubstitutionPair } from '../src/models/substitution';
+import type { SubstitutionPair, LiberoState } from '../src/models/substitution';
 import type { MatchConfig } from '../src/models/match';
 import type { MatchEvent } from '../src/models/event';
 
@@ -19,6 +20,10 @@ const BASE_CONFIG: MatchConfig = {
   substitutionsPerSet: 6,
   unlimitedTimeouts: false,
   unlimitedSubstitutions: false,
+  winMargin: 2,
+  timeoutDurationSec: 30,
+  breakBetweenSetsSec: 180,
+  sanctionsEnabled: true,
 };
 
 function player(id: string, number: number, position: Player['position'] = 'outside'): Player {
@@ -243,6 +248,27 @@ test('libero_rally_required: allowed when no libero replacement happened yet thi
 test('libero_rally_required: a cancelled libero replacement does not count', () => {
   const events = [subEvent({ eventType: 'substitution_home', isCancelled: true, details: { isLibero: true } })];
   expect(checkLiberoRallySinceLastReplacement(events, 'home').ok).toBe(true);
+});
+
+// ─── Libero — only one active at a time (2-libero support) ────────────────
+
+test('libero_other_active: blocked when a DIFFERENT libero is already on court', () => {
+  const active: LiberoState = { liberoId: 'L1', isOnCourt: true, replacedPlayerId: 'A5', replacedPosition: 5 };
+  const result = checkLiberoNotAlreadyActive('L2', 12, active);
+  expect(result.ok).toBe(false);
+  if (!result.ok) {
+    expect(result.code).toBe('libero_other_active');
+    expect(result.message).toBe('Le libéro n°12 est déjà sur le terrain.');
+  }
+});
+
+test('libero_other_active: allowed when no libero is currently active', () => {
+  expect(checkLiberoNotAlreadyActive('L2', 12, null).ok).toBe(true);
+});
+
+test('libero_other_active: allowed when re-selecting the SAME libero that is active', () => {
+  const active: LiberoState = { liberoId: 'L1', isOnCourt: true, replacedPlayerId: 'A5', replacedPosition: 5 };
+  expect(checkLiberoNotAlreadyActive('L1', 5, active).ok).toBe(true);
 });
 
 // ─── Timeouts ───────────────────────────────────────────────────────────────

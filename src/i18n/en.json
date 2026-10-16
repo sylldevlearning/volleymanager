@@ -31,8 +31,17 @@
     "tacticalDesc": "Draw plays, animate movements",
     "quickMatch": "Quick Match",
     "quickMatchDesc": "France vs Brazil • Indoor 6×6 • Leisure",
+    "arbitrage": "Officiating",
+    "arbitrageDesc": "Standalone match, teams entered freely",
     "backToMenu": "Back to menu",
-    "quitMatch": "Quit match?"
+    "quitMatch": "Quit match?",
+    "arbitrageResumeTitle": "Officiating match in progress",
+    "arbitrageResumeMessage": "You have an officiating match that hasn't finished yet.",
+    "arbitrageResume": "Resume match in progress",
+    "arbitrageNewMatch": "New match",
+    "arbitrageAbandonConfirmTitle": "Abandon the match in progress?",
+    "arbitrageAbandonConfirmMessage": "The current match will be marked as finished and cannot be resumed.",
+    "arbitrageAbandonConfirm": "Abandon"
   },
   "tabs": {
     "home": "Home",
@@ -61,6 +70,7 @@
     "firstService": "First serve",
     "coach": "Coach",
     "stats": "Stats",
+    "arbitrage": "Arbitrage",
     "set": "Set",
     "sets": "Sets",
     "point": "Point",
@@ -129,6 +139,60 @@
       "blockFault": "Block fault",
       "defenseFault": "Defense fault"
     }
+  },
+  "arbitrage": {
+    "title": "Officiating",
+    "exitLibero": "Substitute out the libero",
+    "exitLiberoConfirm": "#{{number}} returns to their position on court.",
+    "ruleViolation": "Action not allowed",
+    "serveChoiceTitle": "Who serves first?",
+    "set5Title": "Deciding set (set 5)",
+    "changeEndsHint": "Tap the ⇄ arrows to flip the team display.",
+    "recapButton": "Substitutions recap",
+    "recapTitle": "Substitutions recap",
+    "recapEmpty": "No substitutions yet.",
+    "recapLiberoIn": "enters for",
+    "recapLiberoOut": "exits for",
+    "captainPickerTitle": "The captain left the court — designate the acting captain",
+    "lineupTitle": "Starting lineup",
+    "lineupFor": "Lineup — {{team}}",
+    "tapPosition": "Tap a position to place a player",
+    "positionLabel": "Position {{position}}",
+    "choosePlayer": "Choose a player",
+    "validateLineup": "Confirm lineup",
+    "clearPosition": "Clear position"
+  },
+  "arbitrageSetup": {
+    "title": "Match setup",
+    "tabHome": "Home",
+    "tabAway": "Away",
+    "tabRules": "Rules",
+    "teamName": "Team name",
+    "teamNamePlaceholder": "E.g. Home",
+    "jerseyColor": "Jersey color",
+    "coachName": "Coach",
+    "coachNamePlaceholder": "Name (optional)",
+    "selectNumbers": "Jersey numbers",
+    "selectedPlayers": "Selected players",
+    "playerNamePlaceholder": "Name (optional)",
+    "captain": "Captain",
+    "libero": "Libero",
+    "noPlayersSelected": "Tap numbers above to build the roster.",
+    "rulesPreset": "FIVB preset — editable",
+    "setsToWin": "Sets to win",
+    "pointsPerSet": "Points per set",
+    "pointsLastSet": "Tie-break points",
+    "winMarginToggle": "2-point lead required",
+    "timeoutsPerSet": "Timeouts per set",
+    "timeoutDuration": "Timeout duration",
+    "breakBetweenSets": "Break between sets",
+    "substitutionsPerSet": "Substitutions per set",
+    "sanctionsEnabled": "Sanctions enabled",
+    "startMatch": "Start match",
+    "fixErrors": "Fix these before starting:",
+    "confirmStart": "Confirm starting the match?",
+    "seconds": "s",
+    "minutes": "min"
   },
   "team": {
     "new": "New team",
@@ -411,7 +475,24 @@
     },
     "beach": {
       "noSubstitution": "No substitutions in beach volleyball"
-    }
+    },
+    "exceptional": "Exceptional substitution",
+    "exceptionalHint": "Injury — no other legal option is available"
+  },
+  "sanction": {
+    "button": "Card",
+    "title": "Sanction",
+    "target": "Target",
+    "staff": "Staff / Coach",
+    "type": "Sanction type",
+    "types": {
+      "warning": "Warning",
+      "penalty": "Penalty",
+      "expulsion": "Expulsion",
+      "disqualification": "Disqualification",
+      "delay": "Delay of game"
+    },
+    "confirm": "Confirm sanction"
   },
   "settings": {
     "title": "Settings",

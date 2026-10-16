@@ -23,3 +23,10 @@ export const ANIMATION_DURATION_LONG = 300;
 
 export const SCALE_PRESSED = 0.93;
 export const SCALE_DEFAULT = 1;
+
+export const PRESET_TEAM_COLORS = [
+  '#1D4ED8', '#E63946', '#2EA043', '#F59E0B',
+  '#8B5CF6', '#EC4899', '#06B6D4', '#F97316',
+];
+
+export const LIBERO_PRESET_COLORS = ['#F59E0B', '#06B6D4'];

@@ -1,6 +1,7 @@
 import { getDb, generateId } from './database';
 import { addEvent } from './eventService';
 import type { SubstitutionPair } from '../models/substitution';
+import type { MatchEvent } from '../models/event';
 
 // ─── DB helpers ───────────────────────────────────────────────────────────
 
@@ -79,6 +80,7 @@ export async function cancelPair(pairId: string): Promise<void> {
 export interface PerformSubResult {
   pair: SubstitutionPair;
   eventId: string;
+  event: MatchEvent;
 }
 
 /**
@@ -112,7 +114,7 @@ export async function performSubstitution(opts: {
     details: { playerOutId, position, pairId: pair.id, isLibero, isExceptional, isAutomatic: opts.isAutomatic ?? false },
   });
 
-  return { pair, eventId: event.id };
+  return { pair, eventId: event.id, event };
 }
 
 /**

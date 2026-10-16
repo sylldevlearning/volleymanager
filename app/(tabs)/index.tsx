@@ -1,10 +1,10 @@
-import { ActivityIndicator, Image, ScrollView, StyleSheet, View, Text, Pressable, StatusBar } from 'react-native';
+import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, View, Text, Pressable, StatusBar } from 'react-native';
 
 const BALL_IMG = require('../../assets/images/ballon.png');
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Volleyball, Users, History, ChevronRight, Zap } from 'lucide-react-native';
+import { Volleyball, Users, History, ChevronRight, Zap, Whistle } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { palette } from '../../src/theme/tokens';
 import { COMPANY, ADMOB_IDS } from '../../src/utils/constants';
@@ -13,7 +13,7 @@ import { TacticalBoardIcon } from '../../src/components/ui/TacticalBoardIcon';
 import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
 import { AdBanner } from '../../src/components/ads/AdBanner';
 import { createTeam } from '../../src/services/teamService';
-import { createMatch } from '../../src/services/matchService';
+import { createMatch, getInProgressAdHocMatch, updateMatchStatus } from '../../src/services/matchService';
 import { DEFAULT_INDOOR_CONFIG } from '../../src/models/match';
 
 export default function HomeScreen() {
@@ -21,6 +21,35 @@ export default function HomeScreen() {
   const { t } = useTranslation();
   const [showTactical, setShowTactical] = useState(false);
   const [creatingQuickMatch, setCreatingQuickMatch] = useState(false);
+
+  async function handleArbitragePress() {
+    const inProgress = await getInProgressAdHocMatch();
+    if (!inProgress) {
+      router.push('/arbitrage/new');
+      return;
+    }
+    Alert.alert(t('home.arbitrageResumeTitle'), t('home.arbitrageResumeMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('home.arbitrageResume'), onPress: () => router.push(`/match/${inProgress.id}/arbitrage`) },
+      {
+        text: t('home.arbitrageNewMatch'),
+        style: 'destructive',
+        onPress: () => {
+          Alert.alert(t('home.arbitrageAbandonConfirmTitle'), t('home.arbitrageAbandonConfirmMessage'), [
+            { text: t('common.cancel'), style: 'cancel' },
+            {
+              text: t('home.arbitrageAbandonConfirm'),
+              style: 'destructive',
+              onPress: async () => {
+                await updateMatchStatus(inProgress.id, 'finished');
+                router.push('/arbitrage/new');
+              },
+            },
+          ]);
+        },
+      },
+    ]);
+  }
 
   async function handleQuickMatch() {
     if (creatingQuickMatch) return;
@@ -66,14 +95,14 @@ export default function HomeScreen() {
           accessibilityRole="button"
         >
           {creatingQuickMatch
-            ? <ActivityIndicator color="#fff" size="small" />
-            : <Zap size={28} color="#fff" strokeWidth={2} />
+            ? <ActivityIndicator color={palette.success} size="small" />
+            : <Zap size={26} color={palette.success} strokeWidth={1.5} />
           }
           <View style={styles.quickMatchContent}>
             <Text style={styles.quickMatchTitle}>{t('home.quickMatch')}</Text>
             <Text style={styles.quickMatchDesc}>{t('home.quickMatchDesc')}</Text>
           </View>
-          {!creatingQuickMatch && <ChevronRight size={20} color="rgba(255,255,255,0.7)" />}
+          {!creatingQuickMatch && <ChevronRight size={20} color={palette.textMuted} />}
         </Pressable>
 
         {/* New Match CTA */}
@@ -83,9 +112,26 @@ export default function HomeScreen() {
           accessibilityLabel={t('home.newMatch')}
           accessibilityRole="button"
         >
-          <Volleyball size={28} color="#fff" strokeWidth={1.5} />
-          <Text style={styles.ctaText}>{t('home.newMatch')}</Text>
-          <ChevronRight size={20} color="rgba(255,255,255,0.7)" />
+          <Volleyball size={26} color={palette.accentPrimary} strokeWidth={1.5} />
+          <View style={styles.ctaContent}>
+            <Text style={styles.ctaText}>{t('home.newMatch')}</Text>
+          </View>
+          <ChevronRight size={20} color={palette.textMuted} />
+        </Pressable>
+
+        {/* Arbitrage CTA — standalone match, teams entered freely */}
+        <Pressable
+          style={({ pressed }) => [styles.arbitrageButton, pressed && styles.arbitrageButtonPressed]}
+          onPress={handleArbitragePress}
+          accessibilityLabel={t('home.arbitrage')}
+          accessibilityRole="button"
+        >
+          <Whistle size={26} color={palette.accentSecondary} strokeWidth={1.5} />
+          <View style={styles.arbitrageContent}>
+            <Text style={styles.arbitrageTitle}>{t('home.arbitrage')}</Text>
+            <Text style={styles.arbitrageDesc}>{t('home.arbitrageDesc')}</Text>
+          </View>
+          <ChevronRight size={20} color={palette.textMuted} />
         </Pressable>
 
         {/* Tactical Board CTA */}
@@ -190,53 +236,85 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   quickMatchButton: {
-    backgroundColor: '#16A34A',
+    backgroundColor: palette.backgroundSurface,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
-    paddingVertical: 18,
-    paddingHorizontal: 20,
+    padding: 16,
     borderRadius: 16,
+    borderWidth: 1,
+    borderColor: palette.backgroundElevated,
     marginBottom: 12,
   },
   quickMatchButtonPressed: {
-    opacity: 0.85,
-    transform: [{ scale: 0.98 }],
+    opacity: 0.8,
+    backgroundColor: palette.backgroundElevated,
   },
   quickMatchContent: {
     flex: 1,
   },
   quickMatchTitle: {
-    color: '#fff',
-    fontSize: 17,
-    fontFamily: 'Inter_700Bold',
+    color: palette.textPrimary,
+    fontSize: 15,
+    fontFamily: 'Inter_600SemiBold',
+    marginBottom: 3,
   },
   quickMatchDesc: {
-    color: 'rgba(255,255,255,0.75)',
-    fontSize: 12,
+    color: palette.textSecondary,
+    fontSize: 13,
     fontFamily: 'Inter_400Regular',
-    marginTop: 2,
   },
   ctaButton: {
-    backgroundColor: palette.accentPrimary,
+    backgroundColor: palette.backgroundSurface,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-    paddingVertical: 18,
-    paddingHorizontal: 24,
+    gap: 14,
+    padding: 16,
     borderRadius: 16,
-    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: palette.backgroundElevated,
+    marginBottom: 16,
   },
   ctaButtonPressed: {
-    opacity: 0.85,
-    transform: [{ scale: 0.98 }],
+    opacity: 0.8,
+    backgroundColor: palette.backgroundElevated,
+  },
+  ctaContent: {
+    flex: 1,
   },
   ctaText: {
+    color: palette.textPrimary,
+    fontSize: 15,
+    fontFamily: 'Inter_600SemiBold',
+  },
+  arbitrageButton: {
+    backgroundColor: palette.backgroundSurface,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: palette.backgroundElevated,
+    marginBottom: 16,
+  },
+  arbitrageButtonPressed: {
+    opacity: 0.8,
+    backgroundColor: palette.backgroundElevated,
+  },
+  arbitrageContent: {
     flex: 1,
-    color: '#fff',
-    fontSize: 17,
-    fontFamily: 'Inter_700Bold',
+  },
+  arbitrageTitle: {
+    fontSize: 15,
+    fontFamily: 'Inter_600SemiBold',
+    color: palette.textPrimary,
+    marginBottom: 3,
+  },
+  arbitrageDesc: {
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+    color: palette.textSecondary,
   },
   tacticalButton: {
     backgroundColor: palette.backgroundSurface,

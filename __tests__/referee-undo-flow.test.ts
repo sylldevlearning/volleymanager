@@ -39,6 +39,7 @@ const MATCH: Match = {
   id: 'm1', date: '2026-01-01', format: 'indoor_6v6', mode: 'competition',
   teamHomeId: 't1', teamAwayId: 't2', status: 'live', config: DEFAULT_INDOOR_CONFIG,
   winnerTeamId: null, firstServeTeamId: 't1', captainHomeId: null, captainAwayId: null,
+  sidesSwapped: false, actingCaptainHomeId: null, actingCaptainAwayId: null,
   createdAt: '2026-01-01', finishedAt: null,
 };
 

@@ -275,6 +275,29 @@ export async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
       `);
     });
   }
+
+  if (version < 11) {
+    await db.withExclusiveTransactionAsync(async () => {
+      await db.execAsync(`
+        ALTER TABLE teams ADD COLUMN coach_name TEXT;
+        ALTER TABLE teams ADD COLUMN is_ad_hoc INTEGER DEFAULT 0;
+        DROP INDEX IF EXISTS idx_teams_name_unique;
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_teams_name_unique ON teams(name) WHERE is_ad_hoc = 0;
+        PRAGMA user_version = 11;
+      `);
+    });
+  }
+
+  if (version < 12) {
+    await db.withExclusiveTransactionAsync(async () => {
+      await db.execAsync(`
+        ALTER TABLE matches ADD COLUMN sides_swapped INTEGER DEFAULT 0;
+        ALTER TABLE matches ADD COLUMN acting_captain_home_id TEXT REFERENCES players(id);
+        ALTER TABLE matches ADD COLUMN acting_captain_away_id TEXT REFERENCES players(id);
+        PRAGMA user_version = 12;
+      `);
+    });
+  }
 }
 
 export function generateId(): string {
