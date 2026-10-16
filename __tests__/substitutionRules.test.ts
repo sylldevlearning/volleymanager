@@ -4,8 +4,10 @@ import {
   liberoMustExit,
   countNormalSubs,
   isBackRow,
+  canLiberoEnter,
+  predictLiberoAutoExit,
 } from '../src/utils/substitutionRules';
-import type { SubstitutionPair } from '../src/models/substitution';
+import type { SubstitutionPair, LiberoState } from '../src/models/substitution';
 import type { MatchConfig } from '../src/models/match';
 
 const BASE_CONFIG: MatchConfig = {
@@ -33,6 +35,7 @@ function pair(
     setId: 's1',
     teamId: 't1',
     isLibero: false,
+    isExceptional: false,
     isCancelled: false,
     ...overrides,
   };
@@ -161,4 +164,44 @@ test('20. isBackRow returns false for P4 (front row)', () => {
   expect(isBackRow(6)).toBe(true);
   expect(isBackRow(2)).toBe(false);
   expect(isBackRow(3)).toBe(false);
+});
+
+// ─── Dual-libero: only one on court at a time ──────────────────────────────
+
+test('21. canLiberoEnter is true when no libero is currently active', () => {
+  expect(canLiberoEnter('L1', null)).toBe(true);
+  expect(canLiberoEnter('L1', { liberoId: 'L2', isOnCourt: false, replacedPlayerId: null, replacedPosition: null })).toBe(true);
+});
+
+test('22. canLiberoEnter is true for the already-active libero (re-selecting same one)', () => {
+  const active: LiberoState = { liberoId: 'L1', isOnCourt: true, replacedPlayerId: 'A', replacedPosition: 6 };
+  expect(canLiberoEnter('L1', active)).toBe(true);
+});
+
+test('23. canLiberoEnter is false for the OTHER libero while one is active (no direct L1<->L2 exchange)', () => {
+  const active: LiberoState = { liberoId: 'L1', isOnCourt: true, replacedPlayerId: 'A', replacedPosition: 6 };
+  expect(canLiberoEnter('L2', active)).toBe(false);
+});
+
+// ─── Libero automatic exit prediction (rotation into front row) ────────────
+
+test('24. predictLiberoAutoExit: no exit when libero is not on court', () => {
+  expect(predictLiberoAutoExit(null)).toEqual({ mustExit: false, newPosition: null });
+  const inactive: LiberoState = { liberoId: 'L1', isOnCourt: false, replacedPlayerId: null, replacedPosition: null };
+  expect(predictLiberoAutoExit(inactive)).toEqual({ mustExit: false, newPosition: null });
+});
+
+test('25. predictLiberoAutoExit: libero at P5 rotates to P4 (front row) -> must exit', () => {
+  const libero: LiberoState = { liberoId: 'L1', isOnCourt: true, replacedPlayerId: 'A', replacedPosition: 5 };
+  expect(predictLiberoAutoExit(libero)).toEqual({ mustExit: true, newPosition: 4 });
+});
+
+test('26. predictLiberoAutoExit: libero at P6 rotates to P5 (still back row) -> stays', () => {
+  const libero: LiberoState = { liberoId: 'L1', isOnCourt: true, replacedPlayerId: 'A', replacedPosition: 6 };
+  expect(predictLiberoAutoExit(libero)).toEqual({ mustExit: false, newPosition: 5 });
+});
+
+test('27. predictLiberoAutoExit: libero at P1 rotates to P6 (back row) -> stays', () => {
+  const libero: LiberoState = { liberoId: 'L1', isOnCourt: true, replacedPlayerId: 'A', replacedPosition: 1 };
+  expect(predictLiberoAutoExit(libero)).toEqual({ mustExit: false, newPosition: 6 });
 });

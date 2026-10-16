@@ -2,6 +2,7 @@ import {
   isSetWon,
   isMatchWon,
   shouldChangeEndsBeach,
+  shouldChangeEndsIndoor,
   nextRotation,
   isLiberoZone,
   canRequestTimeout,
@@ -97,6 +98,28 @@ describe('shouldChangeEndsBeach', () => {
 
   it('does not change at 4 total in last set', () => {
     expect(shouldChangeEndsBeach(3, 1, 3, DEFAULT_BEACH_CONFIG)).toBe(false);
+  });
+});
+
+describe('shouldChangeEndsIndoor', () => {
+  it('changes ends when home reaches 8 in the 5th set', () => {
+    expect(shouldChangeEndsIndoor(8, 5, 5, DEFAULT_INDOOR_CONFIG)).toBe(true);
+  });
+
+  it('changes ends when away reaches 8 in the 5th set', () => {
+    expect(shouldChangeEndsIndoor(5, 8, 5, DEFAULT_INDOOR_CONFIG)).toBe(true);
+  });
+
+  it('does not change at 7 points in the 5th set', () => {
+    expect(shouldChangeEndsIndoor(7, 5, 5, DEFAULT_INDOOR_CONFIG)).toBe(false);
+  });
+
+  it('does not change at 9 points in the 5th set (already past 8)', () => {
+    expect(shouldChangeEndsIndoor(9, 5, 5, DEFAULT_INDOOR_CONFIG)).toBe(false);
+  });
+
+  it('does not change at 8 points in a regular set (not the 5th)', () => {
+    expect(shouldChangeEndsIndoor(8, 5, 3, DEFAULT_INDOOR_CONFIG)).toBe(false);
   });
 });
 

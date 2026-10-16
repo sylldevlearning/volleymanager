@@ -1,5 +1,5 @@
 import type { MatchConfig, MatchFormat } from '../models/match';
-import type { SubstitutionPair, SubstitutionOutcome } from '../models/substitution';
+import type { SubstitutionPair, SubstitutionOutcome, LiberoState } from '../models/substitution';
 
 export const BACK_ROW_POSITIONS = [1, 5, 6] as const;
 
@@ -121,6 +121,31 @@ export function liberoMustExit(liberoPosition: number): boolean {
  */
 export function getActivePairs(pairs: SubstitutionPair[]): SubstitutionPair[] {
   return pairs.filter((p) => !p.isCancelled);
+}
+
+/**
+ * Only one registered libero may be on court at a time (FIVB rule) — the two
+ * liberos can never be swapped directly for one another; the active one must
+ * exit (via `predictLiberoAutoExit` or a manual exit) before the other can enter.
+ */
+export function canLiberoEnter(liberoId: string, activeLibero: LiberoState | null): boolean {
+  if (!activeLibero?.isOnCourt) return true;
+  return activeLibero.liberoId === liberoId;
+}
+
+/**
+ * Predicts whether the active libero must automatically exit because the
+ * side-out rotation is about to move their occupied slot into the front row.
+ * Mirrors the rotation transform used for the rest of the court (P1→6, else P-1).
+ */
+export function predictLiberoAutoExit(
+  libero: LiberoState | null,
+): { mustExit: boolean; newPosition: number | null } {
+  if (!libero?.isOnCourt || !libero.replacedPosition) {
+    return { mustExit: false, newPosition: null };
+  }
+  const newPosition = libero.replacedPosition === 1 ? 6 : libero.replacedPosition - 1;
+  return { mustExit: liberoMustExit(newPosition), newPosition };
 }
 
 // Re-export for convenience in SubstitutionPair type narrowing

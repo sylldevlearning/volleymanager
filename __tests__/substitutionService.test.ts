@@ -7,7 +7,7 @@ jest.mock('../src/services/eventService', () => ({
   addEvent: jest.fn(),
 }));
 
-import { getPairsForSet, performSubstitution, cancelPair, undoSubstitution } from '../src/services/substitutionService';
+import { getPairsForSet, getPairsForMatch, performSubstitution, cancelPair, undoSubstitution } from '../src/services/substitutionService';
 import { getDb, generateId } from '../src/services/database';
 import { addEvent } from '../src/services/eventService';
 
@@ -50,7 +50,7 @@ describe('getPairsForSet', () => {
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual({
       id: 'p1', matchId: 'm1', setId: 's1', teamId: 't1',
-      playerOutId: 'A', playerInId: 'B', isLibero: false, isCancelled: false,
+      playerOutId: 'A', playerInId: 'B', isLibero: false, isExceptional: false, isCancelled: false,
     });
   });
 
@@ -74,6 +74,33 @@ describe('getPairsForSet', () => {
 
     const result = await getPairsForSet('m1', 's1', 't1');
     expect(result[0].isCancelled).toBe(true);
+  });
+
+  it('correctly parses isExceptional = 1 from DB', async () => {
+    const db = makeMockDb([{
+      id: 'p4', match_id: 'm1', set_id: 's1', team_id: 't1',
+      player_out_id: 'A', player_in_id: 'B', is_libero: 0, is_exceptional: 1, is_cancelled: 0,
+    }]);
+    mockGetDb.mockResolvedValue(db);
+
+    const result = await getPairsForSet('m1', 's1', 't1');
+    expect(result[0].isExceptional).toBe(true);
+  });
+});
+
+// ─── getPairsForMatch ─────────────────────────────────────────────────────
+
+describe('getPairsForMatch', () => {
+  it('queries across all sets for the match (no set_id filter)', async () => {
+    const db = makeMockDb([]);
+    mockGetDb.mockResolvedValue(db);
+
+    await getPairsForMatch('m1', 't1');
+
+    expect(db.getAllAsync).toHaveBeenCalledWith(
+      expect.not.stringContaining('set_id'),
+      ['m1', 't1'],
+    );
   });
 });
 

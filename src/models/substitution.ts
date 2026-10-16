@@ -9,6 +9,8 @@ export interface SubstitutionPair {
   playerInId: string;
   /** True for libero swaps — these don't consume a substitution slot */
   isLibero: boolean;
+  /** True for an exceptional (injury) substitution — bypasses the quota; playerOutId is out for the rest of the match */
+  isExceptional: boolean;
   isCancelled: boolean;
 }
 

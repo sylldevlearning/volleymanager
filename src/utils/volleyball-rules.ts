@@ -17,6 +17,17 @@ export function isLastSet(setNumber: number, config: MatchConfig): boolean {
   return setNumber === getTotalSets(config);
 }
 
+// FIVB indoor rule: in the deciding (5th) set, teams change ends as soon as
+// either team reaches 8 points — triggered exactly once, at the moment of reaching it.
+export function shouldChangeEndsIndoor(
+  scoreHome: number,
+  scoreAway: number,
+  setNumber: number,
+  config: MatchConfig,
+): boolean {
+  return isLastSet(setNumber, config) && (scoreHome === 8 || scoreAway === 8);
+}
+
 export function shouldChangeEndsBeach(
   scoreHome: number,
   scoreAway: number,

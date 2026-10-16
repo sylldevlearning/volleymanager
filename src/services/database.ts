@@ -255,6 +255,15 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
       `);
     });
   }
+
+  if (version < 9) {
+    await db.withExclusiveTransactionAsync(async () => {
+      await db.execAsync(`
+        ALTER TABLE substitution_pairs ADD COLUMN is_exceptional INTEGER DEFAULT 0;
+        PRAGMA user_version = 9;
+      `);
+    });
+  }
 }
 
 export function generateId(): string {

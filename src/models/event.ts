@@ -11,7 +11,9 @@ export type ManagementEventType =
   | 'set_end'
   | 'match_end'
   | 'point_correction_home'
-  | 'point_correction_away';
+  | 'point_correction_away'
+  | 'sanction_home'
+  | 'sanction_away';
 
 export type StatEventType =
   | 'serve_ace'
