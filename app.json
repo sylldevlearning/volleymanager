@@ -2,7 +2,7 @@
   "expo": {
     "name": "VolleyManager",
     "slug": "volleymanager",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "volleymanager",
@@ -17,7 +17,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.sylldevlearning.volleymanager",
-      "versionCode": 6,
+      "versionCode": 7,
       "permissions": [
         "android.permission.VIBRATE",
         "android.permission.RECORD_AUDIO",
