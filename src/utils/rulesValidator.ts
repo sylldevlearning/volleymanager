@@ -15,6 +15,7 @@ export type RuleCode =
   | 'sub_player_disqualified'
   | 'sub_libero_not_allowed'
   | 'libero_front_row'
+  | 'libero_cannot_serve'
   | 'libero_rally_required'
   | 'libero_other_active'
   | 'timeout_quota_reached';
@@ -149,10 +150,17 @@ export function validateRegularSubstitution(ctx: RegularSubstitutionContext): Ru
   return { ok: true };
 }
 
-/** Libero entry: back row only (I, V, VI). Never consumes the substitution quota. */
-export function validateLiberoSubstitution(position: number): RuleResult {
+/**
+ * Libero entry: back row only (I, V, VI). Never consumes the substitution quota.
+ * Additionally, a libero can never occupy position I (the server's slot) while
+ * their team is serving — a libero is not allowed to serve.
+ */
+export function validateLiberoSubstitution(position: number, isTeamServing = false): RuleResult {
   if (!isBackRow(position)) {
     return violation('libero_front_row', 'Le libéro ne peut pas entrer en zone avant.');
+  }
+  if (position === 1 && isTeamServing) {
+    return violation('libero_cannot_serve', 'Le libéro ne peut pas servir.');
   }
   return { ok: true };
 }

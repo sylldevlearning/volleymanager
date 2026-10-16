@@ -38,6 +38,8 @@ interface SubstitutionSheetProps {
   config: MatchConfig;
   format: MatchFormat;
   mode: 'competition' | 'leisure';
+  /** True when this team currently holds the serve — a libero may never enter at position I while serving. */
+  isTeamServing?: boolean;
   onConfirm: (opts: {
     playerOutId: string;
     playerInId: string;
@@ -63,6 +65,7 @@ export function SubstitutionSheet({
   visible, onClose, side, teamName, teamColor,
   allPlayers, onCourt, bench, libero, pairs,
   subsUsed, config, format, mode, onConfirm,
+  isTeamServing = false,
   strict = false, setEvents = [],
   sanctionEventsForSet = [], sanctionEventsForMatch = [],
   initialOutId = null, initialOutPosition = null,
@@ -139,7 +142,7 @@ export function SubstitutionSheet({
       const activeLiberoNumber = libero ? playerMap.get(libero.liberoId)?.number ?? 0 : 0;
       const activeCheck = checkLiberoNotAlreadyActive(player.id, activeLiberoNumber, libero);
       if (!activeCheck.ok) return activeCheck;
-      const rowCheck = strictValidateLiberoSubstitution(playerOutPos);
+      const rowCheck = strictValidateLiberoSubstitution(playerOutPos, isTeamServing);
       if (!rowCheck.ok) return rowCheck;
       const rallyCheck = checkLiberoRallySinceLastReplacement(setEvents, side);
       if (!rallyCheck.ok) return rallyCheck;

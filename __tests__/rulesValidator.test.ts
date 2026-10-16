@@ -221,6 +221,39 @@ test('libero_front_row: allowed entering at P6 (back row)', () => {
   expect(validateLiberoSubstitution(6).ok).toBe(true);
 });
 
+// ─── Libero — cannot enter at P1 (the server's slot) while the team is serving ──
+
+test('libero_cannot_serve: blocked entering at P1 while the team is serving', () => {
+  const result = validateLiberoSubstitution(1, true);
+  expect(result.ok).toBe(false);
+  if (!result.ok) {
+    expect(result.code).toBe('libero_cannot_serve');
+    expect(result.message).toBe('Le libéro ne peut pas servir.');
+  }
+});
+
+test('libero_cannot_serve: allowed entering at P1 when the team is NOT serving (receiving)', () => {
+  expect(validateLiberoSubstitution(1, false).ok).toBe(true);
+});
+
+test('libero_cannot_serve: entering at P5 while serving is unaffected (only P1 serves)', () => {
+  expect(validateLiberoSubstitution(5, true).ok).toBe(true);
+});
+
+test('libero_cannot_serve: entering at P6 while serving is unaffected (only P1 serves)', () => {
+  expect(validateLiberoSubstitution(6, true).ok).toBe(true);
+});
+
+test('libero_front_row still takes priority over the serving check at a front-row position', () => {
+  const result = validateLiberoSubstitution(3, true);
+  expect(result.ok).toBe(false);
+  if (!result.ok) expect(result.code).toBe('libero_front_row');
+});
+
+test('defaults to NOT serving when the second argument is omitted (back-compat)', () => {
+  expect(validateLiberoSubstitution(1).ok).toBe(true);
+});
+
 // ─── Libero — at least one rally between two replacements ─────────────────
 
 test('libero_rally_required: blocked re-entering before any point was played', () => {

@@ -916,6 +916,7 @@ export default function ArbitrageScreen() {
           config={match.config}
           format={match.format}
           mode={match.mode}
+          isTeamServing={servingTeam === subSide}
           strict
           setEvents={events}
           sanctionEventsForSet={currentSet ? sanctionEvents.filter((e) => e.setId === currentSet.id) : []}
