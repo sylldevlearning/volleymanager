@@ -1,16 +1,13 @@
 export const APP_VERSION = "1.0.0";
 
-// ⚠️ REMPLACER PAR VOS VRAIS IDS ADMOB AVANT PUBLICATION
-// 1. Allez sur https://admob.google.com
-// 2. Créez une app Android avec le package com.sylldevlearning.volleymanager
-// 3. Créez 3 blocs bannière + 1 bloc interstitiel
-// 4. Remplacez les IDs ci-dessous
+// Real AdMob banner unit IDs, read from EAS environment variables (never
+// committed). Only used in the "production" build; everywhere else, or when a
+// variable is missing, AdBanner falls back to Google's test unit.
+// See docs/plans/admob-consent.md for the variable list.
 export const ADMOB_IDS = {
-  // IDs de TEST Google — remplacer par les vrais avant publication
-  BANNER_HOME: "ca-app-pub-3940256099942544/6300978111",
-  BANNER_HISTORY: "ca-app-pub-3940256099942544/6300978111",
-  BANNER_SETTINGS: "ca-app-pub-3940256099942544/6300978111",
-  INTERSTITIAL_POST_MATCH: "ca-app-pub-3940256099942544/1033173712",
+  BANNER_HOME: process.env.EXPO_PUBLIC_ADMOB_BANNER_HOME_ID,
+  BANNER_HISTORY: process.env.EXPO_PUBLIC_ADMOB_BANNER_HISTORY_ID,
+  BANNER_SETTINGS: process.env.EXPO_PUBLIC_ADMOB_BANNER_SETTINGS_ID,
 };
 export const COMPANY = "SyllDevLearning";
 

@@ -6,11 +6,19 @@
     "preview": {
       "android": {
         "buildType": "apk"
+      },
+      "environment": "preview",
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "preview"
       }
     },
     "production": {
       "android": {
         "buildType": "app-bundle"
+      },
+      "environment": "production",
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "production"
       }
     }
   }

@@ -1,9 +1,8 @@
 import { useCallback } from 'react';
 
-// Stub — real interstitial via react-native-google-mobile-ads
-// will be wired at EAS Build time (requires native build, not Expo Go).
-// SummaryScreen already calls show() on mount; it will fire once the
-// real SDK is integrated.
+// Intentionally a no-op: the app only shows banner ads (see AdBanner).
+// SummaryScreen calls show() on mount; wire a real InterstitialAd here if
+// interstitials are ever wanted.
 export function useInterstitialAd() {
   const show = useCallback(() => {
     // no-op until native build

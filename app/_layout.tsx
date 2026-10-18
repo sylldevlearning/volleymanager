@@ -16,6 +16,7 @@ import {
 import tamaguiConfig from '../tamagui.config';
 import { useSettingsStore } from '../src/stores/settingsStore';
 import { seedDefaultDataIfEmpty } from '../src/services/seedService';
+import { initAds } from '../src/features/ads/adsService';
 import i18n from '../src/i18n';
 
 SplashScreen.preventAutoHideAsync();
@@ -45,6 +46,8 @@ export default function RootLayout() {
     if (loaded) {
       SplashScreen.hideAsync();
       seedDefaultDataIfEmpty().catch(console.error);
+      // After the splash screen: the GDPR consent form may need to show.
+      initAds();
     }
   }, [loaded]);
 
