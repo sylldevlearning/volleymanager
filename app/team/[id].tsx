@@ -21,6 +21,7 @@ import type { Player, PlayerPosition as PPos } from '../../src/models/player';
 import { getPlayerDisplayName } from '../../src/features/players/player-helpers';
 import { ScannerSheet } from '../../src/features/scanner/ScannerSheet';
 import { palette } from '../../src/theme/tokens';
+import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
 
 const POSITIONS: PPos[] = ['setter', 'outside', 'opposite', 'middle', 'libero', 'universal'];
 
@@ -77,6 +78,7 @@ export default function TeamDetailScreen() {
           {team.shortName && <Text style={styles.shortName}>{team.shortName}</Text>}
           <Text style={styles.playerCount}>{t('team.playerCount', { count: players.length })}</Text>
         </View>
+        <InfoTooltip textKey="help.team" />
         <Pressable
           onPress={handleDeleteTeam}
           style={styles.deleteBtn}

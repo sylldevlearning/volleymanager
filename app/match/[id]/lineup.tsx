@@ -13,6 +13,7 @@ import type { Match } from '../../../src/models/match';
 import type { LiberoState } from '../../../src/models/substitution';
 import type { CourtMap } from '../../../src/stores/scoringStore';
 import { palette } from '../../../src/theme/tokens';
+import { InfoTooltip } from '../../../src/components/ui/InfoTooltip';
 
 interface PlayerSlot {
   player: Player;
@@ -136,7 +137,10 @@ export default function LineupScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>{t('lineup.title')}</Text>
+        <View style={styles.headerTitleRow}>
+          <Text style={styles.headerTitle}>{t('lineup.title')}</Text>
+          <InfoTooltip textKey="help.lineup" />
+        </View>
         <Text style={styles.headerHint}>{t('lineup.selectStarters')}</Text>
       </View>
 
@@ -294,6 +298,11 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     borderBottomWidth: 1,
     borderBottomColor: palette.backgroundElevated,
+  },
+  headerTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   headerTitle: {
     fontSize: 20,

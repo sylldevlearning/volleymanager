@@ -41,6 +41,7 @@ import type { MatchEvent } from '../../../src/models/event';
 import { getPlayerShortName } from '../../../src/features/players/player-helpers';
 import { palette } from '../../../src/theme/tokens';
 import { CoachMarks } from '../../../src/components/ui/CoachMarks';
+import { InfoTooltip } from '../../../src/components/ui/InfoTooltip';
 
 type SetupPhase = 'serveChoice' | null;
 
@@ -716,6 +717,9 @@ export default function ArbitrageScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.setsRow}>
         <SetTracker setScores={setScores} currentSetNumber={currentSetNum} maxSets={maxSets} />
+        <View style={styles.helpBtn}>
+          <InfoTooltip textKey="help.arbitrage" />
+        </View>
       </View>
 
       <View ref={scoreAreaRef} collapsable={false} style={styles.scoreArea}>
@@ -1105,6 +1109,7 @@ const styles = StyleSheet.create({
   loading: { flex: 1, backgroundColor: palette.background, alignItems: 'center', justifyContent: 'center' },
   loadingText: { color: palette.textSecondary, fontFamily: 'Inter_400Regular' },
   setsRow: { paddingTop: 12, paddingBottom: 8, alignItems: 'center' },
+  helpBtn: { position: 'absolute', top: 12, right: 12 },
   scoreArea: {
     flexDirection: 'row',
     alignItems: 'center',

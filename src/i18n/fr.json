@@ -549,16 +549,19 @@
     "selectStarters": "Appuyez sur le badge pour définir les titulaires"
   },
   "help": {
-    "home": "Lancez un match rapide ou créez un nouveau match. Gérez vos équipes et consultez l'historique.",
-    "referee": "Tapez +1 pour marquer. Le -1 corrige une erreur. Les rotations sont automatiques au changement de service. 🔄 pour les remplacements.",
-    "coach": "Sélectionnez un joueur puis tapez l'action réalisée. Les stats se calculent en temps réel.",
-    "tactical": "Déplacez les joueurs. Tracez des flèches. ◀▶ pour avancer pas à pas. Sauvegardez via le menu ⋮.",
-    "teams": "Créez vos équipes. Seul le numéro est obligatoire. Tapez un joueur pour le modifier. 📷 pour importer depuis une photo de licence.",
-    "newMatch": "Choisissez les équipes, le format et qui sert en premier.",
-    "stats": "Le radar montre le profil global, les barres détaillent chaque compétence.",
-    "history": "Tapez un match pour voir le détail et les statistiques.",
-    "settings": "Changez la langue et activez les vibrations.",
-    "substitution": "Choisissez qui sort puis qui entre. Le libéro ⚡ ne compte pas dans les 6 remplacements."
+    "home": "Match rapide : arbitrez tout de suite, sans saisir d'équipes. Nouveau match : choisissez vos équipes et le format. Arbitrage : match officiel avec composition, remplacements et sanctions. Tableau tactique : dessinez et animez vos schémas.",
+    "referee": "+1 donne le point à l'équipe, -1 en retire un. Après un point, indiquez qui a marqué et comment, ou « Passer ». Touchez le compteur de temps morts ou de remplacements d'une équipe pour l'utiliser. Annuler revient sur la dernière action. Les rotations sont automatiques ; l'icône tactique ouvre le tableau.",
+    "arbitrage": "Composition : touchez chaque poste du terrain pour y placer un titulaire, puis validez. En match : +1 donne le point, ⇄ inverse les côtés. Touchez un joueur sur le terrain pour le remplacer (ou faire sortir le libéro). Temps mort, Remplacement et Carton pour chaque équipe ; Annuler revient sur la dernière action.",
+    "coach": "Sélectionnez un joueur en haut, puis tapez l'action réalisée. Les stats se calculent en temps réel. L'icône graphique ouvre le tableau de bord du match.",
+    "tactical": "Glissez un joueur n'importe où ; touchez-le pour changer numéro, nom ou couleur. Banc : glissez un remplaçant sur un joueur pour l'échanger, ou sur une zone libre pour le faire entrer ; ramenez un joueur au banc pour le sortir. Choisissez un outil pour tracer : T1 anime l'étape (appui long : retour au début), ⏮ ◀ ▶ rejouent pas à pas. 🗒 repart d'un terrain vierge, menu ⋮ pour charger ou sauvegarder.",
+    "teams": "Touchez une équipe pour voir et gérer ses joueurs. + pour créer une équipe.",
+    "team": "+ ajoute un joueur : seul le numéro est obligatoire. Le bouton scanner importe les joueurs depuis une photo de licence. Graphique : statistiques du joueur ; corbeille : le supprimer.",
+    "newMatch": "Choisissez les équipes, le format, le mode et qui sert en premier. Les règles (sets, points, temps morts, remplacements) sont ajustables.",
+    "stats": "Comparez les deux équipes compétence par compétence, découvrez les meilleurs joueurs et la répartition des points. Touchez un joueur pour voir son détail.",
+    "history": "Touchez un match pour le reprendre ou voir son résumé, appui long pour le supprimer. Filtrez par statut ou par équipe.",
+    "settings": "Changez la langue, activez les vibrations et revoyez l'aide de l'app.",
+    "substitution": "Choisissez qui sort puis qui entre. Le libéro ⚡ ne compte pas dans le quota de remplacements.",
+    "lineup": "Cochez les joueurs présents, puis touchez le badge Titulaire / Remplaçant pour choisir les titulaires de chaque équipe. Le libéro ⚡ est géré à part."
   },
   "onboarding": {
     "skip": "Passer",
@@ -587,7 +590,7 @@
     "arbitrage": {
       "score": "Touchez le côté de l'équipe qui gagne l'échange. La rotation se fait automatiquement.",
       "sides": "Inversez les côtés pour suivre le terrain tel que vous le voyez.",
-      "actions": "Temps mort, remplacement et sanction, pour chaque équipe.",
+      "actions": "Temps mort, remplacement et carton (sanction), pour chaque équipe.",
       "undo": "Une erreur ? Annulez la dernière action, rien n'est perdu."
     },
     "tactical": {
