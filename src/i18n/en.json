@@ -389,6 +389,8 @@
     "savePlay": "Save play",
     "ball": "Ball",
     "bench": "Bench",
+    "benchHome": "Home",
+    "benchAway": "Away",
     "swapPlayer": "Swap",
     "playback": {
       "play": "Play",

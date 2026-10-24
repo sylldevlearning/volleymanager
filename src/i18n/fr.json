@@ -389,6 +389,8 @@
     "savePlay": "Sauvegarder",
     "ball": "Ballon",
     "bench": "Remplaçants",
+    "benchHome": "Domicile",
+    "benchAway": "Extérieur",
     "swapPlayer": "Échanger",
     "playback": {
       "play": "Lecture",

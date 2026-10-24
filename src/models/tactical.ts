@@ -17,6 +17,9 @@ export interface PlayerPosition {
   customColor?: string;
 }
 
+/** Substitute waiting on the tactical board bench — a token without coordinates */
+export type BenchPlayer = Omit<PlayerPosition, 'x' | 'y' | 'isBall'>;
+
 export type ArrowType = 'solid' | 'dashed' | 'curved';
 export type ArrowThickness = 'thin' | 'thick';
 

@@ -23,7 +23,9 @@ interface PlayerTokenProps {
   courtHeight: number;
   canDrag: boolean;
   showName: boolean;
-  onDragEnd: (playerId: string, x: number, y: number) => void;
+  /** x/y are clamped court-relative coords; absX/absY the raw release point on screen */
+  onDragEnd: (playerId: string, x: number, y: number, absX: number, absY: number) => void;
+  onDragStart?: () => void;
   onTap?: (playerId: string) => void;
   hapticsEnabled: boolean;
 }
@@ -35,6 +37,7 @@ export function PlayerToken({
   canDrag,
   showName,
   onDragEnd,
+  onDragStart,
   onTap,
   hapticsEnabled,
 }: PlayerTokenProps) {
@@ -48,6 +51,7 @@ export function PlayerToken({
 
   function triggerHaptic() {
     if (hapticsEnabled) Haptics.selectionAsync();
+    onDragStart?.();
   }
   function notifyTap() {
     onTap?.(player.playerId);
@@ -78,7 +82,7 @@ export function PlayerToken({
       const newPixelY = basePixelY + e.translationY;
       const newRelX = clamp(newPixelX / courtWidth, 0.02, 0.98);
       const newRelY = clamp(newPixelY / courtHeight, 0.02, 0.98);
-      runOnJS(onDragEnd)(player.playerId, newRelX, newRelY);
+      runOnJS(onDragEnd)(player.playerId, newRelX, newRelY, e.absoluteX, e.absoluteY);
       translateX.value = withSpring(0);
       translateY.value = withSpring(0);
       scale.value = withSpring(1);

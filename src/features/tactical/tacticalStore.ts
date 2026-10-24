@@ -1,11 +1,15 @@
 import { create } from 'zustand';
-import type { PlayerPosition, Arrow, FreehandPath, TacticalPlay, TacticalTool, ArrowThickness, StepSnapshot } from '../../models/tactical';
+import type { PlayerPosition, Arrow, FreehandPath, TacticalPlay, TacticalTool, ArrowThickness, StepSnapshot, BenchPlayer } from '../../models/tactical';
 import { generateId } from '../../services/database';
+import { swapWithBench, sendToBench, enterFromBench, MAX_ON_COURT, type BenchBoard } from './benchUtils';
 
 type DrawingEntry = { type: 'arrow'; id: string } | { type: 'freehand'; id: string };
 
 interface TacticalState {
   positions: PlayerPosition[];
+  /** Substitutes off the court — sandbox only, never written to the match */
+  benchHome: BenchPlayer[];
+  benchAway: BenchPlayer[];
   arrows: Arrow[];
   freehandPaths: FreehandPath[];
   /** LIFO stack tracking insertion order across arrows and freehand paths */
@@ -22,6 +26,13 @@ interface TacticalState {
 
   setPositions: (positions: PlayerPosition[]) => void;
   movePlayer: (playerId: string, x: number, y: number) => void;
+  setBench: (benchHome: BenchPlayer[], benchAway: BenchPlayer[]) => void;
+  /** Bench player takes the spot of a same-team court player, who goes to the bench */
+  swapWithBench: (benchId: string, targetId: string) => void;
+  /** Court player leaves the court for their team's bench */
+  sendToBench: (playerId: string) => void;
+  /** Bench player enters at (x, y) if their team has room */
+  enterFromBench: (benchId: string, x: number, y: number, maxOnCourt?: number) => void;
   updatePlayerInfo: (playerId: string, data: { number?: number; firstName?: string | null; lastName?: string | null; label?: string; customColor?: string }) => void;
   addArrow: (arrow: Omit<Arrow, 'id' | 'order' | 'group'>) => void;
   removeArrow: (id: string) => void;
@@ -43,8 +54,14 @@ interface TacticalState {
   resetBoard: () => void;
 }
 
+function benchBoard(state: TacticalState): BenchBoard {
+  return { positions: state.positions, benchHome: state.benchHome, benchAway: state.benchAway };
+}
+
 export const useTacticalStore = create<TacticalState>()((set) => ({
   positions: [],
+  benchHome: [],
+  benchAway: [],
   arrows: [],
   freehandPaths: [],
   drawingOrder: [],
@@ -64,11 +81,24 @@ export const useTacticalStore = create<TacticalState>()((set) => ({
       ),
     })),
 
+  setBench: (benchHome, benchAway) => set({ benchHome, benchAway }),
+
+  swapWithBench: (benchId, targetId) =>
+    set((state) => swapWithBench(benchBoard(state), benchId, targetId)),
+
+  sendToBench: (playerId) =>
+    set((state) => sendToBench(benchBoard(state), playerId)),
+
+  enterFromBench: (benchId, x, y, maxOnCourt = MAX_ON_COURT.indoor_6v6) =>
+    set((state) => enterFromBench(benchBoard(state), benchId, x, y, maxOnCourt)),
+
   updatePlayerInfo: (playerId, data) =>
     set((state) => ({
       positions: state.positions.map((p) =>
         p.playerId === playerId ? { ...p, ...data } : p
       ),
+      benchHome: state.benchHome.map((p) => (p.playerId === playerId ? { ...p, ...data } : p)),
+      benchAway: state.benchAway.map((p) => (p.playerId === playerId ? { ...p, ...data } : p)),
     })),
 
   addArrow: (arrow) =>
@@ -142,21 +172,28 @@ export const useTacticalStore = create<TacticalState>()((set) => ({
   setArrowThickness: (thickness) => set({ arrowThickness: thickness }),
 
   loadPlay: (play) =>
-    set({
-      positions: play.positions,
-      arrows: play.arrows,
-      freehandPaths: [],
-      drawingOrder: [],
-      selectedTool: 'move',
-      currentGroup: 1,
-      currentPlayId: play.isDefault ? null : play.id,
-      currentPlayName: play.name,
-      history: [],
+    set((state) => {
+      const onCourt = new Set(play.positions.map((p) => p.playerId));
+      return {
+        positions: play.positions,
+        benchHome: state.benchHome.filter((p) => !onCourt.has(p.playerId)),
+        benchAway: state.benchAway.filter((p) => !onCourt.has(p.playerId)),
+        arrows: play.arrows,
+        freehandPaths: [],
+        drawingOrder: [],
+        selectedTool: 'move',
+        currentGroup: 1,
+        currentPlayId: play.isDefault ? null : play.id,
+        currentPlayName: play.name,
+        history: [],
+      };
     }),
 
   resetBoard: () =>
     set({
       positions: [],
+      benchHome: [],
+      benchAway: [],
       arrows: [],
       freehandPaths: [],
       drawingOrder: [],
