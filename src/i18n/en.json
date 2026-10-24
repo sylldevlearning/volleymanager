@@ -507,7 +507,9 @@
     "sound": "Sounds",
     "soundDesc": "Sound on every point",
     "about": "About",
-    "version": "Version"
+    "version": "Version",
+    "help": "Help",
+    "replayHelp": "Show help again"
   },
   "scoring": {
     "removePoint": "-1 Point",
@@ -557,5 +559,26 @@
     "history": "Tap a match for details and statistics.",
     "settings": "Change language and toggle vibrations.",
     "substitution": "Choose who goes out then who comes in. Libero ⚡ doesn't count toward 6-sub limit."
+  },
+  "onboarding": {
+    "skip": "Skip",
+    "next": "Next",
+    "start": "Let's go!",
+    "quickMatch": {
+      "title": "Quick match",
+      "body": "One tap to get started. Tap +1 for the team that scores. Score, sets and rotations are handled for you."
+    },
+    "arbitrage": {
+      "title": "Refereeing",
+      "body": "Referee a real match under the official rules: starting lineup, substitutions, libero, timeouts and sanctions. The match is saved continuously, so you can resume it at any time."
+    },
+    "tactical": {
+      "title": "Tactical board",
+      "body": "Place your players anywhere, draw their movements and replay them step by step. Drag a substitute onto a player to swap them."
+    },
+    "teams": {
+      "title": "Teams",
+      "body": "Create your teams in seconds: only the jersey number is required. Import your players from a licence photo 📷."
+    }
   }
 }

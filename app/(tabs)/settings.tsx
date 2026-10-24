@@ -1,6 +1,6 @@
 import { Alert, StyleSheet, Text, View, Switch, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Zap, Globe, Info, ChevronRight } from 'lucide-react-native';
+import { Zap, Globe, Info, ChevronRight, LifeBuoy } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useSettingsStore } from '../../src/stores/settingsStore';
@@ -14,7 +14,7 @@ import { deleteAllMatches } from '../../src/services/matchService';
 export default function SettingsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { hapticsEnabled, setHapticsEnabled, language, setLanguage } = useSettingsStore();
+  const { hapticsEnabled, setHapticsEnabled, language, setLanguage, resetHelp } = useSettingsStore();
 
   const changeLanguage = (lang: 'fr' | 'en') => {
     setLanguage(lang);
@@ -58,6 +58,22 @@ export default function SettingsScreen() {
               />
             }
           />
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t('settings.help')}</Text>
+        <View style={styles.card}>
+          {/* Resets the presentation AND the help bubbles; the root layout then opens the presentation */}
+          <Pressable
+            style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+            onPress={resetHelp}
+            accessibilityRole="button"
+          >
+            <LifeBuoy size={20} color={palette.accentSecondary} />
+            <Text style={styles.rowLabel}>{t('settings.replayHelp')}</Text>
+            <ChevronRight size={16} color={palette.textMuted} />
+          </Pressable>
         </View>
       </View>
 

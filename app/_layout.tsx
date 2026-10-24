@@ -15,6 +15,7 @@ import {
 } from '@expo-google-fonts/inter';
 import tamaguiConfig from '../tamagui.config';
 import { useSettingsStore } from '../src/stores/settingsStore';
+import { useSettingsHydrated } from '../src/hooks/useSettingsHydrated';
 import { seedDefaultDataIfEmpty } from '../src/services/seedService';
 import { initAds } from '../src/features/ads/adsService';
 import i18n from '../src/i18n';
@@ -59,6 +60,8 @@ export default function RootLayout() {
 function RootLayoutNav() {
   const theme = useSettingsStore((s) => s.theme);
   const language = useSettingsStore((s) => s.language);
+  const hasSeenOnboarding = useSettingsStore((s) => s.hasSeenOnboarding);
+  const settingsHydrated = useSettingsHydrated();
   const { t } = useTranslation();
   const router = useRouter();
   const segments = useSegments();
@@ -69,6 +72,14 @@ function RootLayoutNav() {
   useEffect(() => {
     i18n.changeLanguage(language);
   }, [language]);
+
+  // First launch, or "Revoir l'aide" in Settings → show the presentation.
+  // Wait for AsyncStorage: before hydration the flag always reads "unseen".
+  useEffect(() => {
+    if (!settingsHydrated || hasSeenOnboarding) return;
+    if ((segmentsRef.current as string[])[0] === 'onboarding') return;
+    router.push('/onboarding' as never);
+  }, [settingsHydrated, hasSeenOnboarding]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const handler = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -98,6 +109,10 @@ function RootLayoutNav() {
       <TamaguiProvider config={tamaguiConfig} defaultTheme={theme}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="onboarding"
+            options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false, animation: 'fade' }}
+          />
           <Stack.Screen name="match/new" options={{ title: 'Nouveau match', presentation: 'modal' }} />
           <Stack.Screen name="match/[id]/lineup" options={{ headerShown: false }} />
           <Stack.Screen name="match/[id]/referee" options={{ headerShown: false }} />

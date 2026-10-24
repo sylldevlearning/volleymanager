@@ -507,7 +507,9 @@
     "sound": "Sons",
     "soundDesc": "Son à chaque point",
     "about": "À propos",
-    "version": "Version"
+    "version": "Version",
+    "help": "Aide",
+    "replayHelp": "Revoir l'aide"
   },
   "scoring": {
     "removePoint": "-1 Point",
@@ -557,5 +559,26 @@
     "history": "Tapez un match pour voir le détail et les statistiques.",
     "settings": "Changez la langue et activez les vibrations.",
     "substitution": "Choisissez qui sort puis qui entre. Le libéro ⚡ ne compte pas dans les 6 remplacements."
+  },
+  "onboarding": {
+    "skip": "Passer",
+    "next": "Suivant",
+    "start": "C'est parti !",
+    "quickMatch": {
+      "title": "Match rapide",
+      "body": "Un seul geste pour commencer. Touchez +1 pour l'équipe qui marque. Le score, les sets et les rotations se gèrent tout seuls."
+    },
+    "arbitrage": {
+      "title": "Arbitrage",
+      "body": "Arbitrez un vrai match selon les règles officielles : composition de départ, remplacements, libéro, temps morts et sanctions. Le match est sauvegardé en continu, vous pouvez le reprendre à tout moment."
+    },
+    "tactical": {
+      "title": "Tableau tactique",
+      "body": "Placez vos joueurs librement, tracez les déplacements et rejouez-les étape par étape. Glissez un remplaçant sur un joueur pour l'échanger."
+    },
+    "teams": {
+      "title": "Équipes",
+      "body": "Créez vos équipes en quelques secondes : seul le numéro est obligatoire. Importez vos joueurs depuis une photo de licence 📷."
+    }
   }
 }
