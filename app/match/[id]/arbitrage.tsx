@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode, type Ref } from 'react';
 import { Alert, Modal, ScrollView, StyleSheet, Text, View, Pressable, useWindowDimensions } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, Flag, ArrowLeftRight, X, ListChecks, AlertTriangle } from 'lucide-react-native';
+import { ArrowLeft, Flag, ArrowLeftRight, X, ListChecks, AlertTriangle, RotateCcw } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 
@@ -26,7 +26,6 @@ import { validateTimeoutRequest } from '../../../src/utils/rulesValidator';
 import { getDisplayedCaptainId, needsNewActingCaptain } from '../../../src/utils/captainTracking';
 import { ScoreButton } from '../../../src/components/scoring/ScoreButton';
 import { SetTracker } from '../../../src/components/scoring/SetTracker';
-import { UndoButton } from '../../../src/components/scoring/UndoButton';
 import { SubstitutionSheet } from '../../../src/components/scoring/SubstitutionSheet';
 import { TimeoutTimerSheet } from '../../../src/components/scoring/TimeoutTimerSheet';
 import { SubstitutionRecapSheet } from '../../../src/components/arbitrage/SubstitutionRecapSheet';
@@ -865,46 +864,40 @@ export default function ArbitrageScreen() {
             </View>
           </View>
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.actionsScroll}
-            contentContainerStyle={styles.actionsRow}
-          >
-            <Pressable
-              style={({ pressed }) => [styles.actionBtn, pressed && styles.actionBtnPressed]}
+          {/* Fixed 4-column bar — the former horizontal scroll pushed "End match" off-screen */}
+          <View style={styles.actionsRow}>
+            <ActionButton
+              icon={<ArrowLeft size={18} color={palette.textSecondary} />}
+              label={t('arbitrage.actionMenu')}
+              accessibilityLabel={t('home.backToMenu')}
               onPress={() => {
                 Alert.alert(t('home.quitMatch'), '', [
                   { text: t('common.cancel'), style: 'cancel' },
                   { text: t('home.backToMenu'), onPress: () => router.replace('/') },
                 ]);
               }}
-              accessibilityRole="button"
-            >
-              <ArrowLeft size={16} color={palette.textSecondary} />
-              <Text style={styles.actionText}>{t('home.backToMenu')}</Text>
-            </Pressable>
-            <View ref={undoRef} collapsable={false}>
-              <UndoButton onPress={handleUndo} disabled={setIsOver} />
-            </View>
-            <Pressable
-              style={({ pressed }) => [styles.actionBtn, pressed && styles.actionBtnPressed]}
+            />
+            <ActionButton
+              ref={undoRef}
+              icon={<RotateCcw size={18} color={setIsOver ? palette.textMuted : palette.textSecondary} />}
+              label={t('match.undo')}
+              onPress={handleUndo}
+              disabled={setIsOver}
+            />
+            <ActionButton
+              icon={<ListChecks size={18} color={palette.textSecondary} />}
+              label={t('arbitrage.actionRecap')}
+              accessibilityLabel={t('arbitrage.recapButton')}
               onPress={() => setShowRecap(true)}
-              accessibilityRole="button"
-            >
-              <ListChecks size={16} color={palette.textSecondary} />
-              <Text style={styles.actionText}>{t('arbitrage.recapButton')}</Text>
-            </Pressable>
-            <Pressable
-              style={({ pressed }) => [styles.actionBtnEnd, pressed && styles.actionBtnPressed]}
-              onPress={handleEndMatch}
+            />
+            <ActionButton
+              icon={<Flag size={18} color={palette.error} />}
+              label={t('arbitrage.actionEnd')}
               accessibilityLabel={t('match.endMatch')}
-              accessibilityRole="button"
-            >
-              <Flag size={16} color={palette.error} />
-              <Text style={[styles.actionText, { color: palette.error }]}>{t('match.endMatch')}</Text>
-            </Pressable>
-          </ScrollView>
+              onPress={handleEndMatch}
+              danger
+            />
+          </View>
         </>
       )}
 
@@ -1104,6 +1097,44 @@ function CounterPill({
   );
 }
 
+function ActionButton({
+  ref, icon, label, accessibilityLabel, onPress, disabled, danger,
+}: {
+  ref?: Ref<View>;
+  icon: ReactNode;
+  label: string;
+  accessibilityLabel?: string;
+  onPress: () => void;
+  disabled?: boolean;
+  danger?: boolean;
+}) {
+  return (
+    <Pressable
+      ref={ref}
+      style={({ pressed }) => [
+        styles.actionBtn,
+        danger && styles.actionBtnDanger,
+        disabled && styles.actionBtnDisabled,
+        pressed && styles.actionBtnPressed,
+      ]}
+      onPress={onPress}
+      disabled={disabled}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? label}
+    >
+      {icon}
+      <Text
+        style={[styles.actionText, danger && { color: palette.error }]}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.8}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
   loading: { flex: 1, backgroundColor: palette.background, alignItems: 'center', justifyContent: 'center' },
@@ -1205,39 +1236,27 @@ const styles = StyleSheet.create({
   pillDot: { width: 8, height: 8, borderRadius: 4 },
   pillInf: { fontSize: 14, color: palette.textMuted, fontFamily: 'Inter_700Bold' },
 
-  actionsScroll: { flexShrink: 0 },
   actionsRow: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     paddingBottom: 8,
-    gap: 8,
-    alignItems: 'center',
+    gap: 6,
   },
   actionBtn: {
     flex: 1,
-    flexDirection: 'row',
+    minWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
+    gap: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
     borderRadius: 12,
     backgroundColor: palette.backgroundSurface,
     borderWidth: 1,
     borderColor: palette.backgroundElevated,
   },
-  actionBtnEnd: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderRadius: 12,
-    backgroundColor: palette.backgroundSurface,
-    borderWidth: 1,
-    borderColor: palette.error + '40',
-  },
+  actionBtnDanger: { borderColor: palette.error + '40' },
+  actionBtnDisabled: { opacity: 0.4 },
   actionBtnPressed: { opacity: 0.7 },
   actionText: { fontSize: 12, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
 

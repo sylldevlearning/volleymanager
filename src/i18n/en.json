@@ -160,7 +160,10 @@
     "positionLabel": "Position {{position}}",
     "choosePlayer": "Choose a player",
     "validateLineup": "Confirm lineup",
-    "clearPosition": "Clear position"
+    "clearPosition": "Clear position",
+    "actionMenu": "Menu",
+    "actionRecap": "Recap",
+    "actionEnd": "End"
   },
   "arbitrageSetup": {
     "title": "Match setup",
