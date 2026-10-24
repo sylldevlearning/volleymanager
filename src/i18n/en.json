@@ -580,5 +580,21 @@
       "title": "Teams",
       "body": "Create your teams in seconds: only the jersey number is required. Import your players from a licence photo 📷."
     }
+  },
+  "tips": {
+    "next": "Next",
+    "done": "Got it",
+    "arbitrage": {
+      "score": "Tap the side of the team that wins the rally. Rotation is automatic.",
+      "sides": "Swap sides to match the court as you see it.",
+      "actions": "Timeout, substitution and sanction, for each team.",
+      "undo": "Made a mistake? Undo the last action, nothing is lost."
+    },
+    "tactical": {
+      "court": "Drag a player anywhere on the court. Tap them to change their number or colour.",
+      "bench": "Drop a substitute on a player to swap them. Drag a player here to take them off.",
+      "tools": "Draw an arrow from a player: they will follow that path when you play the step.",
+      "steps": "Tap “T1” to animate the step, long-press to go back to the start. Save from the ⋮ menu."
+    }
   }
 }

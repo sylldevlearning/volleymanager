@@ -35,6 +35,7 @@ import type { LiberoState } from '../../models/substitution';
 import { getPlayerShortName } from '../../features/players/player-helpers';
 import { palette } from '../../theme/tokens';
 import { InfoTooltip } from '../ui/InfoTooltip';
+import { CoachMarks } from '../ui/CoachMarks';
 import * as Haptics from 'expo-haptics';
 
 const BENCH_TOKEN_SIZE = 30;
@@ -367,6 +368,7 @@ export function TacticalBoard({
   // ── Bench ─────────────────────────────────────────────────────────────────
   const courtRef = useRef<View>(null);
   const benchRef = useRef<View>(null);
+  const toolbarRef = useRef<View>(null);
   // Screen coordinates, re-measured at each drag start (the modal slides in after layout)
   const courtPageRef = useRef({ x: 0, y: 0 });
   const benchPageYRef = useRef(Infinity);
@@ -1107,7 +1109,7 @@ export function TacticalBoard({
 
         {/* Court container */}
         <View style={[styles.courtContainer, { zIndex: dragSource === 'court' ? 30 : 10 }]}>
-          <View ref={courtRef} style={[styles.court, { width: courtW, height: courtH }]}>
+          <View ref={courtRef} collapsable={false} style={[styles.court, { width: courtW, height: courtH }]}>
             <CourtSVG width={courtW} height={courtH} format={currentFormat} />
 
             <View style={styles.drawLayer}>
@@ -1170,6 +1172,7 @@ export function TacticalBoard({
         {hasBench && (
           <View
             ref={benchRef}
+            collapsable={false}
             style={[styles.benchStrip, { height: BENCH_H, zIndex: dragSource === 'bench' ? 30 : 5 }]}
           >
             {[
@@ -1213,19 +1216,21 @@ export function TacticalBoard({
         />
 
         {/* Toolbar */}
-        <ToolBar
-          selectedTool={selectedTool}
-          arrowThickness={arrowThickness}
-          currentGroup={currentGroup}
-          currentGroupColor={groupColor}
-          hasDrawings={drawingOrder.length > 0}
-          onSelectTool={setTool}
-          onAdvanceGroup={handleAdvanceGroup}
-          onResetGroup={handleResetGroup}
-          onUndoDrawing={undoLastDrawing}
-          onClearAll={() => { clearArrows(); handleReset(); }}
-          onSyncFromMatch={matchId ? handleSyncFromMatch : undefined}
-        />
+        <View ref={toolbarRef} collapsable={false}>
+          <ToolBar
+            selectedTool={selectedTool}
+            arrowThickness={arrowThickness}
+            currentGroup={currentGroup}
+            currentGroupColor={groupColor}
+            hasDrawings={drawingOrder.length > 0}
+            onSelectTool={setTool}
+            onAdvanceGroup={handleAdvanceGroup}
+            onResetGroup={handleResetGroup}
+            onUndoDrawing={undoLastDrawing}
+            onClearAll={() => { clearArrows(); handleReset(); }}
+            onSyncFromMatch={matchId ? handleSyncFromMatch : undefined}
+          />
+        </View>
 
         <PlayerEditSheet
           visible={editingPlayer !== null}
@@ -1247,6 +1252,17 @@ export function TacticalBoard({
           onPlayDeleted={(id) => {
             if (currentPlayId === id) resetBoard();
           }}
+        />
+
+        <CoachMarks
+          tipId="tactical"
+          enabled={visible && editingPlayer === null && !showPlaybook && !showMenu}
+          steps={[
+            { id: 'court', target: courtRef },
+            ...(hasBench ? [{ id: 'bench', target: benchRef }] : []),
+            { id: 'tools', target: toolbarRef },
+            { id: 'steps', target: toolbarRef },
+          ]}
         />
       </SafeAreaView>
       </GestureHandlerRootView>

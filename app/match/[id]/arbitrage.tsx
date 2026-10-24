@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Modal, ScrollView, StyleSheet, Text, View, Pressable, useWindowDimensions } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -40,6 +40,7 @@ import type { LiberoState } from '../../../src/models/substitution';
 import type { MatchEvent } from '../../../src/models/event';
 import { getPlayerShortName } from '../../../src/features/players/player-helpers';
 import { palette } from '../../../src/theme/tokens';
+import { CoachMarks } from '../../../src/components/ui/CoachMarks';
 
 type SetupPhase = 'serveChoice' | null;
 
@@ -142,6 +143,12 @@ export default function ArbitrageScreen() {
   const [sanctionEvents, setSanctionEvents] = useState<MatchEvent[]>([]);
   /** Which visual side (left/right) each team is drawn on — toggled manually by the referee, never automatically. */
   const [sidesSwapped, setSidesSwapped] = useState(false);
+
+  // First-use help bubbles anchors
+  const scoreAreaRef = useRef<View>(null);
+  const swapBtnRef = useRef<View>(null);
+  const actionsRef = useRef<View>(null);
+  const undoRef = useRef<View>(null);
 
   // Serve indicator ball — follows the serving team, and the visual side it's
   // drawn on when the referee swaps sides with the ⇄ arrows (computed from
@@ -711,7 +718,7 @@ export default function ArbitrageScreen() {
         <SetTracker setScores={setScores} currentSetNumber={currentSetNum} maxSets={maxSets} />
       </View>
 
-      <View style={styles.scoreArea}>
+      <View ref={scoreAreaRef} collapsable={false} style={styles.scoreArea}>
         <ScoreButton
           teamName={leftData.team.name}
           score={leftData.score}
@@ -745,6 +752,7 @@ export default function ArbitrageScreen() {
           <Text style={styles.courtLabelText} numberOfLines={1}>{leftData.team.name}</Text>
         </View>
         <Pressable
+          ref={swapBtnRef}
           style={({ pressed }) => [styles.swapBtn, pressed && styles.swapBtnPressed]}
           onPress={() => setSidesSwapped((s) => !s)}
           accessibilityRole="button"
@@ -800,55 +808,57 @@ export default function ArbitrageScreen() {
         </View>
       ) : (
         <>
-          <View style={styles.infoRow}>
-            <CounterPill
-              label={leftData.team.shortName ?? leftData.team.name.slice(0, 3).toUpperCase()}
-              used={leftData.timeoutsUsed}
-              max={match!.config.unlimitedTimeouts ? null : maxTimeouts}
-              color={leftData.color}
-              onPress={() => handleTimeout(leftData.side)}
-            />
-            <Pressable
-              style={styles.subBtn}
-              onPress={() => { setSubSide(leftData.side); setPreselectedOut(null); setShowSubSheet(true); }}
-              accessibilityRole="button"
-            >
-              <Text style={styles.subBtnText}>{t('match.substitution')}</Text>
-            </Pressable>
-            <Pressable
-              style={styles.subBtn}
-              onPress={() => { setSubSide(rightData.side); setPreselectedOut(null); setShowSubSheet(true); }}
-              accessibilityRole="button"
-            >
-              <Text style={styles.subBtnText}>{t('match.substitution')}</Text>
-            </Pressable>
-            <CounterPill
-              label={rightData.team.shortName ?? rightData.team.name.slice(0, 3).toUpperCase()}
-              used={rightData.timeoutsUsed}
-              max={match!.config.unlimitedTimeouts ? null : maxTimeouts}
-              color={rightData.color}
-              onPress={() => handleTimeout(rightData.side)}
-              reversed
-            />
-          </View>
+          <View ref={actionsRef} collapsable={false}>
+            <View style={styles.infoRow}>
+              <CounterPill
+                label={leftData.team.shortName ?? leftData.team.name.slice(0, 3).toUpperCase()}
+                used={leftData.timeoutsUsed}
+                max={match!.config.unlimitedTimeouts ? null : maxTimeouts}
+                color={leftData.color}
+                onPress={() => handleTimeout(leftData.side)}
+              />
+              <Pressable
+                style={styles.subBtn}
+                onPress={() => { setSubSide(leftData.side); setPreselectedOut(null); setShowSubSheet(true); }}
+                accessibilityRole="button"
+              >
+                <Text style={styles.subBtnText}>{t('match.substitution')}</Text>
+              </Pressable>
+              <Pressable
+                style={styles.subBtn}
+                onPress={() => { setSubSide(rightData.side); setPreselectedOut(null); setShowSubSheet(true); }}
+                accessibilityRole="button"
+              >
+                <Text style={styles.subBtnText}>{t('match.substitution')}</Text>
+              </Pressable>
+              <CounterPill
+                label={rightData.team.shortName ?? rightData.team.name.slice(0, 3).toUpperCase()}
+                used={rightData.timeoutsUsed}
+                max={match!.config.unlimitedTimeouts ? null : maxTimeouts}
+                color={rightData.color}
+                onPress={() => handleTimeout(rightData.side)}
+                reversed
+              />
+            </View>
 
-          <View style={styles.sanctionRow}>
-            <Pressable
-              style={styles.sanctionBtn}
-              onPress={() => { setSanctionSide(leftData.side); setShowSanctionSheet(true); }}
-              accessibilityRole="button"
-            >
-              <AlertTriangle size={14} color={palette.warning} />
-              <Text style={styles.sanctionBtnText}>{t('sanction.button')}</Text>
-            </Pressable>
-            <Pressable
-              style={styles.sanctionBtn}
-              onPress={() => { setSanctionSide(rightData.side); setShowSanctionSheet(true); }}
-              accessibilityRole="button"
-            >
-              <AlertTriangle size={14} color={palette.warning} />
-              <Text style={styles.sanctionBtnText}>{t('sanction.button')}</Text>
-            </Pressable>
+            <View style={styles.sanctionRow}>
+              <Pressable
+                style={styles.sanctionBtn}
+                onPress={() => { setSanctionSide(leftData.side); setShowSanctionSheet(true); }}
+                accessibilityRole="button"
+              >
+                <AlertTriangle size={14} color={palette.warning} />
+                <Text style={styles.sanctionBtnText}>{t('sanction.button')}</Text>
+              </Pressable>
+              <Pressable
+                style={styles.sanctionBtn}
+                onPress={() => { setSanctionSide(rightData.side); setShowSanctionSheet(true); }}
+                accessibilityRole="button"
+              >
+                <AlertTriangle size={14} color={palette.warning} />
+                <Text style={styles.sanctionBtnText}>{t('sanction.button')}</Text>
+              </Pressable>
+            </View>
           </View>
 
           <ScrollView
@@ -870,7 +880,9 @@ export default function ArbitrageScreen() {
               <ArrowLeft size={16} color={palette.textSecondary} />
               <Text style={styles.actionText}>{t('home.backToMenu')}</Text>
             </Pressable>
-            <UndoButton onPress={handleUndo} disabled={setIsOver} />
+            <View ref={undoRef} collapsable={false}>
+              <UndoButton onPress={handleUndo} disabled={setIsOver} />
+            </View>
             <Pressable
               style={({ pressed }) => [styles.actionBtn, pressed && styles.actionBtnPressed]}
               onPress={() => setShowRecap(true)}
@@ -1005,6 +1017,20 @@ export default function ArbitrageScreen() {
           </ScrollView>
         </View>
       </Modal>
+
+      <CoachMarks
+        tipId="arbitrage"
+        enabled={
+          !!match && !lineupSetupMode && !showSubSheet && !showTimeoutSheet && !showSanctionSheet
+          && !showRecap && captainPickerSide === null
+        }
+        steps={[
+          { id: 'score', target: scoreAreaRef },
+          { id: 'sides', target: swapBtnRef },
+          { id: 'actions', target: actionsRef },
+          { id: 'undo', target: undoRef },
+        ]}
+      />
     </SafeAreaView>
   );
 }

@@ -580,5 +580,21 @@
       "title": "Équipes",
       "body": "Créez vos équipes en quelques secondes : seul le numéro est obligatoire. Importez vos joueurs depuis une photo de licence 📷."
     }
+  },
+  "tips": {
+    "next": "Suivant",
+    "done": "Compris",
+    "arbitrage": {
+      "score": "Touchez le côté de l'équipe qui gagne l'échange. La rotation se fait automatiquement.",
+      "sides": "Inversez les côtés pour suivre le terrain tel que vous le voyez.",
+      "actions": "Temps mort, remplacement et sanction, pour chaque équipe.",
+      "undo": "Une erreur ? Annulez la dernière action, rien n'est perdu."
+    },
+    "tactical": {
+      "court": "Glissez un joueur n'importe où sur le terrain. Touchez-le pour changer son numéro ou sa couleur.",
+      "bench": "Glissez un remplaçant sur un joueur pour les échanger. Ramenez un joueur ici pour le faire sortir.",
+      "tools": "Tracez une flèche depuis un joueur : il suivra ce chemin quand vous lancerez l'étape.",
+      "steps": "Touchez « T1 » pour animer l'étape, appui long pour revenir au début. Le menu ⋮ permet de sauvegarder."
+    }
   }
 }
