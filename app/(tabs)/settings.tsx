@@ -1,8 +1,9 @@
+import { useCallback, useState } from 'react';
 import { Alert, StyleSheet, Text, View, Switch, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Zap, Globe, Info, ChevronRight, LifeBuoy } from 'lucide-react-native';
+import { Zap, Globe, Info, ChevronRight, LifeBuoy, ShieldCheck } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useSettingsStore } from '../../src/stores/settingsStore';
 import { palette } from '../../src/theme/tokens';
 import i18n from '../../src/i18n';
@@ -10,11 +11,21 @@ import { APP_VERSION, ADMOB_IDS } from '../../src/utils/constants';
 import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
 import { AdBanner } from '../../src/components/ads/AdBanner';
 import { deleteAllMatches } from '../../src/services/matchService';
+import { isPrivacyOptionsRequired, openPrivacyOptions } from '../../src/features/ads/adsService';
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { hapticsEnabled, setHapticsEnabled, language, setLanguage, resetHelp } = useSettingsStore();
+
+  // UMP only offers the privacy form where it's required (EEA / UK) — re-checked on
+  // each visit since consent is gathered asynchronously at startup.
+  const [privacyRequired, setPrivacyRequired] = useState(false);
+  useFocusEffect(useCallback(() => {
+    let active = true;
+    isPrivacyOptionsRequired().then((required) => { if (active) setPrivacyRequired(required); });
+    return () => { active = false; };
+  }, []));
 
   const changeLanguage = (lang: 'fr' | 'en') => {
     setLanguage(lang);
@@ -88,6 +99,20 @@ export default function SettingsScreen() {
             <Text style={styles.rowLabel}>{t('about.title')}</Text>
             <ChevronRight size={16} color={palette.textMuted} />
           </Pressable>
+          {privacyRequired && (
+            <>
+              <View style={styles.divider} />
+              <Pressable
+                style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+                onPress={() => { openPrivacyOptions(); }}
+                accessibilityRole="button"
+              >
+                <ShieldCheck size={20} color={palette.textMuted} />
+                <Text style={styles.rowLabel}>{t('settings.privacyOptions')}</Text>
+                <ChevronRight size={16} color={palette.textMuted} />
+              </Pressable>
+            </>
+          )}
           <View style={styles.divider} />
           <SettingRow
             icon={<Info size={20} color={palette.textMuted} />}

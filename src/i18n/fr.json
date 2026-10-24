@@ -512,7 +512,8 @@
     "about": "À propos",
     "version": "Version",
     "help": "Aide",
-    "replayHelp": "Revoir l'aide"
+    "replayHelp": "Revoir l'aide",
+    "privacyOptions": "Paramètres de confidentialité"
   },
   "scoring": {
     "removePoint": "-1 Point",

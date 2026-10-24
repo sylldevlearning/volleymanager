@@ -24,6 +24,25 @@ interface AdsState {
 export const useAdsStore = create<AdsState>(() => ({ canShowAds: false }));
 
 let started = false;
+let sdkInitialized = false;
+
+/** Initializes the SDK the first time ads are allowed; hides them when they no longer are. */
+async function applyConsent(canRequestAds: boolean): Promise<void> {
+  if (!adsModule) return;
+  if (!canRequestAds) {
+    useAdsStore.setState({ canShowAds: false });
+    return;
+  }
+  if (!sdkInitialized) {
+    sdkInitialized = true;
+    try {
+      await adsModule.default().initialize();
+    } catch (e) {
+      if (__DEV__) console.warn('MobileAds init error:', e);
+    }
+  }
+  useAdsStore.setState({ canShowAds: true });
+}
 
 /**
  * GDPR: asks Google's UMP SDK for consent (it shows the form only when needed,
@@ -48,12 +67,27 @@ export async function initAds(): Promise<void> {
   } catch {
     // Unknown consent state → no ads
   }
-  if (!canRequestAds) return;
+  await applyConsent(canRequestAds);
+}
 
+/** True when UMP requires a way to change the consent choice (EEA / UK users). */
+export async function isPrivacyOptionsRequired(): Promise<boolean> {
+  if (!adsModule) return false;
   try {
-    await adsModule.default().initialize();
-  } catch (e) {
-    if (__DEV__) console.warn('MobileAds init error:', e);
+    const info = await adsModule.AdsConsent.getConsentInfo();
+    return info.privacyOptionsRequirementStatus === adsModule.AdsConsentPrivacyOptionsRequirementStatus.REQUIRED;
+  } catch {
+    return false;
   }
-  useAdsStore.setState({ canShowAds: true });
+}
+
+/** Settings › "Paramètres de confidentialité": reopens the consent form and applies the new choice. */
+export async function openPrivacyOptions(): Promise<void> {
+  if (!adsModule) return;
+  try {
+    const info = await adsModule.AdsConsent.showPrivacyOptionsForm();
+    await applyConsent(info.canRequestAds === true);
+  } catch (e) {
+    if (__DEV__) console.warn('Privacy options form error:', e);
+  }
 }
