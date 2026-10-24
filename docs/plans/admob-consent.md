@@ -34,3 +34,7 @@ __tests__/adUnit.test.ts
 | `EXPO_PUBLIC_ADMOB_BANNER_SETTINGS_ID` | production | `ca-app-pub-…/…` |
 
 Sans ces variables, l'app utilise les identifiants d'exemple de Google (annonces de test).
+
+Configurées le 24/10/2026 (`eas env:list`) : une seule bannière
+`ca-app-pub-8391520865775051/7951584073` pour les 3 écrans, App ID
+`ca-app-pub-8391520865775051~4778499519`.
