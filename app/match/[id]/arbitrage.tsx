@@ -419,8 +419,10 @@ export default function ArbitrageScreen() {
       if (isMatchEnd) {
         const matchWinnerId = isMatchWon(newSetsHome, match.config) ? match.teamHomeId : match.teamAwayId;
         await updateMatchStatus(match.id, 'finished', matchWinnerId);
+        useSettingsStore.getState().recordMatchFinished(match.id);
         Alert.alert(t('match.matchOver'), '', [
-          { text: t('common.done'), onPress: () => router.replace(`/match/${match.id}/summary`) },
+          // justFinished → the summary may show the store review dialog
+          { text: t('common.done'), onPress: () => router.replace(`/match/${match.id}/summary?justFinished=1`) },
         ]);
       } else {
         Alert.alert(

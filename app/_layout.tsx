@@ -76,6 +76,7 @@ function RootLayoutNav() {
   // First launch, or "Revoir l'aide" in Settings → show the presentation.
   // Wait for AsyncStorage: before hydration the flag always reads "unseen".
   useEffect(() => {
+    if (settingsHydrated) useSettingsStore.getState().ensureFirstLaunchAt(Date.now());
     if (!settingsHydrated || hasSeenOnboarding) return;
     if ((segmentsRef.current as string[])[0] === 'onboarding') return;
     router.push('/onboarding' as never);

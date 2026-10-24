@@ -217,7 +217,8 @@ export default function RefereeScreen() {
       Alert.alert(
         t('match.matchOver'),
         t('referee.winsMatch', { name: info.matchWinnerName }),
-        [{ text: t('common.done'), onPress: () => router.replace(`/match/${match?.id}/summary`) }],
+        // justFinished → the summary may show the store review dialog
+        [{ text: t('common.done'), onPress: () => router.replace(`/match/${match?.id}/summary?justFinished=1`) }],
       );
     } else {
       Alert.alert(
@@ -284,6 +285,7 @@ export default function RefereeScreen() {
       if (isMatchEnd) {
         const matchWinnerId = isMatchWon(newSetsHome, match.config) ? match.teamHomeId : match.teamAwayId;
         await updateMatchStatus(match.id, 'finished', matchWinnerId);
+        useSettingsStore.getState().recordMatchFinished(match.id);
         if (hapticsEnabled) setTimeout(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success), 300);
       }
 

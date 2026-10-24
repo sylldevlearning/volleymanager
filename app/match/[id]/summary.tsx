@@ -28,9 +28,10 @@ import { RadarChart } from '../../../src/components/stats/RadarChart';
 import { BarChart } from '../../../src/components/stats/BarChart';
 import { palette } from '../../../src/theme/tokens';
 import { useInterstitialAd } from '../../../src/components/ads/useInterstitialAd';
+import { maybeRequestReview } from '../../../src/features/review/reviewPrompt';
 
 export default function SummaryScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, justFinished } = useLocalSearchParams<{ id: string; justFinished?: string }>();
   const { t } = useTranslation();
   const router = useRouter();
 
@@ -50,6 +51,14 @@ export default function SummaryScreen() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Positive moment: a match was just won (not a history visit). Small delay so the
+  // summary is on screen before Google's dialog; it decides itself whether to show.
+  useEffect(() => {
+    if (justFinished !== '1') return;
+    const timer = setTimeout(() => { maybeRequestReview(); }, 1500);
+    return () => clearTimeout(timer);
+  }, [justFinished]);
 
   useEffect(() => {
     async function load() {
