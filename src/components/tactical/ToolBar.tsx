@@ -16,6 +16,8 @@ interface ToolBarProps {
   onUndoDrawing: () => void;
   onClearAll: () => void;
   onSyncFromMatch?: () => void;
+  /** Board opened from a match: write substitutions / starting lineup to the match */
+  onApplyToMatch?: () => void;
 }
 
 const TOOLS: { key: TacticalTool; icon: string; labelKey: string }[] = [
@@ -36,6 +38,7 @@ export function ToolBar({
   onUndoDrawing,
   onClearAll,
   onSyncFromMatch,
+  onApplyToMatch,
 }: ToolBarProps) {
   const { t } = useTranslation();
 
@@ -116,6 +119,18 @@ export function ToolBar({
           >
             <Text style={styles.syncBtnIcon}>🔄</Text>
             <Text style={styles.syncBtnText}>{t('tactical.syncFromMatch')}</Text>
+          </Pressable>
+        )}
+
+        {onApplyToMatch !== undefined && (
+          <Pressable
+            style={styles.applyBtn}
+            onPress={onApplyToMatch}
+            accessibilityLabel={t('tactical.apply.button')}
+            accessibilityRole="button"
+          >
+            <Text style={styles.syncBtnIcon}>✅</Text>
+            <Text style={styles.applyBtnText}>{t('tactical.apply.button')}</Text>
           </Pressable>
         )}
 
@@ -224,6 +239,22 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontFamily: 'Inter_500Medium',
     color: palette.accentSecondary,
+    marginTop: 2,
+  },
+  applyBtn: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 10,
+    backgroundColor: palette.success + '20',
+    borderWidth: 1,
+    borderColor: palette.success + '50',
+  },
+  applyBtnText: {
+    fontSize: 9,
+    fontFamily: 'Inter_500Medium',
+    color: palette.success,
     marginTop: 2,
   },
   clearBtn: {

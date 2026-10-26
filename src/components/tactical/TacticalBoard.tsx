@@ -20,9 +20,13 @@ import { ToolBar } from './ToolBar';
 import { PlaybackControls } from './PlaybackControls';
 import { PlaybookSheet } from './PlaybookSheet';
 import { PlayerEditSheet } from './PlayerEditSheet';
+import { ApplyToMatchSheet } from './ApplyToMatchSheet';
 import { useTacticalStore } from '../../features/tactical/tacticalStore';
 import { seedDefaultPlays } from '../../features/tactical/tacticalService';
 import { openMatchBoard, saveMatchBoard } from '../../features/tactical/boardPersistence';
+import { matchPhase, planBoardApply, rulesContextFromStore, type ApplyPlan } from '../../features/tactical/applyToMatch';
+import { recordSubstitution, type SubstitutionContext } from '../../features/match/recordSubstitution';
+import { applyBoardLineup } from '../../features/match/applyLineup';
 import { HOME_POSITION_COORDS, AWAY_POSITION_COORDS, findNearestPlayer, clamp, easeInOut } from '../../features/tactical/positionUtils';
 import { buildDefaultBench, benchFromPlayers, findTokenAt, MAX_ON_COURT } from '../../features/tactical/benchUtils';
 import { useScoringStore } from '../../stores/scoringStore';
@@ -1076,10 +1080,106 @@ export function TacticalBoard({
     markBoardEdited();
   }
 
-  function handleClose() {
+  // ── Apply to match ────────────────────────────────────────────────────────
+  // Indoor match boards only (beach has no substitutions or zones I–VI)
+  const canApply = !!matchId && format === 'indoor_6v6' && currentFormat === 'indoor_6v6';
+  const [applyPlan, setApplyPlan] = useState<Exclude<ApplyPlan, { kind: 'none' }> | null>(null);
+  const [applying, setApplying] = useState(false);
+  /** The recap was opened from "Appliquer ces changements au match ?" — close the board once applied */
+  const closeAfterApplyRef = useRef(false);
+
+  function computeApplyPlan(): ApplyPlan {
+    const live = useScoringStore.getState();
+    if (!live.match) return { kind: 'none' };
+    const board = useTacticalStore.getState();
+    return planBoardApply({
+      positions: board.positions,
+      benchMoves: board.benchMoves,
+      phase: matchPhase(live.currentSet, live.events),
+      home: rulesContextFromStore(live, 'home', homePlayers),
+      away: rulesContextFromStore(live, 'away', awayPlayers),
+    });
+  }
+
+  function handleApplyPress() {
+    const plan = computeApplyPlan();
+    if (plan.kind !== 'none') {
+      closeAfterApplyRef.current = false;
+      setApplyPlan(plan);
+      return;
+    }
+    const live = useScoringStore.getState();
+    const phase = matchPhase(live.currentSet, live.events);
+    const message = phase === 'set_over'
+      ? t('tactical.apply.nothingSetOver')
+      : phase === 'before_first_point' ? t('tactical.apply.nothingLineup') : t('tactical.apply.nothingInSet');
+    Alert.alert(t('tactical.apply.nothingTitle'), message);
+  }
+
+  async function handleConfirmApply() {
+    const live = useScoringStore.getState();
+    if (!applyPlan || !applyPlan.ok || !live.match || !live.currentSet) return;
+    const contextFor = (side: 'home' | 'away'): SubstitutionContext => ({
+      matchId: live.match!.id,
+      setId: live.currentSet!.id,
+      teamId: side === 'home' ? live.match!.teamHomeId : live.match!.teamAwayId,
+      side,
+      roster: side === 'home' ? homePlayers : awayPlayers,
+    });
+
+    setApplying(true);
+    try {
+      if (applyPlan.kind === 'substitutions') {
+        // In order: each one was validated against the match after the previous ones
+        for (const item of applyPlan.home.items) await recordSubstitution(contextFor('home'), item);
+        for (const item of applyPlan.away.items) await recordSubstitution(contextFor('away'), item);
+      } else {
+        if (applyPlan.home.status === 'changed') await applyBoardLineup(contextFor('home'), applyPlan.home.court);
+        if (applyPlan.away.status === 'changed') await applyBoardLineup(contextFor('away'), applyPlan.away.court);
+      }
+      clearBenchMoves();
+      setApplyPlan(null);
+      if (hapticsEnabled) Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      if (closeAfterApplyRef.current) finishClose();
+    } catch (e) {
+      console.error(e);
+      Alert.alert('', t('tactical.apply.failed'));
+    } finally {
+      setApplying(false);
+    }
+  }
+
+  function handleCancelApply() {
+    // From the close prompt too: the coach stays on the board to fix it
+    closeAfterApplyRef.current = false;
+    setApplyPlan(null);
+  }
+
+  function finishClose() {
     handleReset();
     if (matchId && boardReady) saveBoardNow();
     onClose();
+  }
+
+  function handleClose() {
+    if (canApply && boardReady) {
+      const plan = computeApplyPlan();
+      if (plan.kind !== 'none') {
+        Alert.alert(t('tactical.apply.askOnClose'), '', [
+          // "Plus tard": the match is untouched, the board stays saved as it is
+          { text: t('tactical.apply.later'), style: 'cancel', onPress: finishClose },
+          {
+            text: t('tactical.apply.now'),
+            onPress: () => {
+              closeAfterApplyRef.current = true;
+              setApplyPlan(plan);
+            },
+          },
+        ]);
+        return;
+      }
+    }
+    finishClose();
   }
 
   return (
@@ -1128,7 +1228,7 @@ export function TacticalBoard({
           >
             <Text style={styles.headerBtnText}>⋮</Text>
           </Pressable>
-          <InfoTooltip textKey="help.tactical" />
+          {matchId ? <InfoTooltip textKey="help.tacticalMatch" /> : <InfoTooltip textKey="help.tactical" />}
         </View>
 
         {/* Hamburger menu */}
@@ -1284,8 +1384,20 @@ export function TacticalBoard({
             onUndoDrawing={undoLastDrawing}
             onClearAll={() => { clearArrows(); handleReset(); }}
             onSyncFromMatch={matchId ? handleSyncFromMatch : undefined}
+            onApplyToMatch={canApply ? handleApplyPress : undefined}
           />
         </View>
+
+        <ApplyToMatchSheet
+          plan={applyPlan}
+          homeTeamName={homeTeamName ?? t('tactical.benchHome')}
+          awayTeamName={awayTeamName ?? t('tactical.benchAway')}
+          homePlayers={homePlayers}
+          awayPlayers={awayPlayers}
+          applying={applying}
+          onCancel={handleCancelApply}
+          onConfirm={handleConfirmApply}
+        />
 
         <PlayerEditSheet
           visible={editingPlayer !== null}
@@ -1311,7 +1423,7 @@ export function TacticalBoard({
 
         <CoachMarks
           tipId="tactical"
-          enabled={visible && editingPlayer === null && !showPlaybook && !showMenu}
+          enabled={visible && editingPlayer === null && !showPlaybook && !showMenu && applyPlan === null}
           steps={[
             { id: 'court', target: courtRef },
             ...(hasBench ? [{ id: 'bench', target: benchRef }] : []),

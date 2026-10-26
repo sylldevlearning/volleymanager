@@ -435,7 +435,30 @@
     "arrows_one": "arrow",
     "arrows_other": "arrows",
     "clearConfirm": "Clear all drawings?",
-    "syncFromMatch": "Sync match"
+    "syncFromMatch": "Sync match",
+    "apply": {
+      "button": "Apply to match",
+      "title": "Apply to match",
+      "subLine": "{{in}} comes in for {{out}}",
+      "liberoTag": "libero",
+      "lineupTitle": "Starting lineup",
+      "zone": "{{zone}}: {{number}}",
+      "confirm": "Confirm",
+      "now": "Now",
+      "later": "Later",
+      "askOnClose": "Apply these changes to the match?",
+      "nothingTitle": "Nothing to apply",
+      "nothingInSet": "No substitution to apply. During a set only substitutions are applied to the match: position moves stay on the board.",
+      "nothingSetOver": "The set is over. Start the next set to apply a starting lineup.",
+      "nothingLineup": "The board already matches the match lineup.",
+      "refusedHint": "One refused substitution blocks them all: fix the board, nothing was applied.",
+      "failed": "The changes could not be applied. Try again.",
+      "lineupErrors": {
+        "lineup_count": "Exactly 6 players are needed on court ({{count}} placed).",
+        "lineup_same_zone": "No. {{first}} and no. {{second}} are in the same zone ({{zone}}).",
+        "lineup_libero": "The libero (no. {{number}}) cannot be in the starting lineup."
+      }
+    }
   },
   "scanner": {
     "title": "Scan licenses",
@@ -558,6 +581,7 @@
     "arbitrage": "Lineup: tap each court position to place a starter, then confirm. During the match: +1 gives the point, ⇄ swaps sides. Tap a player on the court to substitute them (or take the libero out). Timeout, Substitution and Card for each team; Undo reverts the last action.",
     "coach": "Select a player at the top, then tap the action they made. Stats update in real time. The chart icon opens the match dashboard.",
     "tactical": "Drag a player anywhere; tap them to change number, name or colour. Bench: drop a substitute on a player to swap them, or on empty space to bring them on; drag a player to the bench to take them off. Pick a tool to draw: T1 animates the step (long-press: back to start), ⏮ ◀ ▶ replay step by step. 🗒 starts a blank board, ⋮ menu to load or save.",
+    "tacticalMatch": "Drag a player anywhere; tap them to change number, name or colour. Bench: drop a substitute on a player to swap them, or on empty space to bring them on; drag a player to the bench to take them off. Pick a tool to draw: T1 animates the step (long-press: back to start), ⏮ ◀ ▶ replay step by step. 🗒 starts a blank board, ⋮ menu to load or save. From a match, the board is kept for that match; \"Sync match\" goes back to the match state. \"Apply to match\" records the substitutions during a set (rules checked, can be undone), or the starting lineup before the first point of a set.",
     "teams": "Tap a team to see and manage its players. + to create a team.",
     "team": "+ adds a player: only the number is required. The scanner button imports players from a licence photo. Chart: player stats; bin: delete them.",
     "newMatch": "Choose the teams, format, mode and who serves first. The rules (sets, points, timeouts, substitutions) can be adjusted.",

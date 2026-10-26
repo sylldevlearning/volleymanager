@@ -435,7 +435,30 @@
     "arrows_one": "flèche",
     "arrows_other": "flèches",
     "clearConfirm": "Effacer tous les tracés ?",
-    "syncFromMatch": "Sync match"
+    "syncFromMatch": "Sync match",
+    "apply": {
+      "button": "Appliquer au match",
+      "title": "Appliquer au match",
+      "subLine": "{{in}} entre à la place de {{out}}",
+      "liberoTag": "libéro",
+      "lineupTitle": "Composition de départ",
+      "zone": "{{zone}} : {{number}}",
+      "confirm": "Valider",
+      "now": "Maintenant",
+      "later": "Plus tard",
+      "askOnClose": "Appliquer ces changements au match ?",
+      "nothingTitle": "Rien à appliquer",
+      "nothingInSet": "Aucun remplacement à appliquer. Pendant un set, seuls les remplacements sont appliqués au match : les déplacements restent sur le tableau.",
+      "nothingSetOver": "Le set est terminé. Lancez le set suivant pour appliquer une composition de départ.",
+      "nothingLineup": "Le tableau correspond déjà à la composition du match.",
+      "refusedHint": "Un remplacement refusé bloque l'ensemble : corrigez le tableau, rien n'a été appliqué.",
+      "failed": "Les changements n'ont pas pu être appliqués. Réessayez.",
+      "lineupErrors": {
+        "lineup_count": "Il faut exactement 6 joueurs sur le terrain ({{count}} placés).",
+        "lineup_same_zone": "Le n°{{first}} et le n°{{second}} sont dans la même zone ({{zone}}).",
+        "lineup_libero": "Le libéro (n°{{number}}) ne peut pas faire partie de la composition de départ."
+      }
+    }
   },
   "scanner": {
     "title": "Scanner les licences",
@@ -558,6 +581,7 @@
     "arbitrage": "Composition : touchez chaque poste du terrain pour y placer un titulaire, puis validez. En match : +1 donne le point, ⇄ inverse les côtés. Touchez un joueur sur le terrain pour le remplacer (ou faire sortir le libéro). Temps mort, Remplacement et Carton pour chaque équipe ; Annuler revient sur la dernière action.",
     "coach": "Sélectionnez un joueur en haut, puis tapez l'action réalisée. Les stats se calculent en temps réel. L'icône graphique ouvre le tableau de bord du match.",
     "tactical": "Glissez un joueur n'importe où ; touchez-le pour changer numéro, nom ou couleur. Banc : glissez un remplaçant sur un joueur pour l'échanger, ou sur une zone libre pour le faire entrer ; ramenez un joueur au banc pour le sortir. Choisissez un outil pour tracer : T1 anime l'étape (appui long : retour au début), ⏮ ◀ ▶ rejouent pas à pas. 🗒 repart d'un terrain vierge, menu ⋮ pour charger ou sauvegarder.",
+    "tacticalMatch": "Glissez un joueur n'importe où ; touchez-le pour changer numéro, nom ou couleur. Banc : glissez un remplaçant sur un joueur pour l'échanger, ou sur une zone libre pour le faire entrer ; ramenez un joueur au banc pour le sortir. Choisissez un outil pour tracer : T1 anime l'étape (appui long : retour au début), ⏮ ◀ ▶ rejouent pas à pas. 🗒 repart d'un terrain vierge, menu ⋮ pour charger ou sauvegarder. Depuis un match, le tableau est gardé pour ce match ; « Sync match » revient à l'état du match. « Appliquer au match » enregistre les remplacements pendant un set (règles vérifiées, annulables), ou la composition de départ avant le premier point d'un set.",
     "teams": "Touchez une équipe pour voir et gérer ses joueurs. + pour créer une équipe.",
     "team": "+ ajoute un joueur : seul le numéro est obligatoire. Le bouton scanner importe les joueurs depuis une photo de licence. Graphique : statistiques du joueur ; corbeille : le supprimer.",
     "newMatch": "Choisissez les équipes, le format, le mode et qui sert en premier. Les règles (sets, points, temps morts, remplacements) sont ajustables.",
