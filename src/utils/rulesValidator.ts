@@ -18,6 +18,7 @@ export type RuleCode =
   | 'libero_cannot_serve'
   | 'libero_rally_required'
   | 'libero_other_active'
+  | 'libero_wrong_return'
   | 'timeout_quota_reached';
 
 export interface RuleViolation {
@@ -209,6 +210,21 @@ export function checkLiberoNotAlreadyActive(
     'libero_other_active',
     `Le libéro n°${activeLiberoNumber} est déjà sur le terrain.`,
     { number: activeLiberoNumber },
+  );
+}
+
+/** The libero leaves the court only for the player they replaced. */
+export function validateLiberoExit(
+  libero: LiberoState,
+  playerInId: string,
+  /** Jersey number of the player the libero replaced (used in the message if blocked). */
+  replacedNumber: number,
+): RuleResult {
+  if (libero.replacedPlayerId === playerInId) return { ok: true };
+  return violation(
+    'libero_wrong_return',
+    `Le libéro ne peut sortir que pour le n°${replacedNumber}, qu'il avait remplacé.`,
+    { number: replacedNumber },
   );
 }
 
