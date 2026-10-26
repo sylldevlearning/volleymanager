@@ -14,7 +14,8 @@ import { getMatchById, createSet, updateSet, updateMatchStatus, setMatchRefereeS
 import { addEvent, undoLastEvent } from '../../../src/services/eventService';
 import { getPlayersByTeam } from '../../../src/services/playerService';
 import { performSubstitution } from '../../../src/services/substitutionService';
-import { saveLineup, type LineupEntry } from '../../../src/services/lineupService';
+import { saveLineup } from '../../../src/services/lineupService';
+import { buildLineupState, toLineupEntries } from '../../../src/features/lineup/lineupState';
 import { reconstructLiveState } from '../../../src/services/matchStateReconstruction';
 import { addSanction, getSanctionsForMatch } from '../../../src/services/sanctionService';
 import { getDelaySanctionOutcome, type SanctionType } from '../../../src/utils/sanctionRules';
@@ -55,23 +56,6 @@ function buildAutoLineup(players: Player[]) {
     ? { liberoId: liberoPlayers[0].id, isOnCourt: false, replacedPlayerId: null, replacedPosition: null }
     : null;
   return { courtMap, bench, liberoState };
-}
-
-function toLineupEntries(courtMap: CourtMap): LineupEntry[] {
-  return Object.entries(courtMap).map(([pos, playerId]) => ({
-    playerId, position: Number(pos) as LineupEntry['position'], isStarter: true, isLibero: false,
-  }));
-}
-
-/** Fresh bench + libero state for a team's chosen starting six — same construction used whether this is the very first set or a lineup re-entered before a later one. */
-function buildLineupState(players: Player[], courtMap: CourtMap): { bench: Player[]; liberoState: LiberoState | null } {
-  const liberoPlayer = players.find((p) => p.position === 'libero') ?? null;
-  const assigned = new Set(Object.values(courtMap));
-  const bench = players.filter((p) => !assigned.has(p.id));
-  const liberoState: LiberoState | null = liberoPlayer
-    ? { liberoId: liberoPlayer.id, isOnCourt: false, replacedPlayerId: null, replacedPosition: null }
-    : null;
-  return { bench, liberoState };
 }
 
 function courtPlayers(

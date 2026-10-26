@@ -30,6 +30,8 @@ import type { Team } from '../../../src/models/team';
 import type { Player } from '../../../src/models/player';
 import { getPlayerShortName } from '../../../src/features/players/player-helpers';
 import { takeLineupDraft } from '../../../src/features/lineup/lineupDraft';
+import { buildLineupState, courtFromLineupRows } from '../../../src/features/lineup/lineupState';
+import { getLineupForSet } from '../../../src/services/lineupService';
 import { palette } from '../../../src/theme/tokens';
 
 type PointAction =
@@ -135,8 +137,8 @@ export default function RefereeScreen() {
       }
 
       const draft = takeLineupDraft();
-      const homeLineup = draft?.home ?? buildLineup(homePlrs);
-      const awayLineup = draft?.away ?? buildLineup(awayPlrs);
+      let homeLineup = draft?.home ?? buildLineup(homePlrs);
+      let awayLineup = draft?.away ?? buildLineup(awayPlrs);
 
       if (m.status === 'created') {
         await updateMatchStatus(id, 'live');
@@ -150,6 +152,15 @@ export default function RefereeScreen() {
           existingSets[existingSets.length - 1] ??
           (await createSet(id, 1));
         initMatch(m, activeSet);
+        // A starting lineup applied from the tactical board for this set wins over the default
+        const [homeRows, awayRows] = await Promise.all([
+          getLineupForSet(id, activeSet.id, m.teamHomeId),
+          getLineupForSet(id, activeSet.id, m.teamAwayId),
+        ]);
+        const savedHome = courtFromLineupRows(homeRows);
+        const savedAway = courtFromLineupRows(awayRows);
+        if (savedHome) homeLineup = { courtMap: savedHome, ...buildLineupState(homePlrs, savedHome) };
+        if (savedAway) awayLineup = { courtMap: savedAway, ...buildLineupState(awayPlrs, savedAway) };
       }
       // initLineup AFTER initMatch — initMatch resets court to EMPTY_COURT
       initLineup('home', homeLineup.courtMap, homeLineup.bench, homeLineup.liberoState);

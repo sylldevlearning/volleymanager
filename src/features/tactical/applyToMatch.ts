@@ -9,7 +9,21 @@ import {
   checkLiberoRallySinceLastReplacement,
   type RuleResult,
 } from '../../utils/rulesValidator';
-import { effectiveCourt, type BoardSubstitution, type MatchTeamState } from './matchDiff';
+import type { Match, MatchSet } from '../../models/match';
+import type { Player } from '../../models/player';
+import type { LiberoState } from '../../models/substitution';
+import type { PlayerPosition } from '../../models/tactical';
+import type { CourtMap } from '../../stores/scoringStore';
+import {
+  effectiveCourt,
+  computeBoardSubstitutions,
+  positionsToLineup,
+  lineupDiffers,
+  type BenchMove,
+  type BoardSubstitution,
+  type LineupResult,
+  type MatchTeamState,
+} from './matchDiff';
 
 /** Everything rulesValidator needs about one team, as the substitution sheet passes it */
 export interface TeamRulesContext {
@@ -115,4 +129,106 @@ export function checkBoardSubstitutions(subs: BoardSubstitution[], ctx: TeamRule
 
 function firstFailure(...results: RuleResult[]): RuleResult {
   return results.find((r) => !r.ok) ?? { ok: true };
+}
+
+/**
+ * What the board may change in the match right now:
+ * - before_first_point: the set has no rally yet (between two sets) → starting lineup
+ * - in_set: substitutions only, never position moves
+ * - set_over / none: nothing
+ */
+export type MatchPhase = 'before_first_point' | 'in_set' | 'set_over' | 'none';
+
+export function matchPhase(currentSet: MatchSet | null, setEvents: MatchEvent[]): MatchPhase {
+  if (!currentSet) return 'none';
+  if (currentSet.winnerTeamId) return 'set_over';
+  const happened = setEvents.some((e) => !e.isCancelled && e.eventType !== 'undo');
+  return happened ? 'in_set' : 'before_first_point';
+}
+
+export type TeamLineupPlan =
+  | { status: 'unchanged' }
+  | { status: 'changed'; court: CourtMap }
+  | { status: 'error'; error: Exclude<LineupResult, { ok: true }> };
+
+export type ApplyPlan =
+  | { kind: 'none' }
+  | { kind: 'substitutions'; ok: boolean; home: BoardCheckResult; away: BoardCheckResult }
+  | { kind: 'lineup'; ok: boolean; home: TeamLineupPlan; away: TeamLineupPlan };
+
+export interface ApplyInput {
+  positions: PlayerPosition[];
+  benchMoves: BenchMove[];
+  phase: MatchPhase;
+  home: TeamRulesContext;
+  away: TeamRulesContext;
+}
+
+function teamLineupPlan(positions: PlayerPosition[], ctx: TeamRulesContext): TeamLineupPlan {
+  const isHome = ctx.side === 'home';
+  const lineup = positionsToLineup(positions, isHome, ctx.team.players);
+  const matchCourt = effectiveCourt(ctx.team);
+  if (lineup.ok) return lineupDiffers(lineup.court, matchCourt) ? { status: 'changed', court: lineup.court } : { status: 'unchanged' };
+  if (lineup.code === 'lineup_no_roster') return { status: 'unchanged' };
+
+  // Players placed off the zones (a drawn play) only matter when the players changed
+  const ids = new Set(ctx.team.players.map((p) => p.id));
+  const onBoard = positions.filter((p) => !p.isBall && p.isHome === isHome && ids.has(p.playerId)).map((p) => p.playerId);
+  const inMatch = Object.values(matchCourt);
+  const samePlayers = onBoard.length === inMatch.length && onBoard.every((id) => inMatch.includes(id));
+  return samePlayers ? { status: 'unchanged' } : { status: 'error', error: lineup };
+}
+
+/** The recap shown before applying the board to the match (and whether there is anything to apply). */
+export function planBoardApply(input: ApplyInput): ApplyPlan {
+  if (input.phase === 'in_set') {
+    const check = (ctx: TeamRulesContext) =>
+      checkBoardSubstitutions(computeBoardSubstitutions(input.positions, input.benchMoves, ctx.side === 'home', ctx.team), ctx);
+    const home = check(input.home);
+    const away = check(input.away);
+    if (home.items.length === 0 && away.items.length === 0) return { kind: 'none' };
+    return { kind: 'substitutions', ok: home.ok && away.ok, home, away };
+  }
+  if (input.phase === 'before_first_point') {
+    const home = teamLineupPlan(input.positions, input.home);
+    const away = teamLineupPlan(input.positions, input.away);
+    if (home.status === 'unchanged' && away.status === 'unchanged') return { kind: 'none' };
+    return { kind: 'lineup', ok: home.status !== 'error' && away.status !== 'error', home, away };
+  }
+  return { kind: 'none' };
+}
+
+/** The live scoring store fields the rules need — the same ones the substitution sheet receives. */
+export interface LiveMatchState {
+  match: Pick<Match, 'config'> | null;
+  onCourtHome: CourtMap;
+  onCourtAway: CourtMap;
+  liberoHome: LiberoState | null;
+  liberoAway: LiberoState | null;
+  pairsHome: SubstitutionPair[];
+  pairsAway: SubstitutionPair[];
+  substitutionsHome: number;
+  substitutionsAway: number;
+  servingTeam: 'home' | 'away';
+  events: MatchEvent[];
+}
+
+export function rulesContextFromStore(state: LiveMatchState, side: 'home' | 'away', roster: Player[]): TeamRulesContext {
+  const isHome = side === 'home';
+  return {
+    side,
+    team: {
+      court: isHome ? state.onCourtHome : state.onCourtAway,
+      libero: isHome ? state.liberoHome : state.liberoAway,
+      players: roster,
+    },
+    pairs: isHome ? state.pairsHome : state.pairsAway,
+    subsUsed: isHome ? state.substitutionsHome : state.substitutionsAway,
+    config: state.match!.config,
+    isTeamServing: state.servingTeam === side,
+    setEvents: state.events,
+    // The quick match screen has no sanctions
+    sanctionEventsForSet: [],
+    sanctionEventsForMatch: [],
+  };
 }
