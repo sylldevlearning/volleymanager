@@ -1,5 +1,6 @@
 import { getDb, generateId } from './database';
 import type { Match, MatchInput, MatchSet } from '../models/match';
+import { deleteMatchBoard, deleteAllMatchBoards } from '../features/tactical/boardPersistence';
 
 function rowToMatch(row: Record<string, unknown>): Match {
   return {
@@ -196,11 +197,13 @@ export async function getSetsForMatch(matchId: string): Promise<MatchSet[]> {
 export async function deleteMatch(id: string): Promise<void> {
   const db = await getDb();
   await db.runAsync('DELETE FROM matches WHERE id = ?', [id]);
+  await deleteMatchBoard(id);
 }
 
 export async function deleteAllMatches(): Promise<void> {
   const db = await getDb();
   await db.runAsync('DELETE FROM matches');
+  await deleteAllMatchBoards();
 }
 
 export async function updateSet(

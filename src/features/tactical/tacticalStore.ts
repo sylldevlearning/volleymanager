@@ -5,9 +5,23 @@ import { swapWithBench, sendToBench, enterFromBench, MAX_ON_COURT, type BenchBoa
 
 type DrawingEntry = { type: 'arrow'; id: string } | { type: 'freehand'; id: string };
 
+/** Everything the coach builds on the board — what a match board save holds */
+export interface BoardSnapshot {
+  positions: PlayerPosition[];
+  benchHome: BenchPlayer[];
+  benchAway: BenchPlayer[];
+  arrows: Arrow[];
+  freehandPaths: FreehandPath[];
+  drawingOrder: DrawingEntry[];
+  currentGroup: number;
+  history: StepSnapshot[];
+  currentPlayId: string | null;
+  currentPlayName: string | null;
+}
+
 interface TacticalState {
   positions: PlayerPosition[];
-  /** Substitutes off the court — sandbox only, never written to the match */
+  /** Substitutes off the court — written to the match only via "Appliquer au match" */
   benchHome: BenchPlayer[];
   benchAway: BenchPlayer[];
   arrows: Arrow[];
@@ -52,13 +66,15 @@ interface TacticalState {
   setArrowThickness: (thickness: ArrowThickness) => void;
   loadPlay: (play: TacticalPlay) => void;
   resetBoard: () => void;
+  getSnapshot: () => BoardSnapshot;
+  restoreSnapshot: (snapshot: BoardSnapshot) => void;
 }
 
 function benchBoard(state: TacticalState): BenchBoard {
   return { positions: state.positions, benchHome: state.benchHome, benchAway: state.benchAway };
 }
 
-export const useTacticalStore = create<TacticalState>()((set) => ({
+export const useTacticalStore = create<TacticalState>()((set, get) => ({
   positions: [],
   benchHome: [],
   benchAway: [],
@@ -203,4 +219,22 @@ export const useTacticalStore = create<TacticalState>()((set) => ({
       currentPlayName: null,
       history: [],
     }),
+
+  getSnapshot: () => {
+    const s = get();
+    return {
+      positions: s.positions,
+      benchHome: s.benchHome,
+      benchAway: s.benchAway,
+      arrows: s.arrows,
+      freehandPaths: s.freehandPaths,
+      drawingOrder: s.drawingOrder,
+      currentGroup: s.currentGroup,
+      history: s.history,
+      currentPlayId: s.currentPlayId,
+      currentPlayName: s.currentPlayName,
+    };
+  },
+
+  restoreSnapshot: (snapshot) => set({ ...snapshot, selectedTool: 'move' }),
 }));

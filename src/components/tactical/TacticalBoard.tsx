@@ -22,6 +22,7 @@ import { PlaybookSheet } from './PlaybookSheet';
 import { PlayerEditSheet } from './PlayerEditSheet';
 import { useTacticalStore } from '../../features/tactical/tacticalStore';
 import { seedDefaultPlays } from '../../features/tactical/tacticalService';
+import { openMatchBoard, saveMatchBoard } from '../../features/tactical/boardPersistence';
 import { HOME_POSITION_COORDS, AWAY_POSITION_COORDS, findNearestPlayer, clamp, easeInOut } from '../../features/tactical/positionUtils';
 import { buildDefaultBench, benchFromPlayers, findTokenAt, MAX_ON_COURT } from '../../features/tactical/benchUtils';
 import { useScoringStore } from '../../stores/scoringStore';
@@ -43,6 +44,8 @@ const BENCH_TOKEN_SIZE = 30;
 const BENCH_H = 96;
 /** Max distance (px) between a dropped substitute and a court token to swap them */
 const SWAP_RADIUS_PX = 28;
+/** Debounce of the match board auto-save */
+const SAVE_DELAY_MS = 500;
 
 // ── Bench token — draggable / tappable substitute chip ───────────────────────
 
@@ -364,6 +367,8 @@ export function TacticalBoard({
   const [playbookMode, setPlaybookMode] = useState<'load' | 'save'>('load');
   const [currentFormat, setCurrentFormat] = useState<MatchFormat>(format);
   const [isSyncedWithMatch, setIsSyncedWithMatch] = useState(true);
+  /** Match board only: false until this match's save is restored (or found missing) */
+  const [boardReady, setBoardReady] = useState(!matchId);
 
   // ── Bench ─────────────────────────────────────────────────────────────────
   const courtRef = useRef<View>(null);
@@ -438,19 +443,36 @@ export function TacticalBoard({
     if (visible) {
       seedDefaultPlays().catch(console.error);
       if (matchId) {
-        // Always re-sync from live match state on every open, regardless of
-        // whether the user had dragged players before closing.
-        setIsSyncedWithMatch(true);
+        // Restore this match's board; without a save, start from the match state
+        let cancelled = false;
+        openMatchBoard(matchId).then((opened) => {
+          if (cancelled) return;
+          if (opened.restored) {
+            setIsSyncedWithMatch(opened.syncedWithMatch);
+            setCurrentFormat(opened.format);
+          } else {
+            resetBoard();
+            setIsSyncedWithMatch(true);
+            setCurrentFormat(format);
+          }
+          setBoardReady(true);
+        }).catch(() => {
+          if (!cancelled) setBoardReady(true);
+        });
+        return () => { cancelled = true; };
       } else if (positions.length === 0) {
         setPositions(buildDefaultPositions(homeTeamId, awayTeamId, rotationHome, rotationAway, format));
         setBench(buildDefaultBench(homeTeamId, true), buildDefaultBench(awayTeamId, false));
       }
+    } else if (matchId) {
+      // Closed: the next open restores the save again before syncing or saving
+      setBoardReady(false);
     }
   }, [visible]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Match sync: auto-follow rotations & substitutions while isSyncedWithMatch is true ──
   useEffect(() => {
-    if (!matchId || !visible || !isSyncedWithMatch) return;
+    if (!matchId || !visible || !boardReady || !isSyncedWithMatch) return;
     const ball = positions.find((p) => p.isBall);
     const synced = buildSyncedPositions(
       homeTeamId, awayTeamId,
@@ -466,7 +488,33 @@ export function TacticalBoard({
       awayPlayers.length > 0 ? benchFromPlayers(matchBenchAway, awayTeamId, false) : buildDefaultBench(awayTeamId, false),
     );
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [matchId, visible, isSyncedWithMatch, onCourtHome, onCourtAway, liberoHome, liberoAway, matchBenchHome, matchBenchAway]);
+  }, [matchId, visible, boardReady, isSyncedWithMatch, onCourtHome, onCourtAway, liberoHome, liberoAway, matchBenchHome, matchBenchAway]);
+
+  // ── Match board auto-save: every change, debounced, survives an app kill ──
+  const saveMetaRef = useRef({ syncedWithMatch: isSyncedWithMatch, format: currentFormat });
+  saveMetaRef.current = { syncedWithMatch: isSyncedWithMatch, format: currentFormat };
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const saveBoardNow = useCallback(() => {
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = null;
+    if (matchId) saveMatchBoard(matchId, saveMetaRef.current).catch(console.error);
+  }, [matchId]);
+
+  useEffect(() => {
+    if (!matchId || !visible || !boardReady) return;
+    const schedule = () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = setTimeout(saveBoardNow, SAVE_DELAY_MS);
+    };
+    schedule();
+    const unsubscribe = useTacticalStore.subscribe(schedule);
+    return () => {
+      unsubscribe();
+      // Leaving (close, unmount, other match): write what is pending right away
+      if (saveTimerRef.current) saveBoardNow();
+    };
+  }, [matchId, visible, boardReady, isSyncedWithMatch, currentFormat, saveBoardNow]);
 
   useEffect(() => { playbackPositionsRef.current = playbackPositions; }, [playbackPositions]);
   // When drawings change (add/undo/advance) exit history browse mode
@@ -977,6 +1025,7 @@ export function TacticalBoard({
     updates: { number: number; firstName: string; lastName: string; customColor?: string },
   ) {
     const newLabel = String(updates.number);
+    markBoardEdited();
     updatePlayerInfo(playerId, {
       number: updates.number,
       firstName: updates.firstName || null,
@@ -1002,6 +1051,7 @@ export function TacticalBoard({
     loadPlay(play);
     setCurrentFormat(play.format);
     handleReset();
+    markBoardEdited();
   }
 
   function handleNewBoard() {
@@ -1020,10 +1070,12 @@ export function TacticalBoard({
     handleReset();
     setPositions(buildDefaultPositions(homeTeamId, awayTeamId, rotationHome, rotationAway, next));
     setBench(buildDefaultBench(homeTeamId, true), buildDefaultBench(awayTeamId, false));
+    markBoardEdited();
   }
 
   function handleClose() {
     handleReset();
+    if (matchId && boardReady) saveBoardNow();
     onClose();
   }
 
