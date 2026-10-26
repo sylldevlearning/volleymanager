@@ -51,6 +51,8 @@ export interface UndoResult {
   cancelledEventId: string;
   /** The opponent's point event cancelled alongside a penalty/delay sanction, if any. */
   linkedCancelledEventId: string | null;
+  /** Set when the undone event was a timeout — the team gets it back */
+  timeout?: 'home' | 'away';
   /** Set when the undone event was a substitution — lets the live screen revert the court */
   substitution?: {
     side: 'home' | 'away';
@@ -126,6 +128,9 @@ export async function undoLastEvent(matchId: string, setId: string): Promise<Und
       isLibero: details.isLibero === true,
       isExceptional: details.isExceptional === true,
     };
+  }
+  if (eventType === 'timeout_home' || eventType === 'timeout_away') {
+    result.timeout = eventType === 'timeout_home' ? 'home' : 'away';
   }
   return result;
 }

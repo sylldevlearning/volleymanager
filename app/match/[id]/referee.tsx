@@ -10,9 +10,10 @@ import * as Haptics from 'expo-haptics';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 
 import { getMatchById, createSet, getSetsForMatch, updateSet, updateMatchStatus } from '../../../src/services/matchService';
-import { addEvent, undoLastEvent, addDirectPointCorrection } from '../../../src/services/eventService';
+import { addEvent, addDirectPointCorrection } from '../../../src/services/eventService';
 import { getPlayersByTeam } from '../../../src/services/playerService';
 import { recordSubstitution } from '../../../src/features/match/recordSubstitution';
+import { recordTimeout, undoQuickMatchEvent, type QuickMatchSetContext } from '../../../src/features/match/quickMatchEvents';
 import { useScoringStore } from '../../../src/stores/scoringStore';
 import { useSettingsStore } from '../../../src/stores/settingsStore';
 import { getTeamById } from '../../../src/services/teamService';
@@ -69,8 +70,8 @@ export default function RefereeScreen() {
     setScores, servingTeam, timeoutsHome, timeoutsAway, showChangeEnds,
     onCourtHome, onCourtAway, benchHome, benchAway, liberoHome, liberoAway,
     pairsHome, pairsAway, substitutionsHome, substitutionsAway,
-    initMatch, hydrate, addPointEvent, undoPoint, removePoint, addCorrectionEvent, endCurrentSet, startNewSet,
-    requestTimeout, cancelTimeout, initLineup, revertSubstitution,
+    initMatch, hydrate, addPointEvent, removePoint, addCorrectionEvent, endCurrentSet, startNewSet,
+    initLineup,
     events, dismissChangeEnds, reset,
   } = useScoringStore();
 
@@ -321,21 +322,18 @@ export default function RefereeScreen() {
     }
   }, [match, currentSet, scoreHome, scoreAway, setsHome, setsAway, homeTeam, awayTeam, homePlayers, awayPlayers, finalizePendingSetEnd]);
 
+  const setContext = useCallback((): QuickMatchSetContext | null => {
+    if (!match || !currentSet) return null;
+    return { matchId: match.id, setId: currentSet.id, homeTeamId: match.teamHomeId, awayTeamId: match.teamAwayId };
+  }, [match, currentSet]);
+
+  // Point, substitution or timeout: the last event is cancelled and reverted
   const handleUndo = useCallback(async () => {
-    if (!match || !currentSet) return;
-    const result = await undoLastEvent(match.id, currentSet.id);
-    if (result) {
-      // A substitution undo also puts court, bench, libero and quota back
-      const sub = result.substitution;
-      if (sub) {
-        const roster = sub.side === 'home' ? homePlayers : awayPlayers;
-        revertSubstitution(sub.side, sub, roster.find((p) => p.id === sub.playerInId));
-      }
-      undoPoint(result.cancelledEventId);
-      if (result.linkedCancelledEventId) undoPoint(result.linkedCancelledEventId);
-      if (hapticsEnabled) Haptics.selectionAsync();
-    }
-  }, [match, currentSet, hapticsEnabled, homePlayers, awayPlayers, revertSubstitution, undoPoint]);
+    const ctx = setContext();
+    if (!ctx) return;
+    const undone = await undoQuickMatchEvent(ctx, { home: homePlayers, away: awayPlayers });
+    if (undone && hapticsEnabled) Haptics.selectionAsync();
+  }, [setContext, hapticsEnabled, homePlayers, awayPlayers]);
 
   const handleRemovePoint = useCallback(async (team: 'home' | 'away') => {
     if (!match || !currentSet) return;
@@ -363,14 +361,16 @@ export default function RefereeScreen() {
     if (hapticsEnabled) Haptics.selectionAsync();
   }, [match, currentSet, subSide, homePlayers, awayPlayers, hapticsEnabled]);
 
-  const handleTimeout = (team: 'home' | 'away') => {
-    if (!match) return;
+  const handleTimeout = async (team: 'home' | 'away') => {
+    const ctx = setContext();
+    if (!match || !ctx) return;
     const timeoutsUsed = team === 'home' ? timeoutsHome : timeoutsAway;
     if (!canRequestTimeout(timeoutsUsed, match.config)) {
       Alert.alert('', t('referee.noTimeoutsLeft'));
       return;
     }
-    requestTimeout(team);
+    // Saved like on the arbitrage screen: replayed on resume, undone by "Annuler"
+    await recordTimeout(ctx, team);
     setTimeoutTeam(team);
     if (hapticsEnabled) Haptics.selectionAsync();
     const name = team === 'home' ? (homeTeam?.name ?? '') : (awayTeam?.name ?? '');
@@ -380,8 +380,10 @@ export default function RefereeScreen() {
     setShowTimeoutSheet(true);
   };
 
-  const handleTimeoutCancel = () => {
-    cancelTimeout(timeoutTeam);
+  const handleTimeoutCancel = async () => {
+    // The timeout just recorded is the last event of the set
+    const ctx = setContext();
+    if (ctx) await undoQuickMatchEvent(ctx, { home: homePlayers, away: awayPlayers });
     setShowTimeoutSheet(false);
   };
 

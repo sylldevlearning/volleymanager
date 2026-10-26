@@ -156,3 +156,9 @@ test('describes an undone substitution so the live screen can revert the court',
     },
   });
 });
+
+test('tells which team an undone timeout belonged to', async () => {
+  const db = makeMockDb({ id: 'to-1', event_type: 'timeout_home', player_id: null, details_json: '{}' });
+  mockGetDb.mockResolvedValue(db);
+  expect(await undoLastEvent('m1', 's1')).toEqual({ cancelledEventId: 'to-1', linkedCancelledEventId: null, timeout: 'home' });
+});
