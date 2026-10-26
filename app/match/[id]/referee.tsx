@@ -30,8 +30,8 @@ import type { Team } from '../../../src/models/team';
 import type { Player } from '../../../src/models/player';
 import { getPlayerShortName } from '../../../src/features/players/player-helpers';
 import { takeLineupDraft } from '../../../src/features/lineup/lineupDraft';
-import { buildLineupState, courtFromLineupRows } from '../../../src/features/lineup/lineupState';
-import { getLineupForSet } from '../../../src/services/lineupService';
+import { buildLineupState } from '../../../src/features/lineup/lineupState';
+import { resumeQuickMatch, saveStartingLineups, startingCourtForNextSet } from '../../../src/features/match/quickMatchLineup';
 import { palette } from '../../../src/theme/tokens';
 
 type PointAction =
@@ -69,7 +69,7 @@ export default function RefereeScreen() {
     setScores, servingTeam, timeoutsHome, timeoutsAway, showChangeEnds,
     onCourtHome, onCourtAway, benchHome, benchAway, liberoHome, liberoAway,
     pairsHome, pairsAway, substitutionsHome, substitutionsAway,
-    initMatch, addPointEvent, undoPoint, removePoint, addCorrectionEvent, endCurrentSet, startNewSet,
+    initMatch, hydrate, addPointEvent, undoPoint, removePoint, addCorrectionEvent, endCurrentSet, startNewSet,
     requestTimeout, cancelTimeout, initLineup, revertSubstitution,
     events, dismissChangeEnds, reset,
   } = useScoringStore();
@@ -137,31 +137,26 @@ export default function RefereeScreen() {
       }
 
       const draft = takeLineupDraft();
-      let homeLineup = draft?.home ?? buildLineup(homePlrs);
-      let awayLineup = draft?.away ?? buildLineup(awayPlrs);
+      const homeLineup = draft?.home ?? buildLineup(homePlrs);
+      const awayLineup = draft?.away ?? buildLineup(awayPlrs);
 
-      if (m.status === 'created') {
-        await updateMatchStatus(id, 'live');
-        const firstSet = await createSet(id, 1);
-        initMatch({ ...m, status: 'live' }, firstSet);
-      } else {
-        // Resume: load existing sets, use the last unfinished one
-        const existingSets = await getSetsForMatch(id);
-        const activeSet =
-          existingSets.find((s) => !s.finishedAt) ??
-          existingSets[existingSets.length - 1] ??
-          (await createSet(id, 1));
-        initMatch(m, activeSet);
-        // A starting lineup applied from the tactical board for this set wins over the default
-        const [homeRows, awayRows] = await Promise.all([
-          getLineupForSet(id, activeSet.id, m.teamHomeId),
-          getLineupForSet(id, activeSet.id, m.teamAwayId),
-        ]);
-        const savedHome = courtFromLineupRows(homeRows);
-        const savedAway = courtFromLineupRows(awayRows);
-        if (savedHome) homeLineup = { courtMap: savedHome, ...buildLineupState(homePlrs, savedHome) };
-        if (savedAway) awayLineup = { courtMap: savedAway, ...buildLineupState(awayPlrs, savedAway) };
+      if (m.status !== 'created') {
+        // Resume: replay the current set from the DB (score, rotation, court,
+        // substitutions, libero) like the arbitrage screen. The default lineup
+        // only stands in for matches started before lineups were saved.
+        const resumed = await resumeQuickMatch(id, { home: homeLineup.courtMap, away: awayLineup.courtMap });
+        if (resumed) {
+          hydrate(resumed);
+          setLoading(false);
+          return;
+        }
       }
+
+      const live = { ...m, status: 'live' as const };
+      if (m.status === 'created') await updateMatchStatus(id, 'live');
+      const firstSet = (await getSetsForMatch(id))[0] ?? (await createSet(id, 1));
+      initMatch(live, firstSet);
+      await saveStartingLineups(live, firstSet.id, homeLineup.courtMap, awayLineup.courtMap);
       // initLineup AFTER initMatch — initMatch resets court to EMPTY_COURT
       initLineup('home', homeLineup.courtMap, homeLineup.bench, homeLineup.liberoState);
       initLineup('away', awayLineup.courtMap, awayLineup.bench, awayLineup.liberoState);
@@ -241,11 +236,20 @@ export default function RefereeScreen() {
             if (!match) return;
             const nextSet = await createSet(match.id, info.setNum + 1);
             startNewSet(nextSet);
+            // The players on court start the next set — saved so a resume replays from them
+            const live = useScoringStore.getState();
+            const homeCourt = startingCourtForNextSet(live.onCourtHome, live.liberoHome);
+            const awayCourt = startingCourtForNextSet(live.onCourtAway, live.liberoAway);
+            await saveStartingLineups(match, nextSet.id, homeCourt, awayCourt);
+            const homeState = buildLineupState(homePlayers, homeCourt);
+            const awayState = buildLineupState(awayPlayers, awayCourt);
+            initLineup('home', homeCourt, homeState.bench, homeState.liberoState);
+            initLineup('away', awayCourt, awayState.bench, awayState.liberoState);
           },
         }],
       );
     }
-  }, [match, t, router, startNewSet]);
+  }, [match, t, router, startNewSet, homePlayers, awayPlayers, initLineup]);
 
   const handlePoint = useCallback(async (team: 'home' | 'away') => {
     if (!match || !currentSet) return;
