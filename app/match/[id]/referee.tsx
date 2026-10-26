@@ -12,7 +12,7 @@ import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, w
 import { getMatchById, createSet, getSetsForMatch, updateSet, updateMatchStatus } from '../../../src/services/matchService';
 import { addEvent, undoLastEvent, addDirectPointCorrection } from '../../../src/services/eventService';
 import { getPlayersByTeam } from '../../../src/services/playerService';
-import { performSubstitution } from '../../../src/services/substitutionService';
+import { recordSubstitution } from '../../../src/features/match/recordSubstitution';
 import { useScoringStore } from '../../../src/stores/scoringStore';
 import { useSettingsStore } from '../../../src/stores/settingsStore';
 import { getTeamById } from '../../../src/services/teamService';
@@ -68,8 +68,8 @@ export default function RefereeScreen() {
     onCourtHome, onCourtAway, benchHome, benchAway, liberoHome, liberoAway,
     pairsHome, pairsAway, substitutionsHome, substitutionsAway,
     initMatch, addPointEvent, undoPoint, removePoint, addCorrectionEvent, endCurrentSet, startNewSet,
-    requestTimeout, cancelTimeout, initLineup, applySubstitution,
-    dismissChangeEnds, reset,
+    requestTimeout, cancelTimeout, initLineup, revertSubstitution,
+    events, dismissChangeEnds, reset,
   } = useScoringStore();
 
   const [homeTeam, setHomeTeam] = useState<Team | null>(null);
@@ -310,11 +310,17 @@ export default function RefereeScreen() {
     if (!match || !currentSet) return;
     const result = await undoLastEvent(match.id, currentSet.id);
     if (result) {
+      // A substitution undo also puts court, bench, libero and quota back
+      const sub = result.substitution;
+      if (sub) {
+        const roster = sub.side === 'home' ? homePlayers : awayPlayers;
+        revertSubstitution(sub.side, sub, roster.find((p) => p.id === sub.playerInId));
+      }
       undoPoint(result.cancelledEventId);
       if (result.linkedCancelledEventId) undoPoint(result.linkedCancelledEventId);
       if (hapticsEnabled) Haptics.selectionAsync();
     }
-  }, [match, currentSet, hapticsEnabled]);
+  }, [match, currentSet, hapticsEnabled, homePlayers, awayPlayers, revertSubstitution, undoPoint]);
 
   const handleRemovePoint = useCallback(async (team: 'home' | 'away') => {
     if (!match || !currentSet) return;
@@ -328,23 +334,19 @@ export default function RefereeScreen() {
     playerInId: string;
     position: number;
     isLibero: boolean;
+    isExceptional?: boolean;
   }) => {
     if (!match || !currentSet) return;
     const side = subSide;
-    const teamId = side === 'home' ? match.teamHomeId : match.teamAwayId;
-    const { pair } = await performSubstitution({
+    await recordSubstitution({
       matchId: match.id,
       setId: currentSet.id,
-      teamId,
-      teamSide: side,
-      playerOutId: opts.playerOutId,
-      playerInId: opts.playerInId,
-      position: opts.position,
-      isLibero: opts.isLibero,
-    });
-    applySubstitution(side, opts.playerOutId, opts.playerInId, opts.position, opts.isLibero, pair);
+      teamId: side === 'home' ? match.teamHomeId : match.teamAwayId,
+      side,
+      roster: side === 'home' ? homePlayers : awayPlayers,
+    }, opts);
     if (hapticsEnabled) Haptics.selectionAsync();
-  }, [match, currentSet, subSide, applySubstitution, hapticsEnabled]);
+  }, [match, currentSet, subSide, homePlayers, awayPlayers, hapticsEnabled]);
 
   const handleTimeout = (team: 'home' | 'away') => {
     if (!match) return;
@@ -591,6 +593,12 @@ export default function RefereeScreen() {
         format={match.format}
         mode={match.mode}
         onConfirm={handleSubConfirm}
+        // Same rules and messages as the arbitrage screen (rulesValidator)
+        strict
+        isTeamServing={servingTeam === subSide}
+        setEvents={events}
+        sanctionEventsForSet={[]}
+        sanctionEventsForMatch={[]}
       />
 
       {/* Tactical board */}

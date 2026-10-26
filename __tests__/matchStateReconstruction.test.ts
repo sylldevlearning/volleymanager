@@ -100,7 +100,8 @@ test('resuming a live match from the DB reproduces the exact live state', async 
     const s = useScoringStore.getState();
     const teamId = side === 'home' ? match.teamHomeId : match.teamAwayId;
     const { pair } = await performSubstitution({ matchId: match.id, setId: s.currentSet!.id, teamId, teamSide: side, playerOutId, playerInId, position, isLibero });
-    s.applySubstitution(side, playerOutId, playerInId, position, isLibero, pair);
+    const playerOut = [...home, homeLibero, homeReserve, ...away].find((p) => p.id === playerOutId);
+    s.applySubstitution(side, playerOutId, playerInId, position, isLibero, pair, { playerOut });
   }
 
   async function timeout(team: 'home' | 'away') {

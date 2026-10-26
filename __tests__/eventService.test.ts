@@ -136,3 +136,23 @@ test('wraps the cascading cancels + undo insert in a single transaction', async 
 
   expect(db.withExclusiveTransactionAsync).toHaveBeenCalledTimes(1);
 });
+
+test('describes an undone substitution so the live screen can revert the court', async () => {
+  const db = makeMockDb({
+    id: 'sub-1',
+    event_type: 'substitution_away',
+    player_id: 'p7',
+    details_json: JSON.stringify({ playerOutId: 'p12', position: 4, pairId: 'pair-1', isLibero: false, isExceptional: false }),
+  });
+  mockGetDb.mockResolvedValue(db);
+
+  const result = await undoLastEvent('m1', 's1');
+
+  expect(result).toEqual({
+    cancelledEventId: 'sub-1',
+    linkedCancelledEventId: null,
+    substitution: {
+      side: 'away', playerOutId: 'p12', playerInId: 'p7', position: 4, pairId: 'pair-1', isLibero: false, isExceptional: false,
+    },
+  });
+});

@@ -51,6 +51,16 @@ export interface UndoResult {
   cancelledEventId: string;
   /** The opponent's point event cancelled alongside a penalty/delay sanction, if any. */
   linkedCancelledEventId: string | null;
+  /** Set when the undone event was a substitution — lets the live screen revert the court */
+  substitution?: {
+    side: 'home' | 'away';
+    playerOutId: string;
+    playerInId: string;
+    position: number;
+    pairId: string | null;
+    isLibero: boolean;
+    isExceptional: boolean;
+  };
 }
 
 export async function undoLastEvent(matchId: string, setId: string): Promise<UndoResult | null> {
@@ -105,7 +115,19 @@ export async function undoLastEvent(matchId: string, setId: string): Promise<Und
       details: { cancelledEventId: cancelledId, linkedCancelledEventId },
     });
   });
-  return { cancelledEventId: cancelledId, linkedCancelledEventId };
+  const result: UndoResult = { cancelledEventId: cancelledId, linkedCancelledEventId };
+  if (isSubstitution && typeof details.playerOutId === 'string' && typeof details.position === 'number') {
+    result.substitution = {
+      side: eventType === 'substitution_home' ? 'home' : 'away',
+      playerOutId: details.playerOutId,
+      playerInId: last.player_id as string,
+      position: details.position,
+      pairId: linkedPairId,
+      isLibero: details.isLibero === true,
+      isExceptional: details.isExceptional === true,
+    };
+  }
+  return result;
 }
 
 export async function addDirectPointCorrection(

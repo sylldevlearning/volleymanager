@@ -114,13 +114,26 @@ interface ScoringState {
     position: number,
     isLibero: boolean,
     pair: SubstitutionPair,
+    /** playerOut goes to the bench (so they can return) unless the substitution is exceptional */
+    options?: { playerOut?: Player; isExceptional?: boolean },
   ) => void;
+  /** "Annuler" on a substitution (or libero exit): puts court, bench, pairs, libero and quota back */
+  revertSubstitution: (side: 'home' | 'away', sub: RevertedSubstitution, playerIn: Player | undefined) => void;
   applyLiberoExit: (side: 'home' | 'away') => void;
   /** Adds the libero back to the bench after they exit (auto or manual) — makes them selectable again. */
   restoreLiberoToBench: (side: 'home' | 'away', liberoPlayer: Player) => void;
   rotateTeam: (team: 'home' | 'away') => void;
   dismissChangeEnds: () => void;
   reset: () => void;
+}
+
+export interface RevertedSubstitution {
+  playerOutId: string;
+  playerInId: string;
+  position: number;
+  pairId: string | null;
+  isLibero: boolean;
+  isExceptional: boolean;
 }
 
 const INITIAL_ROTATION = [1, 2, 3, 4, 5, 6];
@@ -374,11 +387,16 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
     set({ events: newEvents, scoreHome: home, scoreAway: away, servingTeam: serving });
   },
 
-  applySubstitution: (side, playerOutId, playerInId, position, isLibero, pair) => {
+  applySubstitution: (side, playerOutId, playerInId, position, isLibero, pair, options) => {
+    // A regular substitute's partner sits on the bench; the libero's replaced
+    // player and an injured (exceptional) player do not come back that way
+    const benchedOut = !isLibero && !options?.isExceptional ? options?.playerOut : undefined;
+    const withOut = (bench: Player[]) =>
+      (benchedOut && !bench.some((p) => p.id === benchedOut.id) ? [...bench, benchedOut] : bench);
     set((state) => {
       if (side === 'home') {
         const newCourt = { ...state.onCourtHome, [position]: playerInId };
-        const newBench = state.benchHome.filter((p) => p.id !== playerInId);
+        const newBench = withOut(state.benchHome.filter((p) => p.id !== playerInId));
         const pairsHome = [...state.pairsHome, pair];
         const liberoHome = isLibero
           ? { ...state.liberoHome!, isOnCourt: true, replacedPlayerId: playerOutId, replacedPosition: position }
@@ -392,7 +410,7 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
         };
       } else {
         const newCourt = { ...state.onCourtAway, [position]: playerInId };
-        const newBench = state.benchAway.filter((p) => p.id !== playerInId);
+        const newBench = withOut(state.benchAway.filter((p) => p.id !== playerInId));
         const pairsAway = [...state.pairsAway, pair];
         const liberoAway = isLibero
           ? { ...state.liberoAway!, isOnCourt: true, replacedPlayerId: playerOutId, replacedPosition: position }
@@ -405,6 +423,34 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
           substitutionsAway: isLibero ? state.substitutionsAway : state.substitutionsAway + 1,
         };
       }
+    });
+  },
+
+  revertSubstitution: (side, sub, playerIn) => {
+    set((state) => {
+      const isHome = side === 'home';
+      const libero = isHome ? state.liberoHome : state.liberoAway;
+      const isLiberoExit = sub.isLibero && sub.playerOutId === libero?.liberoId;
+      const court = { ...(isHome ? state.onCourtHome : state.onCourtAway), [sub.position]: sub.playerOutId };
+
+      let bench = (isHome ? state.benchHome : state.benchAway).filter((p) => p.id !== sub.playerOutId);
+      // Back to the bench — except the player the libero had replaced (never on the bench)
+      if (playerIn && !isLiberoExit && !bench.some((p) => p.id === playerIn.id)) bench = [...bench, playerIn];
+
+      let nextLibero = libero;
+      if (libero && isLiberoExit) {
+        nextLibero = { ...libero, isOnCourt: true, replacedPlayerId: sub.playerInId, replacedPosition: sub.position };
+      } else if (libero && sub.isLibero && sub.playerInId === libero.liberoId) {
+        nextLibero = { ...libero, isOnCourt: false, replacedPlayerId: null, replacedPosition: null };
+      }
+
+      const pairs = (isHome ? state.pairsHome : state.pairsAway).filter((p) => p.id !== sub.pairId);
+      const used = isHome ? state.substitutionsHome : state.substitutionsAway;
+      const subsUsed = sub.isLibero ? used : Math.max(0, used - 1);
+
+      return isHome
+        ? { onCourtHome: court, benchHome: bench, liberoHome: nextLibero, pairsHome: pairs, substitutionsHome: subsUsed }
+        : { onCourtAway: court, benchAway: bench, liberoAway: nextLibero, pairsAway: pairs, substitutionsAway: subsUsed };
     });
   },
 

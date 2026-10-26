@@ -505,11 +505,14 @@ export default function ArbitrageScreen() {
       isLibero: opts.isLibero,
       isExceptional: opts.isExceptional ?? false,
     });
-    applySubstitution(side, opts.playerOutId, opts.playerInId, opts.position, opts.isLibero, pair);
+    applySubstitution(side, opts.playerOutId, opts.playerInId, opts.position, opts.isLibero, pair, {
+      playerOut: (side === 'home' ? homePlayers : awayPlayers).find((p) => p.id === opts.playerOutId),
+      isExceptional: opts.isExceptional,
+    });
     recordEvent(event);
     setPreselectedOut(null);
     if (hapticsEnabled) Haptics.selectionAsync();
-  }, [match, currentSet, subSide, applySubstitution, recordEvent, hapticsEnabled]);
+  }, [match, currentSet, subSide, homePlayers, awayPlayers, applySubstitution, recordEvent, hapticsEnabled]);
 
   const handleSanctionConfirm = useCallback(async (opts: { sanctionType: SanctionType; playerId: string | null }) => {
     if (!match || !currentSet) return;

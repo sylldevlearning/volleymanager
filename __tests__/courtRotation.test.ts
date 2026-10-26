@@ -107,6 +107,29 @@ describe('replayCourtState', () => {
     expect(result.benchHome.map((p) => p.id)).not.toContain('h8');
   });
 
+  it('puts the starter who left back on the bench, so they can return', () => {
+    const rosterWithReserve = [...home, player('h8', 8)];
+    const events = [
+      subEvent({ id: 'e1', side: 'home', timestamp: 't1', playerInId: 'h8', playerOutId: 'h3', position: 3, isLibero: false }),
+    ];
+    const result = replayCourtState({
+      startingOnCourtHome, startingOnCourtAway, homeRoster: rosterWithReserve, awayRoster: away,
+      events, initialServingTeam: 'home',
+    });
+    expect(result.benchHome.map((p) => p.id)).toContain('h3');
+  });
+
+  it('keeps a player out after an exceptional (injury) substitution', () => {
+    const rosterWithReserve = [...home, player('h8', 8)];
+    const event = subEvent({ id: 'e1', side: 'home', timestamp: 't1', playerInId: 'h8', playerOutId: 'h3', position: 3, isLibero: false });
+    const events = [{ ...event, details: { ...event.details, isExceptional: true } }];
+    const result = replayCourtState({
+      startingOnCourtHome, startingOnCourtAway, homeRoster: rosterWithReserve, awayRoster: away,
+      events, initialServingTeam: 'home',
+    });
+    expect(result.benchHome.map((p) => p.id)).not.toContain('h3');
+  });
+
   it('replays the libero ENTERING for a back-row starter', () => {
     const events = [
       subEvent({ id: 'e1', side: 'home', timestamp: 't1', playerInId: 'h7', playerOutId: 'h6', position: 6, isLibero: true }),

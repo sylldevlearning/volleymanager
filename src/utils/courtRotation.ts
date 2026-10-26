@@ -125,7 +125,7 @@ export function replayCourtState(opts: {
       serving = team;
     } else if (event.eventType === 'substitution_home' || event.eventType === 'substitution_away') {
       const side: 'home' | 'away' = event.eventType === 'substitution_home' ? 'home' : 'away';
-      const details = event.details as { playerOutId?: string; position?: number; isLibero?: boolean };
+      const details = event.details as { playerOutId?: string; position?: number; isLibero?: boolean; isExceptional?: boolean };
       const playerInId = event.playerId;
       if (!playerInId || details.position === undefined || !details.playerOutId) continue;
       const liberoId = side === 'home' ? homeLiberoId : awayLiberoId;
@@ -134,10 +134,16 @@ export function replayCourtState(opts: {
       // exiting — manually or auto-forced by rotation (playerOutId = the
       // libero's own id, playerInId = the original player returning).
       const isLiberoExit = !!details.isLibero && details.playerOutId === liberoId;
+      // A regular substitute's partner sits on the bench (they may return); not an injured player
+      const roster = side === 'home' ? opts.homeRoster : opts.awayRoster;
+      const benchedOut = !details.isLibero && !details.isExceptional
+        ? roster.find((p) => p.id === details.playerOutId)
+        : undefined;
 
       if (side === 'home') {
         onCourtHome = { ...onCourtHome, [details.position]: playerInId };
         benchHome = benchHome.filter((p) => p.id !== playerInId);
+        if (benchedOut && !benchHome.some((p) => p.id === benchedOut.id)) benchHome = [...benchHome, benchedOut];
         if (isLiberoExit) {
           liberoHome = liberoHome ? { ...liberoHome, isOnCourt: false, replacedPlayerId: null, replacedPosition: null } : liberoHome;
           const liberoPlayer = opts.homeRoster.find((p) => p.id === liberoId);
@@ -150,6 +156,7 @@ export function replayCourtState(opts: {
       } else {
         onCourtAway = { ...onCourtAway, [details.position]: playerInId };
         benchAway = benchAway.filter((p) => p.id !== playerInId);
+        if (benchedOut && !benchAway.some((p) => p.id === benchedOut.id)) benchAway = [...benchAway, benchedOut];
         if (isLiberoExit) {
           liberoAway = liberoAway ? { ...liberoAway, isOnCourt: false, replacedPlayerId: null, replacedPosition: null } : liberoAway;
           const liberoPlayer = opts.awayRoster.find((p) => p.id === liberoId);

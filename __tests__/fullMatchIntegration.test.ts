@@ -186,7 +186,8 @@ test('full 5-set arbitrage match through the real store + services + rulesValida
       matchId: currentMatch.id, setId: s.currentSet!.id, teamId, teamSide: side,
       playerOutId, playerInId, position, isLibero, isExceptional,
     });
-    s.applySubstitution(side, playerOutId, playerInId, position, isLibero, pair);
+    const playerOut = [...homeRoster, ...awayRoster].find((p) => p.id === playerOutId);
+    s.applySubstitution(side, playerOutId, playerInId, position, isLibero, pair, { playerOut, isExceptional });
     s.recordEvent(event);
   }
 
