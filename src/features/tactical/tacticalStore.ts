@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { PlayerPosition, Arrow, FreehandPath, TacticalPlay, TacticalTool, ArrowThickness, StepSnapshot, BenchPlayer } from '../../models/tactical';
 import { generateId } from '../../services/database';
 import { swapWithBench, sendToBench, enterFromBench, MAX_ON_COURT, type BenchBoard } from './benchUtils';
+import type { BenchMove } from './matchDiff';
 
 type DrawingEntry = { type: 'arrow'; id: string } | { type: 'freehand'; id: string };
 
@@ -17,6 +18,7 @@ export interface BoardSnapshot {
   history: StepSnapshot[];
   currentPlayId: string | null;
   currentPlayName: string | null;
+  benchMoves: BenchMove[];
 }
 
 interface TacticalState {
@@ -24,6 +26,8 @@ interface TacticalState {
   /** Substitutes off the court — written to the match only via "Appliquer au match" */
   benchHome: BenchPlayer[];
   benchAway: BenchPlayer[];
+  /** Bench swaps / exits / entries since the last match sync — who replaced whom */
+  benchMoves: BenchMove[];
   arrows: Arrow[];
   freehandPaths: FreehandPath[];
   /** LIFO stack tracking insertion order across arrows and freehand paths */
@@ -66,6 +70,7 @@ interface TacticalState {
   setArrowThickness: (thickness: ArrowThickness) => void;
   loadPlay: (play: TacticalPlay) => void;
   resetBoard: () => void;
+  clearBenchMoves: () => void;
   getSnapshot: () => BoardSnapshot;
   restoreSnapshot: (snapshot: BoardSnapshot) => void;
 }
@@ -74,10 +79,17 @@ function benchBoard(state: TacticalState): BenchBoard {
   return { positions: state.positions, benchHome: state.benchHome, benchAway: state.benchAway };
 }
 
+/** Applies a bench action and logs it — refused actions return the board unchanged and are not logged */
+function withMove(state: TacticalState, next: BenchBoard, move: BenchMove): Partial<TacticalState> {
+  if (next.positions === state.positions) return {};
+  return { ...next, benchMoves: [...state.benchMoves, move] };
+}
+
 export const useTacticalStore = create<TacticalState>()((set, get) => ({
   positions: [],
   benchHome: [],
   benchAway: [],
+  benchMoves: [],
   arrows: [],
   freehandPaths: [],
   drawingOrder: [],
@@ -100,13 +112,13 @@ export const useTacticalStore = create<TacticalState>()((set, get) => ({
   setBench: (benchHome, benchAway) => set({ benchHome, benchAway }),
 
   swapWithBench: (benchId, targetId) =>
-    set((state) => swapWithBench(benchBoard(state), benchId, targetId)),
+    set((state) => withMove(state, swapWithBench(benchBoard(state), benchId, targetId), { type: 'swap', inId: benchId, outId: targetId })),
 
   sendToBench: (playerId) =>
-    set((state) => sendToBench(benchBoard(state), playerId)),
+    set((state) => withMove(state, sendToBench(benchBoard(state), playerId), { type: 'out', outId: playerId })),
 
   enterFromBench: (benchId, x, y, maxOnCourt = MAX_ON_COURT.indoor_6v6) =>
-    set((state) => enterFromBench(benchBoard(state), benchId, x, y, maxOnCourt)),
+    set((state) => withMove(state, enterFromBench(benchBoard(state), benchId, x, y, maxOnCourt), { type: 'in', inId: benchId, x, y })),
 
   updatePlayerInfo: (playerId, data) =>
     set((state) => ({
@@ -210,6 +222,7 @@ export const useTacticalStore = create<TacticalState>()((set, get) => ({
       positions: [],
       benchHome: [],
       benchAway: [],
+      benchMoves: [],
       arrows: [],
       freehandPaths: [],
       drawingOrder: [],
@@ -233,8 +246,12 @@ export const useTacticalStore = create<TacticalState>()((set, get) => ({
       history: s.history,
       currentPlayId: s.currentPlayId,
       currentPlayName: s.currentPlayName,
+      benchMoves: s.benchMoves,
     };
   },
 
-  restoreSnapshot: (snapshot) => set({ ...snapshot, selectedTool: 'move' }),
+  // Saves from before the move history have no benchMoves
+  restoreSnapshot: (snapshot) => set({ ...snapshot, benchMoves: snapshot.benchMoves ?? [], selectedTool: 'move' }),
+
+  clearBenchMoves: () => set({ benchMoves: [] }),
 }));

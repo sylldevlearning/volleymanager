@@ -341,6 +341,7 @@ export function TacticalBoard({
     setArrowThickness,
     loadPlay,
     resetBoard,
+    clearBenchMoves,
   } = useTacticalStore();
 
   const {
@@ -483,6 +484,7 @@ export function TacticalBoard({
       format,
     );
     setPositions(synced);
+    clearBenchMoves();
     setBench(
       homePlayers.length > 0 ? benchFromPlayers(matchBenchHome, homeTeamId, true) : buildDefaultBench(homeTeamId, true),
       awayPlayers.length > 0 ? benchFromPlayers(matchBenchAway, awayTeamId, false) : buildDefaultBench(awayTeamId, false),
@@ -1057,6 +1059,7 @@ export function TacticalBoard({
   function handleNewBoard() {
     handleReset();
     clearArrows();
+    clearBenchMoves();
     setPositions(buildDefaultPositions(homeTeamId, awayTeamId, rotationHome, rotationAway, currentFormat));
     setBench(buildDefaultBench(homeTeamId, true), buildDefaultBench(awayTeamId, false));
     markBoardEdited();
