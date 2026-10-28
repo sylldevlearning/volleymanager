@@ -627,5 +627,14 @@
       "tools": "Draw an arrow from a player: they will follow that path when you play the step.",
       "steps": "Tap “T1” to animate the step, long-press to go back to the start. Save from the ⋮ menu."
     }
+  },
+  "nav": {
+    "arbitrageSetup": "Match setup",
+    "newMatch": "New match",
+    "newTeam": "New team",
+    "team": "Team",
+    "summary": "Match summary",
+    "about": "About",
+    "notFound": "Page not found"
   }
 }

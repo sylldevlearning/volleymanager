@@ -9,7 +9,7 @@ import {
   TextInput,
   Modal,
 } from 'react-native';
-import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Plus, Trash2, X, BarChart2, ScanLine } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -71,6 +71,7 @@ export default function TeamDetailScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
+      <Stack.Screen options={{ title: team?.name ?? t('nav.team') }} />
       <View style={styles.header}>
         <View style={[styles.colorBand, { backgroundColor: team.color }]} />
         <View style={styles.headerContent}>

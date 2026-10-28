@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { ArrowLeft } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getMatchById } from '../../../src/services/matchService';
 import { getPlayersByTeam } from '../../../src/services/playerService';
@@ -135,9 +136,19 @@ export default function LineupScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    // No navigation bar here (immersive): top safe area + own back arrow
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.header}>
         <View style={styles.headerTitleRow}>
+          <Pressable
+            onPress={() => router.back()}
+            style={styles.backBtn}
+            accessibilityRole="button"
+            accessibilityLabel={t('common.back')}
+            hitSlop={8}
+          >
+            <ArrowLeft size={22} color={palette.textPrimary} />
+          </Pressable>
           <Text style={styles.headerTitle}>{t('lineup.title')}</Text>
           <InfoTooltip textKey="help.lineup" />
         </View>
@@ -299,12 +310,15 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: palette.backgroundElevated,
   },
+  backBtn: { padding: 4, marginLeft: -4 },
   headerTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   headerTitle: {
+    flex: 1,
+    marginLeft: 8,
     fontSize: 20,
     fontFamily: 'Inter_700Bold',
     color: palette.textPrimary,

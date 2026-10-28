@@ -1,11 +1,10 @@
-import { Link, Stack } from 'expo-router';
+import { Link } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 import { palette } from '../src/theme/tokens';
 
 export default function NotFoundScreen() {
   return (
     <>
-      <Stack.Screen options={{ title: 'Oops!' }} />
       <View style={styles.container}>
         <Text style={styles.title}>Page introuvable</Text>
         <Link href="/" style={styles.link}>

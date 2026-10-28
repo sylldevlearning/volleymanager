@@ -112,10 +112,6 @@ export default function ArbitrageSetupScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>{t('arbitrageSetup.title')}</Text>
-      </View>
-
       <View style={styles.tabBar}>
         <TabButton label={t('arbitrageSetup.tabHome')} active={tab === 'home'} color={home.color} onPress={() => setTab('home')} />
         <TabButton label={t('arbitrageSetup.tabAway')} active={tab === 'away'} color={away.color} onPress={() => setTab('away')} />
@@ -416,8 +412,6 @@ function FormField({ label, required, children }: { label: string; required?: bo
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
-  header: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
-  headerTitle: { fontSize: 20, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
 
   tabBar: {
     flexDirection: 'row',

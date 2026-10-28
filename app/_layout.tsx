@@ -19,6 +19,7 @@ import { useSettingsHydrated } from '../src/hooks/useSettingsHydrated';
 import { seedDefaultDataIfEmpty } from '../src/services/seedService';
 import { initAds } from '../src/features/ads/adsService';
 import i18n from '../src/i18n';
+import { SCREEN_HEADERS, darkHeaderOptions } from '../src/navigation/screenHeaders';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -108,22 +109,18 @@ function RootLayoutNav() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <TamaguiProvider config={tamaguiConfig} defaultTheme={theme}>
-        <Stack>
+        <Stack screenOptions={darkHeaderOptions}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="onboarding"
-            options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false, animation: 'fade' }}
-          />
-          <Stack.Screen name="match/new" options={{ title: 'Nouveau match', presentation: 'modal' }} />
-          <Stack.Screen name="match/[id]/lineup" options={{ headerShown: false }} />
-          <Stack.Screen name="match/[id]/referee" options={{ headerShown: false }} />
-          <Stack.Screen name="match/[id]/coach" options={{ headerShown: false }} />
-          <Stack.Screen name="match/[id]/summary" options={{ title: 'Résumé' }} />
-          <Stack.Screen name="match/[id]/stats" options={{ headerShown: false }} />
-          <Stack.Screen name="match/[id]/player-stats/[playerId]" options={{ headerShown: false }} />
-          <Stack.Screen name="player/[id]/stats" options={{ headerShown: false }} />
-          <Stack.Screen name="team/new" options={{ title: 'Nouvelle équipe', presentation: 'modal' }} />
-          <Stack.Screen name="team/[id]" options={{ title: 'Équipe' }} />
+          {Object.entries(SCREEN_HEADERS).map(([name, header]) => (
+            <Stack.Screen
+              key={name}
+              name={name}
+              options={{
+                ...header.options,
+                ...(header.hidden ? { headerShown: false } : { title: t(header.titleKey!) }),
+              }}
+            />
+          ))}
         </Stack>
       </TamaguiProvider>
     </GestureHandlerRootView>

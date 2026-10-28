@@ -627,5 +627,14 @@
       "tools": "Tracez une flèche depuis un joueur : il suivra ce chemin quand vous lancerez l'étape.",
       "steps": "Touchez « T1 » pour animer l'étape, appui long pour revenir au début. Le menu ⋮ permet de sauvegarder."
     }
+  },
+  "nav": {
+    "arbitrageSetup": "Configuration du match",
+    "newMatch": "Nouveau match",
+    "newTeam": "Nouvelle équipe",
+    "team": "Équipe",
+    "summary": "Résumé du match",
+    "about": "À propos",
+    "notFound": "Page introuvable"
   }
 }
