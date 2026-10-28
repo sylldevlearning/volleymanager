@@ -3,7 +3,7 @@ import { Alert, Modal, ScrollView, StyleSheet, Text, View, Pressable, useWindowD
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, Flag, ArrowLeftRight, X, ListChecks, AlertTriangle, RotateCcw } from 'lucide-react-native';
+import { ArrowLeft, Flag, ArrowLeftRight, X, ListChecks, AlertTriangle, RotateCcw, Timer } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 
@@ -42,6 +42,8 @@ import { getPlayerShortName } from '../../../src/features/players/player-helpers
 import { palette } from '../../../src/theme/tokens';
 import { CoachMarks } from '../../../src/components/ui/CoachMarks';
 import { InfoTooltip } from '../../../src/components/ui/InfoTooltip';
+import { WarningBanner } from '../../../src/components/ui/WarningBanner';
+import { timeoutWarning, substitutionWarning } from '../../../src/features/match/quotaWarnings';
 
 type SetupPhase = 'serveChoice' | null;
 
@@ -468,6 +470,12 @@ export default function ArbitrageScreen() {
     if (hapticsEnabled) Haptics.selectionAsync();
   }, [match, currentSet, hapticsEnabled, hydrate]);
 
+  // ── Quota warnings: short non-blocking banner ──
+  const [warning, setWarning] = useState<{ id: number; text: string } | null>(null);
+  const showWarning = useCallback((text: string) => setWarning({ id: Date.now(), text }), []);
+  /** Shown once the timeout timer is closed (it covers the screen while running) */
+  const pendingTimeoutWarningRef = useRef<string | null>(null);
+
   const handleSubConfirm = useCallback(async (opts: {
     playerOutId: string;
     playerInId: string;
@@ -495,8 +503,15 @@ export default function ArbitrageScreen() {
     });
     recordEvent(event);
     setPreselectedOut(null);
+    if (!opts.isLibero) {
+      const live = useScoringStore.getState();
+      const used = side === 'home' ? live.substitutionsHome : live.substitutionsAway;
+      const key = substitutionWarning(used, match.config);
+      const team = side === 'home' ? homeTeam?.name : awayTeam?.name;
+      if (key) showWarning(t(key, { team: team ?? '' }));
+    }
     if (hapticsEnabled) Haptics.selectionAsync();
-  }, [match, currentSet, subSide, homePlayers, awayPlayers, applySubstitution, recordEvent, hapticsEnabled]);
+  }, [match, currentSet, subSide, homePlayers, awayPlayers, homeTeam, awayTeam, applySubstitution, recordEvent, hapticsEnabled, showWarning, t]);
 
   const handleSanctionConfirm = useCallback(async (opts: { sanctionType: SanctionType; playerId: string | null }) => {
     if (!match || !currentSet) return;
@@ -554,6 +569,8 @@ export default function ArbitrageScreen() {
     });
     recordEvent(timeoutEvent);
     requestTimeout(team);
+    const warningKey = timeoutWarning(used + 1, match.config);
+    pendingTimeoutWarningRef.current = warningKey ? t(warningKey, { team: teamName }) : null;
     setTimeoutTeam(team);
     setTimeoutTeamName(teamName);
     setTimeoutTeamColor(team === 'home' ? (homeTeam?.color ?? palette.teamHome) : palette.teamAway);
@@ -561,7 +578,14 @@ export default function ArbitrageScreen() {
     if (hapticsEnabled) Haptics.selectionAsync();
   };
 
+  const handleTimeoutEnd = () => {
+    setShowTimeoutSheet(false);
+    if (pendingTimeoutWarningRef.current) showWarning(pendingTimeoutWarningRef.current);
+    pendingTimeoutWarningRef.current = null;
+  };
+
   const handleTimeoutCancel = async () => {
+    pendingTimeoutWarningRef.current = null;
     if (match && currentSet) await undoLastEvent(match.id, currentSet.id);
     cancelTimeout(timeoutTeam);
     setShowTimeoutSheet(false);
@@ -703,6 +727,10 @@ export default function ArbitrageScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Zero-height anchor: the banner floats just below the safe area, over the sets row */}
+      <View style={styles.bannerAnchor}>
+        <WarningBanner message={warning} onHidden={() => setWarning(null)} />
+      </View>
       <View style={styles.setsRow}>
         <SetTracker setScores={setScores} currentSetNumber={currentSetNum} maxSets={maxSets} />
         <View style={styles.helpBtn}>
@@ -833,7 +861,13 @@ export default function ArbitrageScreen() {
               />
             </View>
 
+            {/* Each team: Temps mort under its counter (tapping the counter still works), then Carton */}
             <View style={styles.sanctionRow}>
+              <TimeoutButton
+                label={t('arbitrage.timeoutButton')}
+                color={leftData.color}
+                onPress={() => handleTimeout(leftData.side)}
+              />
               <Pressable
                 style={styles.sanctionBtn}
                 onPress={() => { setSanctionSide(leftData.side); setShowSanctionSheet(true); }}
@@ -850,6 +884,11 @@ export default function ArbitrageScreen() {
                 <AlertTriangle size={14} color={palette.warning} />
                 <Text style={styles.sanctionBtnText}>{t('sanction.button')}</Text>
               </Pressable>
+              <TimeoutButton
+                label={t('arbitrage.timeoutButton')}
+                color={rightData.color}
+                onPress={() => handleTimeout(rightData.side)}
+              />
             </View>
           </View>
 
@@ -894,7 +933,7 @@ export default function ArbitrageScreen() {
         visible={showTimeoutSheet}
         teamName={timeoutTeamName}
         teamColor={timeoutTeamColor}
-        onEnd={() => setShowTimeoutSheet(false)}
+        onEnd={handleTimeoutEnd}
         onCancel={handleTimeoutCancel}
       />
 
@@ -1051,6 +1090,20 @@ function ServeChoiceView({
         <Text style={styles.serveChoiceBtnText}>{awayTeam.name}</Text>
       </Pressable>
     </View>
+  );
+}
+
+function TimeoutButton({ label, color, onPress }: { label: string; color: string; onPress: () => void }) {
+  return (
+    <Pressable
+      style={({ pressed }) => [styles.timeoutBtn, { borderColor: color + '60' }, pressed && styles.timeoutBtnPressed]}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+    >
+      <Timer size={14} color={color} />
+      <Text style={[styles.timeoutBtnText, { color }]} numberOfLines={1}>{label}</Text>
+    </Pressable>
   );
 }
 
@@ -1217,6 +1270,20 @@ const styles = StyleSheet.create({
     borderColor: palette.warning + '40',
   },
   sanctionBtnText: { fontSize: 11, fontFamily: 'Inter_600SemiBold', color: palette.warning },
+  bannerAnchor: { height: 0, zIndex: 50, elevation: 6 },
+  timeoutBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 6,
+    borderRadius: 10,
+    backgroundColor: palette.backgroundSurface,
+    borderWidth: 1,
+  },
+  timeoutBtnPressed: { opacity: 0.7 },
+  timeoutBtnText: { fontSize: 11, fontFamily: 'Inter_600SemiBold' },
 
   pill: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   pillReversed: { flexDirection: 'row-reverse' },

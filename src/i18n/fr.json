@@ -163,7 +163,14 @@
     "clearPosition": "Vider la position",
     "actionMenu": "Menu",
     "actionRecap": "Récap",
-    "actionEnd": "Terminer"
+    "actionEnd": "Terminer",
+    "timeoutButton": "Temps mort",
+    "warn": {
+      "lastTimeout": "Plus qu'un temps mort pour {{team}}",
+      "noTimeout": "Plus de temps mort pour {{team}} dans ce set",
+      "lastSub": "Plus qu'un remplacement pour {{team}}",
+      "subQuota": "Quota de remplacements atteint pour {{team}}"
+    }
   },
   "arbitrageSetup": {
     "title": "Configuration du match",
@@ -578,7 +585,7 @@
   "help": {
     "home": "Match rapide : arbitrez tout de suite, sans saisir d'équipes. Nouveau match : choisissez vos équipes et le format. Arbitrage : match officiel avec composition, remplacements et sanctions. Tableau tactique : dessinez et animez vos schémas.",
     "referee": "+1 donne le point à l'équipe, -1 en retire un. Après un point, indiquez qui a marqué et comment, ou « Passer ». Touchez le compteur de temps morts ou de remplacements d'une équipe pour l'utiliser. Annuler revient sur la dernière action. Les rotations sont automatiques ; l'icône tactique ouvre le tableau.",
-    "arbitrage": "Composition : touchez chaque poste du terrain pour y placer un titulaire, puis validez. En match : +1 donne le point, ⇄ inverse les côtés. Touchez un joueur sur le terrain pour le remplacer (ou faire sortir le libéro). Temps mort, Remplacement et Carton pour chaque équipe ; Annuler revient sur la dernière action.",
+    "arbitrage": "Composition : touchez chaque poste du terrain pour y placer un titulaire, puis validez. En match : +1 donne le point, ⇄ inverse les côtés. Touchez un joueur sur le terrain pour le remplacer (ou faire sortir le libéro). Pour chaque équipe : Remplacement, Temps mort (ou touchez la pastille de l'équipe, ses points montrent les temps morts pris) et Carton ; Annuler revient sur la dernière action.",
     "coach": "Sélectionnez un joueur en haut, puis tapez l'action réalisée. Les stats se calculent en temps réel. L'icône graphique ouvre le tableau de bord du match.",
     "tactical": "Glissez un joueur n'importe où ; touchez-le pour changer numéro, nom ou couleur. Banc : glissez un remplaçant sur un joueur pour l'échanger, ou sur une zone libre pour le faire entrer ; ramenez un joueur au banc pour le sortir. Choisissez un outil pour tracer : T1 anime l'étape (appui long : retour au début), ⏮ ◀ ▶ rejouent pas à pas. 🗒 repart d'un terrain vierge, menu ⋮ pour charger ou sauvegarder.",
     "tacticalMatch": "Glissez un joueur n'importe où ; touchez-le pour changer numéro, nom ou couleur. Banc : glissez un remplaçant sur un joueur pour l'échanger, ou sur une zone libre pour le faire entrer ; ramenez un joueur au banc pour le sortir. Choisissez un outil pour tracer : T1 anime l'étape (appui long : retour au début), ⏮ ◀ ▶ rejouent pas à pas. 🗒 repart d'un terrain vierge, menu ⋮ pour charger ou sauvegarder. Depuis un match, le tableau est gardé pour ce match ; « Sync match » revient à l'état du match. « Appliquer au match » enregistre les remplacements pendant un set (règles vérifiées, annulables), ou la composition de départ avant le premier point d'un set.",
@@ -618,7 +625,7 @@
     "arbitrage": {
       "score": "Touchez le côté de l'équipe qui gagne l'échange. La rotation se fait automatiquement.",
       "sides": "Inversez les côtés pour suivre le terrain tel que vous le voyez.",
-      "actions": "Temps mort, remplacement et carton (sanction), pour chaque équipe.",
+      "actions": "Remplacement, Temps mort et carton (sanction), pour chaque équipe. La pastille de l'équipe montre ses temps morts : touchez-la aussi pour en demander un.",
       "undo": "Une erreur ? Annulez la dernière action, rien n'est perdu."
     },
     "tactical": {

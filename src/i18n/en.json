@@ -163,7 +163,14 @@
     "clearPosition": "Clear position",
     "actionMenu": "Menu",
     "actionRecap": "Recap",
-    "actionEnd": "End"
+    "actionEnd": "End",
+    "timeoutButton": "Timeout",
+    "warn": {
+      "lastTimeout": "One timeout left for {{team}}",
+      "noTimeout": "No timeout left for {{team}} this set",
+      "lastSub": "One substitution left for {{team}}",
+      "subQuota": "Substitution quota reached for {{team}}"
+    }
   },
   "arbitrageSetup": {
     "title": "Match setup",
@@ -578,7 +585,7 @@
   "help": {
     "home": "Quick match: referee right away, no teams to enter. New match: pick your teams and format. Refereeing: official match with lineup, substitutions and sanctions. Tactical board: draw and animate your plays.",
     "referee": "+1 gives the team the point, -1 removes one. After a point, choose who scored and how, or \"Skip\". Tap a team's timeout or substitution counter to use it. Undo reverts the last action. Rotations are automatic; the tactical icon opens the board.",
-    "arbitrage": "Lineup: tap each court position to place a starter, then confirm. During the match: +1 gives the point, ⇄ swaps sides. Tap a player on the court to substitute them (or take the libero out). Timeout, Substitution and Card for each team; Undo reverts the last action.",
+    "arbitrage": "Lineup: tap each court position to place a starter, then confirm. During the match: +1 gives the point, ⇄ swaps sides. Tap a player on the court to substitute them (or take the libero out). For each team: Substitution, Timeout (or tap the team's badge, its dots show the timeouts taken) and Card; Undo reverts the last action.",
     "coach": "Select a player at the top, then tap the action they made. Stats update in real time. The chart icon opens the match dashboard.",
     "tactical": "Drag a player anywhere; tap them to change number, name or colour. Bench: drop a substitute on a player to swap them, or on empty space to bring them on; drag a player to the bench to take them off. Pick a tool to draw: T1 animates the step (long-press: back to start), ⏮ ◀ ▶ replay step by step. 🗒 starts a blank board, ⋮ menu to load or save.",
     "tacticalMatch": "Drag a player anywhere; tap them to change number, name or colour. Bench: drop a substitute on a player to swap them, or on empty space to bring them on; drag a player to the bench to take them off. Pick a tool to draw: T1 animates the step (long-press: back to start), ⏮ ◀ ▶ replay step by step. 🗒 starts a blank board, ⋮ menu to load or save. From a match, the board is kept for that match; \"Sync match\" goes back to the match state. \"Apply to match\" records the substitutions during a set (rules checked, can be undone), or the starting lineup before the first point of a set.",
@@ -618,7 +625,7 @@
     "arbitrage": {
       "score": "Tap the side of the team that wins the rally. Rotation is automatic.",
       "sides": "Swap sides to match the court as you see it.",
-      "actions": "Timeout, substitution and card (sanction), for each team.",
+      "actions": "Substitution, Timeout and card (sanction), for each team. The team badge shows its timeouts: tap it to call one too.",
       "undo": "Made a mistake? Undo the last action, nothing is lost."
     },
     "tactical": {
