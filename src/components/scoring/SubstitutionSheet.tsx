@@ -370,10 +370,12 @@ function LiberoRow({
         <Text style={subStyles.liberoTagText}>⚡ L</Text>
       </View>
       <Text style={[subStyles.benchNum, { color: LIBERO_COLOR }]}>#{player.number}</Text>
-      <Text style={subStyles.benchName} numberOfLines={1}>
-        {player.lastName ?? player.firstName ?? `#${player.number}`}
-      </Text>
-      {error && <Text style={subStyles.benchError} numberOfLines={1}>{error}</Text>}
+      <View style={subStyles.benchInfo}>
+        <Text style={subStyles.benchName} numberOfLines={1}>
+          {player.lastName ?? player.firstName ?? `#${player.number}`}
+        </Text>
+        {error && <Text style={subStyles.benchError}>{error}</Text>}
+      </View>
     </Pressable>
   );
 }
@@ -404,15 +406,18 @@ function BenchRow({
       <Text style={[subStyles.benchNum, { color: isSelected ? teamColor : palette.textSecondary }]}>
         #{player.number}
       </Text>
-      <Text style={[subStyles.benchName, blocked && { color: palette.textMuted }]} numberOfLines={1}>
-        {player.lastName ?? player.firstName ?? `#${player.number}`}
-        {player.position === 'libero' ? ' ⚡' : ''}
-      </Text>
-      {error && (
-        <Text style={[subStyles.benchError, exceptional && subStyles.benchErrorExceptional]} numberOfLines={1}>
-          {exceptional ? t('substitution.exceptionalHint') : error}
+      {/* Name + full rule message under it, wrapped on several lines if needed */}
+      <View style={subStyles.benchInfo}>
+        <Text style={[subStyles.benchName, blocked && { color: palette.textMuted }]} numberOfLines={1}>
+          {player.lastName ?? player.firstName ?? `#${player.number}`}
+          {player.position === 'libero' ? ' ⚡' : ''}
         </Text>
-      )}
+        {error && (
+          <Text style={[subStyles.benchError, exceptional && subStyles.benchErrorExceptional]}>
+            {exceptional ? t('substitution.exceptionalHint') : error}
+          </Text>
+        )}
+      </View>
     </Pressable>
   );
 }
@@ -524,8 +529,9 @@ const subStyles = StyleSheet.create({
   benchRowDisabled: { opacity: 0.4 },
   benchRowExceptional: { borderColor: palette.warning, borderStyle: 'dashed' },
   benchNum: { fontSize: 16, fontFamily: 'Inter_700Bold', width: 36 },
-  benchName: { flex: 1, fontSize: 14, fontFamily: 'Inter_500Medium', color: palette.textPrimary },
-  benchError: { fontSize: 11, fontFamily: 'Inter_400Regular', color: palette.error },
+  benchInfo: { flex: 1, minWidth: 0, gap: 2 },
+  benchName: { fontSize: 14, fontFamily: 'Inter_500Medium', color: palette.textPrimary },
+  benchError: { fontSize: 12, lineHeight: 16, fontFamily: 'Inter_400Regular', color: palette.error, flexShrink: 1 },
   benchErrorExceptional: { color: palette.warning, fontFamily: 'Inter_600SemiBold' },
   liberoTag: {
     backgroundColor: LIBERO_COLOR + '30',
