@@ -73,13 +73,14 @@ describe('createAdHocTeam', () => {
     const db = makeMockDb();
     mockGetDb.mockResolvedValue(db);
 
-    const team = await createAdHocTeam({ name: 'Domicile', shortName: null, logoUri: null, color: '#1D4ED8', coachName: 'Coach A' });
+    const team = await createAdHocTeam({ name: 'Domicile', shortName: null, logoUri: null, color: '#1D4ED8', coachName: 'Coach A', liberoColor: '#06B6D4' });
 
     expect(db.runAsync).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO teams'),
-      ['gen-id', 'Domicile', null, null, '#1D4ED8', 'Coach A', expect.any(String), expect.any(String)],
+      ['gen-id', 'Domicile', null, null, '#1D4ED8', 'Coach A', '#06B6D4', expect.any(String), expect.any(String)],
     );
     expect(team.isAdHoc).toBe(true);
+    expect(team.liberoColor).toBe('#06B6D4');
   });
 
   it('never catches a UNIQUE violation to merge with an existing team (ad-hoc names can repeat)', async () => {

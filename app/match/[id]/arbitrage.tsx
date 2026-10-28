@@ -801,11 +801,13 @@ export default function ArbitrageScreen() {
           left={{
             players: courtPlayers(leftData.onCourt, leftData.fullRoster, lineupSetupMode ? null : leftData.libero, leftData.displayedCaptainId),
             isServing: leftData.isServing,
+            liberoColor: leftData.team.liberoColor ?? undefined,
             onPositionPress: (pos) => handlePositionTap(leftData.side, pos),
           }}
           right={{
             players: courtPlayers(rightData.onCourt, rightData.fullRoster, lineupSetupMode ? null : rightData.libero, rightData.displayedCaptainId),
             isServing: rightData.isServing,
+            liberoColor: rightData.team.liberoColor ?? undefined,
             onPositionPress: (pos) => handlePositionTap(rightData.side, pos),
           }}
         />

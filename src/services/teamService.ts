@@ -9,6 +9,7 @@ function rowToTeam(row: Record<string, unknown>): Team {
     logoUri: row.logo_uri as string | null,
     color: row.color as string,
     coachName: (row.coach_name as string | null) ?? null,
+    liberoColor: (row.libero_color as string | null) ?? null,
     isAdHoc: row.is_ad_hoc === 1,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
@@ -47,13 +48,14 @@ export async function createTeam(input: TeamInput): Promise<Team> {
   const id = generateId();
   const now = new Date().toISOString();
   const coachName = input.coachName ?? null;
+  const liberoColor = input.liberoColor ?? null;
   try {
     await db.runAsync(
-      `INSERT INTO teams (id, name, short_name, logo_uri, color, coach_name, is_ad_hoc, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?)`,
-      [id, input.name, input.shortName, input.logoUri, input.color, coachName, now, now]
+      `INSERT INTO teams (id, name, short_name, logo_uri, color, coach_name, libero_color, is_ad_hoc, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?)`,
+      [id, input.name, input.shortName, input.logoUri, input.color, coachName, liberoColor, now, now]
     );
-    return { id, ...input, coachName, isAdHoc: false, createdAt: now, updatedAt: now };
+    return { id, ...input, coachName, liberoColor, isAdHoc: false, createdAt: now, updatedAt: now };
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);
     if (msg.includes('UNIQUE constraint failed')) {
@@ -74,12 +76,13 @@ export async function createAdHocTeam(input: TeamInput): Promise<Team> {
   const id = generateId();
   const now = new Date().toISOString();
   const coachName = input.coachName ?? null;
+  const liberoColor = input.liberoColor ?? null;
   await db.runAsync(
-    `INSERT INTO teams (id, name, short_name, logo_uri, color, coach_name, is_ad_hoc, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)`,
-    [id, input.name, input.shortName, input.logoUri, input.color, coachName, now, now]
+    `INSERT INTO teams (id, name, short_name, logo_uri, color, coach_name, libero_color, is_ad_hoc, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?)`,
+    [id, input.name, input.shortName, input.logoUri, input.color, coachName, liberoColor, now, now]
   );
-  return { id, ...input, coachName, isAdHoc: true, createdAt: now, updatedAt: now };
+  return { id, ...input, coachName, liberoColor, isAdHoc: true, createdAt: now, updatedAt: now };
 }
 
 export async function updateTeam(id: string, input: Partial<TeamInput>): Promise<void> {

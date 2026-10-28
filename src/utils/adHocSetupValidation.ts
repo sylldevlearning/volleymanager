@@ -12,6 +12,9 @@ export interface AdHocTeamDraft {
   captainNumber: number | null;
   /** 0 to 2 registered liberos. */
   liberoNumbers: number[];
+  /** Team and libero jersey colours — they must differ */
+  color?: string;
+  liberoColor?: string;
 }
 
 const MIN_PLAYERS = 6;
@@ -44,6 +47,10 @@ export function validateAdHocTeam(draft: AdHocTeamDraft): string[] {
   // FIVB rule: the libero cannot be designated as team captain.
   if (draft.captainNumber !== null && draft.liberoNumbers.includes(draft.captainNumber)) {
     errors.push('Le libéro ne peut pas être capitaine.');
+  }
+
+  if (draft.liberoNumbers.length > 0 && draft.color && draft.liberoColor === draft.color) {
+    errors.push("Le maillot du libéro doit être d'une autre couleur que celui de l'équipe.");
   }
 
   return errors;

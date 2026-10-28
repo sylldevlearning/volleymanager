@@ -13,6 +13,8 @@ export interface AdHocTeamInput {
   name: string;
   color: string;
   coachName?: string | null;
+  /** Libero jersey colour (different from `color`) */
+  liberoColor?: string | null;
   players: AdHocPlayerInput[];
   captainNumber: number | null;
 }
@@ -32,6 +34,7 @@ async function createAdHocSide(input: AdHocTeamInput) {
     logoUri: null,
     color: input.color,
     coachName: input.coachName ?? null,
+    liberoColor: input.liberoColor ?? null,
   });
 
   const players = await Promise.all(

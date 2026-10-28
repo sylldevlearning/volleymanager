@@ -7,7 +7,9 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Minus, Plus } from 'lucide-react-native';
 import { palette } from '../../src/theme/tokens';
-import { PRESET_TEAM_COLORS, LIBERO_PRESET_COLORS } from '../../src/utils/constants';
+import { PRESET_TEAM_COLORS } from '../../src/utils/constants';
+import { LIBERO_COLOR_CHOICES, defaultLiberoColor, resolveLiberoColor } from '../../src/features/teams/liberoColor';
+import { COMPACT_MAX_NUMBER, jerseyNumbers } from '../../src/features/teams/jerseyNumbers';
 import { DEFAULT_INDOOR_CONFIG } from '../../src/models/match';
 import type { MatchConfig } from '../../src/models/match';
 import { validateAdHocTeam, validateAdHocRules, type AdHocTeamDraft } from '../../src/utils/adHocSetupValidation';
@@ -24,16 +26,15 @@ interface TeamFormState {
   names: Record<number, string>;
   captainNumber: number | null;
   liberoNumbers: number[];
+  /** Libero jersey colour — distinct default, never the team's colour */
+  liberoColor: string;
 }
 
 function emptyTeamState(color: string): TeamFormState {
-  return { name: '', color, coachName: '', selected: [], names: {}, captainNumber: null, liberoNumbers: [] };
-}
-
-/** First preset libero color that differs from the team's own jersey color. */
-function pickLiberoColor(teamColor: string, index: number): string {
-  const candidates = LIBERO_PRESET_COLORS.filter((c) => c !== teamColor);
-  return candidates[index % candidates.length] ?? LIBERO_PRESET_COLORS[index % LIBERO_PRESET_COLORS.length];
+  return {
+    name: '', color, coachName: '', selected: [], names: {}, captainNumber: null, liberoNumbers: [],
+    liberoColor: defaultLiberoColor(color),
+  };
 }
 
 function toDraft(state: TeamFormState): AdHocTeamDraft {
@@ -42,6 +43,8 @@ function toDraft(state: TeamFormState): AdHocTeamDraft {
     players: state.selected.map((n) => ({ number: n, name: state.names[n] ?? '' })),
     captainNumber: state.captainNumber,
     liberoNumbers: state.liberoNumbers,
+    color: state.color,
+    liberoColor: state.liberoColor,
   };
 }
 
@@ -50,6 +53,7 @@ function toInput(state: TeamFormState): AdHocTeamInput {
     name: state.name.trim(),
     color: state.color,
     coachName: state.coachName.trim() || null,
+    liberoColor: state.liberoNumbers.length > 0 ? state.liberoColor : null,
     players: state.selected.map((n) => ({
       number: n,
       name: state.names[n]?.trim() || undefined,
@@ -159,6 +163,9 @@ function TabButton({
 function TeamTab({
   state, otherColor, onChange, t,
 }: { state: TeamFormState; otherColor: string; onChange: (s: TeamFormState) => void; t: (key: string, opts?: Record<string, unknown>) => string }) {
+  // 0-20 first; already open when a bigger number is selected
+  const [showAllNumbers, setShowAllNumbers] = useState(() => state.selected.some((n) => n > COMPACT_MAX_NUMBER));
+
   function toggleNumber(n: number) {
     if (state.selected.includes(n)) {
       onChange({
@@ -218,7 +225,7 @@ function TeamTab({
                   state.color === c && styles.colorSwatchActive,
                   isTaken && styles.colorSwatchDisabled,
                 ]}
-                onPress={() => !isTaken && onChange({ ...state, color: c })}
+                onPress={() => !isTaken && onChange({ ...state, color: c, liberoColor: resolveLiberoColor(state.liberoColor, c) })}
                 disabled={isTaken}
                 accessibilityRole="radio"
                 accessibilityState={{ selected: state.color === c, disabled: isTaken }}
@@ -241,7 +248,7 @@ function TeamTab({
 
       <FormField label={t('arbitrageSetup.selectNumbers')}>
         <View style={styles.numberGrid}>
-          {Array.from({ length: 100 }, (_, n) => n).map((n) => {
+          {jerseyNumbers(showAllNumbers).map((n) => {
             const isSelected = state.selected.includes(n);
             return (
               <Pressable
@@ -255,6 +262,16 @@ function TeamTab({
               </Pressable>
             );
           })}
+          <Pressable
+            style={[styles.numberCell, styles.numberCellToggle]}
+            onPress={() => setShowAllNumbers((v) => !v)}
+            accessibilityRole="button"
+            accessibilityLabel={showAllNumbers ? t('arbitrageSetup.fewerNumbers') : t('arbitrageSetup.moreNumbers')}
+          >
+            {showAllNumbers
+              ? <Minus size={18} color={palette.textPrimary} />
+              : <Plus size={18} color={palette.textPrimary} />}
+          </Pressable>
         </View>
       </FormField>
 
@@ -264,9 +281,8 @@ function TeamTab({
         ) : (
           state.selected.map((n) => {
             const isCaptain = state.captainNumber === n;
-            const liberoIndex = state.liberoNumbers.indexOf(n);
-            const isLibero = liberoIndex !== -1;
-            const liberoColor = isLibero ? pickLiberoColor(state.color, liberoIndex) : undefined;
+            const isLibero = state.liberoNumbers.includes(n);
+            const liberoColor = isLibero ? state.liberoColor : undefined;
             return (
               <View key={n} style={styles.playerRow}>
                 <View style={[styles.playerNumBadge, { borderColor: state.color }]}>
@@ -308,6 +324,33 @@ function TeamTab({
           })
         )}
       </FormField>
+
+      {state.liberoNumbers.length > 0 && (
+        <FormField label={t('arbitrageSetup.liberoColor')}>
+          <View style={styles.colorGrid}>
+            {LIBERO_COLOR_CHOICES.map((c) => {
+              // The libero must stand out from their own team
+              const isTeamColor = c === state.color;
+              return (
+                <Pressable
+                  key={c}
+                  style={[
+                    styles.colorSwatch, { backgroundColor: c },
+                    state.liberoColor === c && styles.colorSwatchActive,
+                    isTeamColor && styles.colorSwatchDisabled,
+                  ]}
+                  onPress={() => !isTeamColor && onChange({ ...state, liberoColor: c })}
+                  disabled={isTeamColor}
+                  accessibilityRole="radio"
+                  accessibilityLabel={t('arbitrageSetup.liberoColor')}
+                  accessibilityState={{ selected: state.liberoColor === c, disabled: isTeamColor }}
+                />
+              );
+            })}
+          </View>
+          <Text style={styles.emptyHint}>{t('arbitrageSetup.liberoColorHint')}</Text>
+        </FormField>
+      )}
     </ScrollView>
   );
 }
@@ -459,14 +502,15 @@ const styles = StyleSheet.create({
   colorSwatchActive: { borderColor: palette.textPrimary, transform: [{ scale: 1.1 }] },
   colorSwatchDisabled: { opacity: 0.25 },
 
-  numberGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 5 },
+  numberGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   numberCell: {
-    width: 30, height: 30, borderRadius: 7,
+    width: 44, height: 44, borderRadius: 10,
     alignItems: 'center', justifyContent: 'center',
     backgroundColor: palette.backgroundSurface,
     borderWidth: 1, borderColor: palette.backgroundElevated,
   },
-  numberCellText: { fontSize: 11, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary },
+  numberCellText: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary },
+  numberCellToggle: { borderStyle: 'dashed', borderColor: palette.textMuted },
   numberCellTextActive: { color: '#fff' },
 
   emptyHint: { fontSize: 13, fontFamily: 'Inter_400Regular', color: palette.textMuted, paddingVertical: 8 },

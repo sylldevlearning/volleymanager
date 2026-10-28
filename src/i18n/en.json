@@ -202,7 +202,11 @@
     "fixErrors": "Fix these before starting:",
     "confirmStart": "Confirm starting the match?",
     "seconds": "s",
-    "minutes": "min"
+    "minutes": "min",
+    "liberoColor": "Libero jersey colour",
+    "liberoColorHint": "Always different from the team's jersey.",
+    "moreNumbers": "Show numbers up to 99",
+    "fewerNumbers": "Show only 0 to 20"
   },
   "team": {
     "new": "New team",

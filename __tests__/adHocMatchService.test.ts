@@ -23,7 +23,7 @@ const mockCreateMatch = createMatch as jest.Mock;
 const mockSetMatchCaptains = setMatchCaptains as jest.Mock;
 
 function team(id: string, overrides: Partial<Team> = {}): Team {
-  return { id, name: 'Team', shortName: null, logoUri: null, color: '#1D4ED8', coachName: null, isAdHoc: true, createdAt: '', updatedAt: '', ...overrides };
+  return { id, name: 'Team', shortName: null, logoUri: null, color: '#1D4ED8', coachName: null, liberoColor: null, isAdHoc: true, createdAt: '', updatedAt: '', ...overrides };
 }
 
 function player(id: string, teamId: string, number: number, overrides: Partial<Player> = {}): Player {

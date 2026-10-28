@@ -7,6 +7,8 @@ export interface FullCourtSide {
   players: PlayerInPosition[];
   isServing: boolean;
   onPositionPress: (position: 1 | 2 | 3 | 4 | 5 | 6) => void;
+  /** The team's libero jersey colour (match setup) */
+  liberoColor?: string;
 }
 
 interface FullCourtProps {
@@ -82,6 +84,7 @@ export function FullCourt({ left, right, leftColor, rightColor, width, height }:
   }
 
   function renderSide(side: FullCourtSide, isLeft: boolean, color: string) {
+    const liberoColor = side.liberoColor ?? palette.libero;
     const playerMap = new Map(side.players.map((p) => [p.position, p]));
     return ([1, 2, 3, 4, 5, 6] as const).map((pos) => {
       const { x: cx, y: cy } = coords(pos, isLeft);
@@ -94,8 +97,8 @@ export function FullCourt({ left, right, leftColor, rightColor, width, height }:
             cx={cx}
             cy={cy}
             r={r}
-            fill={player ? (player.isLibero ? palette.libero + '40' : color + '30') : palette.backgroundHover}
-            stroke={isServing ? palette.accentPrimary : player ? (player.isLibero ? palette.libero : color) : palette.backgroundHover}
+            fill={player ? (player.isLibero ? liberoColor + '40' : color + '30') : palette.backgroundHover}
+            stroke={isServing ? palette.accentPrimary : player ? (player.isLibero ? liberoColor : color) : palette.backgroundHover}
             strokeWidth={isServing ? 2.5 : 1.5}
             strokeDasharray={player?.isLibero ? '4 2' : undefined}
           />

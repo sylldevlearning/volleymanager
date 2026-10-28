@@ -202,7 +202,11 @@
     "fixErrors": "Corrigez ces points avant de démarrer :",
     "confirmStart": "Confirmer le lancement du match ?",
     "seconds": "s",
-    "minutes": "min"
+    "minutes": "min",
+    "liberoColor": "Couleur du maillot du libéro",
+    "liberoColorHint": "Toujours différente du maillot de l'équipe.",
+    "moreNumbers": "Afficher les numéros jusqu'à 99",
+    "fewerNumbers": "Afficher seulement 0 à 20"
   },
   "team": {
     "new": "Nouvelle équipe",

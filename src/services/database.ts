@@ -298,6 +298,16 @@ export async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
       `);
     });
   }
+
+  if (version < 13) {
+    await db.withExclusiveTransactionAsync(async () => {
+      // Libero jersey colour chosen in the match setup (null: app default)
+      await db.execAsync(`
+        ALTER TABLE teams ADD COLUMN libero_color TEXT;
+        PRAGMA user_version = 13;
+      `);
+    });
+  }
 }
 
 export function generateId(): string {
