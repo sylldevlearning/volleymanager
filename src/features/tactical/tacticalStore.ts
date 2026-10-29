@@ -55,7 +55,7 @@ interface TacticalState {
   addArrow: (arrow: Omit<Arrow, 'id' | 'order' | 'group'>) => void;
   removeArrow: (id: string) => void;
   clearArrows: () => void;
-  addFreehandPath: (d: string, color: string, hasArrow?: boolean, group?: number, linkedPlayerId?: string | null) => void;
+  addFreehandPath: (d: string, color: string, hasArrow?: boolean, group?: number, linkedPlayerId?: string | null, unit?: 'court') => void;
   clearFreehandPaths: () => void;
   undoLastDrawing: () => void;
   /** Advance to the next group (tap the group button) */
@@ -150,13 +150,13 @@ export const useTacticalStore = create<TacticalState>()((set, get) => ({
 
   clearArrows: () => set({ arrows: [], freehandPaths: [], drawingOrder: [], currentGroup: 1, history: [] }),
 
-  addFreehandPath: (d, color, hasArrow, group, linkedPlayerId) =>
+  addFreehandPath: (d, color, hasArrow, group, linkedPlayerId, unit) =>
     set((state) => {
       const newId = generateId();
       return {
         freehandPaths: [
           ...state.freehandPaths,
-          { id: newId, d, color, hasArrow, group: group ?? state.currentGroup, linkedPlayerId: linkedPlayerId ?? null },
+          { id: newId, d, color, hasArrow, group: group ?? state.currentGroup, linkedPlayerId: linkedPlayerId ?? null, ...(unit ? { unit } : {}) },
         ],
         drawingOrder: [...state.drawingOrder, { type: 'freehand', id: newId }],
       };

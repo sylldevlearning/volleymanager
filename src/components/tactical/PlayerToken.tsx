@@ -66,6 +66,7 @@ export function PlayerToken({
     });
 
   const panGesture = Gesture.Pan()
+    .maxPointers(1)
     .enabled(canDrag)
     .minDistance(10)
     .onBegin(() => {

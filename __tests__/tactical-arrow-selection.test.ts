@@ -36,13 +36,12 @@ describe('drawing the arrow (step 2)', () => {
     expect(arrowStart(positions, 'ball', 0.9 * W, 0.9 * H, W, H)).toEqual({ x: 0.45 * W, y: 0.5 * H, linkedId: 'ball' });
   });
 
-  it('without a selection: drawn from the finger, linked to the player under it (as before)', () => {
-    expect(arrowStart(positions, null, 0.2 * W, 0.2 * H, W, H)).toEqual({ x: 0.2 * W, y: 0.2 * H, linkedId: 'C' });
-    expect(arrowStart(positions, null, 0.9 * W, 0.9 * H, W, H)).toEqual({ x: 0.9 * W, y: 0.9 * H, linkedId: null });
+  it('without a selection: nothing is drawn (the board says to tap a token first)', () => {
+    expect(arrowStart(positions, null, 0.2 * W, 0.2 * H, W, H)).toBeNull();
   });
 
   it('a selection that left the court is ignored', () => {
-    expect(arrowStart(positions, 'gone', 0.2 * W, 0.2 * H, W, H)).toEqual({ x: 0.2 * W, y: 0.2 * H, linkedId: 'C' });
+    expect(arrowStart(positions, 'gone', 0.2 * W, 0.2 * H, W, H)).toBeNull();
   });
 });
 

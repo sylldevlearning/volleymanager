@@ -16,6 +16,8 @@ import { useTranslation } from 'react-i18next';
 import { CourtSVG } from './CourtSVG';
 import { ArrowOverlay } from './ArrowOverlay';
 import { arrowStart, nextSelection, tokenAt } from '../../features/tactical/arrowSelection';
+import { clampPan, clampZoom, fitCourt, normalizePathD, pathPoints, pathToPixels, viewportToCourt, type ZoomState } from '../../features/tactical/courtGeometry';
+import { WarningBanner } from '../ui/WarningBanner';
 import { PlayerToken } from './PlayerToken';
 import { ToolBar } from './ToolBar';
 import { PlaybackControls } from './PlaybackControls';
@@ -395,8 +397,16 @@ export function TacticalBoard({
 
   const hasBench = currentFormat === 'indoor_6v6';
   const courtAvailableH = availableH - (hasBench ? BENCH_H : 0);
-  const courtW = Math.max(80, Math.min(screenW - PADDING * 2, courtAvailableH / 2));
-  const courtH = courtW * 2;
+  // Drawings saved before were in pixels of the court as it was estimated then
+  const legacyCourtW = Math.max(80, Math.min(screenW - PADDING * 2, courtAvailableH / 2));
+  const legacyCourt = { w: legacyCourtW, h: legacyCourtW * 2 };
+  // The court takes all the room between the top bar and the tools, same proportions
+  const [courtArea, setCourtArea] = useState<{ w: number; h: number } | null>(null);
+  const fittedCourt = courtArea ? fitCourt(courtArea.w, courtArea.h) : legacyCourt;
+  const courtW = fittedCourt.w;
+  const courtH = fittedCourt.h;
+  /** Drawings in pixels of the court as shown */
+  const toPixels = (list: FreehandPath[]) => list.map((fp) => ({ ...fp, d: pathToPixels(fp, courtW, courtH, legacyCourt) }));
 
   // ── Playback / history-browse state ──────────────────────────────────────
   const [playbackPositions, setPlaybackPositions] = useState<PlayerPosition[] | null>(null);
@@ -450,6 +460,11 @@ export function TacticalBoard({
   /** Arrow tools: token selected by a tap, the next arrow starts on it */
   const [selectedTokenId, setSelectedTokenId] = useState<string | null>(null);
   const drawAnchorRef = useRef({ x: 0, y: 0 });
+  /** No token selected when the drawing began: the stroke is ignored */
+  const drawBlockedRef = useRef(false);
+  const [tip, setTip] = useState<{ id: number; text: string } | null>(null);
+  /** Frame around the (zoomable) court, to place what is dropped from the bench */
+  const viewportRef = useRef<View>(null);
   const linkedPlayerIdRef = useRef<string | null>(null);
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
@@ -550,14 +565,9 @@ export function TacticalBoard({
   }, []);
 
   // ── Freehand path helpers ─────────────────────────────────────────────────
-  function parseFreehandPoints(d: string): { x: number; y: number }[] {
-    const pts: { x: number; y: number }[] = [];
-    const re = /[ML]\s*([\d.]+)\s+([\d.]+)/g;
-    let m: RegExpExecArray | null;
-    while ((m = re.exec(d)) !== null) {
-      pts.push({ x: parseFloat(m[1]) / courtW, y: parseFloat(m[2]) / courtH });
-    }
-    return pts;
+  /** Points of a drawing as court fractions (older drawings: from the court they were drawn on) */
+  function parseFreehandPoints(fp: FreehandPath): { x: number; y: number }[] {
+    return pathPoints(fp, legacyCourt);
   }
 
   // ── Snapshot computation ──────────────────────────────────────────────────
@@ -582,7 +592,7 @@ export function TacticalBoard({
     }
 
     for (const fp of groupPaths) {
-      const points = parseFreehandPoints(fp.d);
+      const points = parseFreehandPoints(fp);
       if (points.length < 2) continue;
       const startPt = points[0];
       const endPt = points[points.length - 1];
@@ -633,7 +643,7 @@ export function TacticalBoard({
     }
 
     for (const fp of groupFreehand) {
-      const points = parseFreehandPoints(fp.d);
+      const points = parseFreehandPoints(fp);
       if (points.length < 2) continue;
       let playerId = fp.linkedPlayerId ?? null;
       if (!playerId || claimed.has(playerId)) {
@@ -849,25 +859,30 @@ export function TacticalBoard({
     setSelectedTokenId(nextSelection(selectedTokenId, tokenAt(displayPositions, x, y, courtW, courtH)));
   }
 
-  /** Start of the arrow (the selection, or the finger) and the token it moves. */
+  /** Start of the arrow (the selected token) — null without a selection: nothing is drawn. */
   function captureLinkedPlayer(touchX: number, touchY: number) {
     const start = arrowStart(displayPositions, selectedTokenId, touchX, touchY, courtW, courtH);
-    linkedPlayerIdRef.current = start.linkedId;
-    drawAnchorRef.current = { x: start.x, y: start.y };
+    linkedPlayerIdRef.current = start?.linkedId ?? null;
+    drawBlockedRef.current = start === null;
+    if (start) drawAnchorRef.current = { x: start.x, y: start.y };
+    else setTip({ id: Date.now(), text: t('tactical.selectFirst') });
     return start;
   }
 
   function beginStraightArrow(x: number, y: number) {
     const start = captureLinkedPlayer(x, y);
+    if (!start) return;
     setDrawPreview({ fromX: start.x, fromY: start.y, toX: x, toY: y, color: drawColor, type: drawType });
   }
 
   function updateStraightArrow(x: number, y: number) {
+    if (drawBlockedRef.current) return;
     const a = drawAnchorRef.current;
     setDrawPreview({ fromX: a.x, fromY: a.y, toX: x, toY: y, color: drawColor, type: drawType });
   }
 
   function endStraightArrow(x: number, y: number) {
+    if (drawBlockedRef.current) return;
     const a = drawAnchorRef.current;
     if (Math.hypot(x - a.x, y - a.y) > 20) {
       commitArrow(clamp(a.x / courtW, 0, 1), clamp(a.y / courtH, 0, 1), clamp(x / courtW, 0, 1), clamp(y / courtH, 0, 1));
@@ -889,9 +904,16 @@ export function TacticalBoard({
     linkedPlayerIdRef.current = null;
   }
 
+  function cancelPencil() {
+    pencilPointsRef.current = [];
+    setPencilPreviewD(null);
+    linkedPlayerIdRef.current = null;
+  }
+
   const drawGesture = Gesture.Pan()
     .enabled(isDrawMode)
     .minDistance(8)
+    .maxPointers(1)
     .onStart((e) => { runOnJS(beginStraightArrow)(e.x, e.y); })
     .onUpdate((e) => { runOnJS(updateStraightArrow)(e.x, e.y); })
     .onEnd((e) => { runOnJS(endStraightArrow)(e.x, e.y); })
@@ -908,11 +930,16 @@ export function TacticalBoard({
   function onPencilBegin(x: number, y: number, captureLinked = false) {
     // Traced arrow from a selection: the path starts on the selected token
     const start = captureLinked ? captureLinkedPlayer(x, y) : { x, y };
+    if (!start) {
+      pencilPointsRef.current = [];
+      return;
+    }
     pencilPointsRef.current = start.x === x && start.y === y ? [{ x, y }] : [{ x: start.x, y: start.y }, { x, y }];
     setPencilPreviewD(buildPathD(pencilPointsRef.current) || `M ${x.toFixed(1)} ${y.toFixed(1)}`);
   }
 
   function onPencilUpdate(x: number, y: number) {
+    if (pencilPointsRef.current.length === 0) return;
     pencilPointsRef.current.push({ x, y });
     setPencilPreviewD(buildPathD(pencilPointsRef.current));
   }
@@ -920,7 +947,7 @@ export function TacticalBoard({
   function onPencilEnd() {
     const pts = pencilPointsRef.current;
     if (pts.length > 3) {
-      addFreehandPath(buildPathD(pts), pencilColor);
+      addFreehandPath(normalizePathD(buildPathD(pts), courtW, courtH), pencilColor, undefined, undefined, undefined, 'court');
     }
     pencilPointsRef.current = [];
     setPencilPreviewD(null);
@@ -929,7 +956,7 @@ export function TacticalBoard({
   function onCurvedEnd() {
     const pts = pencilPointsRef.current;
     if (pts.length > 3) {
-      addFreehandPath(buildPathD(pts), drawColor, true, currentGroup, linkedPlayerIdRef.current);
+      addFreehandPath(normalizePathD(buildPathD(pts), courtW, courtH), drawColor, true, currentGroup, linkedPlayerIdRef.current, 'court');
     }
     pencilPointsRef.current = [];
     setPencilPreviewD(null);
@@ -941,17 +968,19 @@ export function TacticalBoard({
     .minDistance(0)
     .onBegin((e) => { runOnJS(onPencilBegin)(e.x, e.y); })
     .onUpdate((e) => { runOnJS(onPencilUpdate)(e.x, e.y); })
+    .maxPointers(1)
     .onEnd(() => { runOnJS(onPencilEnd)(); })
-    .onFinalize(() => { runOnJS(onPencilEnd)(); });
+    .onFinalize((_e, success) => { if (!success) runOnJS(cancelPencil)(); });
 
   // A short tap selects (step 1); moving the finger draws (step 2)
   const curvedGesture = Gesture.Pan()
     .enabled(isCurvedMode)
     .minDistance(8)
+    .maxPointers(1)
     .onStart((e) => { runOnJS(onPencilBegin)(e.x, e.y, true); })
     .onUpdate((e) => { runOnJS(onPencilUpdate)(e.x, e.y); })
     .onEnd(() => { runOnJS(onCurvedEnd)(); })
-    .onFinalize(() => { runOnJS(onCurvedEnd)(); });
+    .onFinalize((_e, success) => { if (!success) runOnJS(cancelPencil)(); });
 
   useEffect(() => {
     if (!isDrawMode && !isCurvedMode) setSelectedTokenId(null);
@@ -963,9 +992,54 @@ export function TacticalBoard({
 
   const allDrawGesture = Gesture.Exclusive(drawGesture, curvedGesture, pencilGesture, selectTap);
 
+  // ── Zoom: pinch, two-finger move, double tap back to normal ──────────────
+  const zoomScale = useSharedValue(1);
+  const zoomTx = useSharedValue(0);
+  const zoomTy = useSharedValue(0);
+  const savedScale = useSharedValue(1);
+  const savedTx = useSharedValue(0);
+  const savedTy = useSharedValue(0);
+  const [zoom, setZoom] = useState<ZoomState>({ scale: 1, tx: 0, ty: 0 });
+
+  const pinchGesture = Gesture.Pinch()
+    .onStart(() => { savedScale.value = zoomScale.value; })
+    .onUpdate((e) => {
+      const scale = clampZoom(savedScale.value * e.scale);
+      const pan = clampPan(zoomTx.value, zoomTy.value, scale, courtW, courtH);
+      zoomScale.value = scale;
+      zoomTx.value = pan.tx;
+      zoomTy.value = pan.ty;
+    })
+    .onEnd(() => { runOnJS(setZoom)({ scale: zoomScale.value, tx: zoomTx.value, ty: zoomTy.value }); });
+
+  const twoFingerPan = Gesture.Pan()
+    .minPointers(2)
+    .onStart(() => { savedTx.value = zoomTx.value; savedTy.value = zoomTy.value; })
+    .onUpdate((e) => {
+      const pan = clampPan(savedTx.value + e.translationX, savedTy.value + e.translationY, zoomScale.value, courtW, courtH);
+      zoomTx.value = pan.tx;
+      zoomTy.value = pan.ty;
+    })
+    .onEnd(() => { runOnJS(setZoom)({ scale: zoomScale.value, tx: zoomTx.value, ty: zoomTy.value }); });
+
+  const resetZoomTap = Gesture.Tap()
+    .numberOfTaps(2)
+    .simultaneousWithExternalGesture(selectTap)
+    .onEnd(() => {
+      zoomScale.value = withTiming(1);
+      zoomTx.value = withTiming(0);
+      zoomTy.value = withTiming(0);
+      runOnJS(setZoom)({ scale: 1, tx: 0, ty: 0 });
+    });
+
+  const zoomGesture = Gesture.Simultaneous(pinchGesture, twoFingerPan, resetZoomTap);
+  const zoomStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: zoomTx.value }, { translateY: zoomTy.value }, { scale: zoomScale.value }],
+  }));
+
   // ── Court & bench drag/drop ───────────────────────────────────────────────
   function measureDropZones() {
-    courtRef.current?.measure((_x, _y, _w, _h, pageX, pageY) => {
+    viewportRef.current?.measure((_x, _y, _w, _h, pageX, pageY) => {
       courtPageRef.current = { x: pageX, y: pageY };
     });
     benchRef.current?.measure((_x, _y, _w, _h, _pageX, pageY) => {
@@ -984,8 +1058,11 @@ export function TacticalBoard({
 
   function handleBenchDrop(benchPlayer: BenchPlayer, absX: number, absY: number) {
     setDragSource(null);
-    const px = absX - courtPageRef.current.x;
-    const py = absY - courtPageRef.current.y;
+    // Dropped on the court frame → the court point under the finger, zoom included
+    const fx = absX - courtPageRef.current.x;
+    const fy = absY - courtPageRef.current.y;
+    if (fx < 0 || fx > courtW || fy < 0 || fy > courtH) return;
+    const { x: px, y: py } = viewportToCourt(fx, fy, zoom, courtW, courtH);
     if (px < 0 || px > courtW || py < 0 || py > courtH) return;
 
     const before = useTacticalStore.getState().positions;
@@ -1270,7 +1347,13 @@ export function TacticalBoard({
         )}
 
         {/* Court container */}
-        <View style={[styles.courtContainer, { zIndex: dragSource === 'court' ? 30 : 10 }]}>
+        <View
+          style={[styles.courtContainer, { zIndex: dragSource === 'court' ? 30 : 10 }]}
+          onLayout={(e) => setCourtArea({ w: e.nativeEvent.layout.width - 16, h: e.nativeEvent.layout.height - 16 })}
+        >
+          <GestureDetector gesture={zoomGesture}>
+          <View ref={viewportRef} collapsable={false} style={[{ width: courtW, height: courtH }, zoom.scale > 1 && styles.zoomedFrame]}>
+          <Animated.View style={zoomStyle}>
           <View ref={courtRef} collapsable={false} style={[styles.court, { width: courtW, height: courtH }]}>
             <CourtSVG width={courtW} height={courtH} format={currentFormat} />
 
@@ -1278,7 +1361,7 @@ export function TacticalBoard({
               {selectedTool === 'eraser' ? (
                 <ArrowOverlay
                   arrows={arrows}
-                  freehandPaths={freehandPaths}
+                  freehandPaths={toPixels(freehandPaths)}
                   courtWidth={courtW}
                   courtHeight={courtH}
                   eraserMode={true}
@@ -1296,7 +1379,7 @@ export function TacticalBoard({
                   <Animated.View style={{ flex: 1 }}>
                     <ArrowOverlay
                       arrows={overlayArrowsDisplay}
-                      freehandPaths={overlayFreehandDisplay}
+                      freehandPaths={toPixels(overlayFreehandDisplay)}
                       courtWidth={courtW}
                       courtHeight={courtH}
                       eraserMode={false}
@@ -1335,6 +1418,10 @@ export function TacticalBoard({
               />
             )}
           </View>
+          </Animated.View>
+          </View>
+          </GestureDetector>
+          <WarningBanner message={tip} onHidden={() => setTip(null)} />
         </View>
 
         {/* Substitutes bench */}
@@ -1600,6 +1687,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     overflow: 'visible',
   },
+  zoomedFrame: { overflow: 'hidden', borderRadius: 4 },
   selectionHalo: {
     position: 'absolute', width: HALO_SIZE, height: HALO_SIZE, borderRadius: HALO_SIZE / 2,
     borderWidth: 3, borderColor: '#FFD60A', backgroundColor: 'rgba(255, 214, 10, 0.18)',

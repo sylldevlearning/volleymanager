@@ -30,21 +30,19 @@ export function nextSelection(_current: string | null, tapped: string | null): s
 }
 
 /**
- * Step 2: where the arrow starts and what it moves. With a selection, the
- * arrow starts on the selected token, wherever the finger starts — even next
- * to another player. Without one, as before: from the finger, linked to the
- * player under it.
+ * Step 2: where the arrow starts and what it moves — the selected token,
+ * wherever the finger starts, even next to another player. Without a
+ * selection nothing is drawn (null): the board asks to tap a token first.
  */
 export function arrowStart(
   positions: PlayerPosition[],
   selectedId: string | null,
-  fingerX: number,
-  fingerY: number,
+  _fingerX: number,
+  _fingerY: number,
   courtW: number,
   courtH: number,
-): { x: number; y: number; linkedId: string | null } {
+): { x: number; y: number; linkedId: string } | null {
   const selected = selectedId ? positions.find((p) => p.playerId === selectedId) : undefined;
-  if (selected) return { x: selected.x * courtW, y: selected.y * courtH, linkedId: selected.playerId };
-  const players = positions.filter((p) => !p.isBall);
-  return { x: fingerX, y: fingerY, linkedId: tokenAt(players, fingerX, fingerY, courtW, courtH) };
+  if (!selected) return null;
+  return { x: selected.x * courtW, y: selected.y * courtH, linkedId: selected.playerId };
 }

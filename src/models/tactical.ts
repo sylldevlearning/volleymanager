@@ -59,8 +59,10 @@ export type TacticalTool =
 
 export interface FreehandPath {
   id: string;
-  /** SVG path data string (M x y L x y ...) — coordinates in court pixels */
+  /** SVG path data (M x y L x y …): court fractions (0..1) when `unit` is 'court', court pixels for older drawings */
   d: string;
+  /** 'court': coordinates relative to the court, whatever its size on screen */
+  unit?: 'court';
   color: string;
   /** When true, an arrowhead is drawn at the last point */
   hasArrow?: boolean;
