@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 
 import { CourtSVG } from './CourtSVG';
 import { ArrowOverlay } from './ArrowOverlay';
+import { arrowStart, nextSelection, tokenAt } from '../../features/tactical/arrowSelection';
 import { PlayerToken } from './PlayerToken';
 import { ToolBar } from './ToolBar';
 import { PlaybackControls } from './PlaybackControls';
@@ -44,6 +45,8 @@ import { CoachMarks } from '../ui/CoachMarks';
 import * as Haptics from 'expo-haptics';
 
 const BENCH_TOKEN_SIZE = 30;
+/** Halo around the token selected for an arrow */
+const HALO_SIZE = 54;
 /** Height of the substitutes strip under the court (label + two rows of tokens) */
 const BENCH_H = 96;
 /** Max distance (px) between a dropped substitute and a court token to swap them */
@@ -442,10 +445,11 @@ export function TacticalBoard({
     : (!isEditMode && !inHistory ? currentGroup : null);
 
   // ── Gesture refs ──────────────────────────────────────────────────────────
-  const drawStartX = useSharedValue(0);
-  const drawStartY = useSharedValue(0);
   const pencilPointsRef = useRef<{ x: number; y: number }[]>([]);
   /** The playerId touched at the start of the current drawing gesture */
+  /** Arrow tools: token selected by a tap, the next arrow starts on it */
+  const [selectedTokenId, setSelectedTokenId] = useState<string | null>(null);
+  const drawAnchorRef = useRef({ x: 0, y: 0 });
   const linkedPlayerIdRef = useRef<string | null>(null);
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
@@ -833,26 +837,44 @@ export function TacticalBoard({
   }
 
   // ── Drawing gestures ──────────────────────────────────────────────────────
+  const selectedToken = selectedTokenId ? displayPositions.find((p) => p.playerId === selectedTokenId) : undefined;
   const isDrawMode = selectedTool === 'arrow_solid' || selectedTool === 'arrow_dashed';
   const isCurvedMode = selectedTool === 'arrow_curved';
   const drawColor = groupColor;
   const drawType: 'solid' | 'dashed' = selectedTool === 'arrow_dashed' ? 'dashed' : 'solid';
 
+  // Arrows in two steps: 1. tap a player or the ball to select it (halo),
+  // 2. draw anywhere — the arrow starts on the selection and moves it.
+  function handleSelectTap(x: number, y: number) {
+    setSelectedTokenId(nextSelection(selectedTokenId, tokenAt(displayPositions, x, y, courtW, courtH)));
+  }
+
+  /** Start of the arrow (the selection, or the finger) and the token it moves. */
   function captureLinkedPlayer(touchX: number, touchY: number) {
-    const TOUCH_RADIUS_PX = 30;
-    let bestId: string | null = null;
-    let bestDist = Infinity;
-    for (const p of displayPositions) {
-      if (p.isBall) continue;
-      const px = p.x * courtW;
-      const py = p.y * courtH;
-      const dist = Math.hypot(touchX - px, touchY - py);
-      if (dist < TOUCH_RADIUS_PX && dist < bestDist) {
-        bestDist = dist;
-        bestId = p.playerId;
-      }
+    const start = arrowStart(displayPositions, selectedTokenId, touchX, touchY, courtW, courtH);
+    linkedPlayerIdRef.current = start.linkedId;
+    drawAnchorRef.current = { x: start.x, y: start.y };
+    return start;
+  }
+
+  function beginStraightArrow(x: number, y: number) {
+    const start = captureLinkedPlayer(x, y);
+    setDrawPreview({ fromX: start.x, fromY: start.y, toX: x, toY: y, color: drawColor, type: drawType });
+  }
+
+  function updateStraightArrow(x: number, y: number) {
+    const a = drawAnchorRef.current;
+    setDrawPreview({ fromX: a.x, fromY: a.y, toX: x, toY: y, color: drawColor, type: drawType });
+  }
+
+  function endStraightArrow(x: number, y: number) {
+    const a = drawAnchorRef.current;
+    if (Math.hypot(x - a.x, y - a.y) > 20) {
+      commitArrow(clamp(a.x / courtW, 0, 1), clamp(a.y / courtH, 0, 1), clamp(x / courtW, 0, 1), clamp(y / courtH, 0, 1));
+    } else {
+      linkedPlayerIdRef.current = null;
     }
-    linkedPlayerIdRef.current = bestId;
+    setDrawPreview(null);
   }
 
   function commitArrow(fromXR: number, fromYR: number, toXR: number, toYR: number) {
@@ -870,40 +892,10 @@ export function TacticalBoard({
   const drawGesture = Gesture.Pan()
     .enabled(isDrawMode)
     .minDistance(8)
-    .onBegin((e) => {
-      drawStartX.value = e.x;
-      drawStartY.value = e.y;
-      runOnJS(captureLinkedPlayer)(e.x, e.y);
-      runOnJS(setDrawPreview)({
-        fromX: e.x, fromY: e.y,
-        toX: e.x, toY: e.y,
-        color: drawColor,
-        type: drawType,
-      });
-    })
-    .onUpdate((e) => {
-      runOnJS(setDrawPreview)({
-        fromX: drawStartX.value,
-        fromY: drawStartY.value,
-        toX: drawStartX.value + e.translationX,
-        toY: drawStartY.value + e.translationY,
-        color: drawColor,
-        type: drawType,
-      });
-    })
-    .onEnd((e) => {
-      const dist = Math.hypot(e.translationX, e.translationY);
-      if (dist > 20) {
-        const fromXR = clamp(drawStartX.value / courtW, 0, 1);
-        const fromYR = clamp(drawStartY.value / courtH, 0, 1);
-        const toXR = clamp((drawStartX.value + e.translationX) / courtW, 0, 1);
-        const toYR = clamp((drawStartY.value + e.translationY) / courtH, 0, 1);
-        runOnJS(commitArrow)(fromXR, fromYR, toXR, toYR);
-      } else {
-        linkedPlayerIdRef.current = null;
-      }
-      runOnJS(setDrawPreview)(null);
-    });
+    .onStart((e) => { runOnJS(beginStraightArrow)(e.x, e.y); })
+    .onUpdate((e) => { runOnJS(updateStraightArrow)(e.x, e.y); })
+    .onEnd((e) => { runOnJS(endStraightArrow)(e.x, e.y); })
+    .onFinalize(() => { runOnJS(setDrawPreview)(null); });
 
   const isPencilMode = selectedTool === 'pencil';
   const pencilColor = isCurvedMode ? drawColor : '#E63946';
@@ -914,9 +906,10 @@ export function TacticalBoard({
   }
 
   function onPencilBegin(x: number, y: number, captureLinked = false) {
-    if (captureLinked) captureLinkedPlayer(x, y);
-    pencilPointsRef.current = [{ x, y }];
-    setPencilPreviewD(`M ${x.toFixed(1)} ${y.toFixed(1)}`);
+    // Traced arrow from a selection: the path starts on the selected token
+    const start = captureLinked ? captureLinkedPlayer(x, y) : { x, y };
+    pencilPointsRef.current = start.x === x && start.y === y ? [{ x, y }] : [{ x: start.x, y: start.y }, { x, y }];
+    setPencilPreviewD(buildPathD(pencilPointsRef.current) || `M ${x.toFixed(1)} ${y.toFixed(1)}`);
   }
 
   function onPencilUpdate(x: number, y: number) {
@@ -951,15 +944,24 @@ export function TacticalBoard({
     .onEnd(() => { runOnJS(onPencilEnd)(); })
     .onFinalize(() => { runOnJS(onPencilEnd)(); });
 
+  // A short tap selects (step 1); moving the finger draws (step 2)
   const curvedGesture = Gesture.Pan()
     .enabled(isCurvedMode)
-    .minDistance(0)
-    .onBegin((e) => { runOnJS(onPencilBegin)(e.x, e.y, true); })
+    .minDistance(8)
+    .onStart((e) => { runOnJS(onPencilBegin)(e.x, e.y, true); })
     .onUpdate((e) => { runOnJS(onPencilUpdate)(e.x, e.y); })
     .onEnd(() => { runOnJS(onCurvedEnd)(); })
     .onFinalize(() => { runOnJS(onCurvedEnd)(); });
 
-  const allDrawGesture = Gesture.Exclusive(drawGesture, curvedGesture, pencilGesture);
+  useEffect(() => {
+    if (!isDrawMode && !isCurvedMode) setSelectedTokenId(null);
+  }, [isDrawMode, isCurvedMode]);
+
+  const selectTap = Gesture.Tap()
+    .enabled(isDrawMode || isCurvedMode)
+    .onEnd((e) => { runOnJS(handleSelectTap)(e.x, e.y); });
+
+  const allDrawGesture = Gesture.Exclusive(drawGesture, curvedGesture, pencilGesture, selectTap);
 
   // ── Court & bench drag/drop ───────────────────────────────────────────────
   function measureDropZones() {
@@ -1325,6 +1327,13 @@ export function TacticalBoard({
                 hapticsEnabled={hapticsEnabled}
               />
             ))}
+
+            {selectedToken && (isDrawMode || isCurvedMode) && (
+              <View
+                pointerEvents="none"
+                style={[styles.selectionHalo, { left: selectedToken.x * courtW - HALO_SIZE / 2, top: selectedToken.y * courtH - HALO_SIZE / 2 }]}
+              />
+            )}
           </View>
         </View>
 
@@ -1590,6 +1599,10 @@ const styles = StyleSheet.create({
   court: {
     position: 'relative',
     overflow: 'visible',
+  },
+  selectionHalo: {
+    position: 'absolute', width: HALO_SIZE, height: HALO_SIZE, borderRadius: HALO_SIZE / 2,
+    borderWidth: 3, borderColor: '#FFD60A', backgroundColor: 'rgba(255, 214, 10, 0.18)',
   },
   drawLayer: {
     position: 'absolute',
