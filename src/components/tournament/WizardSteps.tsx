@@ -1,7 +1,8 @@
 import { useState, type ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, ChevronUp, Plus, Save, Shuffle, Users, X } from 'lucide-react-native';
+import { CalendarDays, ChevronDown, ChevronUp, Clock, Plus, Save, Shuffle, Users, X } from 'lucide-react-native';
 import { palette } from '../../theme/tokens';
 import { FormField, Stepper, ToggleRow } from '../ui/FormControls';
 import { TeamLibrarySheet } from './TeamLibrarySheet';
@@ -9,15 +10,18 @@ import { poolName } from '../../features/tournament/engine/pools';
 import {
   addLibraryTeams,
   addQuickTeam,
+  dateFromIso,
+  dateFromTime,
   displayDate,
   formatHint,
   moveTeam,
-  parseDisplayDate,
   removeTeam,
   resolvedCourts,
   resolvedPools,
   setFormat,
   setGameType,
+  isoFromDate,
+  timeFromDate,
   type TournamentPreview,
   type WizardState,
 } from '../../features/tournament/wizard';
@@ -100,6 +104,36 @@ function SecondaryButton({ icon, label, onPress, disabled }: { icon: ReactNode; 
   );
 }
 
+/**
+ * Native date / time picker. Android opens its dialog on press; iOS shows the
+ * compact picker in place.
+ */
+function PickerField({ mode, value, label, onPick }: { mode: 'date' | 'time'; value: Date; label: string; onPick: (date: Date) => void }) {
+  const [open, setOpen] = useState(false);
+  const Icon = mode === 'date' ? CalendarDays : Clock;
+
+  function handleChange(event: DateTimePickerEvent, picked?: Date) {
+    setOpen(false);
+    if (event.type === 'set' && picked) onPick(picked);
+  }
+
+  if (Platform.OS === 'ios') {
+    return (
+      <DateTimePicker value={value} mode={mode} display="compact" themeVariant="dark"
+        onChange={handleChange} accessibilityLabel={label} style={styles.iosPicker} />
+    );
+  }
+  return (
+    <>
+      <Pressable style={[styles.input, styles.pickerButton]} onPress={() => setOpen(true)} accessibilityRole="button" accessibilityLabel={label}>
+        <Text style={styles.pickerText}>{mode === 'date' ? displayDate(isoFromDate(value)) : timeFromDate(value)}</Text>
+        <Icon size={18} color={palette.textSecondary} />
+      </Pressable>
+      {open && <DateTimePicker value={value} mode={mode} is24Hour onChange={handleChange} />}
+    </>
+  );
+}
+
 // ─── Step 1: details ───────────────────────────────────────────────────────
 
 export function DetailsStep({
@@ -110,7 +144,6 @@ export function DetailsStep({
   onDeleteTemplate: (template: TournamentTemplate) => void;
 }) {
   const { t } = useTranslation();
-  const [dateText, setDateText] = useState(state.date ? displayDate(state.date) : '');
 
   return (
     <View>
@@ -136,19 +169,8 @@ export function DetailsStep({
       </FormField>
 
       <FormField label={t('tournament.wizard.date')} required>
-        <TextInput
-          style={styles.input}
-          value={dateText}
-          onChangeText={(text) => {
-            setDateText(text);
-            // An invalid date is kept empty: the step refuses it
-            onChange({ ...state, date: parseDisplayDate(text) ?? '' });
-          }}
-          placeholder={t('tournament.wizard.datePlaceholder')}
-          placeholderTextColor={palette.textMuted}
-          keyboardType="numbers-and-punctuation"
-          maxLength={10}
-        />
+        <PickerField mode="date" value={dateFromIso(state.date)} label={t('tournament.wizard.date')}
+          onPick={(date) => onChange({ ...state, date: isoFromDate(date) })} />
       </FormField>
 
       <FormField label={t('tournament.wizard.location')}>
@@ -383,15 +405,8 @@ export function TeamsStep({ state, onChange }: StepProps) {
           onChange={(courts) => onChange({ ...state, courts })} />
         <View style={styles.inlineField}>
           <Text style={styles.inlineLabel}>{t('tournament.wizard.startTime')}</Text>
-          <TextInput
-            style={[styles.input, styles.timeInput]}
-            value={state.startTime}
-            onChangeText={(startTime) => onChange({ ...state, startTime })}
-            placeholder={t('tournament.wizard.startTimePlaceholder')}
-            placeholderTextColor={palette.textMuted}
-            keyboardType="numbers-and-punctuation"
-            maxLength={5}
-          />
+          <PickerField mode="time" value={dateFromTime(state.startTime)} label={t('tournament.wizard.startTime')}
+            onPick={(time) => onChange({ ...state, startTime: timeFromDate(time) })} />
         </View>
         <Stepper label={t('tournament.wizard.matchMinutes')} value={state.matchMinutes} min={10} max={120} step={5}
           onChange={(matchMinutes) => onChange({ ...state, matchMinutes })} />
@@ -575,7 +590,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1, borderBottomColor: palette.backgroundElevated,
   },
   inlineLabel: { flex: 1, fontSize: 14, fontFamily: 'Inter_500Medium', color: palette.textPrimary },
-  timeInput: { width: 90, textAlign: 'center', paddingVertical: 8 },
+  pickerButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, minWidth: 130 },
+  pickerText: { fontSize: 15, fontFamily: 'Inter_500Medium', color: palette.textPrimary },
+  iosPicker: { alignSelf: 'flex-start' },
   summaryCard: {
     padding: 16, borderRadius: 16, gap: 4, marginBottom: 16,
     backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,

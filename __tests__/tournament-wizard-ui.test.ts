@@ -52,6 +52,15 @@ describe('tournament entry and wizard wiring', () => {
     expect(read('app/arbitrage/new.tsx')).toContain("from '../../src/components/ui/FormControls'");
   });
 
+  it('date and start time use the native picker (no typed date or time)', () => {
+    const steps = read('src/components/tournament/WizardSteps.tsx');
+    expect(steps).toContain("from '@react-native-community/datetimepicker'");
+    expect(steps).toContain('<PickerField mode="date"');
+    expect(steps).toContain('<PickerField mode="time"');
+    expect(steps).not.toContain('datePlaceholder');
+    expect(steps).not.toContain('startTimePlaceholder');
+  });
+
   it('asks before throwing away a tournament being set up', () => {
     expect(read('app/tournament/new.tsx')).toContain("'beforeRemove'");
   });

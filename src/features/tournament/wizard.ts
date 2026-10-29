@@ -76,7 +76,7 @@ export function initialWizardState(today: Date, seed: number): WizardState {
   const schedule = defaultSchedule('indoor_6v6', 0);
   return {
     name: '',
-    date: `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`,
+    date: isoFromDate(today),
     location: '',
     gameType: 'indoor_6v6',
     format: 'pools_knockout',
@@ -163,6 +163,28 @@ export function parseDisplayDate(text: string): string | null {
 export function displayDate(iso: string): string {
   const [y, m, d] = iso.split('-');
   return `${d}/${m}/${y}`;
+}
+
+// Native picker values (Date, local time) ↔ stored strings
+
+export function dateFromIso(iso: string): Date {
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+export function isoFromDate(date: Date): string {
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+export function dateFromTime(hhmm: string): Date {
+  const [h, m] = hhmm.split(':').map(Number);
+  const d = new Date();
+  d.setHours(h, m, 0, 0);
+  return d;
+}
+
+export function timeFromDate(date: Date): string {
+  return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
 const isTime = (text: string) => /^([01]\d|2[0-3]):[0-5]\d$/.test(text);

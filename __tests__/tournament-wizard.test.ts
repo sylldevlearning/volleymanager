@@ -1,5 +1,9 @@
 import {
   addQuickTeam,
+  dateFromIso,
+  dateFromTime,
+  isoFromDate,
+  timeFromDate,
   applyTemplate,
   displayDate,
   formatHint,
@@ -90,6 +94,16 @@ describe('dates', () => {
     expect(parseDisplayDate('31/02/2026')).toBeNull();
     expect(parseDisplayDate('2026-05-16')).toBeNull();
     expect(displayDate('2026-05-16')).toBe('16/05/2026');
+  });
+
+  it('converts to and from the native picker values (local time)', () => {
+    const d = dateFromIso('2026-05-16');
+    expect([d.getFullYear(), d.getMonth(), d.getDate()]).toEqual([2026, 4, 16]);
+    expect(isoFromDate(new Date(2026, 0, 3, 23, 59))).toBe('2026-01-03');
+    const t = dateFromTime('09:05');
+    expect([t.getHours(), t.getMinutes()]).toEqual([9, 5]);
+    expect(timeFromDate(new Date(2026, 4, 16, 7, 30))).toBe('07:30');
+    expect(timeFromDate(dateFromTime('18:45'))).toBe('18:45');
   });
 });
 
