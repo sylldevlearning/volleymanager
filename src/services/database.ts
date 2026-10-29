@@ -308,6 +308,79 @@ export async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
       `);
     });
   }
+
+  if (version < 14) {
+    await db.withExclusiveTransactionAsync(async () => {
+      // Tournament mode — results of refereed matches stay in matches/match_events
+      await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS tournaments (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          date TEXT NOT NULL,
+          location TEXT,
+          game_type TEXT NOT NULL,
+          format TEXT NOT NULL,
+          rules_json TEXT NOT NULL,
+          schedule_json TEXT NOT NULL,
+          seed INTEGER NOT NULL,
+          seeding TEXT NOT NULL,
+          secret TEXT NOT NULL,
+          status TEXT NOT NULL DEFAULT 'live',
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS tournament_pools (
+          id TEXT PRIMARY KEY,
+          tournament_id TEXT NOT NULL REFERENCES tournaments(id) ON DELETE CASCADE,
+          name TEXT NOT NULL,
+          position INTEGER NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS tournament_teams (
+          id TEXT PRIMARY KEY,
+          tournament_id TEXT NOT NULL REFERENCES tournaments(id) ON DELETE CASCADE,
+          team_id TEXT REFERENCES teams(id) ON DELETE SET NULL,
+          name TEXT NOT NULL,
+          color TEXT NOT NULL,
+          seed_rank INTEGER,
+          pool_id TEXT REFERENCES tournament_pools(id) ON DELETE SET NULL,
+          position INTEGER NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS tournament_matches (
+          id TEXT PRIMARY KEY,
+          tournament_id TEXT NOT NULL REFERENCES tournaments(id) ON DELETE CASCADE,
+          stage TEXT NOT NULL,
+          pool_id TEXT REFERENCES tournament_pools(id) ON DELETE CASCADE,
+          round INTEGER NOT NULL,
+          bracket_slot INTEGER,
+          label TEXT,
+          home_id TEXT REFERENCES tournament_teams(id),
+          away_id TEXT REFERENCES tournament_teams(id),
+          home_source TEXT NOT NULL,
+          away_source TEXT NOT NULL,
+          slot INTEGER,
+          court INTEGER,
+          scheduled_at TEXT,
+          status TEXT NOT NULL DEFAULT 'scheduled',
+          sets_json TEXT,
+          forfeit_id TEXT REFERENCES tournament_teams(id),
+          winner_id TEXT REFERENCES tournament_teams(id),
+          result_source TEXT,
+          arbitrage_match_id TEXT REFERENCES matches(id) ON DELETE SET NULL,
+          validated_at TEXT,
+          position INTEGER NOT NULL,
+          updated_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_tournament_matches_tournament ON tournament_matches(tournament_id);
+        CREATE TABLE IF NOT EXISTS tournament_templates (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          payload_json TEXT NOT NULL,
+          created_at TEXT NOT NULL
+        );
+        PRAGMA user_version = 14;
+      `);
+    });
+  }
 }
 
 export function generateId(): string {
