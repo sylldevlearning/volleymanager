@@ -394,7 +394,53 @@ export async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
       `);
     });
   }
+
+  if (version < 16) {
+    // 4×4 and 3×3 in the arbitrage mode: matches.format had a CHECK limited to
+    // 6×6 and beach, which SQLite cannot alter — the table is rebuilt with the
+    // same columns, in the same order, and every row copied. Foreign keys are
+    // off during the swap so dropping the old table touches nothing else.
+    const fk = await db.getFirstAsync<{ foreign_keys: number }>('PRAGMA foreign_keys');
+    await db.execAsync('PRAGMA foreign_keys = OFF');
+    try {
+      await db.withExclusiveTransactionAsync(async () => {
+        await db.execAsync(`
+          CREATE TABLE IF NOT EXISTS matches_v16 (
+            id TEXT PRIMARY KEY,
+            date TEXT NOT NULL DEFAULT (datetime('now')),
+            format TEXT NOT NULL CHECK(format IN ('indoor_6v6','indoor_4v4','indoor_3v3','beach_2v2')),
+            mode TEXT NOT NULL CHECK(mode IN ('competition','leisure')),
+            team_home_id TEXT NOT NULL REFERENCES teams(id),
+            team_away_id TEXT NOT NULL REFERENCES teams(id),
+            status TEXT DEFAULT 'created' CHECK(status IN ('created','live','paused','finished')),
+            config_json TEXT DEFAULT '{}',
+            winner_team_id TEXT REFERENCES teams(id),
+            created_at TEXT DEFAULT (datetime('now')),
+            finished_at TEXT,
+            first_serve_team_id TEXT REFERENCES teams(id),
+            captain_home_id TEXT REFERENCES players(id),
+            captain_away_id TEXT REFERENCES players(id),
+            sides_swapped INTEGER DEFAULT 0,
+            acting_captain_home_id TEXT REFERENCES players(id),
+            acting_captain_away_id TEXT REFERENCES players(id)
+          );
+          INSERT INTO matches_v16 (${MATCH_COLUMNS}) SELECT ${MATCH_COLUMNS} FROM matches;
+          DROP TABLE matches;
+          ALTER TABLE matches_v16 RENAME TO matches;
+          PRAGMA user_version = 16;
+        `);
+      });
+    } finally {
+      if (fk?.foreign_keys) await db.execAsync('PRAGMA foreign_keys = ON');
+    }
+  }
 }
+
+const MATCH_COLUMNS = [
+  'id', 'date', 'format', 'mode', 'team_home_id', 'team_away_id', 'status', 'config_json', 'winner_team_id',
+  'created_at', 'finished_at', 'first_serve_team_id', 'captain_home_id', 'captain_away_id', 'sides_swapped',
+  'acting_captain_home_id', 'acting_captain_away_id',
+].join(', ');
 
 export function generateId(): string {
   return Math.random().toString(36).slice(2, 10) +

@@ -12,7 +12,8 @@ import { LIBERO_COLOR_CHOICES, defaultLiberoColor, resolveLiberoColor } from '..
 import { COMPACT_MAX_NUMBER, jerseyNumbers } from '../../src/features/teams/jerseyNumbers';
 import { FormField, Stepper, ToggleRow } from '../../src/components/ui/FormControls';
 import { DEFAULT_INDOOR_CONFIG } from '../../src/models/match';
-import type { MatchConfig } from '../../src/models/match';
+import type { MatchConfig, MatchFormat } from '../../src/models/match';
+import { FORMAT_PROFILES, applyPreset, defaultArbitrageConfig, isOfficial, presetOf } from '../../src/features/match/formatProfile';
 import { validateAdHocTeam, validateAdHocRules, type AdHocTeamDraft } from '../../src/utils/adHocSetupValidation';
 import { createAdHocMatch } from '../../src/services/adHocMatchService';
 import type { AdHocTeamInput } from '../../src/services/adHocMatchService';
@@ -70,12 +71,24 @@ export default function ArbitrageSetupScreen() {
   const [tab, setTab] = useState<Tab>('home');
   const [home, setHome] = useState<TeamFormState>(() => emptyTeamState(PRESET_TEAM_COLORS[0]));
   const [away, setAway] = useState<TeamFormState>(() => emptyTeamState(PRESET_TEAM_COLORS[1]));
+  const [format, setFormat] = useState<MatchFormat>('indoor_6v6');
   const [config, setConfig] = useState<MatchConfig>(DEFAULT_INDOOR_CONFIG);
+  const hasLibero = FORMAT_PROFILES[format].hasLibero;
+
+  function changeFormat(next: MatchFormat) {
+    setFormat(next);
+    setConfig(defaultArbitrageConfig(next));
+    // No libero outside 6×6
+    if (!FORMAT_PROFILES[next].hasLibero) {
+      setHome((h) => ({ ...h, liberoNumbers: [] }));
+      setAway((a) => ({ ...a, liberoNumbers: [] }));
+    }
+  }
   const [submitting, setSubmitting] = useState(false);
 
   function handleStart() {
-    const homeErrors = validateAdHocTeam(toDraft(home));
-    const awayErrors = validateAdHocTeam(toDraft(away));
+    const homeErrors = validateAdHocTeam(toDraft(home), format);
+    const awayErrors = validateAdHocTeam(toDraft(away), format);
     const rulesErrors = validateAdHocRules(config);
 
     if (homeErrors.length || awayErrors.length || rulesErrors.length) {
@@ -101,7 +114,7 @@ export default function ArbitrageSetupScreen() {
     setSubmitting(true);
     try {
       const match = await createAdHocMatch({
-        format: 'indoor_6v6',
+        format,
         mode: 'competition',
         config,
         home: toInput(home),
@@ -117,15 +130,28 @@ export default function ArbitrageSetupScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
+      <View style={styles.formatRow} accessibilityRole="radiogroup" accessibilityLabel={t('arbitrageSetup.format')}>
+        {(['indoor_6v6', 'indoor_4v4', 'indoor_3v3', 'beach_2v2'] as MatchFormat[]).map((f) => (
+          <Pressable
+            key={f}
+            style={[styles.formatChip, format === f && styles.formatChipActive]}
+            onPress={() => changeFormat(f)}
+            accessibilityRole="radio"
+            accessibilityState={{ selected: format === f }}
+          >
+            <Text style={[styles.formatChipText, format === f && styles.formatChipTextActive]}>{t(`arbitrageSetup.formats.${f}`)}</Text>
+          </Pressable>
+        ))}
+      </View>
       <View style={styles.tabBar}>
         <TabButton label={t('arbitrageSetup.tabHome')} active={tab === 'home'} color={home.color} onPress={() => setTab('home')} />
         <TabButton label={t('arbitrageSetup.tabAway')} active={tab === 'away'} color={away.color} onPress={() => setTab('away')} />
         <TabButton label={t('arbitrageSetup.tabRules')} active={tab === 'rules'} onPress={() => setTab('rules')} />
       </View>
 
-      {tab === 'home' && <TeamTab state={home} otherColor={away.color} onChange={setHome} t={t} />}
-      {tab === 'away' && <TeamTab state={away} otherColor={home.color} onChange={setAway} t={t} />}
-      {tab === 'rules' && <RulesTab config={config} onChange={setConfig} t={t} />}
+      {tab === 'home' && <TeamTab state={home} otherColor={away.color} onChange={setHome} hasLibero={hasLibero} t={t} />}
+      {tab === 'away' && <TeamTab state={away} otherColor={home.color} onChange={setAway} hasLibero={hasLibero} t={t} />}
+      {tab === 'rules' && <RulesTab format={format} config={config} onChange={setConfig} t={t} />}
 
       <View style={styles.footer}>
         <Pressable
@@ -162,8 +188,8 @@ function TabButton({
 // ─── Team tab ───────────────────────────────────────────────────────────────
 
 function TeamTab({
-  state, otherColor, onChange, t,
-}: { state: TeamFormState; otherColor: string; onChange: (s: TeamFormState) => void; t: (key: string, opts?: Record<string, unknown>) => string }) {
+  state, otherColor, onChange, hasLibero, t,
+}: { state: TeamFormState; otherColor: string; onChange: (s: TeamFormState) => void; hasLibero: boolean; t: (key: string, opts?: Record<string, unknown>) => string }) {
   // 0-20 first; already open when a bigger number is selected
   const [showAllNumbers, setShowAllNumbers] = useState(() => state.selected.some((n) => n > COMPACT_MAX_NUMBER));
 
@@ -306,7 +332,7 @@ function TeamTab({
                 >
                   <Text style={[styles.tagBtnText, isCaptain && styles.tagBtnTextActive]}>C</Text>
                 </Pressable>
-                <Pressable
+                {hasLibero && <Pressable
                   style={[
                     styles.tagBtn,
                     isLibero && { backgroundColor: liberoColor, borderColor: liberoColor },
@@ -319,7 +345,7 @@ function TeamTab({
                   accessibilityState={{ selected: isLibero }}
                 >
                   <Text style={[styles.tagBtnText, isLibero && styles.tagBtnTextActive]}>L</Text>
-                </Pressable>
+                </Pressable>}
               </View>
             );
           })
@@ -359,11 +385,13 @@ function TeamTab({
 // ─── Rules tab ──────────────────────────────────────────────────────────────
 
 function RulesTab({
-  config, onChange, t,
-}: { config: MatchConfig; onChange: (c: MatchConfig) => void; t: (key: string, opts?: Record<string, unknown>) => string }) {
+  format, config, onChange, t,
+}: { format: MatchFormat; config: MatchConfig; onChange: (c: MatchConfig) => void; t: (key: string, opts?: Record<string, unknown>) => string }) {
   function set<K extends keyof MatchConfig>(key: K, value: MatchConfig[K]) {
     onChange({ ...config, [key]: value });
   }
+  const preset = presetOf(format);
+  if (preset) return <SmallFormatRules format={format} config={config} onChange={onChange} labelKey={preset.labelKey} t={t} />;
 
   return (
     <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
@@ -402,9 +430,111 @@ function RulesTab({
   );
 }
 
+// ─── Rules of the small formats (4×4, 3×3, 2×2) ────────────────────────────
+
+function SmallFormatRules({
+  format, config, onChange, labelKey, t,
+}: {
+  format: MatchFormat; config: MatchConfig; onChange: (c: MatchConfig) => void; labelKey: string;
+  t: (key: string, opts?: Record<string, unknown>) => string;
+}) {
+  const official = isOfficial(format, config);
+  const set = (patch: Partial<MatchConfig>) => onChange({ ...config, ...patch });
+  const subsAllowed = config.substitutionMode !== 'none';
+  const switching = config.courtSwitch ?? null;
+
+  return (
+    <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+      <View style={styles.presetRow}>
+        {(['leisure', 'official'] as const).map((p) => {
+          const active = p === 'official' ? official : !official;
+          return (
+            <Pressable key={p} style={[styles.presetChip, active && styles.presetChipActive]}
+              onPress={() => onChange(applyPreset(format, p, config))} accessibilityRole="radio" accessibilityState={{ selected: active }}>
+              <Text style={[styles.presetChipText, active && styles.presetChipTextActive]}>
+                {p === 'leisure' ? t('arbitrageSetup.presetLeisure') : t(labelKey)}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
+      <Stepper label={t('arbitrageSetup.setsToWin')} value={config.setsToWin} min={1} max={3}
+        onChange={(v) => set({ setsToWin: v })} />
+      <Stepper label={t('arbitrageSetup.pointsPerSet')} value={config.pointsPerSet} min={5} max={30}
+        onChange={(v) => set({ pointsPerSet: v })} />
+      {config.setsToWin > 1 && (
+        <Stepper label={t('arbitrageSetup.pointsLastSet')} value={config.pointsLastSet} min={5} max={30}
+          onChange={(v) => set({ pointsLastSet: v })} />
+      )}
+      <ToggleRow label={t('arbitrageSetup.winMarginToggle')} value={config.winMargin >= 2}
+        onChange={(on) => set({ winMargin: on ? 2 : 1 })} />
+
+      <Stepper label={t('arbitrageSetup.timeoutsPerSet')} value={config.timeoutsPerSet ?? 0} min={0} max={4}
+        onChange={(v) => set({ timeoutsPerSet: v })} />
+      <Stepper label={`${t('arbitrageSetup.timeoutDuration')} (${t('arbitrageSetup.seconds')})`}
+        value={config.timeoutDurationSec} min={10} max={120} step={5} onChange={(v) => set({ timeoutDurationSec: v })} />
+      {format === 'beach_2v2' && (
+        <ToggleRow label={t('arbitrageSetup.technicalTimeout')} value={config.technicalTimeout === true}
+          onChange={(on) => set({ technicalTimeout: on })} />
+      )}
+
+      <ToggleRow label={t('arbitrageSetup.subsAllowed')} value={subsAllowed}
+        onChange={(on) => set(on ? { substitutionMode: 'free', unlimitedSubstitutions: true } : { substitutionMode: 'none' })} />
+      {subsAllowed && (
+        <ToggleRow label={t('arbitrageSetup.subsUnlimited')} value={config.unlimitedSubstitutions}
+          onChange={(on) => set({ unlimitedSubstitutions: on, substitutionsPerSet: on ? null : config.substitutionsPerSet ?? 4 })} />
+      )}
+      {subsAllowed && !config.unlimitedSubstitutions && (
+        <Stepper label={t('arbitrageSetup.substitutionsPerSet')} value={config.substitutionsPerSet ?? 0} min={1} max={12}
+          onChange={(v) => set({ substitutionsPerSet: v })} />
+      )}
+      {format === 'indoor_4v4' && subsAllowed && (
+        <ToggleRow label={t('arbitrageSetup.m13Subs')} value={config.m13Substitutions === true}
+          onChange={(on) => set({ m13Substitutions: on })} />
+      )}
+      {format !== 'beach_2v2' && (
+        <ToggleRow label={t('arbitrageSetup.positionalFaults')} value={config.positionalFaults === true}
+          onChange={(on) => set({ positionalFaults: on })} />
+      )}
+
+      <ToggleRow label={t('arbitrageSetup.courtSwitch')} value={switching !== null}
+        onChange={(on) => set({ courtSwitch: on ? { every: 7, everyDecidingSet: 5 } : null })} />
+      {switching && (
+        <>
+          <Stepper label={t('arbitrageSetup.courtSwitchEvery')} value={switching.every} min={3} max={15}
+            onChange={(v) => set({ courtSwitch: { ...switching, every: v } })} />
+          <Stepper label={t('arbitrageSetup.courtSwitchDeciding')} value={switching.everyDecidingSet} min={3} max={15}
+            onChange={(v) => set({ courtSwitch: { ...switching, everyDecidingSet: v } })} />
+        </>
+      )}
+
+      <ToggleRow label={t('arbitrageSetup.sanctionsEnabled')} value={config.sanctionsEnabled}
+        onChange={(on) => set({ sanctionsEnabled: on })} />
+      <Text style={styles.emptyHint}>{t('arbitrageSetup.noLibero')}</Text>
+    </ScrollView>
+  );
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
 
+  formatRow: { flexDirection: 'row', gap: 6, marginHorizontal: 16, marginTop: 8, marginBottom: 8 },
+  formatChip: {
+    flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: 'center',
+    backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
+  },
+  formatChipActive: { backgroundColor: palette.accentPrimary, borderColor: palette.accentPrimary },
+  formatChipText: { fontSize: 14, fontFamily: 'Inter_700Bold', color: palette.textSecondary },
+  formatChipTextActive: { color: '#fff' },
+  presetRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
+  presetChip: {
+    paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10,
+    backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
+  },
+  presetChipActive: { backgroundColor: palette.accentSecondary, borderColor: palette.accentSecondary },
+  presetChipText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary },
+  presetChipTextActive: { color: '#fff' },
   tabBar: {
     flexDirection: 'row',
     marginHorizontal: 16,

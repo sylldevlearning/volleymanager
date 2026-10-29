@@ -1,6 +1,6 @@
 # Plan — Arbitrage 4×4, 3×3 et 2×2 (avant la phase 4 du tournoi)
 
-Statut : **validé**. Branche `feat/tournoi`.
+Statut : **fait** (moteur, migration v16, écrans, tests de bout en bout). Branche `feat/tournoi`.
 
 Décisions : 2×2 loisir avec remplacements libres ; 3×3 loisir avec changement
 de côté entre les sets seulement ; temps mort technique du beach en option,
@@ -114,3 +114,17 @@ migration.
   remplacements libres et quotas, options officielles 4×4, temps morts,
   changement de côté 7 / 5, reprise après fermeture et annuler (point,
   remplacement, temps mort), création du match depuis la configuration.
+
+## Réalisé
+- `formatProfile.ts` : profils, valeurs loisir, préréglages officiels,
+  changement de côté, temps mort technique, remplacements autorisés.
+- Rotation sur N places (direct, reprise, annuler) ; 6×6 identique.
+- `validateFreeSubstitution` (+ limites M13) ; fiche de remplacement en mode libre.
+- Migration v16 : table `matches` reconstruite (4 formats), lignes conservées.
+- Configuration : format en tête, joueurs et libéro selon le format, onglet
+  Règles « Loisir » / « Officiel … » (6×6 inchangé).
+- Arbitrage : composition à N places, terrain par format, alertes de
+  changement de côté et de temps mort technique.
+- Historique : libellés 4×4 et 3×3. Tableau tactique : inchangé (6×6 / 2×2).
+- Limite : l'app ne détecte pas les fautes de position (comme en 6×6) ; le
+  réglage « zones fixes » est mémorisé avec le match.

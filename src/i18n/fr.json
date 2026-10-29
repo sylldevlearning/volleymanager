@@ -110,7 +110,9 @@
     "deleteConfirm": "Supprimer ce match et toutes ses données ?",
     "deleteAll": "Supprimer tout l'historique",
     "deleteAllConfirm": "Supprimer TOUS les matchs ?",
-    "irreversible": "Cette action est irréversible."
+    "irreversible": "Cette action est irréversible.",
+    "indoor4v4": "4 vs 4",
+    "indoor3v3": "3 vs 3"
   },
   "referee": {
     "title": "Arbitre",
@@ -172,7 +174,9 @@
       "noTimeout": "Plus de temps mort pour {{team}} dans ce set",
       "lastSub": "Plus qu'un remplacement pour {{team}}",
       "subQuota": "Quota de remplacements atteint pour {{team}}"
-    }
+    },
+    "technicalTimeoutTitle": "Temps mort technique",
+    "technicalTimeoutMessage": "21 points joués : temps mort technique de {{seconds}} s."
   },
   "arbitrageSetup": {
     "title": "Configuration du match",
@@ -208,7 +212,27 @@
     "liberoColor": "Couleur du maillot du libéro",
     "liberoColorHint": "Toujours différente du maillot de l'équipe.",
     "moreNumbers": "Afficher les numéros jusqu'à 99",
-    "fewerNumbers": "Afficher seulement 0 à 20"
+    "fewerNumbers": "Afficher seulement 0 à 20",
+    "format": "Format",
+    "formats": {
+      "indoor_6v6": "6×6",
+      "indoor_4v4": "4×4",
+      "indoor_3v3": "3×3",
+      "beach_2v2": "2×2"
+    },
+    "presetLeisure": "Loisir",
+    "presetM13": "Officiel M13 (FFVolley)",
+    "presetSnow": "Officiel snow-volley (FIVB)",
+    "presetBeach": "Officiel beach (FIVB)",
+    "technicalTimeout": "Temps mort technique à 21 points (sets 1 et 2)",
+    "subsAllowed": "Remplacements autorisés",
+    "subsUnlimited": "Remplacements illimités",
+    "m13Subs": "Limites M13 : retour après un échange, le serveur ne revient pas en position 2",
+    "positionalFaults": "Zones fixes (fautes de position sifflées)",
+    "courtSwitch": "Changement de côté pendant le set",
+    "courtSwitchEvery": "Tous les … points",
+    "courtSwitchDeciding": "Au set décisif, tous les … points",
+    "noLibero": "Pas de libéro dans ce format."
   },
   "team": {
     "new": "Nouvelle équipe",
@@ -515,7 +539,7 @@
       "onBench": "Libéro sur le banc"
     },
     "beach": {
-      "noSubstitution": "Pas de remplacement en beach volley"
+      "noSubstitution": "Pas de remplacement dans ce match"
     },
     "exceptional": "Remplacement exceptionnel",
     "exceptionalHint": "Blessure — aucune autre solution légale n'est disponible"

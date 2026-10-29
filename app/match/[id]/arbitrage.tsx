@@ -22,7 +22,8 @@ import { getDelaySanctionOutcome, type SanctionType } from '../../../src/utils/s
 import { useScoringStore, resolveInitialServing, type CourtMap } from '../../../src/stores/scoringStore';
 import { useSettingsStore } from '../../../src/stores/settingsStore';
 import { getTeamById } from '../../../src/services/teamService';
-import { isSetWon, isMatchWon, isLastSet, getTotalSets, shouldChangeEndsIndoor } from '../../../src/utils/volleyball-rules';
+import { isSetWon, isMatchWon, isLastSet, getTotalSets } from '../../../src/utils/volleyball-rules';
+import { courtSize, isTechnicalTimeout, shouldSwitchCourts } from '../../../src/features/match/formatProfile';
 import { validateTimeoutRequest } from '../../../src/utils/rulesValidator';
 import { getDisplayedCaptainId, needsNewActingCaptain } from '../../../src/utils/captainTracking';
 import { ScoreButton } from '../../../src/components/scoring/ScoreButton';
@@ -47,11 +48,11 @@ import { timeoutWarning, substitutionWarning } from '../../../src/features/match
 
 type SetupPhase = 'serveChoice' | null;
 
-function buildAutoLineup(players: Player[]) {
+function buildAutoLineup(players: Player[], size = 6) {
   const liberoPlayers = players.filter((p) => p.position === 'libero');
   const nonLiberos = players.filter((p) => p.position !== 'libero');
-  const starters = nonLiberos.slice(0, 6);
-  const bench = [...nonLiberos.slice(6), ...liberoPlayers];
+  const starters = nonLiberos.slice(0, size);
+  const bench = [...nonLiberos.slice(size), ...liberoPlayers];
   const courtMap: CourtMap = {};
   starters.forEach((p, i) => { courtMap[i + 1] = p.id; });
   const liberoState: LiberoState | null = liberoPlayers[0]
@@ -113,7 +114,7 @@ export default function ArbitrageScreen() {
   const [lineupSetupMode, setLineupSetupMode] = useState(false);
   const [draftHomeCourt, setDraftHomeCourt] = useState<CourtMap>({});
   const [draftAwayCourt, setDraftAwayCourt] = useState<CourtMap>({});
-  const [lineupPickerTarget, setLineupPickerTarget] = useState<{ side: 'home' | 'away'; position: 1 | 2 | 3 | 4 | 5 | 6 } | null>(null);
+  const [lineupPickerTarget, setLineupPickerTarget] = useState<{ side: 'home' | 'away'; position: number } | null>(null);
 
   const [showSubSheet, setShowSubSheet] = useState(false);
   const [subSide, setSubSide] = useState<'home' | 'away'>('home');
@@ -231,8 +232,8 @@ export default function ArbitrageScreen() {
       // shouldn't normally happen): start set 1 with a default lineup.
       const activeSet = await createSet(id, 1, m.firstServeTeamId ?? m.teamHomeId);
       initMatch(m, activeSet);
-      const homeLineup = buildAutoLineup(homePlrs);
-      const awayLineup = buildAutoLineup(awayPlrs);
+      const homeLineup = buildAutoLineup(homePlrs, courtSize(m.format));
+      const awayLineup = buildAutoLineup(awayPlrs, courtSize(m.format));
       initLineup('home', homeLineup.courtMap, homeLineup.bench, homeLineup.liberoState);
       initLineup('away', awayLineup.courtMap, awayLineup.bench, awayLineup.liberoState);
       await saveLineup(m.id, activeSet.id, m.teamHomeId, toLineupEntries(homeLineup.courtMap));
@@ -273,7 +274,7 @@ export default function ArbitrageScreen() {
     setLineupSetupMode(true);
   }, [serveChoiceContext, match, createAndEnterSetLineup]);
 
-  const handleLineupPositionTap = useCallback((side: 'home' | 'away', pos: 1 | 2 | 3 | 4 | 5 | 6) => {
+  const handleLineupPositionTap = useCallback((side: 'home' | 'away', pos: number) => {
     const draft = side === 'home' ? draftHomeCourt : draftAwayCourt;
     const setDraft = side === 'home' ? setDraftHomeCourt : setDraftAwayCourt;
     if (draft[pos]) {
@@ -295,8 +296,10 @@ export default function ArbitrageScreen() {
     setLineupPickerTarget(null);
   }, [lineupPickerTarget]);
 
-  const isHomeLineupComplete = Object.keys(draftHomeCourt).length === 6;
-  const isAwayLineupComplete = Object.keys(draftAwayCourt).length === 6;
+  // 6 places in 6×6, 4 / 3 / 2 in the small formats
+  const lineupSize = courtSize((match ?? pendingMatch)?.format ?? 'indoor_6v6');
+  const isHomeLineupComplete = Object.keys(draftHomeCourt).length === lineupSize;
+  const isAwayLineupComplete = Object.keys(draftAwayCourt).length === lineupSize;
 
   const handleValidateLineup = useCallback(async () => {
     if (!id || !isHomeLineupComplete || !isAwayLineupComplete) return;
@@ -385,8 +388,12 @@ export default function ArbitrageScreen() {
     const homeWins = isSetWon(newScoreHome, newScoreAway, match.config, lastSet);
     const awayWins = isSetWon(newScoreAway, newScoreHome, match.config, lastSet);
 
-    if (match.format === 'indoor_6v6' && shouldChangeEndsIndoor(newScoreHome, newScoreAway, setNum, match.config)) {
+    // 6×6: at 8 in the deciding set; small formats: as set up (2×2 every 7 / 5)
+    if (shouldSwitchCourts(match.format, newScoreHome, newScoreAway, setNum, match.config)) {
       Alert.alert(t('match.changeEnds'), t('arbitrage.changeEndsHint'));
+    }
+    if (isTechnicalTimeout(newScoreHome, newScoreAway, setNum, match.config)) {
+      Alert.alert(t('arbitrage.technicalTimeoutTitle'), t('arbitrage.technicalTimeoutMessage', { seconds: 30 }));
     }
 
     if (homeWins || awayWins) {
@@ -699,7 +706,7 @@ export default function ArbitrageScreen() {
   const leftData = sideData(leftSide);
   const rightData = sideData(rightSide);
 
-  function handlePositionTap(side: 'home' | 'away', pos: 1 | 2 | 3 | 4 | 5 | 6) {
+  function handlePositionTap(side: 'home' | 'away', pos: number) {
     if (lineupSetupMode) {
       handleLineupPositionTap(side, pos);
       return;
@@ -794,6 +801,7 @@ export default function ArbitrageScreen() {
 
       <View style={styles.courtWrap}>
         <FullCourt
+          format={(match ?? pendingMatch)?.format}
           width={courtWidth}
           height={courtHeight}
           leftColor={leftData.color}

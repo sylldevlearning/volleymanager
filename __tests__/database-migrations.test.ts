@@ -10,6 +10,8 @@
 // recognize, so if a future migration does something more invasive than an
 // additive ALTER TABLE, this test fails loudly instead of silently passing.
 
+import fs from 'fs';
+import path from 'path';
 import { runMigrations } from '../src/services/database';
 import type * as SQLite from 'expo-sqlite';
 import {
@@ -34,6 +36,9 @@ class FakeMigrationDb {
   async getFirstAsync<T>(sql: string): Promise<T> {
     if (/PRAGMA user_version/i.test(sql)) {
       return { user_version: this.userVersion } as unknown as T;
+    }
+    if (/PRAGMA foreign_keys/i.test(sql)) {
+      return { foreign_keys: 0 } as unknown as T;
     }
     throw new Error(`FakeMigrationDb.getFirstAsync: unsupported query for this test: "${sql}"`);
   }
@@ -66,6 +71,27 @@ class FakeMigrationDb {
         }
         continue;
       }
+      if (/^PRAGMA foreign_keys/i.test(stmt)) continue;
+      // v16 table rebuild: copy, drop, rename
+      const copyMatch = /^INSERT INTO (\w+) \(([^)]+)\) SELECT ([\s\S]+) FROM (\w+)$/i.exec(stmt);
+      if (copyMatch) {
+        const [, target, cols] = copyMatch;
+        const columns = cols.split(',').map((c) => c.trim());
+        this.tables[target] = (this.tables[copyMatch[4]] ?? []).map((row) =>
+          Object.fromEntries(columns.filter((c) => c in row).map((c) => [c, row[c]])));
+        continue;
+      }
+      const dropMatch = /^DROP TABLE (\w+)$/i.exec(stmt);
+      if (dropMatch) {
+        delete this.tables[dropMatch[1]];
+        continue;
+      }
+      const renameMatch = /^ALTER TABLE (\w+) RENAME TO (\w+)$/i.exec(stmt);
+      if (renameMatch) {
+        this.tables[renameMatch[2]] = this.tables[renameMatch[1]];
+        delete this.tables[renameMatch[1]];
+        continue;
+      }
       // New empty tables (v14+) never touch an existing table
       const createMatch = /^CREATE TABLE IF NOT EXISTS (\w+)/i.exec(stmt);
       if (createMatch) {
@@ -89,7 +115,7 @@ class FakeMigrationDb {
   }
 }
 
-test('migrating an existing v8 database to v15 preserves every pre-existing row intact', async () => {
+test('migrating an existing v8 database to v16 preserves every pre-existing row intact', async () => {
   const tables: Record<string, Row[]> = {
     matches: [{ ...V8_MATCH_ROW }],
     sets: [{ ...V8_SET_ROW }],
@@ -101,7 +127,7 @@ test('migrating an existing v8 database to v15 preserves every pre-existing row 
 
   await runMigrations(db as unknown as SQLite.SQLiteDatabase);
 
-  expect(db.userVersion).toBe(15);
+  expect(db.userVersion).toBe(16);
 
   // matches: every pre-existing field untouched, new columns added as null/0
   expect(tables.matches[0]).toEqual({
@@ -138,16 +164,16 @@ test('migrating an existing v8 database to v15 preserves every pre-existing row 
   });
 });
 
-test('a database already at v15 is a no-op (idempotent)', async () => {
+test('a database already at v16 is a no-op (idempotent)', async () => {
   const tables: Record<string, Row[]> = {
     matches: [{ ...V8_MATCH_ROW, captain_home_id: 'P5', captain_away_id: null, sides_swapped: 1, acting_captain_home_id: 'P6', acting_captain_away_id: null }],
     teams: [{ ...V8_TEAM_ROW, is_ad_hoc: 1, coach_name: 'Coach Dupont' }],
   };
-  const db = new FakeMigrationDb(15, tables);
+  const db = new FakeMigrationDb(16, tables);
 
   await runMigrations(db as unknown as SQLite.SQLiteDatabase);
 
-  expect(db.userVersion).toBe(15);
+  expect(db.userVersion).toBe(16);
   // existing captain assignment, ad-hoc flag and referee state from before must not be clobbered by a re-run
   expect(tables.matches[0].captain_home_id).toBe('P5');
   expect(tables.matches[0].sides_swapped).toBe(1);
@@ -156,7 +182,7 @@ test('a database already at v15 is a no-op (idempotent)', async () => {
   expect(tables.teams[0].coach_name).toBe('Coach Dupont');
 });
 
-test('migrating an existing v11 database to v15 adds the referee-state columns', async () => {
+test('migrating an existing v11 database to v16 adds the referee-state columns', async () => {
   const tables: Record<string, Row[]> = {
     matches: [{ ...V8_MATCH_ROW, captain_home_id: 'P5', captain_away_id: null }],
   };
@@ -164,7 +190,7 @@ test('migrating an existing v11 database to v15 adds the referee-state columns',
 
   await runMigrations(db as unknown as SQLite.SQLiteDatabase);
 
-  expect(db.userVersion).toBe(15);
+  expect(db.userVersion).toBe(16);
   expect(tables.matches[0]).toEqual({
     ...V8_MATCH_ROW,
     captain_home_id: 'P5',
@@ -194,31 +220,31 @@ test('multiple pre-existing rows in the same table are all migrated', async () =
   expect(tables.sets.map((s) => s.id)).toEqual(['s1', 's2', 's3']);
 });
 
-test('migrating a v12 database to v15 adds the libero jersey colour to teams', async () => {
+test('migrating a v12 database to v16 adds the libero jersey colour to teams', async () => {
   const tables: Record<string, Row[]> = { teams: [{ ...V8_TEAM_ROW, is_ad_hoc: 1, coach_name: null }] };
   const db = new FakeMigrationDb(12, tables);
 
   await runMigrations(db as unknown as SQLite.SQLiteDatabase);
 
-  expect(db.userVersion).toBe(15);
+  expect(db.userVersion).toBe(16);
   expect(tables.teams[0]).toEqual({ ...V8_TEAM_ROW, is_ad_hoc: 1, coach_name: null, libero_color: null });
 });
 
-test('migrating a v13 database to v15 creates the empty tournament tables and changes nothing else', async () => {
+test('migrating a v13 database to v16 creates the empty tournament tables and changes nothing else', async () => {
   const tables: Record<string, Row[]> = { teams: [{ ...V8_TEAM_ROW, is_ad_hoc: 0, coach_name: null, libero_color: null }] };
   const before = JSON.stringify(tables.teams);
   const db = new FakeMigrationDb(13, tables);
 
   await runMigrations(db as unknown as SQLite.SQLiteDatabase);
 
-  expect(db.userVersion).toBe(15);
+  expect(db.userVersion).toBe(16);
   expect(JSON.stringify(tables.teams)).toBe(before);
   for (const t of ['tournaments', 'tournament_pools', 'tournament_teams', 'tournament_matches', 'tournament_templates']) {
     expect(tables[t]).toEqual([]);
   }
 });
 
-test('migrating a v14 database to v15 adds the mixing round and level to tournament pools and matches', async () => {
+test('migrating a v14 database to v16 adds the mixing round and level to tournament pools and matches', async () => {
   const tables: Record<string, Row[]> = {
     tournament_pools: [{ id: 'p1', tournament_id: 't1', name: 'A', position: 0 }],
     tournament_matches: [{ id: 'm1', tournament_id: 't1', stage: 'pool', round: 1, status: 'validated' }],
@@ -227,7 +253,29 @@ test('migrating a v14 database to v15 adds the mixing round and level to tournam
 
   await runMigrations(db as unknown as SQLite.SQLiteDatabase);
 
-  expect(db.userVersion).toBe(15);
+  expect(db.userVersion).toBe(16);
   expect(tables.tournament_pools[0]).toEqual({ id: 'p1', tournament_id: 't1', name: 'A', position: 0, phase: null, level: null });
   expect(tables.tournament_matches[0]).toEqual({ id: 'm1', tournament_id: 't1', stage: 'pool', round: 1, status: 'validated', phase: null, level: null });
+});
+
+test('migrating a v15 database to v16 keeps every match (6×6 and beach) and allows 4×4 / 3×3', async () => {
+  const full = {
+    ...V8_MATCH_ROW, captain_home_id: 'P5', captain_away_id: null, sides_swapped: 1,
+    acting_captain_home_id: null, acting_captain_away_id: 'P9',
+  };
+  const beach = { ...full, id: 'm2', format: 'beach_2v2', status: 'finished', winner_team_id: 't2' };
+  const tables: Record<string, Row[]> = { matches: [{ ...full }, { ...beach }], sets: [{ ...V8_SET_ROW, serving_team_id: null }] };
+  const db = new FakeMigrationDb(15, tables);
+
+  await runMigrations(db as unknown as SQLite.SQLiteDatabase);
+
+  expect(db.userVersion).toBe(16);
+  expect(tables.matches).toEqual([full, beach]);
+  expect(tables.matches_v16).toBeUndefined();
+  expect(tables.sets).toEqual([{ ...V8_SET_ROW, serving_team_id: null }]);
+});
+
+test('the v16 matches table accepts the four formats', () => {
+  const sql = fs.readFileSync(path.join(__dirname, '../src/services/database.ts'), 'utf8');
+  expect(sql).toContain("CHECK(format IN ('indoor_6v6','indoor_4v4','indoor_3v3','beach_2v2'))");
 });

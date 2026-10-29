@@ -13,6 +13,7 @@ import { palette } from '../../theme/tokens';
 import { validateSubstitution, validateLiberoSubstitution } from '../../utils/substitutionRules';
 import {
   validateRegularSubstitution,
+  validateFreeSubstitution,
   validateLiberoSubstitution as strictValidateLiberoSubstitution,
   checkLiberoRallySinceLastReplacement,
   checkLiberoNotAlreadyActive,
@@ -20,6 +21,7 @@ import {
   type RuleViolation,
 } from '../../utils/rulesValidator';
 import { InfoTooltip } from '../ui/InfoTooltip';
+import { courtSize, substitutionsAllowed } from '../../features/match/formatProfile';
 
 const LIBERO_COLOR = palette.libero;
 
@@ -101,7 +103,10 @@ export function SubstitutionSheet({
   const maxSubs = config.unlimitedSubstitutions ? null : (config.substitutionsPerSet ?? 6);
   const subsFull = maxSubs !== null && subsUsed >= maxSubs;
 
-  const courtPositions = ([1, 2, 3, 4, 5, 6] as const).map((pos) => ({
+  // Small formats: any bench player for any court player (FIVB pairs in 6×6)
+  const freeMode = config.substitutionMode === 'free';
+  const allowed = substitutionsAllowed(format, config);
+  const courtPositions = Array.from({ length: courtSize(format) }, (_, i) => i + 1).map((pos) => ({
     pos,
     playerId: onCourt[pos] ?? null,
     player: onCourt[pos] ? playerMap.get(onCourt[pos]) ?? null : null,
@@ -150,6 +155,13 @@ export function SubstitutionSheet({
     }
     if (!outPlayer || !player) return null;
     const onCourtPlayerIds = Object.values(onCourt);
+    if (freeMode) {
+      const free = validateFreeSubstitution({
+        playerOut: outPlayer, playerIn: player, position: playerOutPos, allPlayers, subsUsed, config,
+        onCourtPlayerIds, setEvents, side, sanctionEventsForSet, sanctionEventsForMatch,
+      });
+      return free.ok ? null : free;
+    }
     const result = validateRegularSubstitution({
       playerOut: outPlayer,
       playerIn: player,
@@ -168,7 +180,7 @@ export function SubstitutionSheet({
   // the referee may force an exceptional (injury) substitution for whichever
   // candidate they pick, bypassing quota/reciprocity — never for a libero swap.
   const exceptionalEligibility = (() => {
-    if (!strict || !outPlayer || outPlayer.position === 'libero' || format === 'beach_2v2') return { eligible: false };
+    if (!strict || !outPlayer || outPlayer.position === 'libero' || !allowed || freeMode) return { eligible: false };
     const benchCandidates = bench.filter((p) => p.position !== 'libero');
     return getExceptionalSubstitutionEligibility(outPlayer, benchCandidates, {
       allPlayers, pairs, subsUsed, config,
@@ -242,7 +254,7 @@ export function SubstitutionSheet({
           </View>
         </View>
 
-        {format === 'beach_2v2' ? (
+        {!allowed ? (
           <View style={subStyles.beachMsg}>
             <Text style={subStyles.beachMsgText}>{t('substitution.beach.noSubstitution')}</Text>
           </View>

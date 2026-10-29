@@ -110,7 +110,9 @@
     "deleteConfirm": "Delete this match and all its data?",
     "deleteAll": "Delete all history",
     "deleteAllConfirm": "Delete ALL matches?",
-    "irreversible": "This action is irreversible."
+    "irreversible": "This action is irreversible.",
+    "indoor4v4": "4v4",
+    "indoor3v3": "3v3"
   },
   "referee": {
     "title": "Referee",
@@ -172,7 +174,9 @@
       "noTimeout": "No timeout left for {{team}} this set",
       "lastSub": "One substitution left for {{team}}",
       "subQuota": "Substitution quota reached for {{team}}"
-    }
+    },
+    "technicalTimeoutTitle": "Technical time-out",
+    "technicalTimeoutMessage": "21 points played: {{seconds}} s technical time-out."
   },
   "arbitrageSetup": {
     "title": "Match setup",
@@ -208,7 +212,27 @@
     "liberoColor": "Libero jersey colour",
     "liberoColorHint": "Always different from the team's jersey.",
     "moreNumbers": "Show numbers up to 99",
-    "fewerNumbers": "Show only 0 to 20"
+    "fewerNumbers": "Show only 0 to 20",
+    "format": "Format",
+    "formats": {
+      "indoor_6v6": "6×6",
+      "indoor_4v4": "4×4",
+      "indoor_3v3": "3×3",
+      "beach_2v2": "2×2"
+    },
+    "presetLeisure": "Leisure",
+    "presetM13": "Official U13 (FFVolley)",
+    "presetSnow": "Official snow volleyball (FIVB)",
+    "presetBeach": "Official beach (FIVB)",
+    "technicalTimeout": "Technical time-out at 21 points (sets 1 and 2)",
+    "subsAllowed": "Substitutions allowed",
+    "subsUnlimited": "Unlimited substitutions",
+    "m13Subs": "U13 limits: back after one rally, the server does not return at position 2",
+    "positionalFaults": "Fixed zones (positional faults called)",
+    "courtSwitch": "Change of courts during the set",
+    "courtSwitchEvery": "Every … points",
+    "courtSwitchDeciding": "Deciding set: every … points",
+    "noLibero": "No libero in this format."
   },
   "team": {
     "new": "New team",
@@ -515,7 +539,7 @@
       "onBench": "Libero on bench"
     },
     "beach": {
-      "noSubstitution": "No substitutions in beach volleyball"
+      "noSubstitution": "No substitutions in this match"
     },
     "exceptional": "Exceptional substitution",
     "exceptionalHint": "Injury — no other legal option is available"

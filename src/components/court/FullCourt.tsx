@@ -2,11 +2,13 @@ import { StyleSheet, View, Pressable } from 'react-native';
 import Svg, { Line, Rect, Circle, Text as SvgText, G } from 'react-native-svg';
 import { palette } from '../../theme/tokens';
 import type { PlayerInPosition } from './IndoorCourt';
+import type { MatchFormat } from '../../models/match';
+import { courtSize } from '../../features/match/formatProfile';
 
 export interface FullCourtSide {
   players: PlayerInPosition[];
   isServing: boolean;
-  onPositionPress: (position: 1 | 2 | 3 | 4 | 5 | 6) => void;
+  onPositionPress: (position: number) => void;
   /** The team's libero jersey colour (match setup) */
   liberoColor?: string;
 }
@@ -20,6 +22,8 @@ interface FullCourtProps {
   rightColor: string;
   width: number;
   height: number;
+  /** 6×6 by default */
+  format?: MatchFormat;
 }
 
 // Net vertical, home/away face to face left/right. Row fractions (top/mid/bottom)
@@ -63,18 +67,46 @@ export function getPositionSlot(position: 1 | 2 | 3 | 4 | 5 | 6, isLeft: boolean
   return (isLeft ? LEFT_POSITION_SLOT : RIGHT_POSITION_SLOT)[position];
 }
 
+/**
+ * Small courts, left half (net on the right): y from top, x from the back line
+ * (0) to the net (1). The right half is the 180° rotation, as for 6×6.
+ *   4×4 (FFVolley M13): front IV, III, II top→bottom, I alone at the back
+ *   3×3: III and II at the front, I at the back (service order)
+ *   2×2: the two players side by side, I below (service order)
+ */
+const SMALL_SLOTS: Record<number, Record<number, { y: number; x: number }>> = {
+  4: { 4: { y: 0.17, x: 0.75 }, 3: { y: 0.5, x: 0.75 }, 2: { y: 0.83, x: 0.75 }, 1: { y: 0.5, x: 0.25 } },
+  3: { 3: { y: 0.25, x: 0.72 }, 2: { y: 0.75, x: 0.72 }, 1: { y: 0.5, x: 0.28 } },
+  2: { 2: { y: 0.3, x: 0.5 }, 1: { y: 0.7, x: 0.5 } },
+};
+
+/** Where a place of a small court sits: { y, x } fractions, x growing toward the net. */
+export function smallCourtSlot(size: number, position: number, isLeft: boolean): { y: number; x: number } {
+  const slot = SMALL_SLOTS[size][position];
+  return isLeft ? slot : { y: 1 - slot.y, x: slot.x };
+}
+
 const CIRCLE_RADIUS = 20;
 
-export function FullCourt({ left, right, leftColor, rightColor, width, height }: FullCourtProps) {
+export function FullCourt({ left, right, leftColor, rightColor, width, height, format = 'indoor_6v6' }: FullCourtProps) {
   const pad = 10;
   const courtW = width - pad * 2;
   const courtH = height - pad * 2;
   const halfW = courtW / 2;
+  const size = courtSize(format);
+  const positions = Array.from({ length: size }, (_, i) => i + 1);
 
-  function coords(position: 1 | 2 | 3 | 4 | 5 | 6, isLeft: boolean) {
-    const { row, col } = getPositionSlot(position, isLeft);
-    const y = pad + ROWS[row] * courtH;
-    const colFraction = COL_FRACTION[col];
+  function coords(position: number, isLeft: boolean) {
+    let yFraction: number;
+    let colFraction: number;
+    if (size === 6) {
+      const { row, col } = getPositionSlot(position as 1 | 2 | 3 | 4 | 5 | 6, isLeft);
+      yFraction = ROWS[row];
+      colFraction = COL_FRACTION[col];
+    } else {
+      ({ y: yFraction, x: colFraction } = smallCourtSlot(size, position, isLeft));
+    }
+    const y = pad + yFraction * courtH;
     // For the left half, the fraction grows toward the net (right edge of the half).
     // For the right half it's mirrored, growing toward the net (left edge of the half).
     const x = isLeft
@@ -86,9 +118,9 @@ export function FullCourt({ left, right, leftColor, rightColor, width, height }:
   function renderSide(side: FullCourtSide, isLeft: boolean, color: string) {
     const liberoColor = side.liberoColor ?? palette.libero;
     const playerMap = new Map(side.players.map((p) => [p.position, p]));
-    return ([1, 2, 3, 4, 5, 6] as const).map((pos) => {
+    return positions.map((pos) => {
       const { x: cx, y: cy } = coords(pos, isLeft);
-      const player = playerMap.get(pos);
+      const player = playerMap.get(pos as PlayerInPosition['position']);
       const isServing = side.isServing && pos === 1;
       const r = CIRCLE_RADIUS;
       return (
@@ -137,7 +169,7 @@ export function FullCourt({ left, right, leftColor, rightColor, width, height }:
       </Svg>
 
       {/* Touch overlay — plain RN Pressables for reliable single-tap hit-testing. */}
-      {([1, 2, 3, 4, 5, 6] as const).map((pos) => {
+      {positions.map((pos) => {
         const { x, y } = coords(pos, true);
         return (
           <Pressable
@@ -148,7 +180,7 @@ export function FullCourt({ left, right, leftColor, rightColor, width, height }:
           />
         );
       })}
-      {([1, 2, 3, 4, 5, 6] as const).map((pos) => {
+      {positions.map((pos) => {
         const { x, y } = coords(pos, false);
         return (
           <Pressable

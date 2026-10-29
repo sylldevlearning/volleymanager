@@ -16,6 +16,13 @@ import { AdBanner } from '../../src/components/ads/AdBanner';
 
 type StatusFilter = 'all' | 'live' | 'finished';
 
+const FORMAT_LABELS: Record<Match['format'], string> = {
+  indoor_6v6: 'match.indoor6v6',
+  indoor_4v4: 'match.indoor4v4',
+  indoor_3v3: 'match.indoor3v3',
+  beach_2v2: 'match.beach2v2',
+};
+
 export default function MatchesScreen() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -227,7 +234,7 @@ function MatchCard({
           </View>
         )}
         <Text style={styles.cardFormat}>
-          {match.format === 'indoor_6v6' ? t('match.indoor6v6') : t('match.beach2v2')}
+          {t(FORMAT_LABELS[match.format])}
         </Text>
       </View>
       <View style={styles.cardTeams}>
