@@ -14,6 +14,8 @@ const FILES = [
   'app/tournament/[id]/schedule.tsx',
   'src/components/tournament/MatchRow.tsx',
   'src/components/tournament/StandingsTableView.tsx',
+  'app/tournament/[id]/round/[round].tsx',
+  'app/tournament/[id]/levels.tsx',
 ];
 
 const lookup = (dict: unknown, key: string) =>
@@ -75,6 +77,33 @@ describe('tournament screens (phase 3)', () => {
     const schedule = read('app/tournament/[id]/schedule.tsx');
     expect(schedule).toContain('rescheduleTournament(');
     expect(schedule).toContain('<PickerField mode="time"');
+  });
+
+  it('"Tour N terminé" and "Répartition des niveaux": rebuilt from the results each time they are shown', () => {
+    const round = read('app/tournament/[id]/round/[round].tsx');
+    expect(round).toContain('roundSummary(bundle, n, t)');
+    expect(round).toContain('useFocusEffect');
+    expect(round).toContain("t('tournament.round.nextPools'");
+    const levels = read('app/tournament/[id]/levels.tsx');
+    expect(levels).toContain('levelsSummary(bundle, t)');
+    expect(levels).toContain('useFocusEffect');
+    expect(levels).toContain('borderColor: level.color');
+    expect(SCREEN_HEADERS['tournament/[id]/round/[round]'].titleKey).toBe('nav.tournamentRound');
+    expect(SCREEN_HEADERS['tournament/[id]/levels'].titleKey).toBe('nav.tournamentLevels');
+  });
+
+  it('shown right after the last result of a round, then consultable from the tournament', () => {
+    const score = read('app/tournament/[id]/match/[matchId].tsx');
+    expect(score).toContain('roundJustCompleted(bundle!, outcome.bundle, matchId)');
+    expect(score).toContain('router.replace(lastRound ? `/tournament/${id}/levels` : `/tournament/${id}/round/${round}`)');
+    const screen = read('app/tournament/[id]/index.tsx');
+    expect(screen).toContain('phaseStatuses(bundle, t)');
+    expect(screen).toContain('router.push(`/tournament/${id}/round/${phase.screen.round}`)');
+    expect(screen).toContain('router.push(`/tournament/${id}/levels`)');
+    // Status at the top, in the Matchs filters and in the Classement tab
+    expect(screen).toContain('styles.phaseStrip');
+    expect(screen).toContain('`${g.label} · ${statusText(ph.status)}`');
+    expect(screen).toContain("t('tournament.view.phases')");
   });
 
   it('every text exists in French and English', () => {

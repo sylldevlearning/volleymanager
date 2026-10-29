@@ -233,6 +233,18 @@ transaction de création), moteur complet et ses tests. Pas d'écran.
 - Textes et titres calculés dans `src/features/tournament/display.ts` (testé) ;
   conversions base ↔ moteur dans `src/features/tournament/bundle.ts`.
 
+### Retours de test : fin des tours et niveaux (fait)
+- `src/features/tournament/phases.ts` (testé) : statut de chaque phase
+  (terminé / en cours / à venir), résumé d'un tour, répartition des niveaux.
+- « Tour N terminé » (`round/[round].tsx`) : classement du tour et poules du
+  tour suivant ; ouvert tout seul quand le dernier match du tour est validé.
+  Après le dernier tour : « Répartition des niveaux » (`levels.tsx`), une
+  couleur par niveau (or, argent, bronze), grands noms lisibles de loin.
+- Statut des phases en haut du tournoi, dans les filtres Matchs et en tête du
+  Classement ; chaque écran reste consultable depuis là.
+- Recalculés à chaque affichage : une correction est prise en compte. Partage
+  en image : phase 5.
+
 ### Phase 4 — QR codes
 - Format : `VMT1:` + JSON en base64url, avec `v`, `kind` (`match` | `result`),
   `t` (tournoi), `m` (match), équipes, règles du match, et `sig`

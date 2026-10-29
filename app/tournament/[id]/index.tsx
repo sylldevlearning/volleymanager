@@ -3,7 +3,7 @@ import { Alert, FlatList, Modal, Pressable, ScrollView, SectionList, StyleSheet,
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { CalendarClock, Ellipsis, Pencil, Shuffle, Trash2 } from 'lucide-react-native';
+import { CalendarClock, ChevronRight, Ellipsis, Pencil, Shuffle, Trash2 } from 'lucide-react-native';
 import { palette } from '../../../src/theme/tokens';
 import { InfoTooltip } from '../../../src/components/ui/InfoTooltip';
 import { MatchRow } from '../../../src/components/tournament/MatchRow';
@@ -18,6 +18,7 @@ import {
   slotGroups,
   standingsTables,
 } from '../../../src/features/tournament/display';
+import { phaseStatuses, type PhaseInfo, type PhaseStatus } from '../../../src/features/tournament/phases';
 
 type Tab = 'planning' | 'matches' | 'standings';
 type StatusFilter = 'all' | 'toPlay' | 'done';
@@ -41,6 +42,7 @@ export default function TournamentScreen() {
   }, [id]));
 
   const groups = useMemo(() => (bundle ? matchGroups(bundle, t) : []), [bundle, t]);
+  const phases = useMemo(() => (bundle ? phaseStatuses(bundle, t) : []), [bundle, t]);
   const filtered = useMemo(() => {
     if (!bundle) return [];
     const inPhase = phase ? new Set(groups.find((g) => g.key === phase)?.matchIds ?? []) : null;
@@ -72,6 +74,17 @@ export default function TournamentScreen() {
   }
 
   const sections = slotGroups(bundle.matches).map((g) => ({ title: g.time, data: g.matches }));
+  const statusText = (status: PhaseStatus) => t(STATUS_KEYS[status]);
+  // A filter chip and its phase: pools share the status of the pool phase
+  const phaseOfGroup = (key: string) => phases.find((ph) => ph.key === (key.startsWith('pool:') ? 'pools' : key));
+  function openPhase(phase: PhaseInfo) {
+    if (phase.screen?.kind === 'round') router.push(`/tournament/${id}/round/${phase.screen.round}`);
+    else if (phase.screen?.kind === 'levels') router.push(`/tournament/${id}/levels`);
+    else {
+      setTab('matches');
+      setPhase(groups.some((g) => g.key === phase.key) ? phase.key : null);
+    }
+  }
   const ranking = rankingRows(bundle);
 
   return (
@@ -93,6 +106,21 @@ export default function TournamentScreen() {
       <Text style={styles.progress}>
         {bundle.tournament.status === 'finished' ? t('tournament.view.finished') : t('tournament.view.progress', { done, total: bundle.matches.length })}
       </Text>
+
+      {phases.length > 1 && (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.phaseStrip} contentContainerStyle={styles.phaseStripContent}>
+          {phases.map((ph) => (
+            <Pressable key={ph.key} style={[styles.phaseChip, ph.status === 'live' && styles.phaseChipLive]} onPress={() => openPhase(ph)}
+              accessibilityRole="button" accessibilityLabel={`${ph.label} · ${statusText(ph.status)}`}>
+              <View style={[styles.statusDot, { backgroundColor: STATUS_COLORS[ph.status] }]} />
+              <View>
+                <Text style={styles.phaseLabel}>{ph.label}</Text>
+                <Text style={[styles.phaseStatus, { color: STATUS_COLORS[ph.status] }]}>{statusText(ph.status)}</Text>
+              </View>
+            </Pressable>
+          ))}
+        </ScrollView>
+      )}
 
       <View style={styles.tabBar}>
         {(['planning', 'matches', 'standings'] as Tab[]).map((key) => (
@@ -135,7 +163,10 @@ export default function TournamentScreen() {
               {groups.length > 1 && (
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
                   <Chip label={t('tournament.view.allPhases')} active={phase === null} onPress={() => setPhase(null)} />
-                  {groups.map((g) => <Chip key={g.key} label={g.label} active={phase === g.key} onPress={() => setPhase(g.key)} />)}
+                  {groups.map((g) => {
+                    const ph = phaseOfGroup(g.key);
+                    return <Chip key={g.key} label={ph ? `${g.label} · ${statusText(ph.status)}` : g.label} active={phase === g.key} onPress={() => setPhase(g.key)} />;
+                  })}
                 </ScrollView>
               )}
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
@@ -155,6 +186,30 @@ export default function TournamentScreen() {
 
       {tab === 'standings' && (
         <ScrollView contentContainerStyle={[styles.list, styles.standings]}>
+          {phases.length > 1 && (
+            <View style={styles.phaseCard}>
+              <Text style={styles.rankingTitle}>{t('tournament.view.phases')}</Text>
+              {phases.map((ph) => (
+                <Pressable key={ph.key} style={styles.phaseRow} onPress={() => openPhase(ph)} accessibilityRole="button">
+                  <View style={[styles.statusDot, { backgroundColor: STATUS_COLORS[ph.status] }]} />
+                  <Text style={styles.phaseRowLabel}>
+                    {ph.screen?.kind === 'round' && ph.status === 'done' ? t('tournament.round.titleDone', { n: ph.screen.round }) : ph.label}
+                  </Text>
+                  <Text style={[styles.phaseStatus, { color: STATUS_COLORS[ph.status] }]}>
+                    {statusText(ph.status)} · {ph.done}/{ph.total}
+                  </Text>
+                  {ph.screen && <ChevronRight size={16} color={palette.textMuted} />}
+                </Pressable>
+              ))}
+              {phases.some((ph) => ph.screen?.kind === 'levels') && (
+                <Pressable style={styles.phaseRow} onPress={() => router.push(`/tournament/${id}/levels`)} accessibilityRole="button">
+                  <View style={[styles.statusDot, { backgroundColor: '#D4AF37' }]} />
+                  <Text style={styles.phaseRowLabel}>{t('tournament.levels.title')}</Text>
+                  <ChevronRight size={16} color={palette.textMuted} />
+                </Pressable>
+              )}
+            </View>
+          )}
           {ranking.length > 0 && (
             <View style={styles.rankingCard}>
               <Text style={styles.rankingTitle}>{t('tournament.view.finalRanking')}</Text>
@@ -208,6 +263,13 @@ export default function TournamentScreen() {
   );
 }
 
+const STATUS_KEYS: Record<PhaseStatus, string> = {
+  done: 'tournament.view.statusDone',
+  live: 'tournament.view.statusLive',
+  upcoming: 'tournament.view.statusUpcoming',
+};
+const STATUS_COLORS: Record<PhaseStatus, string> = { done: palette.success, live: palette.info, upcoming: palette.textMuted };
+
 function MenuItem({ icon, label, onPress, danger }: { icon: ReactNode; label: string; onPress: () => void; danger?: boolean }) {
   return (
     <Pressable style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]} onPress={onPress} accessibilityRole="button">
@@ -221,6 +283,22 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   progress: { fontSize: 13, fontFamily: 'Inter_500Medium', color: palette.textSecondary, paddingHorizontal: 16, paddingBottom: 8 },
+  phaseStrip: { flexGrow: 0, marginBottom: 8 },
+  phaseStripContent: { paddingHorizontal: 16, gap: 8 },
+  phaseChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 12,
+    backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
+  },
+  phaseChipLive: { borderColor: palette.info },
+  statusDot: { width: 10, height: 10, borderRadius: 5 },
+  phaseLabel: { fontSize: 13, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
+  phaseStatus: { fontSize: 12, fontFamily: 'Inter_600SemiBold' },
+  phaseCard: {
+    backgroundColor: palette.backgroundSurface, borderRadius: 14, borderWidth: 1,
+    borderColor: palette.backgroundElevated, padding: 12, gap: 2,
+  },
+  phaseRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 9, borderTopWidth: 1, borderTopColor: palette.backgroundElevated },
+  phaseRowLabel: { flex: 1, fontSize: 15, fontFamily: 'Inter_500Medium', color: palette.textPrimary },
   tabBar: {
     flexDirection: 'row', marginHorizontal: 16, marginBottom: 8, padding: 4, gap: 4,
     backgroundColor: palette.backgroundSurface, borderRadius: 12,

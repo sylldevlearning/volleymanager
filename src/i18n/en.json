@@ -681,7 +681,9 @@
     "tournament": "Tournament",
     "tournamentMatch": "Match",
     "tournamentTeams": "Teams",
-    "tournamentSchedule": "Schedule and courts"
+    "tournamentSchedule": "Schedule and courts",
+    "tournamentRound": "Round",
+    "tournamentLevels": "Levels"
   },
   "tournament": {
     "list": {
@@ -896,7 +898,11 @@
       "finished": "Tournament finished",
       "menuDevFill": "Fill the matches to play with random scores",
       "devFilled_one": "{{count}} match filled",
-      "devFilled_other": "{{count}} matches filled"
+      "devFilled_other": "{{count}} matches filled",
+      "pools": "Pools",
+      "statusDone": "Finished",
+      "statusUpcoming": "To come",
+      "phases": "Phases"
     },
     "score": {
       "rules": "{{sets}} winning set(s) of {{points}} points",
@@ -936,6 +942,20 @@
     "scheduleScreen": {
       "hint": "Change the courts or times (court unavailable, delay): matches still to play are placed again. Finished or ongoing matches keep their place.",
       "apply": "Recompute the schedule"
+    },
+    "round": {
+      "titleDone": "Round {{n}} finished",
+      "titleLive": "Round {{n}} in progress",
+      "ranking": "Ranking of round {{n}}",
+      "nextPools": "Pools of round {{n}}",
+      "toLevels": "See the levels",
+      "notDone": "This round ends when its {{total}} matches are validated ({{done}} / {{total}})."
+    },
+    "levels": {
+      "title": "Levels",
+      "pending": "The levels will be known at the end of the last mixing round.",
+      "count_one": "{{count}} team",
+      "count_other": "{{count}} teams"
     }
   }
 }

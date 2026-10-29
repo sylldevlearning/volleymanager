@@ -681,7 +681,9 @@
     "tournament": "Tournoi",
     "tournamentMatch": "Match",
     "tournamentTeams": "Équipes",
-    "tournamentSchedule": "Planning et terrains"
+    "tournamentSchedule": "Planning et terrains",
+    "tournamentRound": "Tour",
+    "tournamentLevels": "Répartition des niveaux"
   },
   "tournament": {
     "list": {
@@ -896,7 +898,11 @@
       "finished": "Tournoi terminé",
       "menuDevFill": "Remplir les matchs à jouer avec des scores aléatoires",
       "devFilled_one": "{{count}} match rempli",
-      "devFilled_other": "{{count}} matchs remplis"
+      "devFilled_other": "{{count}} matchs remplis",
+      "pools": "Poules",
+      "statusDone": "Terminé",
+      "statusUpcoming": "À venir",
+      "phases": "Phases"
     },
     "score": {
       "rules": "{{sets}} set(s) gagnant(s) de {{points}} points",
@@ -936,6 +942,20 @@
     "scheduleScreen": {
       "hint": "Change les terrains ou les horaires (terrain indisponible, retard) : les matchs à jouer sont replacés. Les matchs terminés ou en cours gardent leur place.",
       "apply": "Recalculer le planning"
+    },
+    "round": {
+      "titleDone": "Tour {{n}} terminé",
+      "titleLive": "Tour {{n}} en cours",
+      "ranking": "Classement du tour {{n}}",
+      "nextPools": "Poules du tour {{n}}",
+      "toLevels": "Voir la répartition des niveaux",
+      "notDone": "Ce tour se termine quand ses {{total}} matchs sont validés ({{done}} / {{total}})."
+    },
+    "levels": {
+      "title": "Répartition des niveaux",
+      "pending": "La répartition sera connue à la fin du dernier tour de brassage.",
+      "count_one": "{{count}} équipe",
+      "count_other": "{{count}} équipes"
     }
   }
 }
