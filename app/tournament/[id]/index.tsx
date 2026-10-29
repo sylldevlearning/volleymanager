@@ -3,13 +3,14 @@ import { Alert, FlatList, Modal, Pressable, ScrollView, SectionList, StyleSheet,
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { CalendarClock, Ellipsis, Pencil, Trash2 } from 'lucide-react-native';
+import { CalendarClock, Ellipsis, Pencil, Shuffle, Trash2 } from 'lucide-react-native';
 import { palette } from '../../../src/theme/tokens';
 import { InfoTooltip } from '../../../src/components/ui/InfoTooltip';
 import { MatchRow } from '../../../src/components/tournament/MatchRow';
 import { StandingsTableView } from '../../../src/components/tournament/StandingsTableView';
 import { Chip } from '../../../src/components/tournament/WizardSteps';
 import { deleteTournament, getTournamentBundle, type TournamentBundle } from '../../../src/services/tournamentService';
+import { fillRandomResults } from '../../../src/features/tournament/devRandomScores';
 import {
   bracketRounds,
   matchGroups,
@@ -187,6 +188,18 @@ export default function TournamentScreen() {
               onPress={() => { setMenuOpen(false); router.push(`/tournament/${id}/teams`); }} />
             <MenuItem icon={<CalendarClock size={20} color={palette.textPrimary} />} label={t('tournament.view.menuSchedule')}
               onPress={() => { setMenuOpen(false); router.push(`/tournament/${id}/schedule`); }} />
+            {__DEV__ && (
+              <MenuItem
+                icon={<Shuffle size={20} color={palette.warning} />}
+                label={t('tournament.view.menuDevFill')}
+                onPress={async () => {
+                  setMenuOpen(false);
+                  const filled = await fillRandomResults(id);
+                  setBundle(await getTournamentBundle(id));
+                  Alert.alert(t('tournament.view.devFilled', { count: filled }));
+                }}
+              />
+            )}
             <MenuItem icon={<Trash2 size={20} color={palette.error} />} label={t('tournament.view.menuDelete')} danger onPress={confirmDelete} />
           </View>
         </Pressable>

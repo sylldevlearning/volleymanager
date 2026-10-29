@@ -869,7 +869,10 @@
       "deleteTitle": "Delete \"{{name}}\"?",
       "deleteMessage": "Every match and result of the tournament will be deleted. Refereed matches stay in the history.",
       "progress": "{{done}} / {{total}} matches played",
-      "finished": "Tournament finished"
+      "finished": "Tournament finished",
+      "menuDevFill": "Fill the matches to play with random scores",
+      "devFilled_one": "{{count}} match filled",
+      "devFilled_other": "{{count}} matches filled"
     },
     "score": {
       "rules": "{{sets}} winning set(s) of {{points}} points",

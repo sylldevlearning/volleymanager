@@ -869,7 +869,10 @@
       "deleteTitle": "Supprimer « {{name}} » ?",
       "deleteMessage": "Tous les matchs et résultats du tournoi seront supprimés. Les matchs arbitrés restent dans l'historique.",
       "progress": "{{done}} / {{total}} matchs joués",
-      "finished": "Tournoi terminé"
+      "finished": "Tournoi terminé",
+      "menuDevFill": "Remplir les matchs à jouer avec des scores aléatoires",
+      "devFilled_one": "{{count}} match rempli",
+      "devFilled_other": "{{count}} matchs remplis"
     },
     "score": {
       "rules": "{{sets}} set(s) gagnant(s) de {{points}} points",
