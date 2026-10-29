@@ -25,7 +25,7 @@ type Slot = { kind: 'entrant'; entrant: Entrant } | { kind: 'match'; key: string
 
 function emptyMatch(key: string, round: number, bracketSlot: number, label: string): Omit<EngineMatch, 'homeRef' | 'awayRef' | 'homeId' | 'awayId'> {
   return {
-    key, stage: 'knockout', pool: null, round, bracketSlot, label,
+    key, stage: 'knockout', pool: null, phase: null, level: null, round, bracketSlot, label,
     status: 'scheduled', sets: null, forfeitId: null, winnerId: null, slot: null, court: null,
   };
 }
@@ -86,5 +86,40 @@ export function buildBracket(entrants: Entrant[], opts: { thirdPlace: boolean; k
       awayId: null,
     });
   }
+  return matches;
+}
+
+/**
+ * Bracket where every place is played (size = power of 2): winners go on for
+ * the best places, losers play for the places below, so every team plays
+ * log2(size) matches. Labels: 'place:<from>-<to>:<n>' — a 2-team match
+ * decides places <from> and <to>.
+ */
+export function buildPlacementBracket(entrants: TeamRef[], opts: { keyPrefix: string; level: number | null }): EngineMatch[] {
+  const matches: EngineMatch[] = [];
+  const positions = seedPositions(entrants.length);
+
+  const play = (slots: TeamRef[], from: number, round: number, path: string) => {
+    if (slots.length < 2) return;
+    const to = from + slots.length - 1;
+    const winners: TeamRef[] = [];
+    const losers: TeamRef[] = [];
+    for (let j = 0; j < slots.length / 2; j++) {
+      const key = `${opts.keyPrefix}K${path}${round}-${j + 1}`;
+      matches.push({
+        ...emptyMatch(key, round, j, `place:${from}-${to}:${j + 1}`),
+        level: opts.level,
+        homeRef: slots[2 * j], awayRef: slots[2 * j + 1],
+        homeId: slots[2 * j].type === 'team' ? (slots[2 * j] as { id: string }).id : null,
+        awayId: slots[2 * j + 1].type === 'team' ? (slots[2 * j + 1] as { id: string }).id : null,
+      });
+      winners.push({ type: 'winner', match: key });
+      losers.push({ type: 'loser', match: key });
+    }
+    play(winners, from, round + 1, `${path}W`);
+    play(losers, from + slots.length / 2, round + 1, `${path}L`);
+  };
+
+  play(positions.map((seed) => entrants[seed - 1]), 1, 1, '');
   return matches;
 }

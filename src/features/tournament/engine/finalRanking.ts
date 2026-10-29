@@ -1,4 +1,4 @@
-import { completedPoolStandings } from './qualification';
+import { brassageView, completedPoolStandings } from './qualification';
 import { compareAcrossPools, computeStandings, type StandingRow } from './standings';
 import type { EngineContext, EngineMatch } from './types';
 
@@ -19,6 +19,7 @@ const roundTeams = (m: EngineMatch) => Number(m.label?.split(':')[1] ?? 0);
  * pools come after the bracket, best pool place first.
  */
 export function finalRanking(ctx: EngineContext, matches: EngineMatch[]): RankingEntry[] {
+  if (ctx.format === 'brassage_levels') return brassageRanking(ctx, matches);
   if (ctx.format === 'round_robin') {
     const done = matches.every((m) => m.status === 'validated');
     return computeStandings(ctx.teams.map((t) => t.id), matches, ctx)
@@ -69,4 +70,52 @@ export function finalRanking(ctx: EngineContext, matches: EngineMatch[]): Rankin
     .sort((a, b) =>
       (a.rank ?? Infinity) - (b.rank ?? Infinity)
       || (rows.size > 0 ? statsOrder.indexOf(a.teamId) - statsOrder.indexOf(b.teamId) : position.get(a.teamId)! - position.get(b.teamId)!));
+}
+
+/** "from-to" of a 'place:<from>-<to>:<n>' label */
+const placeRange = (label: string | null) => {
+  const m = /^place:(\d+)-(\d+):/.exec(label ?? '');
+  return m ? [Number(m[1]), Number(m[2])] as const : null;
+};
+
+/**
+ * Brassage + niveaux: the Principale gives places 1..k, then the Consolante…
+ * Inside a level: the table of its pool, place by place across its pools, or
+ * the places played in its bracket.
+ */
+function brassageRanking(ctx: EngineContext, matches: EngineMatch[]): RankingEntry[] {
+  const view = brassageView(ctx, matches);
+  const levels = view.levels();
+  const rank = new Map<string, number>();
+  let start = 0;
+  (levels ?? []).forEach((teams, level) => {
+    const inLevel = matches.filter((m) => m.level === level);
+    const bracket = inLevel.filter((m) => placeRange(m.label));
+    if (bracket.length > 0) {
+      for (const m of bracket) {
+        const [from, to] = placeRange(m.label)!;
+        if (to - from !== 1 || m.status !== 'validated' || !m.winnerId) continue;
+        rank.set(m.winnerId, start + from);
+        rank.set(loserOf(m)!, start + to);
+      }
+    } else if (inLevel.length > 0 && inLevel.every((m) => m.status === 'validated')) {
+      const pools = [...new Set(inLevel.map((m) => m.pool!))].sort((a, b) => a - b);
+      const standings = pools.map((p) => {
+        const inPool = inLevel.filter((m) => m.pool === p);
+        const ids = [...new Set(inPool.flatMap((m) => [m.homeId, m.awayId]).filter((t): t is string => t !== null))];
+        return computeStandings(ids, inPool, ctx);
+      });
+      const deepest = Math.max(...standings.map((st) => st.length));
+      let next = start + 1;
+      for (let place = 0; place < deepest; place++) {
+        const tier = standings.map((st) => st[place]).filter((r): r is StandingRow => r !== undefined);
+        for (const r of compareAcrossPools(tier, ctx)) rank.set(r.teamId, next++);
+      }
+    }
+    start += teams.length;
+  });
+  const order = new Map(ctx.teams.map((t) => [t.id, t.position]));
+  return ctx.teams
+    .map((t) => ({ teamId: t.id, rank: rank.get(t.id) ?? null }))
+    .sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity) || order.get(a.teamId)! - order.get(b.teamId)!);
 }

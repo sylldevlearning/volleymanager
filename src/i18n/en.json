@@ -672,12 +672,14 @@
     "format": {
       "round_robin": "League",
       "pools_knockout": "Pools + finals",
-      "knockout": "Single elimination"
+      "knockout": "Single elimination",
+      "brassage_levels": "Mixing + levels"
     },
     "formatDesc": {
       "round_robin": "Everybody plays everybody; the table decides the winner.",
       "pools_knockout": "Pools, then a bracket with the best of each pool.",
-      "knockout": "A bracket from the start: the loser is out."
+      "knockout": "A bracket from the start: the loser is out.",
+      "brassage_levels": "Pool rounds to mix then rank the teams, then levels (Main, Consolation…): everybody plays about the same number of matches."
     },
     "tiebreaker": {
       "headToHead": "Head-to-head",
@@ -777,7 +779,14 @@
       "and": " and ",
       "summaryDuration": "Estimated duration: {{duration}}",
       "pointsPresetSimple": "Win = 1 point",
-      "pointsPresetFivb": "3-2-1-0"
+      "pointsPresetFivb": "3-2-1-0",
+      "brassage": "Mixing and levels",
+      "brassageRounds": "Mixing rounds",
+      "brassageLevels": "Levels",
+      "brassageHint": "Round 1: pools drawn at random. Next rounds: pools of the same level, from the ranking of the previous round. Levels follow the ranking of the last round.",
+      "matchesPerTeam_one": "Each team plays {{count}} match",
+      "matchesPerTeam_other": "Each team plays {{count}} matches",
+      "matchesPerTeamRange": "Each team plays {{min}} to {{max}} matches"
     },
     "errors": {
       "name_required": "Give the tournament a name.",
@@ -789,7 +798,15 @@
       "seed_duplicate": "Two teams have the same seed.",
       "pool_too_small": "The pools are too small for this number of qualified teams.",
       "too_few_qualifiers": "At least 2 teams must qualify for the bracket.",
-      "too_many_best_others": "At most one \"best next team\" per pool."
+      "too_many_best_others": "At most one \"best next team\" per pool.",
+      "brassage_too_few_teams": "Mixing needs at least 6 teams.",
+      "too_many_levels": "Too many levels: each level needs at least 2 teams."
+    },
+    "level": {
+      "0": "Main",
+      "1": "Consolation",
+      "2": "Second consolation",
+      "3": "Level 4"
     }
   }
 }

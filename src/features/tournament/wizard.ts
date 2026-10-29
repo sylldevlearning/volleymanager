@@ -1,4 +1,5 @@
 import type {
+  BrassageRules,
   PointsScale,
   PoolRules,
   SeedingMode,
@@ -15,6 +16,8 @@ import { PRESET_TEAM_COLORS } from '../../utils/constants';
 import {
   DEFAULT_POINTS,
   DEFAULT_TIEBREAKERS,
+  defaultBrassageRules,
+  defaultFormat,
   defaultPoolRules,
   defaultSchedule,
   defaultSetRules,
@@ -22,6 +25,7 @@ import {
 } from './engine/defaults';
 import { generateTournament, validateSetup, type SetupError } from './engine/generate';
 import { restSlotsFor, scheduleMatches, slotStart } from './engine/scheduler';
+import { matchCountRange } from './engine/simulate';
 import type { GenerateInput } from './engine/types';
 
 export type WizardStep = 1 | 2 | 3 | 4;
@@ -60,6 +64,8 @@ export interface WizardState {
   legs: 1 | 2;
   /** null: automatic, from the number of teams */
   pools: PoolRules | null;
+  /** Brassage + niveaux — null: automatic, from the number of teams */
+  brassage: BrassageRules | null;
   teams: WizardTeam[];
   /** 'seeded': the order of the list is the seed order */
   seeding: SeedingMode;
@@ -96,6 +102,7 @@ export function initialWizardState(today: Date, seed: number, label: TeamLabel):
     thirdPlace: true,
     legs: 1,
     pools: null,
+    brassage: null,
     teams: [],
     seeding: 'random',
     courts: null,
@@ -111,6 +118,10 @@ export function setGameType(state: WizardState, gameType: TournamentGameType): W
   return {
     ...state,
     gameType,
+    // Leisure formats mix the teams then play by levels; 6×6 plays pools + finals
+    format: defaultFormat(gameType),
+    pools: null,
+    brassage: null,
     match: defaultSetRules(gameType),
     finalsMatch: state.finalsMatch ? defaultSetRules(gameType) : null,
     matchMinutes: defaultSchedule(gameType, state.teams.length).matchMinutes,
@@ -118,7 +129,11 @@ export function setGameType(state: WizardState, gameType: TournamentGameType): W
 }
 
 export function setFormat(state: WizardState, format: TournamentFormat): WizardState {
-  return { ...state, format, pools: null };
+  return { ...state, format, pools: null, brassage: null };
+}
+
+export function resolvedBrassage(state: WizardState): BrassageRules {
+  return state.brassage ?? defaultBrassageRules(state.teams.length);
 }
 
 export function resolvedPools(state: WizardState): PoolRules {
@@ -246,6 +261,7 @@ export function toRules(state: WizardState): TournamentRules {
     pools: state.format === 'pools_knockout' ? resolvedPools(state) : null,
     knockout: { thirdPlace: state.thirdPlace },
     roundRobinLegs: state.legs,
+    brassage: state.format === 'brassage_levels' ? resolvedBrassage(state) : null,
   };
 }
 
@@ -296,6 +312,7 @@ export function validateStep(state: WizardState, step: WizardStep): WizardError[
 export function formatHint(state: WizardState): TournamentFormat | null {
   const n = state.teams.length;
   if (n < 2 || state.format === 'knockout') return null;
+  if (state.format === 'brassage_levels') return n < 6 ? 'round_robin' : null;
   const recommended = recommendFormat(n);
   return recommended === state.format ? null : recommended;
 }
@@ -309,24 +326,29 @@ export interface TournamentPreview {
   endTime: string | null;
   /** From the start time to the end of the last slot */
   durationMinutes: number | null;
+  /** Fewest / most matches a team plays */
+  matchesPerTeam: { min: number; max: number } | null;
 }
 
 /** What "Créer" will produce, with the current seed. */
 export function previewTournament(state: WizardState): TournamentPreview {
   const input = engineInput(state);
   const errors = validateSetup(input);
-  if (errors.length > 0) return { errors, pools: [], matchCount: 0, endTime: null, durationMinutes: null };
+  if (errors.length > 0) return { errors, pools: [], matchCount: 0, endTime: null, durationMinutes: null, matchesPerTeam: null };
   const schedule = toSchedule(state);
   const generated = generateTournament(input);
   const planned = scheduleMatches(generated.matches, { courts: schedule.courts, restSlots: restSlotsFor(schedule) });
   const names = new Map(state.teams.map((t) => [t.key, displayName(t)]));
   const lastSlot = Math.max(...planned.map((m) => m.slot ?? 0));
+  const ctx = { format: input.format, rules: input.rules, teams: input.teams, pools: generated.pools };
   return {
     errors,
-    pools: generated.pools.map((ids) => ids.map((id) => names.get(id)!)),
+    // Pools known now (later rounds depend on the results)
+    pools: generated.pools.filter((ids) => ids.length > 0).map((ids) => ids.map((id) => names.get(id)!)),
     matchCount: planned.length,
     endTime: slotStart(schedule, lastSlot + 1),
     durationMinutes: (lastSlot + 1) * schedule.matchMinutes,
+    matchesPerTeam: matchCountRange(ctx, planned),
   };
 }
 
@@ -358,7 +380,11 @@ export function templatePayload(state: WizardState): TournamentTemplate['payload
   return {
     gameType: state.gameType,
     format: state.format,
-    rules: { ...toRules(state), pools: state.format === 'pools_knockout' ? state.pools : null },
+    rules: {
+      ...toRules(state),
+      pools: state.format === 'pools_knockout' ? state.pools : null,
+      brassage: state.format === 'brassage_levels' ? state.brassage : null,
+    },
     schedule: toSchedule(state),
     seeding: state.seeding,
   };
@@ -377,6 +403,7 @@ export function applyTemplate(state: WizardState, payload: TournamentTemplate['p
     thirdPlace: rules.knockout.thirdPlace,
     legs: rules.roundRobinLegs,
     pools: rules.pools,
+    brassage: rules.brassage ?? null,
     seeding: payload.seeding,
     courts: schedule.courts,
     startTime: schedule.startTime,

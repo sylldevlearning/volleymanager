@@ -89,7 +89,7 @@ class FakeMigrationDb {
   }
 }
 
-test('migrating an existing v8 database to v14 preserves every pre-existing row intact', async () => {
+test('migrating an existing v8 database to v15 preserves every pre-existing row intact', async () => {
   const tables: Record<string, Row[]> = {
     matches: [{ ...V8_MATCH_ROW }],
     sets: [{ ...V8_SET_ROW }],
@@ -101,7 +101,7 @@ test('migrating an existing v8 database to v14 preserves every pre-existing row 
 
   await runMigrations(db as unknown as SQLite.SQLiteDatabase);
 
-  expect(db.userVersion).toBe(14);
+  expect(db.userVersion).toBe(15);
 
   // matches: every pre-existing field untouched, new columns added as null/0
   expect(tables.matches[0]).toEqual({
@@ -138,16 +138,16 @@ test('migrating an existing v8 database to v14 preserves every pre-existing row 
   });
 });
 
-test('a database already at v14 is a no-op (idempotent)', async () => {
+test('a database already at v15 is a no-op (idempotent)', async () => {
   const tables: Record<string, Row[]> = {
     matches: [{ ...V8_MATCH_ROW, captain_home_id: 'P5', captain_away_id: null, sides_swapped: 1, acting_captain_home_id: 'P6', acting_captain_away_id: null }],
     teams: [{ ...V8_TEAM_ROW, is_ad_hoc: 1, coach_name: 'Coach Dupont' }],
   };
-  const db = new FakeMigrationDb(14, tables);
+  const db = new FakeMigrationDb(15, tables);
 
   await runMigrations(db as unknown as SQLite.SQLiteDatabase);
 
-  expect(db.userVersion).toBe(14);
+  expect(db.userVersion).toBe(15);
   // existing captain assignment, ad-hoc flag and referee state from before must not be clobbered by a re-run
   expect(tables.matches[0].captain_home_id).toBe('P5');
   expect(tables.matches[0].sides_swapped).toBe(1);
@@ -156,7 +156,7 @@ test('a database already at v14 is a no-op (idempotent)', async () => {
   expect(tables.teams[0].coach_name).toBe('Coach Dupont');
 });
 
-test('migrating an existing v11 database to v14 adds the referee-state columns', async () => {
+test('migrating an existing v11 database to v15 adds the referee-state columns', async () => {
   const tables: Record<string, Row[]> = {
     matches: [{ ...V8_MATCH_ROW, captain_home_id: 'P5', captain_away_id: null }],
   };
@@ -164,7 +164,7 @@ test('migrating an existing v11 database to v14 adds the referee-state columns',
 
   await runMigrations(db as unknown as SQLite.SQLiteDatabase);
 
-  expect(db.userVersion).toBe(14);
+  expect(db.userVersion).toBe(15);
   expect(tables.matches[0]).toEqual({
     ...V8_MATCH_ROW,
     captain_home_id: 'P5',
@@ -194,26 +194,40 @@ test('multiple pre-existing rows in the same table are all migrated', async () =
   expect(tables.sets.map((s) => s.id)).toEqual(['s1', 's2', 's3']);
 });
 
-test('migrating a v12 database to v14 adds the libero jersey colour to teams', async () => {
+test('migrating a v12 database to v15 adds the libero jersey colour to teams', async () => {
   const tables: Record<string, Row[]> = { teams: [{ ...V8_TEAM_ROW, is_ad_hoc: 1, coach_name: null }] };
   const db = new FakeMigrationDb(12, tables);
 
   await runMigrations(db as unknown as SQLite.SQLiteDatabase);
 
-  expect(db.userVersion).toBe(14);
+  expect(db.userVersion).toBe(15);
   expect(tables.teams[0]).toEqual({ ...V8_TEAM_ROW, is_ad_hoc: 1, coach_name: null, libero_color: null });
 });
 
-test('migrating a v13 database to v14 creates the empty tournament tables and changes nothing else', async () => {
+test('migrating a v13 database to v15 creates the empty tournament tables and changes nothing else', async () => {
   const tables: Record<string, Row[]> = { teams: [{ ...V8_TEAM_ROW, is_ad_hoc: 0, coach_name: null, libero_color: null }] };
   const before = JSON.stringify(tables.teams);
   const db = new FakeMigrationDb(13, tables);
 
   await runMigrations(db as unknown as SQLite.SQLiteDatabase);
 
-  expect(db.userVersion).toBe(14);
+  expect(db.userVersion).toBe(15);
   expect(JSON.stringify(tables.teams)).toBe(before);
   for (const t of ['tournaments', 'tournament_pools', 'tournament_teams', 'tournament_matches', 'tournament_templates']) {
     expect(tables[t]).toEqual([]);
   }
+});
+
+test('migrating a v14 database to v15 adds the mixing round and level to tournament pools and matches', async () => {
+  const tables: Record<string, Row[]> = {
+    tournament_pools: [{ id: 'p1', tournament_id: 't1', name: 'A', position: 0 }],
+    tournament_matches: [{ id: 'm1', tournament_id: 't1', stage: 'pool', round: 1, status: 'validated' }],
+  };
+  const db = new FakeMigrationDb(14, tables);
+
+  await runMigrations(db as unknown as SQLite.SQLiteDatabase);
+
+  expect(db.userVersion).toBe(15);
+  expect(tables.tournament_pools[0]).toEqual({ id: 'p1', tournament_id: 't1', name: 'A', position: 0, phase: null, level: null });
+  expect(tables.tournament_matches[0]).toEqual({ id: 'm1', tournament_id: 't1', stage: 'pool', round: 1, status: 'validated', phase: null, level: null });
 });

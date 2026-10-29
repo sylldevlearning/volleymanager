@@ -23,7 +23,7 @@ export interface ScoreSummary {
 export type ScoreEvaluation = { ok: true; summary: ScoreSummary } | { ok: false; errors: ScoreError[] };
 
 export function rulesForStage(rules: TournamentRules, stage: TournamentStage): SetRules {
-  const finals = stage === 'knockout' || stage === 'placement';
+  const finals = stage === 'knockout' || stage === 'placement' || stage === 'level';
   return finals && rules.finalsMatch ? rules.finalsMatch : rules.match;
 }
 

@@ -14,6 +14,7 @@ import {
   parseDisplayDate,
   previewTournament,
   renameTeam,
+  resolvedBrassage,
   resolvedCourts,
   resolvedPools,
   setFormat,
@@ -25,7 +26,7 @@ import {
   validateStep,
   type WizardState,
 } from '../src/features/tournament/wizard';
-import { POINTS_PRESETS, defaultPoolRules, defaultSetRules } from '../src/features/tournament/engine/defaults';
+import { POINTS_PRESETS, defaultBrassageRules, defaultPoolRules, defaultSetRules } from '../src/features/tournament/engine/defaults';
 import { PRESET_TEAM_COLORS } from '../src/utils/constants';
 
 const TODAY = new Date(2026, 4, 16, 10, 30); // 16 May 2026
@@ -274,5 +275,49 @@ describe('templates', () => {
   it('custom pools are kept', () => {
     const s = { ...withTeams(8), pools: { count: 2, qualifiersPerPool: 1, bestOthers: 0 } };
     expect(applyTemplate(initial(1), templatePayload(s)).pools).toEqual({ count: 2, qualifiersPerPool: 1, bestOthers: 0 });
+  });
+});
+
+describe('Brassage + niveaux', () => {
+  it('is the default format in 4×4, 3×3 and 2×2; 6×6 keeps pools + finals', () => {
+    expect(initial().format).toBe('pools_knockout');
+    for (const type of ['indoor_4v4', 'indoor_3v3', 'beach_2v2'] as const) {
+      expect(setGameType(initial(), type).format).toBe('brassage_levels');
+    }
+    expect(setGameType(setGameType(initial(), 'indoor_4v4'), 'indoor_6v6').format).toBe('pools_knockout');
+  });
+
+  it('rounds and levels follow the number of teams until set by hand', () => {
+    const s = setGameType(initial(), 'indoor_4v4');
+    expect(resolvedBrassage(withTeams(10, s))).toEqual({ rounds: 1, levels: 2 });
+    expect(resolvedBrassage(withTeams(16, s))).toEqual({ rounds: 2, levels: 2 });
+    expect(resolvedBrassage(withTeams(24, s))).toEqual({ rounds: 2, levels: 3 });
+    expect(resolvedBrassage({ ...withTeams(24, s), brassage: { rounds: 3, levels: 2 } })).toEqual({ rounds: 3, levels: 2 });
+    expect(toCreateInput({ ...withTeams(24, s), name: 'Open' }).rules.brassage).toEqual(defaultBrassageRules(24));
+    expect(toCreateInput({ ...withTeams(8), name: 'Open' }).rules.brassage).toBeNull();
+  });
+
+  it('the estimate tells how many matches each team plays', () => {
+    const s = { ...withTeams(16, setGameType(initial(), 'indoor_4v4')), name: 'Open' };
+    const p = previewTournament(s);
+    expect(p.errors).toEqual([]);
+    expect(p.matchesPerTeam).toEqual({ min: 9, max: 9 });
+    // Round 1 pools only: the next ones depend on the results
+    expect(p.pools).toHaveLength(4);
+    expect(previewTournament({ ...withTeams(6), name: 'Open', format: 'round_robin' }).matchesPerTeam).toEqual({ min: 5, max: 5 });
+  });
+
+  it('too few teams: an error, and a championship is suggested', () => {
+    const s = withTeams(4, setGameType(initial(), 'indoor_3v3'));
+    expect(validateStep(s, 3)).toEqual(['brassage_too_few_teams']);
+    expect(formatHint(s)).toBe('round_robin');
+    expect(formatHint(withTeams(8, setGameType(initial(), 'indoor_3v3')))).toBeNull();
+  });
+
+  it('templates keep automatic rounds and levels automatic', () => {
+    const s = withTeams(16, setGameType(initial(), 'indoor_4v4'));
+    expect(templatePayload(s).rules.brassage).toBeNull();
+    const custom = { ...s, brassage: { rounds: 3, levels: 2 } };
+    expect(applyTemplate(initial(), templatePayload(custom)).brassage).toEqual({ rounds: 3, levels: 2 });
   });
 });

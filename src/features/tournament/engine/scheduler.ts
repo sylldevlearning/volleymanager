@@ -19,23 +19,41 @@ export function slotStart(schedule: TournamentSchedule, slot: number): string {
   return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
 }
 
+interface DependencyIndex {
+  poolKeys: Map<number, string[]>;
+  allPoolKeys: string[];
+  /** Mixing matches by round */
+  phaseKeys: Map<number, string[]>;
+  lastPhase: number;
+}
+
 /** Matches whose result decides the teams of `m`. */
-function dependencies(m: EngineMatch, poolKeys: Map<number, string[]>, allPoolKeys: string[]): string[] {
+function dependencies(m: EngineMatch, index: DependencyIndex): string[] {
   return [m.homeRef, m.awayRef].flatMap((ref) => {
-    if (ref.type === 'winner' || ref.type === 'loser') return [ref.match];
-    if (ref.type === 'poolRank') return poolKeys.get(ref.pool) ?? [];
-    if (ref.type === 'bestOf') return allPoolKeys;
-    return [];
+    switch (ref.type) {
+      case 'winner':
+      case 'loser': return [ref.match];
+      case 'poolRank': return index.poolKeys.get(ref.pool) ?? [];
+      case 'bestOf': return index.allPoolKeys;
+      case 'seat': return index.phaseKeys.get(ref.phase - 1) ?? [];
+      case 'levelRank': return index.phaseKeys.get(index.lastPhase) ?? [];
+      default: return [];
+    }
   });
 }
 
-const STAGE_ORDER = { league: 0, pool: 0, placement: 1, knockout: 2 } as const;
+const STAGE_ORDER: Record<EngineMatch['stage'], number> = { league: 0, pool: 0, brassage: 0, level: 0, placement: 1, knockout: 2 };
+
+/** Phases in order: mixing rounds, pools, then levels and brackets. */
+function tier(m: EngineMatch): number {
+  if (m.stage === 'brassage') return m.phase ?? 0;
+  if (m.stage === 'league' || m.stage === 'pool') return 0;
+  return 1000;
+}
 
 /** Pools round by round, then the bracket round by round (3rd place before the final). */
 function priority(a: EngineMatch, b: EngineMatch): number {
-  const groupA = a.stage === 'league' || a.stage === 'pool' ? 0 : 1;
-  const groupB = b.stage === 'league' || b.stage === 'pool' ? 0 : 1;
-  return groupA - groupB
+  return tier(a) - tier(b)
     || a.round - b.round
     || STAGE_ORDER[a.stage] - STAGE_ORDER[b.stage]
     || (a.pool ?? 0) - (b.pool ?? 0)
@@ -59,11 +77,18 @@ export function scheduleMatches(matches: EngineMatch[], opts: ScheduleOptions): 
     .map(({ m }) => m);
 
   const poolKeys = new Map<number, string[]>();
+  const phaseKeys = new Map<number, string[]>();
   for (const m of matches) {
     if (m.stage === 'pool' && m.pool !== null) poolKeys.set(m.pool, [...(poolKeys.get(m.pool) ?? []), m.key]);
+    if (m.stage === 'brassage' && m.phase !== null) phaseKeys.set(m.phase, [...(phaseKeys.get(m.phase) ?? []), m.key]);
   }
-  const allPoolKeys = [...poolKeys.values()].flat();
-  const deps = new Map(pending.map((m) => [m.key, dependencies(m, poolKeys, allPoolKeys)]));
+  const index: DependencyIndex = {
+    poolKeys,
+    allPoolKeys: [...poolKeys.values()].flat(),
+    phaseKeys,
+    lastPhase: Math.max(0, ...phaseKeys.keys()),
+  };
+  const deps = new Map(pending.map((m) => [m.key, dependencies(m, index)]));
 
   // Slot of every match already placed (-Infinity: done without a slot)
   const placedSlot = new Map<string, number>();

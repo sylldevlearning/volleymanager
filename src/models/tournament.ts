@@ -1,10 +1,11 @@
 import type { MatchConfig } from './match';
 
 export type TournamentGameType = 'indoor_6v6' | 'indoor_4v4' | 'indoor_3v3' | 'beach_2v2';
-export type TournamentFormat = 'round_robin' | 'pools_knockout' | 'knockout';
+export type TournamentFormat = 'round_robin' | 'pools_knockout' | 'knockout' | 'brassage_levels';
 export type SeedingMode = 'random' | 'seeded';
 export type TournamentStatus = 'live' | 'finished';
-export type TournamentStage = 'league' | 'pool' | 'knockout' | 'placement';
+/** 'brassage': mixing pools; 'level': pool of a level (Principale…) — level brackets are 'knockout' with a level */
+export type TournamentStage = 'league' | 'pool' | 'knockout' | 'placement' | 'brassage' | 'level';
 export type TournamentMatchStatus = 'scheduled' | 'live' | 'validated';
 export type ResultSource = 'manual' | 'qr' | 'arbitrage';
 export type TiebreakerRule = 'headToHead' | 'setDifference' | 'pointDifference' | 'pointsScored';
@@ -31,6 +32,14 @@ export interface PoolRules {
   bestOthers: number;
 }
 
+/** "Brassage + niveaux": mixing rounds, then levels (Principale, Consolante…) */
+export interface BrassageRules {
+  /** Mixing rounds; from round 2, pools gather teams of the same level */
+  rounds: number;
+  /** Levels of equal size, from the ranking of the last round */
+  levels: number;
+}
+
 export interface TournamentRules {
   match: SetRules;
   /** Different rules in the final phase (null: same as `match`). */
@@ -41,6 +50,8 @@ export interface TournamentRules {
   pools: PoolRules | null;
   knockout: { thirdPlace: boolean };
   roundRobinLegs: 1 | 2;
+  /** Only for 'brassage_levels' (absent in older tournaments) */
+  brassage?: BrassageRules | null;
 }
 
 export interface TournamentSchedule {
@@ -60,7 +71,11 @@ export type TeamRef =
   /** The `index`-th best team among those ranked `rank` in their pool. */
   | { type: 'bestOf'; rank: number; index: number }
   | { type: 'winner'; match: string }
-  | { type: 'loser'; match: string };
+  | { type: 'loser'; match: string }
+  /** Place `seat` (0-based) of a mixing pool, composed from the previous round */
+  | { type: 'seat'; phase: number; pool: number; seat: number }
+  /** `rank`-th team (1-based) of a level, by the mixing ranking */
+  | { type: 'levelRank'; level: number; rank: number };
 
 export type SetScore = [number, number];
 
@@ -86,6 +101,10 @@ export interface TournamentPool {
   tournamentId: string;
   name: string;
   position: number;
+  /** Mixing round (1-based), null otherwise */
+  phase: number | null;
+  /** Level (0 = Principale), null otherwise */
+  level: number | null;
 }
 
 export interface TournamentTeam {
@@ -106,6 +125,10 @@ export interface TournamentMatch {
   tournamentId: string;
   stage: TournamentStage;
   poolId: string | null;
+  /** Mixing round (1-based), null otherwise */
+  phase: number | null;
+  /** Level (0 = Principale), null otherwise */
+  level: number | null;
   round: number;
   bracketSlot: number | null;
   /** 'ko:<teams in round>:<n>' or 'third' — translated by the UI. */

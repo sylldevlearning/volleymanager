@@ -20,7 +20,7 @@ function played(home: string, away: string, sets: SetScore[], forfeitId: string 
   const setsHome = sets.filter(([h, a]) => h > a).length;
   const setsAway = sets.length - setsHome;
   return {
-    key: `m${++n}`, stage: 'league', pool: null, round: 1, bracketSlot: null, label: null,
+    key: `m${++n}`, stage: 'league', pool: null, phase: null, level: null, round: 1, bracketSlot: null, label: null,
     homeRef: { type: 'team', id: home }, awayRef: { type: 'team', id: away },
     homeId: home, awayId: away, status: 'validated', sets, forfeitId,
     winnerId: setsHome > setsAway ? home : away, slot: 0, court: 1,

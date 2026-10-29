@@ -381,6 +381,19 @@ export async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
       `);
     });
   }
+
+  if (version < 15) {
+    await db.withExclusiveTransactionAsync(async () => {
+      // "Brassage + niveaux": mixing round / level of pools and matches
+      await db.execAsync(`
+        ALTER TABLE tournament_pools ADD COLUMN phase INTEGER;
+        ALTER TABLE tournament_pools ADD COLUMN level INTEGER;
+        ALTER TABLE tournament_matches ADD COLUMN phase INTEGER;
+        ALTER TABLE tournament_matches ADD COLUMN level INTEGER;
+        PRAGMA user_version = 15;
+      `);
+    });
+  }
 }
 
 export function generateId(): string {

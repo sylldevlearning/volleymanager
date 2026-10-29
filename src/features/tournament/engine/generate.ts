@@ -1,4 +1,6 @@
 import { buildBracket, nextPowerOf2, seedPositions, type Entrant } from './bracket';
+import { generateBrassage } from './brassage';
+import { defaultBrassageRules } from './defaults';
 import { drawOrder, drawPools } from './pools';
 import { createRng } from './rng';
 import { roundRobin } from './roundRobin';
@@ -9,7 +11,9 @@ export type SetupError =
   | 'seed_duplicate'
   | 'pool_too_small'
   | 'too_few_qualifiers'
-  | 'too_many_best_others';
+  | 'too_many_best_others'
+  | 'brassage_too_few_teams'
+  | 'too_many_levels';
 
 export function validateSetup(input: GenerateInput): SetupError[] {
   const errors: SetupError[] = [];
@@ -26,12 +30,17 @@ export function validateSetup(input: GenerateInput): SetupError[] {
     if (pools.count * pools.qualifiersPerPool + pools.bestOthers < 2) errors.push('too_few_qualifiers');
     if (pools.bestOthers > pools.count) errors.push('too_many_best_others');
   }
+  if (input.format === 'brassage_levels' && n >= 2) {
+    const { levels } = input.rules.brassage ?? defaultBrassageRules(n);
+    if (n < 6) errors.push('brassage_too_few_teams');
+    else if (levels * 2 > n) errors.push('too_many_levels');
+  }
   return errors;
 }
 
 function newMatch(key: string, fields: Pick<EngineMatch, 'stage' | 'pool' | 'round'>, home: string, away: string): EngineMatch {
   return {
-    key, ...fields, bracketSlot: null, label: null,
+    key, ...fields, phase: null, level: null, bracketSlot: null, label: null,
     homeRef: { type: 'team', id: home }, awayRef: { type: 'team', id: away },
     homeId: home, awayId: away,
     status: 'scheduled', sets: null, forfeitId: null, winnerId: null, slot: null, court: null,
@@ -94,14 +103,16 @@ export function generateTournament(input: GenerateInput): Generated {
       counters.set(p.round, n);
       return newMatch(`${prefix}L${p.round}-${n}`, { stage: 'league', pool: null, round: p.round }, p.home, p.away);
     });
-    return { pools: [], matches };
+    return { pools: [], poolDefs: [], matches };
   }
+
+  if (input.format === 'brassage_levels') return generateBrassage(input, rng, prefix);
 
   if (input.format === 'knockout') {
     const entrants = drawOrder(input.teams, input.seeding, rng).map((t): Entrant => ({
       ref: { type: 'team', id: t.id }, pool: null, teamId: t.id,
     }));
-    return { pools: [], matches: buildBracket(entrants, { thirdPlace: rules.knockout.thirdPlace, keyPrefix: prefix }) };
+    return { pools: [], poolDefs: [], matches: buildBracket(entrants, { thirdPlace: rules.knockout.thirdPlace, keyPrefix: prefix }) };
   }
 
   const poolRules = rules.pools!;
@@ -116,5 +127,5 @@ export function generateTournament(input: GenerateInput): Generated {
   });
   const entrants = qualifierEntrants(pools.length, poolRules.qualifiersPerPool, poolRules.bestOthers);
   const bracket = buildBracket(entrants, { thirdPlace: rules.knockout.thirdPlace, keyPrefix: prefix });
-  return { pools, matches: [...poolMatches, ...bracket] };
+  return { pools, poolDefs: pools.map(() => ({ phase: null, level: null })), matches: [...poolMatches, ...bracket] };
 }

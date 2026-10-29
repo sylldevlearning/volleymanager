@@ -672,12 +672,14 @@
     "format": {
       "round_robin": "Championnat",
       "pools_knockout": "Poules + phases finales",
-      "knockout": "Élimination directe"
+      "knockout": "Élimination directe",
+      "brassage_levels": "Brassage + niveaux"
     },
     "formatDesc": {
       "round_robin": "Tout le monde se rencontre ; le classement désigne le vainqueur.",
       "pools_knockout": "Des poules, puis un tableau final avec les meilleurs de chaque poule.",
-      "knockout": "Un tableau final dès le départ : le perdant est éliminé."
+      "knockout": "Un tableau final dès le départ : le perdant est éliminé.",
+      "brassage_levels": "Des tours de poules pour mélanger puis classer les équipes, puis des niveaux (Principale, Consolante…) : tout le monde joue à peu près autant de matchs."
     },
     "tiebreaker": {
       "headToHead": "Confrontation directe",
@@ -777,7 +779,14 @@
       "and": " et ",
       "summaryDuration": "Durée estimée : {{duration}}",
       "pointsPresetSimple": "Victoire = 1 point",
-      "pointsPresetFivb": "3-2-1-0"
+      "pointsPresetFivb": "3-2-1-0",
+      "brassage": "Brassage et niveaux",
+      "brassageRounds": "Tours de brassage",
+      "brassageLevels": "Niveaux",
+      "brassageHint": "Tour 1 : poules tirées au sort. Tours suivants : poules de même niveau d'après le classement du tour précédent. Les niveaux se répartissent selon le classement du dernier tour.",
+      "matchesPerTeam_one": "Chaque équipe joue {{count}} match",
+      "matchesPerTeam_other": "Chaque équipe joue {{count}} matchs",
+      "matchesPerTeamRange": "Chaque équipe joue {{min}} à {{max}} matchs"
     },
     "errors": {
       "name_required": "Donne un nom au tournoi.",
@@ -789,7 +798,15 @@
       "seed_duplicate": "Deux équipes ont la même tête de série.",
       "pool_too_small": "Les poules sont trop petites pour ce nombre de qualifiés.",
       "too_few_qualifiers": "Il faut au moins 2 équipes qualifiées pour le tableau final.",
-      "too_many_best_others": "Un « meilleur suivant » par poule au maximum."
+      "too_many_best_others": "Un « meilleur suivant » par poule au maximum.",
+      "brassage_too_few_teams": "Le brassage demande au moins 6 équipes.",
+      "too_many_levels": "Trop de niveaux : il faut au moins 2 équipes par niveau."
+    },
+    "level": {
+      "0": "Principale",
+      "1": "Consolante",
+      "2": "Super-consolante",
+      "3": "Niveau 4"
     }
   }
 }

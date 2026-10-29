@@ -81,6 +81,8 @@ function rowToPool(row: Row): TournamentPool {
     tournamentId: row.tournament_id as string,
     name: row.name as string,
     position: row.position as number,
+    phase: (row.phase as number | null) ?? null,
+    level: (row.level as number | null) ?? null,
   };
 }
 
@@ -103,6 +105,8 @@ function rowToMatch(row: Row): TournamentMatch {
     tournamentId: row.tournament_id as string,
     stage: row.stage as TournamentMatch['stage'],
     poolId: (row.pool_id as string | null) ?? null,
+    phase: (row.phase as number | null) ?? null,
+    level: (row.level as number | null) ?? null,
     round: row.round as number,
     bracketSlot: (row.bracket_slot as number | null) ?? null,
     label: (row.label as string | null) ?? null,
@@ -133,6 +137,7 @@ export function engineContext(bundle: TournamentBundle): EngineContext {
     rules: tournament.rules,
     teams: teams.map((t) => ({ id: t.id, seedRank: t.seedRank, position: t.position })),
     pools: pools.map((p) => teams.filter((t) => t.poolId === p.id).map((t) => t.id)),
+    poolDefs: pools.map((p) => ({ phase: p.phase, level: p.level })),
   };
 }
 
@@ -142,6 +147,8 @@ export function toEngineMatch(m: TournamentMatch, pools: TournamentPool[]): Engi
     key: m.id,
     stage: m.stage,
     pool: pool >= 0 ? pool : null,
+    phase: m.phase,
+    level: m.level,
     round: m.round,
     bracketSlot: m.bracketSlot,
     label: m.label,
@@ -214,9 +221,12 @@ export async function createTournament(input: CreateTournamentInput): Promise<To
         JSON.stringify(input.rules), JSON.stringify(input.schedule), seed, input.seeding, randomHex(32), 'live', now, now],
     );
     for (let p = 0; p < poolIds.length; p++) {
+      const def = generated.poolDefs[p];
+      // Letters restart in each mixing round and level: "Tour 2 · Poule A"
+      const local = generated.poolDefs.slice(0, p).filter((d) => d.phase === def.phase && d.level === def.level).length;
       await db.runAsync(
-        'INSERT INTO tournament_pools (id, tournament_id, name, position) VALUES (?, ?, ?, ?)',
-        [poolIds[p], tournamentId, poolName(p), p],
+        'INSERT INTO tournament_pools (id, tournament_id, name, position, phase, level) VALUES (?, ?, ?, ?, ?, ?)',
+        [poolIds[p], tournamentId, poolName(local), p, def.phase, def.level],
       );
     }
     for (let i = 0; i < input.teams.length; i++) {
@@ -230,11 +240,11 @@ export async function createTournament(input: CreateTournamentInput): Promise<To
     for (let i = 0; i < planned.length; i++) {
       const m = planned[i];
       await db.runAsync(
-        `INSERT INTO tournament_matches (id, tournament_id, stage, pool_id, round, bracket_slot, label, home_id, away_id,
+        `INSERT INTO tournament_matches (id, tournament_id, stage, pool_id, phase, level, round, bracket_slot, label, home_id, away_id,
            home_source, away_source, slot, court, scheduled_at, status, sets_json, forfeit_id, winner_id, result_source,
            arbitrage_match_id, validated_at, position, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [m.key, tournamentId, m.stage, m.pool === null ? null : poolIds[m.pool], m.round, m.bracketSlot, m.label,
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [m.key, tournamentId, m.stage, m.pool === null ? null : poolIds[m.pool], m.phase, m.level, m.round, m.bracketSlot, m.label,
           m.homeId, m.awayId, JSON.stringify(m.homeRef), JSON.stringify(m.awayRef), m.slot, m.court,
           m.slot === null ? null : scheduledAt({ date: input.date, schedule: input.schedule }, m.slot),
           m.status, null, null, null, null, null, null, i, now],

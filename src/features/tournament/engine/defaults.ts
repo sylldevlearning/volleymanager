@@ -1,4 +1,5 @@
 import type {
+  BrassageRules,
   PointsScale,
   PoolRules,
   SetRules,
@@ -38,6 +39,17 @@ export function defaultSetRules(gameType: TournamentGameType): SetRules {
   return { ...SET_RULES[gameType] };
 }
 
+/** Leisure formats (4×4, 3×3, 2×2) mix the teams, then play by levels. */
+export function defaultFormat(gameType: TournamentGameType): TournamentFormat {
+  return gameType === 'indoor_6v6' ? 'pools_knockout' : 'brassage_levels';
+}
+
+/** < 12 teams: 1 round, 2 levels; 12-23: 2 rounds, 2 levels; 24+: 2 rounds, 3 levels. */
+export function defaultBrassageRules(teamCount: number): BrassageRules {
+  if (teamCount < 12) return { rounds: 1, levels: 2 };
+  return { rounds: 2, levels: teamCount < 24 ? 2 : 3 };
+}
+
 export function recommendFormat(teamCount: number): TournamentFormat {
   return teamCount <= 6 ? 'round_robin' : 'pools_knockout';
 }
@@ -67,6 +79,7 @@ export function defaultRules(gameType: TournamentGameType, format: TournamentFor
     pools: format === 'pools_knockout' ? defaultPoolRules(teamCount) : null,
     knockout: { thirdPlace: true },
     roundRobinLegs: 1,
+    brassage: format === 'brassage_levels' ? defaultBrassageRules(teamCount) : null,
   };
 }
 

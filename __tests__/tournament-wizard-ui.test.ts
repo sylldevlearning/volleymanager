@@ -84,6 +84,21 @@ describe('tournament entry and wizard wiring', () => {
     expect(steps).toContain('POINTS_PRESETS.fivb');
   });
 
+  it('Brassage + niveaux: a format card, its settings and the matches per team', () => {
+    const steps = read('src/components/tournament/WizardSteps.tsx');
+    expect(steps).toContain("'brassage_levels'];");
+    expect(steps).toContain("t('tournament.wizard.brassageRounds')");
+    expect(steps).toContain("t('tournament.wizard.brassageLevels')");
+    expect(steps).toContain('estimate.matchesPerTeam');
+    for (const dict of [fr, en]) {
+      const levels = (dict as unknown as { tournament: { level: Record<string, string> } }).tournament.level;
+      expect(Object.keys(levels)).toEqual(['0', '1', '2', '3']);
+    }
+    expect(fr.tournament.level['0']).toBe('Principale');
+    expect(fr.tournament.level['1']).toBe('Consolante');
+    expect(fr.tournament.level['2']).toBe('Super-consolante');
+  });
+
   it('asks before throwing away a tournament being set up', () => {
     expect(read('app/tournament/new.tsx')).toContain("'beforeRemove'");
   });
@@ -109,13 +124,14 @@ describe('tournament entry and wizard wiring', () => {
     for (const dict of [fr, en]) {
       const tr = (dict as unknown as { tournament: Record<string, Record<string, string>> }).tournament;
       for (const type of ['indoor_6v6', 'indoor_4v4', 'indoor_3v3', 'beach_2v2']) expect(tr.gameType[type]).toBeTruthy();
-      for (const format of ['round_robin', 'pools_knockout', 'knockout']) {
+      for (const format of ['round_robin', 'pools_knockout', 'knockout', 'brassage_levels']) {
         expect(tr.format[format]).toBeTruthy();
         expect(tr.formatDesc[format]).toBeTruthy();
       }
       for (const rule of ['headToHead', 'setDifference', 'pointDifference', 'pointsScored']) expect(tr.tiebreaker[rule]).toBeTruthy();
       for (const code of ['name_required', 'date_invalid', 'tie_break_too_long', 'team_name_duplicate',
-        'start_time_invalid', 'too_few_teams', 'seed_duplicate', 'pool_too_small', 'too_few_qualifiers', 'too_many_best_others']) {
+        'start_time_invalid', 'too_few_teams', 'seed_duplicate', 'pool_too_small', 'too_few_qualifiers', 'too_many_best_others',
+        'brassage_too_few_teams', 'too_many_levels']) {
         expect(tr.errors[code]).toBeTruthy();
       }
     }

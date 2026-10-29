@@ -163,6 +163,27 @@ est déjà validé, la correction est bloquée avec la liste des matchs concern�
   renommées ; noms en double surlignés. Renommage après création :
   `renameTournamentTeam` (écran en phase 3).
 
+### Format « Brassage + niveaux » (fait, avant la phase 3)
+Décisions : poules homogènes aux tours 2+ ; classement sur le dernier tour
+seulement ; niveaux automatiques de taille égale ; format par défaut en 4×4,
+3×3 et 2×2 (6×6 : poules + phases finales) avec moins de 12 équipes : 1 tour,
+2 niveaux ; 12 à 23 : 2 tours, 2 niveaux ; 24 et plus : 2 tours, 3 niveaux.
+- Tour 1 : poules de 4 puis de 3, tirées au sort (ou têtes de série). Classement
+  place par place entre poules (tous les 1ers, puis les 2es…).
+- Tours 2+ : poules du même niveau (1-4, 5-8…) d'après le tour précédent ; deux
+  équipes qui se sont déjà rencontrées sont séparées si possible (échange avec
+  l'équipe la plus proche de la poule voisine). Classement : poule A, puis B…
+- Niveaux (Principale, Consolante, Super-consolante, Niveau 4) : découpage du
+  classement du dernier tour en tailles égales. Format d'un niveau : 1 poule
+  jusqu'à 5 équipes ; tableau où toutes les places se jouent pour 8, 16, 32
+  (tout le monde joue log2(n) matchs) ; poules de 4 / 3 sinon (6 → 2 × 3).
+- Matchs créés dès le départ avec des places à remplir (`seat`, `levelRank`) :
+  planning complet à la création, corrections en cascade comme ailleurs.
+- Nombre de matchs par équipe (défauts, mesuré) : 6 → 4 ; 8 → 6 ; 10 → 6-7 ;
+  12 → 8 ; 14 → 7-9 ; 16 → 9 ; 20 → 8-9 ; 24 → 9 ; 32 → 8-9 ; 48 → 10 ; 64 → 8-9.
+  L'écart vient des poules de 3 (2 matchs au lieu de 3).
+- Base v15 : `phase` / `level` sur les poules et les matchs.
+
 ## Phases
 ### Phase 1 — Modèle + moteur
 `src/models/tournament.ts`, migration v14, `tournamentService.ts` (CRUD,

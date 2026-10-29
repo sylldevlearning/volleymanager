@@ -20,6 +20,7 @@ import {
   previewTournament,
   removeTeam,
   renameTeam,
+  resolvedBrassage,
   resolvedCourts,
   resolvedPools,
   setFormat,
@@ -40,7 +41,7 @@ import type {
 } from '../../models/tournament';
 
 const GAME_TYPES: TournamentGameType[] = ['indoor_6v6', 'indoor_4v4', 'indoor_3v3', 'beach_2v2'];
-const FORMATS: TournamentFormat[] = ['round_robin', 'pools_knockout', 'knockout'];
+const FORMATS: TournamentFormat[] = ['round_robin', 'pools_knockout', 'knockout', 'brassage_levels'];
 
 interface StepProps {
   state: WizardState;
@@ -349,6 +350,7 @@ export function TeamsStep({ state, onChange }: StepProps) {
   const seeded = state.seeding === 'seeded';
   const n = state.teams.length;
   const pools = resolvedPools(state);
+  const brassage = resolvedBrassage(state);
   const duplicates = duplicateTeamKeys(state);
 
   // Team names do not change the estimate: no recomputing while typing
@@ -356,7 +358,7 @@ export function TeamsStep({ state, onChange }: StepProps) {
   const estimate = useMemo(
     () => previewTournament(state),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [format, match, finalsMatch, points, tiebreakers, thirdPlace, legs, state.pools, courts, startTime, matchMinutes, restMinutes, seeding, seed, n],
+    [format, match, finalsMatch, points, tiebreakers, thirdPlace, legs, state.pools, state.brassage, courts, startTime, matchMinutes, restMinutes, seeding, seed, n],
   );
 
   const setPools = (patch: Partial<typeof pools>) => onChange({ ...state, pools: { ...pools, ...patch } });
@@ -378,6 +380,13 @@ export function TeamsStep({ state, onChange }: StepProps) {
                 {t('tournament.wizard.summaryMatches', { count: estimate.matchCount })} · {t('tournament.wizard.summaryEnd', { time: estimate.endTime })}
               </Text>
               <Text style={styles.estimateText}>{t('tournament.wizard.summaryDuration', { duration: durationText(estimate.durationMinutes ?? 0) })}</Text>
+              {estimate.matchesPerTeam && (
+                <Text style={styles.estimateText}>
+                  {estimate.matchesPerTeam.min === estimate.matchesPerTeam.max
+                    ? t('tournament.wizard.matchesPerTeam', { count: estimate.matchesPerTeam.min })
+                    : t('tournament.wizard.matchesPerTeamRange', { min: estimate.matchesPerTeam.min, max: estimate.matchesPerTeam.max })}
+                </Text>
+              )}
             </>
           )}
       </View>
@@ -432,6 +441,21 @@ export function TeamsStep({ state, onChange }: StepProps) {
           );
         })}
       </FormField>
+
+      {state.format === 'brassage_levels' && (
+        <FormField label={`${t('tournament.wizard.brassage')}${state.brassage ? '' : ` · ${t('tournament.wizard.poolsAuto')}`}`}>
+          <Stepper label={t('tournament.wizard.brassageRounds')} value={brassage.rounds} min={1} max={4}
+            onChange={(rounds) => onChange({ ...state, brassage: { ...brassage, rounds } })} />
+          <Stepper label={t('tournament.wizard.brassageLevels')} value={brassage.levels} min={1} max={Math.max(1, Math.min(4, Math.floor(n / 2)))}
+            onChange={(levels) => onChange({ ...state, brassage: { ...brassage, levels } })} />
+          <Text style={styles.hint}>{t('tournament.wizard.brassageHint')}</Text>
+          {state.brassage && (
+            <Pressable onPress={() => onChange({ ...state, brassage: null })} accessibilityRole="button" style={styles.linkRow}>
+              <Text style={styles.hintAction}>{t('tournament.wizard.poolsReset')}</Text>
+            </Pressable>
+          )}
+        </FormField>
+      )}
 
       {state.format === 'pools_knockout' && (
         <FormField label={`${t('tournament.wizard.pools')}${state.pools ? '' : ` · ${t('tournament.wizard.poolsAuto')}`}`}>

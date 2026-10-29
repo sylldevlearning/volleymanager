@@ -20,8 +20,12 @@ export interface EngineTeam {
 export interface EngineMatch {
   key: string;
   stage: TournamentStage;
-  /** Pool index (0 = A) for pool matches, null otherwise. */
+  /** Pool index across the tournament, null outside pools. */
   pool: number | null;
+  /** Mixing round (1-based) of a 'brassage' match, null otherwise. */
+  phase: number | null;
+  /** Level (0 = Principale) of a level match, null otherwise. */
+  level: number | null;
   round: number;
   bracketSlot: number | null;
   label: string | null;
@@ -42,8 +46,15 @@ export interface EngineContext {
   format: TournamentFormat;
   rules: TournamentRules;
   teams: EngineTeam[];
-  /** Team ids by pool index. Empty without pools. */
+  /** Team ids by pool index — empty for pools composed from results. */
   pools: string[][];
+  /** Mixing round / level of each pool (same index as `pools`). */
+  poolDefs?: PoolDef[];
+}
+
+export interface PoolDef {
+  phase: number | null;
+  level: number | null;
 }
 
 export interface GenerateInput {
@@ -58,5 +69,6 @@ export interface GenerateInput {
 
 export interface Generated {
   pools: string[][];
+  poolDefs: PoolDef[];
   matches: EngineMatch[];
 }
