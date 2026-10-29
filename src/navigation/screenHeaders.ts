@@ -41,6 +41,8 @@ export const SCREEN_HEADERS: Record<string, ScreenHeader> = {
   'team/new': { titleKey: 'nav.newTeam', options: { presentation: 'modal' } },
   // The screen replaces it with the team name once loaded
   'team/[id]': { titleKey: 'nav.team' },
+  'tournament/index': { titleKey: 'nav.tournaments' },
+  'tournament/new': { titleKey: 'nav.newTournament' },
   about: { titleKey: 'nav.about' },
   '+not-found': { titleKey: 'nav.notFound' },
 };

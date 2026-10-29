@@ -1,6 +1,6 @@
 # Plan — Mode Tournoi (v1.1.0, branche `feat/tournoi`)
 
-Statut : **validé**. Phase 1 faite.
+Statut : **validé**. Phases 1 et 2 faites.
 
 Décisions : 4×4 et 3×3 en saisie manuelle seulement (pas de QR ni d'arbitrage) ;
 équipes saisies par leur nom gardées dans le tournoi ; « Arbitrer ici » en
@@ -155,17 +155,27 @@ est déjà validé, la correction est bloquée avec la liste des matchs concern�
 `src/models/tournament.ts`, migration v14, `tournamentService.ts` (CRUD,
 transaction de création), moteur complet et ses tests. Pas d'écran.
 
-### Phase 2 — Assistant de création
-- Entrée « Tournoi » sur l'accueil → `app/tournament/index.tsx` (liste des
-  tournois + « Nouveau tournoi »).
-- `app/tournament/new.tsx`, 4 étapes avec barre de progression :
-  1. Nom, date (aujourd'hui), lieu, type ; « Partir d'un modèle ».
-  2. Format (recommandé selon le nombre d'équipes), sets gagnants, points par
-     set, tie-break, écart ; barème et critères dans « Avancé ».
-  3. Équipes (« Mes équipes » ou nom seul, tête de série option), terrains,
-     heure de début, durée estimée, repos ; aperçu « fin estimée vers 17 h 40 ».
-  4. Récapitulatif (poules tirées, nb de matchs, horaires), « Retirer au sort »
-     (nouvelle graine), « Enregistrer comme modèle », « Créer ».
+### Phase 2 — Assistant de création (fait)
+- Accueil : bouton « Tournoi » → `app/tournament/index.tsx` (liste, du plus
+  récent au plus ancien, statut En cours / Terminé, « Nouveau tournoi »).
+  Les cartes s'ouvriront en phase 3.
+- `app/tournament/new.tsx` : barre de progression, « Retour » / « Suivant »,
+  erreurs de l'étape au-dessus des boutons, confirmation avant d'abandonner.
+  1. Nom, date (aujourd'hui, JJ/MM/AAAA), lieu, type ; « Partir d'un
+     modèle » (appui long = supprimer). 4×4 / 3×3 : mention « saisie à la main ».
+  2. Format (3 cartes), sets gagnants, points, tie-break, écart. « Réglages
+     avancés » : 3e place, règles de phase finale, aller-retour, barème,
+     ordre des critères d'égalité.
+  3. Équipes (« Mes équipes » en liste à cocher, ou nom seul), têtes de série
+     (ordre de la liste, flèches), conseil de format selon le nombre d'équipes,
+     poules (automatique tant qu'on n'y touche pas), terrains, heure, durée, repos.
+  4. Récapitulatif : règles, nb de matchs, fin estimée, poules tirées,
+     « Retirer au sort » (nouvelle graine), « Enregistrer comme modèle », « Créer ».
+- Logique pure dans `src/features/tournament/wizard.ts` (testée) ; les lignes
+  de formulaire (`Stepper`, `ToggleRow`, `FormField`) sont partagées avec la
+  configuration d'arbitrage (`src/components/ui/FormControls.tsx`).
+- Modèle : règles + planning sans les équipes ; des poules automatiques restent
+  automatiques (`rules.pools = null`) pour s'adapter au nombre d'équipes.
 
 ### Phase 3 — Planning, Matchs, Classement
 - `app/tournament/[id]/index.tsx` : onglets Planning (par heure × terrain),

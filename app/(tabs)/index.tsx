@@ -4,7 +4,7 @@ const BALL_IMG = require('../../assets/images/ballon.png');
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Volleyball, Users, History, ChevronRight, Zap, Whistle } from 'lucide-react-native';
+import { Volleyball, Users, History, ChevronRight, Zap, Whistle, Trophy } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { palette } from '../../src/theme/tokens';
 import { COMPANY, ADMOB_IDS } from '../../src/utils/constants';
@@ -130,6 +130,21 @@ export default function HomeScreen() {
           <View style={styles.arbitrageContent}>
             <Text style={styles.arbitrageTitle}>{t('home.arbitrage')}</Text>
             <Text style={styles.arbitrageDesc}>{t('home.arbitrageDesc')}</Text>
+          </View>
+          <ChevronRight size={20} color={palette.textMuted} />
+        </Pressable>
+
+        {/* Tournament CTA */}
+        <Pressable
+          style={({ pressed }) => [styles.arbitrageButton, pressed && styles.arbitrageButtonPressed]}
+          onPress={() => router.push('/tournament')}
+          accessibilityLabel={t('home.tournament')}
+          accessibilityRole="button"
+        >
+          <Trophy size={26} color={palette.warning} strokeWidth={1.5} />
+          <View style={styles.arbitrageContent}>
+            <Text style={styles.arbitrageTitle}>{t('home.tournament')}</Text>
+            <Text style={styles.arbitrageDesc}>{t('home.tournamentDesc')}</Text>
           </View>
           <ChevronRight size={20} color={palette.textMuted} />
         </Pressable>
