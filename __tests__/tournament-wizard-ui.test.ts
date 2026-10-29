@@ -61,6 +61,29 @@ describe('tournament entry and wizard wiring', () => {
     expect(steps).not.toContain('startTimePlaceholder');
   });
 
+  it('teams step: number of teams and courts first, live estimate, editable names, duplicates marked', () => {
+    const steps = read('src/components/tournament/WizardSteps.tsx');
+    const teamsStep = steps.slice(steps.indexOf('export function TeamsStep'), steps.indexOf('// ─── Step 4'));
+    expect(teamsStep.indexOf("t('tournament.wizard.teamCount')")).toBeLessThan(teamsStep.indexOf("t('tournament.wizard.teams'"));
+    expect(teamsStep).toContain('setTeamCount(state, count, label)');
+    expect(teamsStep).toContain('previewTournament(state)');
+    expect(teamsStep).toContain('renameTeam(state, team.key, name)');
+    expect(teamsStep).toContain('placeholder={team.fallbackName}');
+    expect(teamsStep).toContain('duplicates.has(team.key)');
+    expect(teamsStep).toContain("t('tournament.wizard.duplicateName')");
+  });
+
+  it('the word "quotient" is gone from the interface', () => {
+    expect(JSON.stringify(fr)).not.toMatch(/quotient/i);
+    expect(JSON.stringify(en)).not.toMatch(/quotient|ratio/i);
+  });
+
+  it('points presets: "Victoire = 1 point" and 3-2-1-0', () => {
+    const steps = read('src/components/tournament/WizardSteps.tsx');
+    expect(steps).toContain('POINTS_PRESETS.simple');
+    expect(steps).toContain('POINTS_PRESETS.fivb');
+  });
+
   it('asks before throwing away a tournament being set up', () => {
     expect(read('app/tournament/new.tsx')).toContain("'beforeRemove'");
   });
@@ -72,9 +95,13 @@ describe('tournament entry and wizard wiring', () => {
       for (const m of read(f).matchAll(/textKey="([\w.]+)"/g)) keys.add(m[1]);
     }
     expect(keys.size).toBeGreaterThan(40);
+    // A plural key exists as key_one / key_other
+    const kind = (dict: unknown, key: string) =>
+      typeof lookup(dict, key) === 'string' || (typeof lookup(dict, `${key}_one`) === 'string' && typeof lookup(dict, `${key}_other`) === 'string')
+        ? 'string' : 'missing';
     for (const key of keys) {
-      expect([key, typeof lookup(fr, key)]).toEqual([key, 'string']);
-      expect([key, typeof lookup(en, key)]).toEqual([key, 'string']);
+      expect([key, kind(fr, key)]).toEqual([key, 'string']);
+      expect([key, kind(en, key)]).toEqual([key, 'string']);
     }
   });
 
@@ -86,8 +113,8 @@ describe('tournament entry and wizard wiring', () => {
         expect(tr.format[format]).toBeTruthy();
         expect(tr.formatDesc[format]).toBeTruthy();
       }
-      for (const rule of ['setQuotient', 'pointQuotient', 'headToHead']) expect(tr.tiebreaker[rule]).toBeTruthy();
-      for (const code of ['name_required', 'date_invalid', 'tie_break_too_long', 'team_name_required', 'team_name_duplicate',
+      for (const rule of ['headToHead', 'setDifference', 'pointDifference', 'pointsScored']) expect(tr.tiebreaker[rule]).toBeTruthy();
+      for (const code of ['name_required', 'date_invalid', 'tie_break_too_long', 'team_name_duplicate',
         'start_time_invalid', 'too_few_teams', 'seed_duplicate', 'pool_too_small', 'too_few_qualifiers', 'too_many_best_others']) {
         expect(tr.errors[code]).toBeTruthy();
       }

@@ -14,6 +14,7 @@ import {
   getTournaments,
   recordTournamentResult,
   rescheduleTournament,
+  renameTournamentTeam,
   saveTemplate,
   getTemplates,
   deleteTemplate,
@@ -161,4 +162,13 @@ test('templates: saved without the teams, listed, deleted', async () => {
   expect(tpl.payload).toEqual({ gameType: 'indoor_6v6', format: 'pools_knockout', rules: i.rules, schedule: i.schedule, seeding: 'random' });
   await deleteTemplate(tpl.id);
   expect(await getTemplates()).toEqual([]);
+});
+
+test('a team can be renamed after creation — not empty, not like another team', async () => {
+  const { tournament, teams } = await createTournament(input(4, { format: 'round_robin', rules: defaultRules('indoor_6v6', 'round_robin', 4) }));
+  expect(await renameTournamentTeam(tournament.id, teams[0].id, '  Les Requins ')).toEqual({ ok: true });
+  expect((await getTournamentBundle(tournament.id))!.teams[0].name).toBe('Les Requins');
+  expect(await renameTournamentTeam(tournament.id, teams[1].id, '   ')).toEqual({ ok: false, reason: 'empty' });
+  expect(await renameTournamentTeam(tournament.id, teams[1].id, 'les requins')).toEqual({ ok: false, reason: 'duplicate' });
+  expect((await getTournamentBundle(tournament.id))!.teams[1].name).toBe('Équipe 2');
 });

@@ -680,9 +680,10 @@
       "knockout": "Un tableau final dès le départ : le perdant est éliminé."
     },
     "tiebreaker": {
-      "setQuotient": "Quotient sets",
-      "pointQuotient": "Quotient points",
-      "headToHead": "Confrontation directe"
+      "headToHead": "Confrontation directe",
+      "setDifference": "Différence de sets",
+      "pointDifference": "Différence de points",
+      "pointsScored": "Plus de points marqués"
     },
     "wizard": {
       "stepOf": "Étape {{step}} sur 4",
@@ -724,9 +725,6 @@
       "finalsTitle": "Phase finale",
       "teams": "Équipes ({{count}})",
       "fromLibrary": "Mes équipes",
-      "quickAddPlaceholder": "Nom d'une équipe",
-      "quickAdd": "Ajouter",
-      "noTeams": "Ajoute au moins 2 équipes : depuis « Mes équipes » ou en tapant leur nom.",
       "removeTeam": "Retirer {{name}}",
       "seeding": "Têtes de série",
       "seedingHint": "Classe les équipes de la plus forte à la plus faible : les meilleures sont réparties dans des poules différentes et ne se croisent que tard dans le tableau.",
@@ -769,13 +767,22 @@
       "fixErrors": "À corriger",
       "leaveTitle": "Abandonner la création ?",
       "leaveMessage": "Les informations saisies seront perdues.",
-      "leave": "Abandonner"
+      "leave": "Abandonner",
+      "teamCount": "Nombre d'équipes",
+      "teamNumber": "Équipe {{n}}",
+      "teamNameLabel": "Nom de l'équipe {{n}}",
+      "duplicateName": "Même nom qu'une autre équipe",
+      "poolsOf_one": "{{count}} poule de {{size}}",
+      "poolsOf_other": "{{count}} poules de {{size}}",
+      "and": " et ",
+      "summaryDuration": "Durée estimée : {{duration}}",
+      "pointsPresetSimple": "Victoire = 1 point",
+      "pointsPresetFivb": "3-2-1-0"
     },
     "errors": {
       "name_required": "Donne un nom au tournoi.",
       "date_invalid": "Date invalide : utilise le format JJ/MM/AAAA.",
       "tie_break_too_long": "Le tie-break ne peut pas se jouer en plus de points qu'un set normal.",
-      "team_name_required": "Chaque équipe doit avoir un nom.",
       "team_name_duplicate": "Deux équipes ont le même nom.",
       "start_time_invalid": "Heure de début invalide : utilise le format HH:MM.",
       "too_few_teams": "Il faut au moins 2 équipes.",

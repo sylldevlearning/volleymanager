@@ -254,6 +254,22 @@ export async function deleteTournament(id: string): Promise<void> {
   });
 }
 
+/** Renames a team of the tournament (names stay unique, case aside). */
+export async function renameTournamentTeam(
+  tournamentId: string,
+  teamId: string,
+  name: string,
+): Promise<{ ok: true } | { ok: false; reason: 'empty' | 'duplicate' }> {
+  const trimmed = name.trim();
+  if (!trimmed) return { ok: false, reason: 'empty' };
+  const db = await getDb();
+  const rows = await db.getAllAsync<Row>('SELECT * FROM tournament_teams WHERE tournament_id = ?', [tournamentId]);
+  const clash = rows.some((r) => r.id !== teamId && (r.name as string).toLocaleLowerCase() === trimmed.toLocaleLowerCase());
+  if (clash) return { ok: false, reason: 'duplicate' };
+  await db.runAsync('UPDATE tournament_teams SET name = ? WHERE id = ?', [trimmed, teamId]);
+  return { ok: true };
+}
+
 // ── Results ───────────────────────────────────────────────────────────────
 
 export type TournamentResultInput = ResultInput & { source: ResultSource; arbitrageMatchId?: string | null };

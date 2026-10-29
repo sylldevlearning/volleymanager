@@ -7,7 +7,7 @@ export type TournamentStatus = 'live' | 'finished';
 export type TournamentStage = 'league' | 'pool' | 'knockout' | 'placement';
 export type TournamentMatchStatus = 'scheduled' | 'live' | 'validated';
 export type ResultSource = 'manual' | 'qr' | 'arbitrage';
-export type TiebreakerRule = 'setQuotient' | 'pointQuotient' | 'headToHead';
+export type TiebreakerRule = 'headToHead' | 'setDifference' | 'pointDifference' | 'pointsScored';
 
 /** Set rules of a tournament match — same field names as MatchConfig. */
 export type SetRules = Pick<MatchConfig, 'setsToWin' | 'pointsPerSet' | 'pointsLastSet' | 'winMargin'> & {

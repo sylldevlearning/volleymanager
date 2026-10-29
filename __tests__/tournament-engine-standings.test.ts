@@ -1,16 +1,16 @@
 import { computeStandings } from '../src/features/tournament/engine/standings';
-import { DEFAULT_POINTS, DEFAULT_TIEBREAKERS, defaultRules } from '../src/features/tournament/engine/defaults';
+import { DEFAULT_POINTS, DEFAULT_TIEBREAKERS, POINTS_PRESETS, defaultRules } from '../src/features/tournament/engine/defaults';
 import type { EngineContext, EngineMatch } from '../src/features/tournament/engine/types';
 import type { SetScore, TiebreakerRule, TournamentRules } from '../src/models/tournament';
 
 const TEAMS = ['A', 'B', 'C', 'D'];
 
-function ctxWith(rules: Partial<TournamentRules> = {}, setsToWin = 2): EngineContext {
-  const base = defaultRules('indoor_6v6', 'round_robin', TEAMS.length);
+function ctxWith(rules: Partial<TournamentRules> = {}, setsToWin = 2, teams = TEAMS): EngineContext {
+  const base = defaultRules('indoor_6v6', 'round_robin', teams.length);
   return {
     format: 'round_robin',
     rules: { ...base, match: { ...base.match, setsToWin }, ...rules },
-    teams: TEAMS.map((id, i) => ({ id, seedRank: null, position: i })),
+    teams: teams.map((id, i) => ({ id, seedRank: null, position: i })),
     pools: [],
   };
 }
@@ -28,33 +28,35 @@ function played(home: string, away: string, sets: SetScore[], forfeitId: string 
 }
 
 const order = (rows: { teamId: string }[]) => rows.map((r) => r.teamId);
+const fivb = { points: POINTS_PRESETS.fivb };
 
-describe('ranking points (default scale)', () => {
-  it('2 winning sets: 2-0 → 3/0, 2-1 → 2/1', () => {
+describe('ranking points', () => {
+  it('by default a win is worth 1 point, a loss 0 — whatever the score', () => {
+    expect(DEFAULT_POINTS).toEqual({ winClear: 1, winTight: 1, lossTight: 0, lossClear: 0, forfeitLoss: 0 });
     const rows = computeStandings(TEAMS, [
       played('A', 'B', [[25, 10], [25, 10]]),
       played('C', 'D', [[25, 10], [10, 25], [15, 10]]),
     ], ctxWith());
-    const pts = Object.fromEntries(rows.map((r) => [r.teamId, r.points]));
-    expect(pts).toEqual({ A: 3, B: 0, C: 2, D: 1 });
+    expect(Object.fromEntries(rows.map((r) => [r.teamId, r.points]))).toEqual({ A: 1, B: 0, C: 1, D: 0 });
   });
 
-  it('3 winning sets: 3-0 and 3-1 → 3/0, 3-2 → 2/1', () => {
+  it('3/2/1/0 stays available: 2-0 → 3/0, 2-1 → 2/1', () => {
+    const rows = computeStandings(TEAMS, [
+      played('A', 'B', [[25, 10], [25, 10]]),
+      played('C', 'D', [[25, 10], [10, 25], [15, 10]]),
+    ], ctxWith(fivb));
+    expect(Object.fromEntries(rows.map((r) => [r.teamId, r.points]))).toEqual({ A: 3, B: 0, C: 2, D: 1 });
+  });
+
+  it('3/2/1/0 with 3 winning sets: 3-0 and 3-1 → 3/0, 3-2 → 2/1', () => {
     const w = [25, 20] as SetScore;
     const l = [20, 25] as SetScore;
     const rows = computeStandings(TEAMS, [
       played('A', 'B', [w, w, w]),
       played('C', 'D', [w, l, w, w]),
       played('A', 'C', [w, l, w, l, [15, 13]]),
-    ], ctxWith({}, 3));
-    const pts = Object.fromEntries(rows.map((r) => [r.teamId, r.points]));
-    expect(pts).toEqual({ A: 5, B: 0, C: 4, D: 0 });
-  });
-
-  it('uses a modified scale', () => {
-    const rules = { points: { winClear: 2, winTight: 2, lossTight: 1, lossClear: 1, forfeitLoss: 0 } };
-    const rows = computeStandings(TEAMS, [played('A', 'B', [[25, 10], [25, 10]])], ctxWith(rules));
-    expect(rows.find((r) => r.teamId === 'B')!.points).toBe(1);
+    ], ctxWith(fivb, 3));
+    expect(Object.fromEntries(rows.map((r) => [r.teamId, r.points]))).toEqual({ A: 5, B: 0, C: 4, D: 0 });
   });
 
   it('a forfeit gives the forfeit-loss points', () => {
@@ -78,48 +80,53 @@ describe('tie-breakers', () => {
     played('A', 'B', aB), played('B', 'C', bC), played('C', 'A', cA),
   ];
 
-  const flat = { points: { winClear: 3, winTight: 3, lossTight: 0, lossClear: 0, forfeitLoss: 0 } };
+  it('default order: head-to-head, set difference, point difference, points scored', () => {
+    const expected: TiebreakerRule[] = ['headToHead', 'setDifference', 'pointDifference', 'pointsScored'];
+    expect(DEFAULT_TIEBREAKERS).toEqual(expected);
+  });
 
-  it('set quotient first', () => {
+  it('head-to-head first, before the set difference', () => {
+    const matches = [
+      played('A', 'C', [[25, 10], [25, 10]]),           // A: 1 win, sets 2-0
+      played('B', 'A', [[25, 20], [20, 25], [15, 10]]), // B beats A — A sets 3-2 overall
+      played('D', 'B', [[25, 10], [25, 10]]),           // B: sets 2-3 overall
+    ];
+    // A, B and D: 1 point each. Between them B beat A, D beat B → A last;
+    // B and D still tied → set difference (D +2, B -1)
+    expect(order(computeStandings(TEAMS, matches, ctxWith()))).toEqual(['D', 'B', 'A', 'C']);
+    // Set difference alone: D +2, A +1, B -1
+    expect(order(computeStandings(TEAMS, matches, ctxWith({ tiebreakers: ['setDifference'] })))).toEqual(['D', 'A', 'B', 'C']);
+  });
+
+  it('set difference when head-to-head cannot split (cycle)', () => {
     const rows = computeStandings(['A', 'B', 'C'], cycle(
       [[25, 20], [20, 25], [15, 10]], // A 2-1 B
       [[25, 20], [25, 20]],           // B 2-0 C
       [[25, 20], [25, 20]],           // C 2-0 A
-    ), ctxWith(flat));
-    // 3 pts each — sets: B 3-2, C 2-2, A 2-3
+    ), ctxWith());
+    // 1 pt each — sets: B +1, C 0, A -1
     expect(order(rows)).toEqual(['B', 'C', 'A']);
   });
 
-  it('a set quotient with no set lost beats any other', () => {
-    const matches = [
-      played('A', 'C', [[25, 23], [25, 23]]),           // A: sets 2-0, points 50/46
-      played('B', 'C', [[25, 10], [10, 25], [15, 5]]),  // B: sets 2-1, points 50/40
-    ];
-    expect(order(computeStandings(['A', 'B', 'C'], matches, ctxWith(flat)))).toEqual(['A', 'B', 'C']);
-    // Point quotient first: B
-    const pointsFirst = ctxWith({ ...flat, tiebreakers: ['pointQuotient', 'setQuotient'] });
-    expect(order(computeStandings(['A', 'B', 'C'], matches, pointsFirst))).toEqual(['B', 'A', 'C']);
-  });
-
-  it('point quotient after the set quotient', () => {
+  it('then the point difference', () => {
     const rows = computeStandings(['A', 'B', 'C'], cycle(
       [[25, 23], [25, 23]],
       [[25, 10], [25, 10]],
       [[25, 20], [25, 20]],
     ), ctxWith());
-    // 3 pts and 2-2 sets each; points A 90/96, B 96/70, C 70/90
+    // Sets 2-2 each; points A 90-96 (-6), B 96-70 (+26), C 70-90 (-20)
     expect(order(rows)).toEqual(['B', 'A', 'C']);
   });
 
-  it('head-to-head between two teams with equal quotients', () => {
-    const rows = computeStandings(['A', 'B', 'C', 'D'], [
-      played('B', 'A', [[25, 20], [25, 20]]),
-      played('A', 'C', [[25, 20], [25, 20]]),
-      played('D', 'B', [[25, 20], [25, 20]]),
-      played('D', 'C', [[25, 20], [25, 20]]),
+  it('then the most points scored', () => {
+    const rows = computeStandings(['A', 'B', 'C'], [
+      played('C', 'A', [[30, 28], [25, 23]]),
+      played('A', 'B', [[25, 23], [25, 23]]),
+      played('B', 'C', [[27, 25], [25, 23]]),
     ], ctxWith());
-    // A and B: 3 pts, 2-2 sets, 90-90 points; B beat A
-    expect(order(rows)).toEqual(['D', 'B', 'A', 'C']);
+    // Sets 2-2 and point difference 0 for all; scored C 103, A 101, B 98
+    expect(rows.map((r) => r.pointsWon - r.pointsLost)).toEqual([0, 0, 0]);
+    expect(order(rows)).toEqual(['C', 'A', 'B']);
   });
 
   it('follows the configured order of criteria', () => {
@@ -128,27 +135,23 @@ describe('tie-breakers', () => {
       [[25, 10], [25, 10]],
       [[25, 20], [25, 20]],
     );
-    const headToHeadFirst: TiebreakerRule[] = ['headToHead', 'setQuotient', 'pointQuotient'];
-    // A cycle: head-to-head cannot split → the point quotient still decides
-    expect(order(computeStandings(['A', 'B', 'C'], matches, ctxWith({ tiebreakers: headToHeadFirst })))).toEqual(['B', 'A', 'C']);
-    // Without the point quotient, the registration order decides
-    expect(order(computeStandings(['A', 'B', 'C'], matches, ctxWith({ tiebreakers: ['setQuotient'] })))).toEqual(['A', 'B', 'C']);
-    expect(DEFAULT_TIEBREAKERS).toEqual(['setQuotient', 'pointQuotient', 'headToHead']);
+    // Only "points scored": A 90, B 96, C 70
+    expect(order(computeStandings(['A', 'B', 'C'], matches, ctxWith({ tiebreakers: ['pointsScored'] })))).toEqual(['B', 'A', 'C']);
+    // No criterion: the registration order decides
+    expect(order(computeStandings(['A', 'B', 'C'], matches, ctxWith({ tiebreakers: [] })))).toEqual(['A', 'B', 'C']);
   });
 
   it('three teams tied: a mini-ranking between them', () => {
     const win = [[25, 20], [25, 20]] as SetScore[];
     const teams = ['A', 'B', 'C', 'D', 'E'];
-    const ctx = ctxWith({ tiebreakers: ['headToHead'] });
-    ctx.teams = teams.map((id, i) => ({ id, seedRank: null, position: i }));
     const rows = computeStandings(teams, [
       played('A', 'B', win), played('A', 'C', win), played('B', 'C', win),
       played('D', 'A', win), played('E', 'A', win),
       played('B', 'D', win), played('E', 'B', win),
       played('C', 'D', win), played('C', 'E', win),
       played('D', 'E', [[25, 20], [20, 25], [15, 10]]),
-    ], ctx);
-    // E 7, A/B/C 6, D 5 — between A, B and C: A 2 wins, B 1, C 0
+    ], ctxWith({ ...fivb, tiebreakers: ['headToHead'] }, 2, teams));
+    // 3/2/1/0: E 7, A/B/C 6, D 5 — between A, B and C: A 2 wins, B 1, C 0
     expect(order(rows)).toEqual(['E', 'A', 'B', 'C', 'D']);
     expect(rows.map((r) => r.points)).toEqual([7, 6, 6, 6, 5]);
     expect(rows.map((r) => r.rank)).toEqual([1, 2, 3, 4, 5]);
@@ -163,6 +166,11 @@ describe('tie-breakers', () => {
       { id: 'D', seedRank: null, position: 3 },
     ];
     expect(order(computeStandings(TEAMS, [], ctx))).toEqual(['C', 'B', 'A', 'D']);
+  });
+
+  it('ignores criteria it does not know (older tournaments)', () => {
+    const legacy = ['setQuotient'] as unknown as TiebreakerRule[];
+    expect(order(computeStandings(TEAMS, [], ctxWith({ tiebreakers: legacy })))).toEqual(TEAMS);
   });
 
   it('ignores matches that are not validated or outside the group', () => {

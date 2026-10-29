@@ -1,50 +1,62 @@
 import {
-  addQuickTeam,
+  DEFAULT_TEAM_COUNT,
+  addLibraryTeams,
+  applyTemplate,
   dateFromIso,
   dateFromTime,
-  isoFromDate,
-  timeFromDate,
-  applyTemplate,
   displayDate,
+  displayName,
+  duplicateTeamKeys,
   formatHint,
   initialWizardState,
+  isoFromDate,
   moveTeam,
   parseDisplayDate,
   previewTournament,
+  renameTeam,
   resolvedCourts,
   resolvedPools,
   setFormat,
   setGameType,
+  setTeamCount,
   templatePayload,
+  timeFromDate,
   toCreateInput,
   validateStep,
   type WizardState,
 } from '../src/features/tournament/wizard';
-import { defaultPoolRules, defaultSetRules } from '../src/features/tournament/engine/defaults';
+import { POINTS_PRESETS, defaultPoolRules, defaultSetRules } from '../src/features/tournament/engine/defaults';
 import { PRESET_TEAM_COLORS } from '../src/utils/constants';
 
 const TODAY = new Date(2026, 4, 16, 10, 30); // 16 May 2026
+const label = (n: number) => `Équipe ${n}`;
+const initial = (seed = 42) => initialWizardState(TODAY, seed, label);
 
-function withTeams(n: number, base: WizardState = initialWizardState(TODAY, 42)): WizardState {
-  let s = base;
-  for (let i = 0; i < n; i++) s = addQuickTeam(s, `Équipe ${i + 1}`);
-  return s;
+function withTeams(n: number, base: WizardState = initial()): WizardState {
+  return setTeamCount(base, n, label);
 }
 
 describe('defaults', () => {
-  it('a 6×6 tournament today, pools + finals, 9:00, 45 min, 10 min rest', () => {
-    const s = initialWizardState(TODAY, 42);
+  it('a 6×6 tournament today, 8 teams, pools + finals, 9:00, 45 min, 10 min rest', () => {
+    const s = initial();
     expect(s).toMatchObject({
       name: '', date: '2026-05-16', location: '', gameType: 'indoor_6v6', format: 'pools_knockout',
       match: defaultSetRules('indoor_6v6'), finalsMatch: null, thirdPlace: true, legs: 1,
       pools: null, courts: null, startTime: '09:00', matchMinutes: 45, restMinutes: 10,
-      seeding: 'random', seed: 42, teams: [],
+      seeding: 'random', seed: 42,
     });
-    expect(s.points).toEqual({ winClear: 3, winTight: 2, lossTight: 1, lossClear: 0, forfeitLoss: 0 });
+    expect(DEFAULT_TEAM_COUNT).toBe(8);
+    expect(s.teams.map(displayName)).toEqual(['Équipe 1', 'Équipe 2', 'Équipe 3', 'Équipe 4', 'Équipe 5', 'Équipe 6', 'Équipe 7', 'Équipe 8']);
+  });
+
+  it('ranking: a win is worth 1 point; tie-breakers head-to-head, sets, points, points scored', () => {
+    const s = initial();
+    expect(s.points).toEqual(POINTS_PRESETS.simple);
+    expect(s.tiebreakers).toEqual(['headToHead', 'setDifference', 'pointDifference', 'pointsScored']);
   });
 
   it('the game type sets its own set rules and match duration', () => {
-    const s = setGameType(initialWizardState(TODAY, 1), 'beach_2v2');
+    const s = setGameType(initial(1), 'beach_2v2');
     expect(s.match).toEqual(defaultSetRules('beach_2v2'));
     expect(s.matchMinutes).toBe(35);
     expect(setGameType(s, 'indoor_3v3').match.setsToWin).toBe(1);
@@ -59,6 +71,14 @@ describe('defaults', () => {
     expect(resolvedCourts(custom)).toBe(3);
   });
 
+  it('pools of 4 first, completed with pools of 3', () => {
+    const sizes = (n: number) => previewTournament({ ...withTeams(n), name: 'Open' }).pools.map((p) => p.length).sort();
+    expect(sizes(10)).toEqual([3, 3, 4]);
+    expect(sizes(13)).toEqual([3, 3, 3, 4]);
+    expect(sizes(21)).toEqual([3, 3, 3, 4, 4, 4]);
+    expect(sizes(16)).toEqual([4, 4, 4, 4]);
+  });
+
   it('changing format goes back to automatic pools', () => {
     const s = { ...withTeams(8), pools: { count: 2, qualifiersPerPool: 1, bestOthers: 0 } };
     expect(setFormat(s, 'pools_knockout').pools).toBeNull();
@@ -66,23 +86,57 @@ describe('defaults', () => {
 });
 
 describe('teams', () => {
-  it('typed by name only: trimmed, a colour each', () => {
-    const s = addQuickTeam(addQuickTeam(initialWizardState(TODAY, 1), '  Lyon  '), 'Paris');
-    expect(s.teams.map((t) => [t.name, t.teamId, t.color])).toEqual([
-      ['Lyon', null, PRESET_TEAM_COLORS[0]],
-      ['Paris', null, PRESET_TEAM_COLORS[1]],
-    ]);
-    expect(new Set(s.teams.map((t) => t.key)).size).toBe(2);
+  it('the count adds "Équipe N" at the end and removes from the end, keeping names', () => {
+    let s = withTeams(3);
+    s = renameTeam(s, s.teams[1].key, 'Lyon');
+    s = setTeamCount(s, 5, label);
+    expect(s.teams.map(displayName)).toEqual(['Équipe 1', 'Lyon', 'Équipe 3', 'Équipe 4', 'Équipe 5']);
+    expect(s.teams.map((t) => t.color)).toEqual(PRESET_TEAM_COLORS.slice(0, 5));
+    s = setTeamCount(s, 2, label);
+    expect(s.teams.map(displayName)).toEqual(['Équipe 1', 'Lyon']);
+    expect(setTeamCount(s, 1, label).teams).toHaveLength(2); // at least 2
   });
 
-  it('ignores an empty name', () => {
-    expect(addQuickTeam(initialWizardState(TODAY, 1), '   ').teams).toEqual([]);
+  it('a new team takes the first free number', () => {
+    let s = withTeams(3);
+    s = { ...s, teams: s.teams.filter((t) => displayName(t) !== 'Équipe 2') };
+    expect(setTeamCount(s, 3, label).teams.map(displayName)).toEqual(['Équipe 1', 'Équipe 3', 'Équipe 2']);
+  });
+
+  it('names are optional: an empty name falls back to "Équipe N"', () => {
+    const s = withTeams(2);
+    const cleared = renameTeam(s, s.teams[0].key, '   ');
+    expect(displayName(cleared.teams[0])).toBe('Équipe 1');
+    expect(toCreateInput({ ...cleared, name: 'Open' }).teams[0].name).toBe('Équipe 1');
+  });
+
+  it('"Mes équipes" fills the teams still unnamed, then adds more', () => {
+    let s = withTeams(3);
+    s = renameTeam(s, s.teams[0].key, 'Lyon');
+    s = addLibraryTeams(s, [
+      { id: 'a', name: 'Paris', color: '#000001' },
+      { id: 'b', name: 'Nice', color: '#000002' },
+      { id: 'c', name: 'Caen', color: '#000003' },
+    ], label);
+    expect(s.teams.map((t) => [displayName(t), t.teamId])).toEqual([
+      ['Lyon', null], ['Paris', 'a'], ['Nice', 'b'], ['Caen', 'c'],
+    ]);
+    expect(s.teams[1].color).toBe('#000001');
+    // Already in the tournament: ignored
+    expect(addLibraryTeams(s, [{ id: 'a', name: 'Paris', color: '#000001' }], label).teams).toHaveLength(4);
+  });
+
+  it('duplicate names point at every team concerned', () => {
+    let s = withTeams(4);
+    s = renameTeam(s, s.teams[3].key, ' équipe 1 ');
+    expect(duplicateTeamKeys(s)).toEqual(new Set([s.teams[0].key, s.teams[3].key]));
+    expect(duplicateTeamKeys(withTeams(4)).size).toBe(0);
   });
 
   it('can be moved up and down (seed order)', () => {
     const s = withTeams(3);
     const moved = moveTeam(s, s.teams[2].key, -1);
-    expect(moved.teams.map((t) => t.name)).toEqual(['Équipe 1', 'Équipe 3', 'Équipe 2']);
+    expect(moved.teams.map(displayName)).toEqual(['Équipe 1', 'Équipe 3', 'Équipe 2']);
     expect(moveTeam(s, s.teams[0].key, -1)).toBe(s);
   });
 });
@@ -109,32 +163,30 @@ describe('dates', () => {
 
 describe('validation by step', () => {
   it('step 1: a name and a valid date', () => {
-    const s = initialWizardState(TODAY, 1);
+    const s = initial(1);
     expect(validateStep(s, 1)).toEqual(['name_required']);
     expect(validateStep({ ...s, name: 'Open', date: '' }, 1)).toEqual(['date_invalid']);
     expect(validateStep({ ...s, name: 'Open' }, 1)).toEqual([]);
   });
 
   it('step 2: the set rules make sense', () => {
-    const s = { ...initialWizardState(TODAY, 1), name: 'Open' };
+    const s = { ...initial(1), name: 'Open' };
     expect(validateStep(s, 2)).toEqual([]);
     expect(validateStep({ ...s, match: { ...s.match, pointsLastSet: 30 } }, 2)).toEqual(['tie_break_too_long']);
   });
 
-  it('step 3: enough teams, distinct names, valid times, a playable format', () => {
-    const s = { ...initialWizardState(TODAY, 1), name: 'Open' };
-    expect(validateStep(s, 3)).toEqual(['too_few_teams']);
-    const dup = withTeams(4, s);
-    dup.teams[1] = { ...dup.teams[1], name: 'équipe 1' };
-    expect(validateStep(dup, 3)).toContain('team_name_duplicate');
-    expect(validateStep({ ...withTeams(8, s), startTime: '25:00' }, 3)).toEqual(['start_time_invalid']);
-    expect(validateStep({ ...withTeams(8, s), pools: { count: 4, qualifiersPerPool: 2, bestOthers: 2 } }, 3)).toEqual(['pool_too_small']);
-    expect(validateStep(withTeams(8, s), 3)).toEqual([]);
+  it('step 3: distinct names, valid times, a playable format', () => {
+    const s = { ...initial(1), name: 'Open' };
+    const dup = renameTeam(s, s.teams[1].key, 'équipe 1');
+    expect(validateStep(dup, 3)).toEqual(['team_name_duplicate']);
+    expect(validateStep({ ...s, startTime: '25:00' }, 3)).toEqual(['start_time_invalid']);
+    expect(validateStep({ ...s, pools: { count: 4, qualifiersPerPool: 2, bestOthers: 2 } }, 3)).toEqual(['pool_too_small']);
+    expect(validateStep(s, 3)).toEqual([]);
   });
 
   it('step 4 checks everything', () => {
-    expect(validateStep(withTeams(8), 4)).toEqual(['name_required']);
-    expect(validateStep({ ...withTeams(8), name: 'Open' }, 4)).toEqual([]);
+    expect(validateStep(initial(), 4)).toEqual(['name_required']);
+    expect(validateStep({ ...initial(), name: 'Open' }, 4)).toEqual([]);
   });
 });
 
@@ -145,7 +197,6 @@ describe('format hint', () => {
     expect(formatHint(setFormat(withTeams(16), 'round_robin'))).toBe('pools_knockout');
     expect(formatHint(withTeams(16))).toBeNull();
     expect(formatHint(setFormat(withTeams(16), 'knockout'))).toBeNull(); // a deliberate choice
-    expect(formatHint(initialWizardState(TODAY, 1))).toBeNull();
   });
 });
 
@@ -160,6 +211,7 @@ describe('creation input', () => {
     });
     expect(input.rules.pools).toEqual(defaultPoolRules(8));
     expect(input.rules.knockout).toEqual({ thirdPlace: true });
+    expect(input.teams.map((t) => t.name)).toEqual(s.teams.map(displayName));
     expect(input.teams.every((t) => t.seedRank === null)).toBe(true);
     expect(toCreateInput({ ...s, location: '  ' }).location).toBeNull();
   });
@@ -174,16 +226,22 @@ describe('creation input', () => {
   });
 });
 
-describe('preview', () => {
-  it('pools, number of matches and estimated end, deterministic', () => {
+describe('preview (estimate shown with the number of teams)', () => {
+  it('pools, number of matches, estimated end and duration, deterministic', () => {
     const s = { ...withTeams(8), name: 'Open' };
     const p = previewTournament(s);
     expect(p.errors).toEqual([]);
     expect(p.pools).toHaveLength(2);
-    expect(p.pools.flat().sort()).toEqual(s.teams.map((t) => t.name).sort());
+    expect(p.pools.flat().sort()).toEqual(s.teams.map(displayName).sort());
     expect(p.matchCount).toBe(16);
     expect(p.endTime).toMatch(/^\d\d:\d\d$/);
+    expect(p.durationMinutes! % 45).toBe(0);
     expect(previewTournament(s)).toEqual(p);
+  });
+
+  it('more courts, shorter tournament', () => {
+    const s = withTeams(16);
+    expect(previewTournament({ ...s, courts: 4 }).durationMinutes!).toBeLessThan(previewTournament({ ...s, courts: 1 }).durationMinutes!);
   });
 
   it('"Retirer au sort" (another seed) changes the pools', () => {
@@ -192,9 +250,9 @@ describe('preview', () => {
   });
 
   it('reports setup errors instead of a planning', () => {
-    const p = previewTournament(withTeams(1));
-    expect(p.errors).toEqual(['too_few_teams']);
-    expect(p.matchCount).toBe(0);
+    const p = previewTournament({ ...withTeams(8), pools: { count: 4, qualifiersPerPool: 2, bestOthers: 2 } });
+    expect(p.errors).toEqual(['pool_too_small']);
+    expect([p.matchCount, p.durationMinutes]).toEqual([0, null]);
   });
 });
 
@@ -207,7 +265,7 @@ describe('templates', () => {
     // Automatic pools stay automatic
     expect(payload.rules.pools).toBeNull();
 
-    const fresh = withTeams(5, initialWizardState(TODAY, 9));
+    const fresh = withTeams(5, initial(9));
     const applied = applyTemplate(fresh, payload);
     expect(applied).toMatchObject({ gameType: 'beach_2v2', courts: 3, restMinutes: 0, pools: null, name: '', seed: 9 });
     expect(applied.teams).toEqual(fresh.teams);
@@ -215,6 +273,6 @@ describe('templates', () => {
 
   it('custom pools are kept', () => {
     const s = { ...withTeams(8), pools: { count: 2, qualifiersPerPool: 1, bestOthers: 0 } };
-    expect(applyTemplate(initialWizardState(TODAY, 1), templatePayload(s)).pools).toEqual({ count: 2, qualifiersPerPool: 1, bestOthers: 0 });
+    expect(applyTemplate(initial(1), templatePayload(s)).pools).toEqual({ count: 2, qualifiersPerPool: 1, bestOthers: 0 });
   });
 });

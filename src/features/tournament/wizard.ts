@@ -29,11 +29,21 @@ export type WizardStep = 1 | 2 | 3 | 4;
 export interface WizardTeam {
   /** Local key — the tournament team id is created with the tournament */
   key: string;
-  /** "Mes équipes" team, null when typed by name only */
+  /** "Mes équipes" team, null otherwise */
   teamId: string | null;
+  /** As typed — may be empty */
   name: string;
+  /** "Équipe N": shown and used while the name is empty */
+  fallbackName: string;
+  /** N of "Équipe N" (also picks the colour) */
+  number: number;
   color: string;
 }
+
+export const DEFAULT_TEAM_COUNT = 8;
+
+/** Localised "Équipe N" */
+export type TeamLabel = (n: number) => string;
 
 export interface WizardState {
   name: string;
@@ -65,16 +75,15 @@ export type WizardError =
   | 'name_required'
   | 'date_invalid'
   | 'tie_break_too_long'
-  | 'team_name_required'
   | 'team_name_duplicate'
   | 'start_time_invalid'
   | SetupError;
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
-export function initialWizardState(today: Date, seed: number): WizardState {
-  const schedule = defaultSchedule('indoor_6v6', 0);
-  return {
+export function initialWizardState(today: Date, seed: number, label: TeamLabel): WizardState {
+  const schedule = defaultSchedule('indoor_6v6', DEFAULT_TEAM_COUNT);
+  const empty: WizardState = {
     name: '',
     date: isoFromDate(today),
     location: '',
@@ -95,6 +104,7 @@ export function initialWizardState(today: Date, seed: number): WizardState {
     restMinutes: schedule.restMinutes,
     seed,
   };
+  return setTeamCount(empty, DEFAULT_TEAM_COUNT, label);
 }
 
 export function setGameType(state: WizardState, gameType: TournamentGameType): WizardState {
@@ -122,19 +132,57 @@ export function resolvedCourts(state: WizardState): number {
 let keyCounter = 0;
 const newKey = () => `w${Date.now().toString(36)}${(keyCounter++).toString(36)}`;
 
-export function addQuickTeam(state: WizardState, name: string): WizardState {
-  const trimmed = name.trim();
-  if (!trimmed) return state;
-  const color = PRESET_TEAM_COLORS[state.teams.length % PRESET_TEAM_COLORS.length];
-  return { ...state, teams: [...state.teams, { key: newKey(), teamId: null, name: trimmed, color }] };
+export function displayName(team: WizardTeam): string {
+  return team.name.trim() || team.fallbackName;
 }
 
-export function addLibraryTeams(state: WizardState, teams: { id: string; name: string; color: string }[]): WizardState {
+function newTeam(label: TeamLabel, used: Set<number>): WizardTeam {
+  let number = 1;
+  while (used.has(number)) number++;
+  used.add(number);
+  return {
+    key: newKey(), teamId: null, name: label(number), fallbackName: label(number), number,
+    color: PRESET_TEAM_COLORS[(number - 1) % PRESET_TEAM_COLORS.length],
+  };
+}
+
+/** Adds "Équipe N" teams at the end, or removes from the end (2 teams at least). */
+export function setTeamCount(state: WizardState, count: number, label: TeamLabel): WizardState {
+  const target = Math.max(2, count);
+  if (target <= state.teams.length) return { ...state, teams: state.teams.slice(0, target) };
+  const used = new Set(state.teams.map((t) => t.number));
+  const teams = [...state.teams];
+  while (teams.length < target) teams.push(newTeam(label, used));
+  return { ...state, teams };
+}
+
+export function renameTeam(state: WizardState, key: string, name: string): WizardState {
+  return { ...state, teams: state.teams.map((t) => (t.key === key ? { ...t, name } : t)) };
+}
+
+/** "Mes équipes" teams take the places still unnamed, then are added at the end. */
+export function addLibraryTeams(state: WizardState, library: { id: string; name: string; color: string }[], label: TeamLabel): WizardState {
   const already = new Set(state.teams.map((t) => t.teamId));
-  const added = teams
-    .filter((t) => !already.has(t.id))
-    .map((t): WizardTeam => ({ key: newKey(), teamId: t.id, name: t.name, color: t.color }));
-  return { ...state, teams: [...state.teams, ...added] };
+  const queue = library.filter((t) => !already.has(t.id));
+  const fill = (slot: WizardTeam, team: { id: string; name: string; color: string }): WizardTeam =>
+    ({ ...slot, teamId: team.id, name: team.name, color: team.color });
+  const teams = state.teams.map((slot) => {
+    const untouched = slot.teamId === null && slot.name === slot.fallbackName;
+    return untouched && queue.length > 0 ? fill(slot, queue.shift()!) : slot;
+  });
+  const used = new Set(teams.map((t) => t.number));
+  for (const team of queue) teams.push(fill(newTeam(label, used), team));
+  return { ...state, teams };
+}
+
+/** Keys of every team whose name is used more than once. */
+export function duplicateTeamKeys(state: WizardState): Set<string> {
+  const byName = new Map<string, string[]>();
+  for (const t of state.teams) {
+    const n = displayName(t).toLocaleLowerCase();
+    byName.set(n, [...(byName.get(n) ?? []), t.key]);
+  }
+  return new Set([...byName.values()].filter((keys) => keys.length > 1).flat());
 }
 
 export function removeTeam(state: WizardState, key: string): WizardState {
@@ -237,9 +285,7 @@ export function validateStep(state: WizardState, step: WizardStep): WizardError[
     }
   }
   if (step === 3 || step === 4) {
-    if (state.teams.some((t) => !t.name.trim())) errors.push('team_name_required');
-    const names = state.teams.map((t) => t.name.trim().toLocaleLowerCase());
-    if (new Set(names).size !== names.length) errors.push('team_name_duplicate');
+    if (duplicateTeamKeys(state).size > 0) errors.push('team_name_duplicate');
     if (!isTime(state.startTime)) errors.push('start_time_invalid');
     errors.push(...validateSetup(engineInput(state)));
   }
@@ -261,23 +307,26 @@ export interface TournamentPreview {
   matchCount: number;
   /** 'HH:MM' end of the last slot */
   endTime: string | null;
+  /** From the start time to the end of the last slot */
+  durationMinutes: number | null;
 }
 
 /** What "Créer" will produce, with the current seed. */
 export function previewTournament(state: WizardState): TournamentPreview {
   const input = engineInput(state);
   const errors = validateSetup(input);
-  if (errors.length > 0) return { errors, pools: [], matchCount: 0, endTime: null };
+  if (errors.length > 0) return { errors, pools: [], matchCount: 0, endTime: null, durationMinutes: null };
   const schedule = toSchedule(state);
   const generated = generateTournament(input);
   const planned = scheduleMatches(generated.matches, { courts: schedule.courts, restSlots: restSlotsFor(schedule) });
-  const names = new Map(state.teams.map((t) => [t.key, t.name]));
+  const names = new Map(state.teams.map((t) => [t.key, displayName(t)]));
   const lastSlot = Math.max(...planned.map((m) => m.slot ?? 0));
   return {
     errors,
     pools: generated.pools.map((ids) => ids.map((id) => names.get(id)!)),
     matchCount: planned.length,
     endTime: slotStart(schedule, lastSlot + 1),
+    durationMinutes: (lastSlot + 1) * schedule.matchMinutes,
   };
 }
 
@@ -294,7 +343,7 @@ export function toCreateInput(state: WizardState): CreateTournamentInput {
     seed: state.seed,
     teams: state.teams.map((t, i) => ({
       teamId: t.teamId,
-      name: t.name.trim(),
+      name: displayName(t),
       color: t.color,
       seedRank: state.seeding === 'seeded' ? i + 1 : null,
     })),

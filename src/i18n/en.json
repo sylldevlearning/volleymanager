@@ -680,9 +680,10 @@
       "knockout": "A bracket from the start: the loser is out."
     },
     "tiebreaker": {
-      "setQuotient": "Set ratio",
-      "pointQuotient": "Point ratio",
-      "headToHead": "Head-to-head"
+      "headToHead": "Head-to-head",
+      "setDifference": "Set difference",
+      "pointDifference": "Point difference",
+      "pointsScored": "Most points scored"
     },
     "wizard": {
       "stepOf": "Step {{step}} of 4",
@@ -724,9 +725,6 @@
       "finalsTitle": "Finals",
       "teams": "Teams ({{count}})",
       "fromLibrary": "My teams",
-      "quickAddPlaceholder": "Team name",
-      "quickAdd": "Add",
-      "noTeams": "Add at least 2 teams: from \"My teams\" or by typing their name.",
       "removeTeam": "Remove {{name}}",
       "seeding": "Seeds",
       "seedingHint": "Rank the teams from strongest to weakest: the best ones go to different pools and only meet late in the bracket.",
@@ -769,13 +767,22 @@
       "fixErrors": "To fix",
       "leaveTitle": "Discard the tournament?",
       "leaveMessage": "What you entered will be lost.",
-      "leave": "Discard"
+      "leave": "Discard",
+      "teamCount": "Number of teams",
+      "teamNumber": "Team {{n}}",
+      "teamNameLabel": "Name of team {{n}}",
+      "duplicateName": "Same name as another team",
+      "poolsOf_one": "{{count}} pool of {{size}}",
+      "poolsOf_other": "{{count}} pools of {{size}}",
+      "and": " and ",
+      "summaryDuration": "Estimated duration: {{duration}}",
+      "pointsPresetSimple": "Win = 1 point",
+      "pointsPresetFivb": "3-2-1-0"
     },
     "errors": {
       "name_required": "Give the tournament a name.",
       "date_invalid": "Invalid date: use DD/MM/YYYY.",
       "tie_break_too_long": "The tie-break cannot be longer than a normal set.",
-      "team_name_required": "Every team needs a name.",
       "team_name_duplicate": "Two teams have the same name.",
       "start_time_invalid": "Invalid start time: use HH:MM.",
       "too_few_teams": "At least 2 teams are needed.",

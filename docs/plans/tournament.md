@@ -97,8 +97,8 @@ interface TournamentRules {
   match: { setsToWin: number; pointsPerSet: number; tieBreak: boolean;
            tieBreakPoints: number; winMargin: number };   // mêmes noms que MatchConfig
   finalsMatch?: TournamentRules['match'];                  // règles différentes en phase finale (option)
-  points: { winClear: 3; winTight: 2; lossTight: 1; lossClear: 0; forfeitLoss: 0 };
-  tiebreakers: ('setQuotient' | 'pointQuotient' | 'headToHead')[]; // ordre modifiable
+  points: { winClear: 1; winTight: 1; lossTight: 0; lossClear: 0; forfeitLoss: 0 }; // 3/2/1/0 en préréglage
+  tiebreakers: ('headToHead' | 'setDifference' | 'pointDifference' | 'pointsScored')[]; // ordre modifiable
   forfeitScore: { sets: 'max'; pointsPerSet: number };    // forfait = 3-0 (25-0) par défaut
   pools?: { count: number; qualifiersPerPool: number; bestOthers: number };
   knockout?: { thirdPlace: boolean };
@@ -149,6 +149,19 @@ est déjà validé, la correction est bloquée avec la liste des matchs concern�
   vide ; un terrain peut donc rester libre pour respecter le repos.
 - Comparaison entre poules (meilleurs Nᵉ, non-qualifiés) : points par match
   (poules de tailles différentes), quotient sets, quotient points.
+
+### Retours après test (assistant v2)
+- Barème par défaut : victoire 1 point, défaite 0 ; 3-2-1-0 en préréglage.
+- Égalités par défaut : confrontation directe, différence de sets, différence
+  de points, plus de points marqués (plus de quotients). Entre poules : les
+  mêmes valeurs ramenées au nombre de matchs joués.
+- Poules automatiques : de 4 en priorité, complétées par des poules de 3
+  (`ceil(n / 4)` poules), jamais de 5.
+- Étape 3 : nombre d'équipes (8 par défaut) et de terrains d'abord, estimation
+  immédiate (poules, matchs, fin, durée) ; « Équipe N » par défaut, noms
+  modifiables dans la liste ; « Mes équipes » remplit les équipes pas encore
+  renommées ; noms en double surlignés. Renommage après création :
+  `renameTournamentTeam` (écran en phase 3).
 
 ## Phases
 ### Phase 1 — Modèle + moteur

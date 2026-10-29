@@ -22,12 +22,6 @@ function emptyTotals(teamId: string): Totals {
   return { teamId, played: 0, won: 0, lost: 0, forfeits: 0, points: 0, setsWon: 0, setsLost: 0, pointsWon: 0, pointsLost: 0 };
 }
 
-/** won / lost, with x/0 above any finite quotient. */
-export function quotient(won: number, lost: number): number {
-  if (lost === 0) return won === 0 ? 0 : Infinity;
-  return won / lost;
-}
-
 function totalsFor(teamIds: string[], matches: EngineMatch[], ctx: EngineContext): Map<string, Totals> {
   const totals = new Map(teamIds.map((id) => [id, emptyTotals(id)]));
   for (const m of matches) {
@@ -65,8 +59,7 @@ function totalsFor(teamIds: string[], matches: EngineMatch[], ctx: EngineContext
 
 /** Splits `ids` into groups of equal value, best first. */
 function groupBy(ids: string[], value: (id: string) => number): string[][] {
-  // No subtraction: quotients can be Infinity
-  const sorted = [...ids].sort((a, b) => (value(a) === value(b) ? 0 : value(b) > value(a) ? 1 : -1));
+  const sorted = [...ids].sort((a, b) => value(b) - value(a));
   const groups: string[][] = [];
   for (const id of sorted) {
     const last = groups[groups.length - 1];
@@ -89,18 +82,26 @@ function finalOrder(ids: string[], teams: Map<string, EngineTeam>): string[] {
 
 /**
  * Ranking of a group (pool, league): ranking points, then the tie-breakers in
- * the configured order. Head-to-head = a mini-ranking of the matches between
- * the tied teams only. Remaining ties: seed, then registration order.
+ * the configured order (default: head-to-head, set difference, point
+ * difference, points scored). Head-to-head = a mini-ranking of the matches
+ * between the tied teams only. Remaining ties: seed, then registration order.
  */
 export function computeStandings(teamIds: string[], matches: EngineMatch[], ctx: EngineContext): StandingRow[] {
   const totals = totalsFor(teamIds, matches, ctx);
   const teams = new Map(ctx.teams.map((t) => [t.id, t]));
 
   const criterion = (rule: TiebreakerRule, group: string[]): ((id: string) => number) => {
-    if (rule === 'setQuotient') return (id) => { const t = totals.get(id)!; return quotient(t.setsWon, t.setsLost); };
-    if (rule === 'pointQuotient') return (id) => { const t = totals.get(id)!; return quotient(t.pointsWon, t.pointsLost); };
-    const mini = totalsFor(group, matches, ctx);
-    return (id) => mini.get(id)!.points;
+    switch (rule) {
+      case 'headToHead': {
+        const mini = totalsFor(group, matches, ctx);
+        return (id) => mini.get(id)!.points;
+      }
+      case 'setDifference': return (id) => { const t = totals.get(id)!; return t.setsWon - t.setsLost; };
+      case 'pointDifference': return (id) => { const t = totals.get(id)!; return t.pointsWon - t.pointsLost; };
+      case 'pointsScored': return (id) => totals.get(id)!.pointsWon;
+      // A criterion from an older version: no effect
+      default: return () => 0;
+    }
   };
 
   const rank = (group: string[], level: number): string[] => {
@@ -115,24 +116,18 @@ export function computeStandings(teamIds: string[], matches: EngineMatch[], ctx:
 }
 
 /**
- * Compares teams of different pools (best thirds, non-qualified teams):
- * points per match (pools may differ in size), set quotient, point quotient,
- * seed, registration order.
+ * Compares teams of different pools (best thirds, non-qualified teams), per
+ * match played since pools may differ in size: points, set difference, point
+ * difference, points scored; then seed and registration order.
  */
 export function compareAcrossPools(rows: StandingRow[], ctx: EngineContext): StandingRow[] {
   const teams = new Map(ctx.teams.map((t) => [t.id, t]));
-  const perMatch = (r: StandingRow) => (r.played === 0 ? 0 : r.points / r.played);
+  const perMatch = (r: StandingRow, value: number) => (r.played === 0 ? 0 : value / r.played);
   const order = finalOrder(rows.map((r) => r.teamId), teams);
   return [...rows].sort((a, b) =>
-    perMatch(b) - perMatch(a)
-    || quotientDiff(b.setsWon, b.setsLost, a.setsWon, a.setsLost)
-    || quotientDiff(b.pointsWon, b.pointsLost, a.pointsWon, a.pointsLost)
+    perMatch(b, b.points) - perMatch(a, a.points)
+    || perMatch(b, b.setsWon - b.setsLost) - perMatch(a, a.setsWon - a.setsLost)
+    || perMatch(b, b.pointsWon - b.pointsLost) - perMatch(a, a.pointsWon - a.pointsLost)
+    || perMatch(b, b.pointsWon) - perMatch(a, a.pointsWon)
     || order.indexOf(a.teamId) - order.indexOf(b.teamId));
-}
-
-function quotientDiff(w1: number, l1: number, w2: number, l2: number): number {
-  const q1 = quotient(w1, l1);
-  const q2 = quotient(w2, l2);
-  if (q1 === q2) return 0;
-  return q1 > q2 ? 1 : -1;
 }

@@ -1,25 +1,30 @@
-import { useState, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useTranslation } from 'react-i18next';
-import { CalendarDays, ChevronDown, ChevronUp, Clock, Plus, Save, Shuffle, Users, X } from 'lucide-react-native';
+import { CalendarDays, ChevronDown, ChevronUp, Clock, Save, Shuffle, Users, X } from 'lucide-react-native';
 import { palette } from '../../theme/tokens';
 import { FormField, Stepper, ToggleRow } from '../ui/FormControls';
 import { TeamLibrarySheet } from './TeamLibrarySheet';
 import { poolName } from '../../features/tournament/engine/pools';
+import { POINTS_PRESETS } from '../../features/tournament/engine/defaults';
 import {
   addLibraryTeams,
-  addQuickTeam,
   dateFromIso,
   dateFromTime,
   displayDate,
+  displayName,
+  duplicateTeamKeys,
   formatHint,
   moveTeam,
+  previewTournament,
   removeTeam,
+  renameTeam,
   resolvedCourts,
   resolvedPools,
   setFormat,
   setGameType,
+  setTeamCount,
   isoFromDate,
   timeFromDate,
   type TournamentPreview,
@@ -223,6 +228,7 @@ function SetRulesEditor({ rules, onChange }: { rules: SetRules; onChange: (rules
 }
 
 const POINT_ROWS: (keyof PointsScale)[] = ['winClear', 'winTight', 'lossTight', 'lossClear', 'forfeitLoss'];
+const samePoints = (a: PointsScale, b: PointsScale) => POINT_ROWS.every((k) => a[k] === b[k]);
 
 export function FormatStep({ state, onChange }: StepProps) {
   const { t } = useTranslation();
@@ -284,6 +290,12 @@ export function FormatStep({ state, onChange }: StepProps) {
           {state.format !== 'knockout' && (
             <>
               <FormField label={t('tournament.wizard.points')}>
+                <View style={[styles.chips, styles.presetChips]}>
+                  <Chip label={t('tournament.wizard.pointsPresetSimple')} active={samePoints(state.points, POINTS_PRESETS.simple)}
+                    onPress={() => onChange({ ...state, points: { ...POINTS_PRESETS.simple } })} />
+                  <Chip label={t('tournament.wizard.pointsPresetFivb')} active={samePoints(state.points, POINTS_PRESETS.fivb)}
+                    onPress={() => onChange({ ...state, points: { ...POINTS_PRESETS.fivb } })} />
+                </View>
                 {POINT_ROWS.map((key) => (
                   <Stepper key={key} label={t(`tournament.wizard.${key}`)} value={state.points[key]} min={-3} max={5}
                     onChange={(v) => onChange({ ...state, points: { ...state.points, [key]: v } })} />
@@ -312,68 +324,63 @@ export function FormatStep({ state, onChange }: StepProps) {
 
 // ─── Step 3: teams and planning ────────────────────────────────────────────
 
+/** "3 poules de 4 et 1 poule de 3" */
+function poolSizesText(pools: string[][], t: (key: string, opts?: Record<string, unknown>) => string): string {
+  const bySize = new Map<number, number>();
+  for (const p of pools) bySize.set(p.length, (bySize.get(p.length) ?? 0) + 1);
+  return [...bySize.entries()]
+    .sort(([a], [b]) => b - a)
+    .map(([size, count]) => t('tournament.wizard.poolsOf', { count, size }))
+    .join(t('tournament.wizard.and'));
+}
+
+/** "6 h 45", "40 min" */
+function durationText(minutes: number): string {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return h === 0 ? `${m} min` : `${h} h ${String(m).padStart(2, '0')}`;
+}
+
 export function TeamsStep({ state, onChange }: StepProps) {
   const { t } = useTranslation();
-  const [quickName, setQuickName] = useState('');
   const [libraryOpen, setLibraryOpen] = useState(false);
+  const label = (k: number) => t('tournament.wizard.teamNumber', { n: k });
   const hint = formatHint(state);
   const seeded = state.seeding === 'seeded';
   const n = state.teams.length;
   const pools = resolvedPools(state);
+  const duplicates = duplicateTeamKeys(state);
 
-  function addQuick() {
-    onChange(addQuickTeam(state, quickName));
-    setQuickName('');
-  }
+  // Team names do not change the estimate: no recomputing while typing
+  const { format, match, finalsMatch, points, tiebreakers, thirdPlace, legs, courts, startTime, matchMinutes, restMinutes, seeding, seed } = state;
+  const estimate = useMemo(
+    () => previewTournament(state),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [format, match, finalsMatch, points, tiebreakers, thirdPlace, legs, state.pools, courts, startTime, matchMinutes, restMinutes, seeding, seed, n],
+  );
 
   const setPools = (patch: Partial<typeof pools>) => onChange({ ...state, pools: { ...pools, ...patch } });
 
   return (
     <View>
-      <FormField label={t('tournament.wizard.teams', { count: n })}>
-        <View style={styles.addRow}>
-          <TextInput
-            style={[styles.input, styles.addInput]}
-            value={quickName}
-            onChangeText={setQuickName}
-            onSubmitEditing={addQuick}
-            blurOnSubmit={false}
-            returnKeyType="done"
-            placeholder={t('tournament.wizard.quickAddPlaceholder')}
-            placeholderTextColor={palette.textMuted}
-            maxLength={40}
-          />
-          <Pressable style={[styles.addButton, !quickName.trim() && styles.disabled]} onPress={addQuick}
-            disabled={!quickName.trim()} accessibilityRole="button" accessibilityLabel={t('tournament.wizard.quickAdd')}>
-            <Plus size={20} color="#fff" />
-          </Pressable>
-        </View>
-        <SecondaryButton icon={<Users size={18} color={palette.textPrimary} />} label={t('tournament.wizard.fromLibrary')}
-          onPress={() => setLibraryOpen(true)} />
+      <Stepper label={t('tournament.wizard.teamCount')} value={n} min={2} max={64}
+        onChange={(count) => onChange(setTeamCount(state, count, label))} />
+      <Stepper label={t('tournament.wizard.courts')} value={resolvedCourts(state)} min={1} max={20}
+        onChange={(c) => onChange({ ...state, courts: c })} />
 
-        <ToggleRow label={t('tournament.wizard.seeding')} value={seeded}
-          onChange={(on) => onChange({ ...state, seeding: on ? 'seeded' : 'random' })} />
-        {seeded && <Text style={styles.hint}>{t('tournament.wizard.seedingHint')}</Text>}
-
-        {n === 0 && <Text style={styles.hint}>{t('tournament.wizard.noTeams')}</Text>}
-        {state.teams.map((team, i) => (
-          <View key={team.key} style={styles.teamRow}>
-            {seeded && <Text style={styles.orderIndex}>{i + 1}</Text>}
-            <View style={[styles.teamDot, { backgroundColor: team.color }]} />
-            <Text style={styles.teamName} numberOfLines={1}>{team.name}</Text>
-            {seeded && (
-              <>
-                <IconButton icon={<ChevronUp size={18} color={palette.textPrimary} />} label={t('tournament.wizard.moveUp')}
-                  onPress={() => onChange(moveTeam(state, team.key, -1))} disabled={i === 0} />
-                <IconButton icon={<ChevronDown size={18} color={palette.textPrimary} />} label={t('tournament.wizard.moveDown')}
-                  onPress={() => onChange(moveTeam(state, team.key, 1))} disabled={i === n - 1} />
-              </>
-            )}
-            <IconButton icon={<X size={18} color={palette.textSecondary} />} label={t('tournament.wizard.removeTeam', { name: team.name })}
-              onPress={() => onChange(removeTeam(state, team.key))} />
-          </View>
-        ))}
-      </FormField>
+      <View style={styles.estimate}>
+        {estimate.errors.length > 0
+          ? estimate.errors.map((code) => <Text key={code} style={styles.error}>• {t(`tournament.errors.${code}`)}</Text>)
+          : (
+            <>
+              {estimate.pools.length > 0 && <Text style={styles.estimateStrong}>{poolSizesText(estimate.pools, t)}</Text>}
+              <Text style={styles.estimateText}>
+                {t('tournament.wizard.summaryMatches', { count: estimate.matchCount })} · {t('tournament.wizard.summaryEnd', { time: estimate.endTime })}
+              </Text>
+              <Text style={styles.estimateText}>{t('tournament.wizard.summaryDuration', { duration: durationText(estimate.durationMinutes ?? 0) })}</Text>
+            </>
+          )}
+      </View>
 
       {hint && (
         <View style={styles.hintBox}>
@@ -384,7 +391,49 @@ export function TeamsStep({ state, onChange }: StepProps) {
         </View>
       )}
 
-      {state.format === 'pools_knockout' && n >= 2 && (
+      <FormField label={t('tournament.wizard.teams', { count: n })}>
+        <SecondaryButton icon={<Users size={18} color={palette.textPrimary} />} label={t('tournament.wizard.fromLibrary')}
+          onPress={() => setLibraryOpen(true)} />
+
+        <ToggleRow label={t('tournament.wizard.seeding')} value={seeded}
+          onChange={(on) => onChange({ ...state, seeding: on ? 'seeded' : 'random' })} />
+        {seeded && <Text style={styles.hint}>{t('tournament.wizard.seedingHint')}</Text>}
+
+        {state.teams.map((team, i) => {
+          const duplicate = duplicates.has(team.key);
+          return (
+            <View key={team.key} style={[styles.teamRow, duplicate && styles.teamRowDuplicate]}>
+              <View style={styles.teamLine}>
+                {seeded && <Text style={styles.orderIndex}>{i + 1}</Text>}
+                <View style={[styles.teamDot, { backgroundColor: team.color }]} />
+                <TextInput
+                  style={styles.teamNameInput}
+                  value={team.name}
+                  onChangeText={(name) => onChange(renameTeam(state, team.key, name))}
+                  placeholder={team.fallbackName}
+                  placeholderTextColor={palette.textMuted}
+                  accessibilityLabel={t('tournament.wizard.teamNameLabel', { n: i + 1 })}
+                  selectTextOnFocus
+                  maxLength={40}
+                />
+                {seeded && (
+                  <>
+                    <IconButton icon={<ChevronUp size={18} color={palette.textPrimary} />} label={t('tournament.wizard.moveUp')}
+                      onPress={() => onChange(moveTeam(state, team.key, -1))} disabled={i === 0} />
+                    <IconButton icon={<ChevronDown size={18} color={palette.textPrimary} />} label={t('tournament.wizard.moveDown')}
+                      onPress={() => onChange(moveTeam(state, team.key, 1))} disabled={i === n - 1} />
+                  </>
+                )}
+                <IconButton icon={<X size={18} color={palette.textSecondary} />} label={t('tournament.wizard.removeTeam', { name: displayName(team) })}
+                  onPress={() => onChange(removeTeam(state, team.key))} disabled={n <= 2} />
+              </View>
+              {duplicate && <Text style={styles.duplicateText}>{t('tournament.wizard.duplicateName')}</Text>}
+            </View>
+          );
+        })}
+      </FormField>
+
+      {state.format === 'pools_knockout' && (
         <FormField label={`${t('tournament.wizard.pools')}${state.pools ? '' : ` · ${t('tournament.wizard.poolsAuto')}`}`}>
           <Stepper label={t('tournament.wizard.poolCount')} value={pools.count} min={1} max={Math.max(1, Math.floor(n / 2))}
             onChange={(count) => setPools({ count, bestOthers: Math.min(pools.bestOthers, count) })} />
@@ -401,17 +450,15 @@ export function TeamsStep({ state, onChange }: StepProps) {
       )}
 
       <FormField label={t('tournament.wizard.planning')}>
-        <Stepper label={t('tournament.wizard.courts')} value={resolvedCourts(state)} min={1} max={20}
-          onChange={(courts) => onChange({ ...state, courts })} />
         <View style={styles.inlineField}>
           <Text style={styles.inlineLabel}>{t('tournament.wizard.startTime')}</Text>
           <PickerField mode="time" value={dateFromTime(state.startTime)} label={t('tournament.wizard.startTime')}
             onPick={(time) => onChange({ ...state, startTime: timeFromDate(time) })} />
         </View>
         <Stepper label={t('tournament.wizard.matchMinutes')} value={state.matchMinutes} min={10} max={120} step={5}
-          onChange={(matchMinutes) => onChange({ ...state, matchMinutes })} />
+          onChange={(m) => onChange({ ...state, matchMinutes: m })} />
         <Stepper label={t('tournament.wizard.restMinutes')} value={state.restMinutes} min={0} max={60} step={5}
-          onChange={(restMinutes) => onChange({ ...state, restMinutes })} />
+          onChange={(m) => onChange({ ...state, restMinutes: m })} />
         <Text style={styles.hint}>{t('tournament.wizard.restHint')}</Text>
       </FormField>
 
@@ -420,7 +467,7 @@ export function TeamsStep({ state, onChange }: StepProps) {
         alreadyAdded={new Set(state.teams.map((team) => team.teamId).filter((id): id is string => id !== null))}
         onClose={() => setLibraryOpen(false)}
         onAdd={(teams) => {
-          onChange(addLibraryTeams(state, teams));
+          onChange(addLibraryTeams(state, teams, label));
           setLibraryOpen(false);
         }}
       />
@@ -573,11 +620,24 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   teamRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8,
-    borderBottomWidth: 1, borderBottomColor: palette.backgroundElevated,
+    paddingVertical: 6, paddingHorizontal: 6, gap: 4, borderRadius: 10,
+    borderWidth: 1, borderColor: 'transparent', marginBottom: 4,
   },
+  teamRowDuplicate: { borderColor: palette.error, backgroundColor: 'rgba(248, 81, 73, 0.08)' },
+  teamLine: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  teamNameInput: {
+    flex: 1, fontSize: 15, fontFamily: 'Inter_500Medium', color: palette.textPrimary,
+    paddingVertical: 8, paddingHorizontal: 10, borderRadius: 8, backgroundColor: palette.backgroundSurface,
+  },
+  duplicateText: { fontSize: 12, fontFamily: 'Inter_500Medium', color: palette.error, marginLeft: 22 },
+  estimate: {
+    padding: 14, borderRadius: 12, gap: 4, marginVertical: 16,
+    backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
+  },
+  estimateStrong: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },
+  estimateText: { fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textSecondary },
+  presetChips: { marginBottom: 8 },
   teamDot: { width: 12, height: 12, borderRadius: 6 },
-  teamName: { flex: 1, fontSize: 15, fontFamily: 'Inter_500Medium', color: palette.textPrimary },
   hintBox: {
     flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 12, marginBottom: 20,
     backgroundColor: 'rgba(88, 166, 255, 0.12)',

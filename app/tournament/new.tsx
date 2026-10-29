@@ -31,14 +31,17 @@ export default function NewTournamentScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const navigation = useNavigation();
-  const [state, setState] = useState<WizardState>(() => initialWizardState(new Date(), newSeed()));
+  const [initial] = useState<WizardState>(() =>
+    initialWizardState(new Date(), newSeed(), (n) => t('tournament.wizard.teamNumber', { n })));
+  const [state, setState] = useState<WizardState>(initial);
   const [step, setStep] = useState<WizardStep>(1);
   const [errors, setErrors] = useState<WizardError[]>([]);
   const [templates, setTemplates] = useState<TournamentTemplate[]>([]);
   const [creating, setCreating] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
   const created = useRef(false);
-  const dirty = state.name.trim() !== '' || state.teams.length > 0;
+  // Anything changed from the suggested setup
+  const dirty = state !== initial;
 
   useEffect(() => { getTemplates().then(setTemplates); }, []);
 

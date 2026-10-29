@@ -9,8 +9,15 @@ import type {
   TournamentSchedule,
 } from '../../../models/tournament';
 
-export const DEFAULT_POINTS: PointsScale = { winClear: 3, winTight: 2, lossTight: 1, lossClear: 0, forfeitLoss: 0 };
-export const DEFAULT_TIEBREAKERS: TiebreakerRule[] = ['setQuotient', 'pointQuotient', 'headToHead'];
+export const POINTS_PRESETS = {
+  /** A win is worth 1 point, whatever the score (leisure tournaments) */
+  simple: { winClear: 1, winTight: 1, lossTight: 0, lossClear: 0, forfeitLoss: 0 },
+  /** 3-0/3-1 → 3, 3-2 → 2/1 */
+  fivb: { winClear: 3, winTight: 2, lossTight: 1, lossClear: 0, forfeitLoss: 0 },
+} satisfies Record<string, PointsScale>;
+
+export const DEFAULT_POINTS: PointsScale = POINTS_PRESETS.simple;
+export const DEFAULT_TIEBREAKERS: TiebreakerRule[] = ['headToHead', 'setDifference', 'pointDifference', 'pointsScored'];
 
 const SET_RULES: Record<TournamentGameType, SetRules> = {
   indoor_6v6: { setsToWin: 2, pointsPerSet: 25, pointsLastSet: 15, winMargin: 2, tieBreak: true },
@@ -38,10 +45,13 @@ export function recommendFormat(teamCount: number): TournamentFormat {
 const isPowerOf2 = (n: number) => n > 0 && (n & (n - 1)) === 0;
 const nextPowerOf2 = (n: number) => 2 ** Math.ceil(Math.log2(Math.max(1, n)));
 
-/** Pools of about 4, top 2 qualified, best thirds to fill a full bracket when possible. */
+/**
+ * Pools of 4 first, completed with pools of 3 (never 5), top 2 qualified,
+ * best thirds to fill a full bracket when possible.
+ */
 export function defaultPoolRules(teamCount: number): PoolRules {
   if (teamCount < 6) return { count: 1, qualifiersPerPool: Math.min(4, teamCount), bestOthers: 0 };
-  const count = Math.round(teamCount / 4);
+  const count = Math.ceil(teamCount / 4);
   const direct = count * 2;
   const missing = isPowerOf2(direct) ? 0 : nextPowerOf2(direct) - direct;
   // One extra team per pool at most — otherwise byes complete the bracket
