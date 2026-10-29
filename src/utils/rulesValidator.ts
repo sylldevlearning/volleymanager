@@ -19,7 +19,9 @@ export type RuleCode =
   | 'libero_rally_required'
   | 'libero_other_active'
   | 'libero_wrong_return'
-  | 'timeout_quota_reached';
+  | 'timeout_quota_reached'
+  | 'sub_m13_rally_required'
+  | 'sub_m13_server_to_2';
 
 export interface RuleViolation {
   ok: false;
@@ -148,6 +150,83 @@ export function validateRegularSubstitution(ctx: RegularSubstitutionContext): Ru
     }
   }
 
+  return { ok: true };
+}
+
+export interface FreeSubstitutionContext {
+  playerOut: Player;
+  playerIn: Player;
+  /** Place on court where the substitute enters */
+  position: number;
+  allPlayers: Player[];
+  subsUsed: number;
+  config: MatchConfig;
+  onCourtPlayerIds: string[];
+  /** This set's events, in order — for the M13 limits */
+  setEvents: MatchEvent[];
+  side: 'home' | 'away';
+  sanctionEventsForSet: MatchEvent[];
+  sanctionEventsForMatch: MatchEvent[];
+}
+
+/** Did `side` win back the serve (and rotate) after event `from`? */
+function rotatedSince(events: MatchEvent[], side: 'home' | 'away', from: number): boolean {
+  const own = `point_${side}`;
+  const isPoint = (e: MatchEvent) => e.eventType === 'point_home' || e.eventType === 'point_away';
+  let serving: string | null = null;
+  for (let i = from - 1; i >= 0; i--) {
+    if (isPoint(events[i])) { serving = events[i].eventType; break; }
+  }
+  for (let i = from + 1; i < events.length; i++) {
+    if (!isPoint(events[i])) continue;
+    if (events[i].eventType === own && serving !== null && serving !== own) return true;
+    serving = events[i].eventType;
+  }
+  return false;
+}
+
+/**
+ * Small formats (4×4, 3×3, 2×2): any bench player may replace any court
+ * player, with an optional quota. With the FFVolley M13 limits (4×4): a
+ * player who left only comes back after at least one rally, and the player who
+ * left from position I does not come back at II before the team rotates (he
+ * would serve twice in a row).
+ */
+export function validateFreeSubstitution(ctx: FreeSubstitutionContext): RuleResult {
+  const { playerIn } = ctx;
+  if (isPlayerDisqualified(playerIn.id, ctx.sanctionEventsForMatch)) {
+    return violation('sub_player_disqualified', `Le n°${playerIn.number} est disqualifié pour le match.`, { number: playerIn.number });
+  }
+  if (isPlayerExpelled(playerIn.id, ctx.sanctionEventsForSet)) {
+    return violation('sub_player_expelled', `Le n°${playerIn.number} est expulsé pour ce set.`, { number: playerIn.number });
+  }
+  if (ctx.onCourtPlayerIds.includes(playerIn.id)) {
+    return violation('sub_player_on_court', `Le n°${playerIn.number} est déjà sur le terrain.`, { number: playerIn.number });
+  }
+  if (!ctx.config.unlimitedSubstitutions) {
+    const max = ctx.config.substitutionsPerSet ?? 0;
+    if (ctx.subsUsed >= max) {
+      return violation('sub_quota_reached', `${max} remplacements déjà effectués dans ce set.`, { max });
+    }
+  }
+  if (ctx.config.m13Substitutions) {
+    const events = ctx.setEvents.filter((e) => !e.isCancelled);
+    const subType = `substitution_${ctx.side}`;
+    let lastExit = -1;
+    events.forEach((e, i) => {
+      if (e.eventType === subType && (e.details as { playerOutId?: string })?.playerOutId === playerIn.id) lastExit = i;
+    });
+    if (lastExit >= 0) {
+      const rallyAfter = events.slice(lastExit + 1).some((e) => e.eventType === 'point_home' || e.eventType === 'point_away');
+      if (!rallyAfter) {
+        return violation('sub_m13_rally_required', `Le n°${playerIn.number} ne peut revenir qu'après au moins un échange.`, { number: playerIn.number });
+      }
+      const leftFrom = (events[lastExit].details as { position?: number })?.position;
+      if (leftFrom === 1 && ctx.position === 2 && !rotatedSince(events, ctx.side, lastExit)) {
+        return violation('sub_m13_server_to_2', `Le n°${playerIn.number} vient de servir : il ne peut pas entrer en position 2.`, { number: playerIn.number });
+      }
+    }
+  }
   return { ok: true };
 }
 

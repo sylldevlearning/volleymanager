@@ -1,4 +1,5 @@
-import type { MatchConfig } from '../models/match';
+import type { MatchConfig, MatchFormat } from '../models/match';
+import { FORMAT_PROFILES } from '../features/match/formatProfile';
 
 export interface AdHocPlayerDraft {
   number: number;
@@ -20,16 +21,24 @@ export interface AdHocTeamDraft {
 const MIN_PLAYERS = 6;
 const MAX_LIBEROS = 2;
 
-export function validateAdHocTeam(draft: AdHocTeamDraft): string[] {
+export function validateAdHocTeam(draft: AdHocTeamDraft, format: MatchFormat = 'indoor_6v6'): string[] {
   const errors: string[] = [];
+  const profile = FORMAT_PROFILES[format];
+  const minPlayers = format === 'indoor_6v6' ? MIN_PLAYERS : profile.courtSize;
   const selectedNumbers = new Set(draft.players.map((p) => p.number));
 
   if (draft.name.trim().length < 2) {
     errors.push("Le nom de l'équipe doit contenir au moins 2 lettres.");
   }
 
-  if (draft.players.length < MIN_PLAYERS) {
-    errors.push(`Il faut au moins ${MIN_PLAYERS} joueurs sélectionnés.`);
+  if (draft.players.length < minPlayers) {
+    errors.push(`Il faut au moins ${minPlayers} joueurs sélectionnés.`);
+  }
+  if (format !== 'indoor_6v6' && draft.players.length > profile.maxRoster) {
+    errors.push(`${profile.maxRoster} joueurs au maximum.`);
+  }
+  if (!profile.hasLibero && draft.liberoNumbers.length > 0) {
+    errors.push('Pas de libéro dans ce format.');
   }
 
   if (draft.captainNumber === null) {

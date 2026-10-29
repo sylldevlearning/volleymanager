@@ -7,6 +7,8 @@ export const DEFAULT_BENCH_NUMBERS = [7, 8, 9, 10, 11, 12];
 
 export const MAX_ON_COURT: Record<MatchFormat, number> = {
   indoor_6v6: 6,
+  indoor_4v4: 4,
+  indoor_3v3: 3,
   beach_2v2: 2,
 };
 

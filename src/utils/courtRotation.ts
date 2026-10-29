@@ -19,14 +19,23 @@ export interface SideCourtState {
   libero: LiberoState | null;
 }
 
-/** Side-out rotation: each player moves one slot clockwise (P2→P1, …, P1→P6). */
-export function rotateCourt(court: CourtMap): CourtMap {
+/**
+ * Side-out rotation: each player moves one slot clockwise (P2→P1, …, P1→P6).
+ * Smaller courts turn the same way over their own places (4×4: 2→1, 1→4;
+ * 2×2: the two players alternate at the serve).
+ */
+export function rotateCourt(court: CourtMap, size = 6): CourtMap {
   const rotated: CourtMap = {};
   for (const [posStr, playerId] of Object.entries(court)) {
     const pos = Number(posStr);
-    rotated[pos === 1 ? 6 : pos - 1] = playerId;
+    rotated[pos === 1 ? size : pos - 1] = playerId;
   }
   return rotated;
+}
+
+/** [1, 2, …, size] — the rotation list at the start of a set. */
+export function initialRotation(size = 6): number[] {
+  return Array.from({ length: size }, (_, i) => i + 1);
 }
 
 /**
@@ -38,9 +47,10 @@ export function rotateCourt(court: CourtMap): CourtMap {
 export function rotateSideOnSideOut(
   side: 'home' | 'away',
   state: SideCourtState,
+  size = 6,
 ): { state: SideCourtState; autoExit: LiberoAutoExit | null } {
-  const rotation = state.rotation.map((p) => (p === 6 ? 1 : p + 1));
-  let onCourt = rotateCourt(state.onCourt);
+  const rotation = state.rotation.map((p) => (p === size ? 1 : p + 1));
+  let onCourt = rotateCourt(state.onCourt, size);
   let libero = state.libero;
   let autoExit: LiberoAutoExit | null = null;
 
@@ -88,11 +98,14 @@ export function replayCourtState(opts: {
   awayRoster: Player[];
   events: MatchEvent[];
   initialServingTeam: 'home' | 'away';
+  /** Players on court (6×6 by default) */
+  courtSize?: number;
 }): CourtReplayResult {
+  const size = opts.courtSize ?? 6;
   let onCourtHome = { ...opts.startingOnCourtHome };
   let onCourtAway = { ...opts.startingOnCourtAway };
-  let rotationHome = [1, 2, 3, 4, 5, 6];
-  let rotationAway = [1, 2, 3, 4, 5, 6];
+  let rotationHome = initialRotation(size);
+  let rotationAway = initialRotation(size);
 
   const homeLiberoId = opts.homeRoster.find((p) => p.position === 'libero')?.id ?? null;
   const awayLiberoId = opts.awayRoster.find((p) => p.position === 'libero')?.id ?? null;
@@ -112,12 +125,12 @@ export function replayCourtState(opts: {
     if (event.eventType === 'point_home' || event.eventType === 'point_away') {
       const team = event.eventType === 'point_home' ? 'home' : 'away';
       if (team === 'home' && serving === 'away') {
-        const result = rotateSideOnSideOut('home', { onCourt: onCourtHome, rotation: rotationHome, libero: liberoHome });
+        const result = rotateSideOnSideOut('home', { onCourt: onCourtHome, rotation: rotationHome, libero: liberoHome }, size);
         onCourtHome = result.state.onCourt;
         rotationHome = result.state.rotation;
         liberoHome = result.state.libero;
       } else if (team === 'away' && serving === 'home') {
-        const result = rotateSideOnSideOut('away', { onCourt: onCourtAway, rotation: rotationAway, libero: liberoAway });
+        const result = rotateSideOnSideOut('away', { onCourt: onCourtAway, rotation: rotationAway, libero: liberoAway }, size);
         onCourtAway = result.state.onCourt;
         rotationAway = result.state.rotation;
         liberoAway = result.state.libero;

@@ -5,7 +5,8 @@ import type { Player } from '../models/player';
 import type { SubstitutionPair, LiberoState } from '../models/substitution';
 import { computeScore } from '../services/eventService';
 import { isSetWon, isMatchWon, isLastSet, shouldChangeEndsBeach } from '../utils/volleyball-rules';
-import { rotateSideOnSideOut, type LiberoAutoExit } from '../utils/courtRotation';
+import { initialRotation, rotateSideOnSideOut, type LiberoAutoExit } from '../utils/courtRotation';
+import { courtSize } from '../features/match/formatProfile';
 
 interface SetScore {
   home: number;
@@ -209,8 +210,8 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
       currentSet: firstSet,
       sets: [firstSet],
       events: [],
-      rotationHome: [...INITIAL_ROTATION],
-      rotationAway: [...INITIAL_ROTATION],
+      rotationHome: initialRotation(courtSize(match.format)),
+      rotationAway: initialRotation(courtSize(match.format)),
       timeoutsHome: 0,
       timeoutsAway: 0,
       substitutionsHome: 0,
@@ -267,6 +268,7 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
 
     const prevServing = state.servingTeam;
     const newServing = team;
+    const size = courtSize(match.format);
 
     let rotationHome = state.rotationHome;
     let rotationAway = state.rotationAway;
@@ -278,14 +280,14 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
 
     if (team === 'home' && prevServing === 'away') {
       // Side-out: home team rotates
-      const result = rotateSideOnSideOut('home', { onCourt: onCourtHome, rotation: rotationHome, libero: liberoHome });
+      const result = rotateSideOnSideOut('home', { onCourt: onCourtHome, rotation: rotationHome, libero: liberoHome }, size);
       onCourtHome = result.state.onCourt;
       rotationHome = result.state.rotation;
       liberoHome = result.state.libero;
       liberoAutoExit = result.autoExit;
     } else if (team === 'away' && prevServing === 'home') {
       // Side-out: away team rotates
-      const result = rotateSideOnSideOut('away', { onCourt: onCourtAway, rotation: rotationAway, libero: liberoAway });
+      const result = rotateSideOnSideOut('away', { onCourt: onCourtAway, rotation: rotationAway, libero: liberoAway }, size);
       onCourtAway = result.state.onCourt;
       rotationAway = result.state.rotation;
       liberoAway = result.state.libero;
@@ -354,8 +356,8 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
         timeoutsAway: 0,
         substitutionsHome: 0,
         substitutionsAway: 0,
-        rotationHome: [...INITIAL_ROTATION],
-        rotationAway: [...INITIAL_ROTATION],
+        rotationHome: initialRotation(courtSize(state.match!.format)),
+        rotationAway: initialRotation(courtSize(state.match!.format)),
         servingTeam: initialServing,
         initialServingTeam: initialServing,
         lastScoringTeam: null,
@@ -483,10 +485,12 @@ export const useScoringStore = create<ScoringState>()((set, get) => ({
   },
 
   rotateTeam: (team) => {
+    const size = get().match ? courtSize(get().match!.format) : 6;
+    const turn = (rotation: number[]) => rotation.map((p) => (p === size ? 1 : p + 1));
     if (team === 'home') {
-      set((s) => ({ rotationHome: s.rotationHome.map((p) => (p === 6 ? 1 : p + 1)) }));
+      set((s) => ({ rotationHome: turn(s.rotationHome) }));
     } else {
-      set((s) => ({ rotationAway: s.rotationAway.map((p) => (p === 6 ? 1 : p + 1)) }));
+      set((s) => ({ rotationAway: turn(s.rotationAway) }));
     }
   },
 

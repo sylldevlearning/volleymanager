@@ -162,6 +162,9 @@ interface TacticalBoardProps {
   awayPlayers?: Player[];
 }
 
+type BoardFormat = 'indoor_6v6' | 'beach_2v2';
+const boardFormat = (f: MatchFormat): BoardFormat => (f === 'beach_2v2' ? 'beach_2v2' : 'indoor_6v6');
+
 function buildDefaultPositions(
   homeTeamId: string,
   awayTeamId: string,
@@ -370,7 +373,9 @@ export function TacticalBoard({
   const [showMenu, setShowMenu] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<PlayerPosition | null>(null);
   const [playbookMode, setPlaybookMode] = useState<'load' | 'save'>('load');
-  const [currentFormat, setCurrentFormat] = useState<MatchFormat>(format);
+  // The board draws 6×6 or 2×2 courts; 4×4 / 3×3 matches open the 6×6 board
+  const [currentFormat, setBoardFormat] = useState<BoardFormat>(boardFormat(format));
+  const setCurrentFormat = (f: MatchFormat) => setBoardFormat(boardFormat(f));
   const [isSyncedWithMatch, setIsSyncedWithMatch] = useState(true);
   /** Match board only: false until this match's save is restored (or found missing) */
   const [boardReady, setBoardReady] = useState(!matchId);

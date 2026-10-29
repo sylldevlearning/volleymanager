@@ -1,4 +1,5 @@
-export type MatchFormat = 'indoor_6v6' | 'beach_2v2';
+/** 2×2 uses 'beach_2v2' (beach or gym) */
+export type MatchFormat = 'indoor_6v6' | 'indoor_4v4' | 'indoor_3v3' | 'beach_2v2';
 export type MatchMode = 'competition' | 'leisure';
 export type MatchStatus = 'created' | 'live' | 'paused' | 'finished';
 
@@ -15,6 +16,17 @@ export interface MatchConfig {
   timeoutDurationSec: number;
   breakBetweenSetsSec: number;
   sanctionsEnabled: boolean;
+  // Small formats (4×4, 3×3, 2×2) — absent on 6×6 and older matches
+  /** 'free': any bench player for any court player; 'none': no substitution; 'fivb' (default): 6×6 rules */
+  substitutionMode?: 'fivb' | 'free' | 'none';
+  /** FFVolley M13 4×4: the player leaving from I does not come back at II before a rotation; back only after one rally */
+  m13Substitutions?: boolean;
+  /** Fixed zones shown (the referee calls positional faults) instead of the service order only */
+  positionalFaults?: boolean;
+  /** Change of courts every N points (deciding set: M); null: between sets only. Absent: 6×6 rule */
+  courtSwitch?: { every: number; everyDecidingSet: number } | null;
+  /** Beach: 30 s technical time-out at 21 points in sets 1 and 2 */
+  technicalTimeout?: boolean;
 }
 
 export const DEFAULT_INDOOR_CONFIG: MatchConfig = {

@@ -5,6 +5,7 @@ import { getLineupForSet } from './lineupService';
 import { getPairsForSet } from './substitutionService';
 import { determineInitialServing, computeServingTeam, type CourtMap } from '../stores/scoringStore';
 import { replayCourtState } from '../utils/courtRotation';
+import { courtSize } from '../features/match/formatProfile';
 import { countNormalSubs } from '../utils/substitutionRules';
 import type { Match, MatchSet } from '../models/match';
 import type { MatchEvent } from '../models/event';
@@ -82,6 +83,7 @@ export async function reconstructLiveState(matchId: string): Promise<Reconstruct
     awayRoster,
     events: setEvents,
     initialServingTeam,
+    courtSize: courtSize(match.format),
   });
 
   const { home: scoreHome, away: scoreAway } = computeScore(setEvents);
