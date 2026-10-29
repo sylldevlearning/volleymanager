@@ -37,7 +37,11 @@ export default function TournamentListScreen() {
           </View>
         ) : null}
         renderItem={({ item }) => (
-          <View style={styles.card}>
+          <Pressable
+            style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+            onPress={() => router.push(`/tournament/${item.id}`)}
+            accessibilityRole="button"
+          >
             <View style={styles.cardHeader}>
               <Text style={styles.cardTitle} numberOfLines={2}>{item.name}</Text>
               <View style={[styles.status, item.status === 'finished' && styles.statusFinished]}>
@@ -52,7 +56,7 @@ export default function TournamentListScreen() {
             <Text style={styles.cardLine}>
               {t(`tournament.gameType.${item.gameType}`)} · {t(`tournament.format.${item.format}`)}
             </Text>
-          </View>
+          </Pressable>
         )}
       />
       <View style={styles.footer}>
@@ -79,6 +83,7 @@ const styles = StyleSheet.create({
     backgroundColor: palette.backgroundSurface, borderRadius: 16, borderWidth: 1,
     borderColor: palette.backgroundElevated, padding: 16, gap: 4,
   },
+  cardPressed: { opacity: 0.85 },
   cardHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 2 },
   cardTitle: { flex: 1, fontSize: 16, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
   cardLine: { fontSize: 13, fontFamily: 'Inter_400Regular', color: palette.textSecondary },

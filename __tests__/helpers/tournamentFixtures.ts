@@ -1,7 +1,8 @@
 import { createRng } from '../../src/features/tournament/engine/rng';
 import { defaultRules } from '../../src/features/tournament/engine/defaults';
 import { generateTournament } from '../../src/features/tournament/engine/generate';
-import { scheduleMatches } from '../../src/features/tournament/engine/scheduler';
+import { scheduleMatches, slotStart } from '../../src/features/tournament/engine/scheduler';
+import type { TournamentBundle } from '../../src/features/tournament/bundle';
 import { recordResult } from '../../src/features/tournament/engine/cascade';
 import { rulesForStage } from '../../src/features/tournament/engine/results';
 import type { EngineContext, EngineMatch, EngineTeam } from '../../src/features/tournament/engine/types';
@@ -77,4 +78,39 @@ export function playAll(built: Built, seed = 7): EngineMatch[] {
 /** Teams playing in a match, whether known now or only through results. */
 export function teamsOf(m: EngineMatch): string[] {
   return [m.homeId, m.awayId].filter((t): t is string => t !== null);
+}
+
+/** A stored-like tournament (as the service returns it), without SQLite. */
+export function bundleFrom(built: Built, matches: EngineMatch[] = built.matches, opts: { date?: string } = {}): TournamentBundle {
+  const { ctx } = built;
+  const poolCount = Math.max(ctx.pools.length, ...matches.map((m) => (m.pool ?? -1) + 1));
+  const defs = Array.from({ length: poolCount }, (_, p) => {
+    const m = matches.find((x) => x.pool === p);
+    return { phase: m?.phase ?? null, level: m?.level ?? null };
+  });
+  const pools = defs.map((def, p) => ({
+    id: `p${p}`, tournamentId: 'T', position: p, ...def,
+    name: String.fromCharCode(65 + defs.slice(0, p).filter((d) => d.phase === def.phase && d.level === def.level).length),
+  }));
+  const schedule = { courts: 2, startTime: '09:00', matchMinutes: 45, restMinutes: 10 };
+  return {
+    tournament: {
+      id: 'T', name: 'Open', date: opts.date ?? '2026-05-16', location: null, gameType: 'indoor_6v6', format: ctx.format,
+      rules: ctx.rules, schedule, seed: 1, seeding: 'random', secret: 'x', status: 'live', createdAt: '', updatedAt: '',
+    },
+    pools,
+    teams: ctx.teams.map((t, i) => ({
+      id: t.id, tournamentId: 'T', teamId: null, name: `Équipe ${i + 1}`, color: '#1D4ED8', seedRank: t.seedRank,
+      poolId: (() => { const p = ctx.pools.findIndex((ids) => ids.includes(t.id)); return p >= 0 ? `p${p}` : null; })(),
+      position: t.position,
+    })),
+    matches: matches.map((m) => ({
+      id: m.key, tournamentId: 'T', stage: m.stage, poolId: m.pool === null ? null : `p${m.pool}`, phase: m.phase, level: m.level,
+      round: m.round, bracketSlot: m.bracketSlot, label: m.label, homeId: m.homeId, awayId: m.awayId,
+      homeSource: m.homeRef, awaySource: m.awayRef, slot: m.slot, court: m.court,
+      scheduledAt: m.slot === null ? null : `2026-05-16T${slotStart(schedule, m.slot)}`,
+      status: m.status, sets: m.sets, forfeitId: m.forfeitId, winnerId: m.winnerId,
+      resultSource: m.status === 'validated' ? 'manual' : null, arbitrageMatchId: null, validatedAt: null, updatedAt: '',
+    })),
+  };
 }

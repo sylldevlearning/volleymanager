@@ -50,7 +50,7 @@ interface StepProps {
 
 // ─── Small pieces ───────────────────────────────────────────────────────────
 
-function Chip({ label, active, onPress, onLongPress }: { label: string; active: boolean; onPress: () => void; onLongPress?: () => void }) {
+export function Chip({ label, active, onPress, onLongPress }: { label: string; active: boolean; onPress: () => void; onLongPress?: () => void }) {
   return (
     <Pressable
       style={[styles.chip, active && styles.chipActive]}
@@ -114,7 +114,7 @@ function SecondaryButton({ icon, label, onPress, disabled }: { icon: ReactNode; 
  * Native date / time picker. Android opens its dialog on press; iOS shows the
  * compact picker in place.
  */
-function PickerField({ mode, value, label, onPick }: { mode: 'date' | 'time'; value: Date; label: string; onPick: (date: Date) => void }) {
+export function PickerField({ mode, value, label, onPick }: { mode: 'date' | 'time'; value: Date; label: string; onPick: (date: Date) => void }) {
   const [open, setOpen] = useState(false);
   const Icon = mode === 'date' ? CalendarDays : Clock;
 

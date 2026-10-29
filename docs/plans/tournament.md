@@ -1,6 +1,6 @@
 # Plan — Mode Tournoi (v1.1.0, branche `feat/tournoi`)
 
-Statut : **validé**. Phases 1 et 2 faites.
+Statut : **validé**. Phases 1, 2 et 3 faites, format Brassage + niveaux inclus.
 
 Décisions : 4×4 et 3×3 en saisie manuelle seulement (pas de QR ni d'arbitrage) ;
 équipes saisies par leur nom gardées dans le tournoi ; « Arbitrer ici » en
@@ -211,14 +211,27 @@ transaction de création), moteur complet et ses tests. Pas d'écran.
 - Modèle : règles + planning sans les équipes ; des poules automatiques restent
   automatiques (`rules.pools = null`) pour s'adapter au nombre d'équipes.
 
-### Phase 3 — Planning, Matchs, Classement
-- `app/tournament/[id]/index.tsx` : onglets Planning (par heure × terrain),
-  Matchs (filtres phase / poule / équipe / statut), Classement (poules + tableau
-  + classement final).
-- `app/tournament/[id]/match/[matchId].tsx` : saisie set par set, vainqueur
-  calculé, erreurs du moteur (« Le set 2 doit avoir 2 points d'écart »),
-  « Forfait de… », correction d'un résultat validé (avec confirmation).
-- Régénérer le planning (terrain indisponible, retard) sans toucher aux résultats.
+### Phase 3 — Planning, Matchs, Classement (fait)
+- Liste : une carte ouvre `app/tournament/[id]/index.tsx` (titre = nom du
+  tournoi, « ? », menu ⋯), avancement « 12 / 24 matchs joués ».
+  - Planning : matchs par heure, terrain par terrain.
+  - Matchs : filtres statut (Tous / À jouer / Terminés), phase (poule, tour,
+    niveau, tableau) et équipe.
+  - Classement : classement final dès qu'il est connu, tableaux des poules
+    (J, V, D, Pts, différence de sets et de points), tableau par tour.
+  - Équipes pas encore connues : « 1er Poule A », « Vainqueur Demi-finale 1 »,
+    « Meilleur 3e n°1 », « Selon le tour 1 », « Principale n°3 ».
+- `app/tournament/[id]/match/[matchId].tsx` : saisie set par set (pavé
+  numérique), sets ajoutés / retirés jusqu'au maximum, vainqueur calculé,
+  erreurs en clair avec les règles (« Set 3 : pas encore gagné (15 points et
+  2 points d'écart). »), forfait de l'une ou l'autre équipe, correction d'un
+  résultat validé (confirmation), correction bloquée avec la liste des matchs
+  déjà joués qui en dépendent.
+- Menu ⋯ : renommer les équipes (`teams.tsx`), recalculer le planning
+  (`schedule.tsx` : terrains, heure, durée, repos — les matchs joués ou en
+  cours ne bougent pas), supprimer le tournoi (confirmation).
+- Textes et titres calculés dans `src/features/tournament/display.ts` (testé) ;
+  conversions base ↔ moteur dans `src/features/tournament/bundle.ts`.
 
 ### Phase 4 — QR codes
 - Format : `VMT1:` + JSON en base64url, avec `v`, `kind` (`match` | `result`),
