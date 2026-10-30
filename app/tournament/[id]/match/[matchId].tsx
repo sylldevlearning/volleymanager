@@ -13,7 +13,8 @@ import {
 } from '../../../../src/services/tournamentService';
 import { evaluateScore, rulesForStage, type ScoreError } from '../../../../src/features/tournament/engine/results';
 import { matchTitle, scoreErrorText, sideName } from '../../../../src/features/tournament/display';
-import { resultRoute } from '../../../../src/features/tournament/phases';
+import { justFinished, resultRoute } from '../../../../src/features/tournament/phases';
+import { showFinished } from '../../../../src/components/tournament/showFinished';
 import { matchQrOf } from '../../../../src/features/tournament/matchQr';
 import type { SetScore, TournamentTeam } from '../../../../src/models/tournament';
 
@@ -75,8 +76,11 @@ export default function TournamentMatchScreen() {
       if (outcome.ok) {
         // Last result of a mixing round: show the end of the round (or the levels after the last one)
         const next = resultRoute(id, bundle!, outcome.bundle, matchId);
-        if (next) router.replace(next);
-        else router.back();
+        // Teams with nothing left to play can leave: say so first
+        showFinished(justFinished(bundle!, outcome.bundle), t, () => {
+          if (next) router.replace(next);
+          else router.back();
+        });
         return;
       }
       if (outcome.reason === 'invalid_score') {

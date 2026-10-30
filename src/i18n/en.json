@@ -982,6 +982,15 @@
       "scanWith": "Scan with the VolleyManager app (Play Store)",
       "hint": "The referee taps \"Scan a match QR\" on the app home screen: the quick match opens with these teams and these rules. At the end of the match, the referee's app shows the result QR: scan it from the tournament ⋯ menu.",
       "lead": " · {{margin}}-point lead"
+    },
+    "finished": {
+      "title": "End of the tournament",
+      "one": "Team {{team}} has finished its tournament{{place}}. It can leave.",
+      "place": " (final place {{rank}})",
+      "many": "These teams have finished their tournament and can leave:",
+      "line": "• {{team}}{{place}}",
+      "badge": "Finished",
+      "ok": "OK"
     }
   },
   "scan": {

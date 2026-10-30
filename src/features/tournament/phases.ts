@@ -1,6 +1,8 @@
 import type { TournamentMatch } from '../../models/tournament';
 import { engineContext, toEngineMatch, type TournamentBundle } from './bundle';
 import { brassageView } from './engine/qualification';
+import { finalRanking } from './engine/finalRanking';
+import { finishedTeams, newlyFinished } from './engine/finished';
 import type { Translate } from './display';
 
 export type PhaseStatus = 'done' | 'live' | 'upcoming';
@@ -152,4 +154,37 @@ export function levelsSummary(bundle: TournamentBundle, t: Translate): LevelSumm
     color: LEVEL_COLORS[Math.min(level, LEVEL_COLORS.length - 1)],
     teams: ids.map(name),
   }));
+}
+
+/** Teams that have finished their tournament (marked "Terminé"). */
+export function finishedTeamIds(bundle: TournamentBundle): Set<string> {
+  return finishedTeams(engineContext(bundle), bundle.matches.map((m) => toEngineMatch(m, bundle.pools)));
+}
+
+export interface FinishedTeam {
+  teamId: string;
+  name: string;
+  /** Final place, null while not decided */
+  rank: number | null;
+}
+
+/** Teams that finished with this result, in final ranking order, with their place when known. */
+export function justFinished(before: TournamentBundle, after: TournamentBundle): FinishedTeam[] {
+  const fresh = new Set(newlyFinished(finishedTeamIds(before), finishedTeamIds(after)));
+  if (fresh.size === 0) return [];
+  const ranking = finalRanking(engineContext(after), after.matches.map((m) => toEngineMatch(m, after.pools)));
+  return ranking
+    .filter((r) => fresh.has(r.teamId))
+    .map((r) => ({ teamId: r.teamId, name: after.teams.find((x) => x.id === r.teamId)?.name ?? '?', rank: r.rank }));
+}
+
+/** "L'équipe X a terminé son tournoi (place finale N). Elle peut partir." — or the list. */
+export function finishedMessage(teams: FinishedTeam[], t: Translate): { title: string; message: string } {
+  const place = (team: FinishedTeam) => (team.rank !== null ? t('tournament.finished.place', { rank: team.rank }) : '');
+  const title = t('tournament.finished.title');
+  if (teams.length === 1) {
+    return { title, message: t('tournament.finished.one', { team: teams[0].name, place: place(teams[0]) }) };
+  }
+  const lines = teams.map((team) => t('tournament.finished.line', { team: team.name, place: place(team) }));
+  return { title, message: [t('tournament.finished.many'), ...lines].join('\n') };
 }

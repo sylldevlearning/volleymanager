@@ -285,6 +285,21 @@ transaction de création), moteur complet et ses tests. Pas d'écran.
   matchs, menu ⋯).
 - Assistant : repos entre deux matchs à 0 minute par défaut.
 
+### Fin de tournoi d'une équipe
+- Moteur (`engine/finished.ts`) : une équipe a terminé quand aucun match non
+  validé ne la contient ni ne peut la désigner. Équipe d'un match non joué
+  connue → elle reste ; place de poule non jouée → toute la poule ; meilleurs
+  Nèmes → toutes les équipes des poules ; place d'un tour de brassage ou d'un
+  niveau pas encore composé → toutes les équipes. Vainqueur/perdant d'un match
+  non joué : ses équipes restent déjà par ce match.
+- Calculé à chaque lecture : une correction qui fait rejouer une équipe la
+  remet « en lice ».
+- Après un résultat (saisie ou QR) : fenêtre « L'équipe X a terminé son
+  tournoi (place finale N). Elle peut partir. », ou la liste ; puis la suite
+  habituelle (écran de fin de tour, des niveaux, ou retour).
+- Badge « Terminé » : tableaux et classement final de l'onglet Classement,
+  liste des équipes.
+
 ### Phase 5 — Export
 - Planning et classement en image (rendu dédié, lisible sur un téléphone) ou
   PDF (HTML généré par une fonction pure, testée), partagés par la feuille de

@@ -982,6 +982,15 @@
       "scanWith": "À scanner avec l'app VolleyManager (Play Store)",
       "hint": "L'arbitre touche « Scanner un QR de match » sur l'accueil de l'app : le match rapide s'ouvre avec ces équipes et ces règles. À la fin du match, l'app de l'arbitre affiche le QR du résultat : scannez-le depuis le menu ⋯ du tournoi.",
       "lead": " · {{margin}} points d'écart"
+    },
+    "finished": {
+      "title": "Fin de tournoi",
+      "one": "L'équipe {{team}} a terminé son tournoi{{place}}. Elle peut partir.",
+      "place": " (place finale {{rank}})",
+      "many": "Ces équipes ont terminé leur tournoi et peuvent partir :",
+      "line": "• {{team}}{{place}}",
+      "badge": "Terminé",
+      "ok": "OK"
     }
   },
   "scan": {

@@ -4,7 +4,8 @@ import { palette } from '../../theme/tokens';
 import type { StandingsTable } from '../../features/tournament/display';
 
 /** A pool / league table: place, team, played, won, lost, points, set and point differences. */
-export function StandingsTableView({ table }: { table: StandingsTable }) {
+/** `finished`: teams that have finished their tournament, marked "Terminé" */
+export function StandingsTableView({ table, finished }: { table: StandingsTable; finished?: Set<string> }) {
   const { t } = useTranslation();
   const diff = (n: number) => (n > 0 ? `+${n}` : String(n));
   return (
@@ -26,7 +27,10 @@ export function StandingsTableView({ table }: { table: StandingsTable }) {
       {table.rows.map((r) => (
         <View key={r.teamId} style={styles.row}>
           <Text style={[styles.cell, styles.rank]}>{r.rank}</Text>
-          <Text style={[styles.cell, styles.team]} numberOfLines={1}>{r.name}</Text>
+          <View style={[styles.team, styles.teamCell]}>
+            <Text style={styles.teamName} numberOfLines={1}>{r.name}</Text>
+            {finished?.has(r.teamId) && <Text style={styles.badge}>{t('tournament.finished.badge')}</Text>}
+          </View>
           <Text style={[styles.cell, styles.num]}>{r.played}</Text>
           <Text style={[styles.cell, styles.num]}>{r.won}</Text>
           <Text style={[styles.cell, styles.num]}>{r.lost}</Text>
@@ -52,6 +56,12 @@ const styles = StyleSheet.create({
   cell: { fontSize: 13, fontFamily: 'Inter_500Medium', color: palette.textPrimary, textAlign: 'center' },
   rank: { width: 22, color: palette.textSecondary },
   team: { flex: 1, textAlign: 'left', paddingHorizontal: 4 },
+  teamCell: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  teamName: { flexShrink: 1, fontSize: 13, fontFamily: 'Inter_500Medium', color: palette.textPrimary },
+  badge: {
+    fontSize: 10, fontFamily: 'Inter_600SemiBold', color: palette.success, overflow: 'hidden',
+    paddingHorizontal: 5, paddingVertical: 1, borderRadius: 6, backgroundColor: 'rgba(46, 160, 67, 0.15)',
+  },
   num: { width: 26 },
   wide: { width: 40 },
   points: { fontFamily: 'Inter_700Bold' },

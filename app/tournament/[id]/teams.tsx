@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { palette } from '../../../src/theme/tokens';
 import { getTournamentBundle, renameTournamentTeam } from '../../../src/services/tournamentService';
 import type { TournamentTeam } from '../../../src/models/tournament';
+import { finishedTeamIds } from '../../../src/features/tournament/phases';
 
 /** Rename the teams of a tournament — saved when leaving the field. */
 export default function TournamentTeamsScreen() {
@@ -15,11 +16,13 @@ export default function TournamentTeamsScreen() {
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, 'empty' | 'duplicate'>>({});
   const [saved, setSaved] = useState<string | null>(null);
+  const [finished, setFinished] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     getTournamentBundle(id).then((b) => {
       if (!b) return;
       setTeams(b.teams);
+      setFinished(finishedTeamIds(b));
       setDrafts(Object.fromEntries(b.teams.map((x) => [x.id, x.name])));
     });
   }, [id]);
@@ -61,6 +64,7 @@ export default function TournamentTeamsScreen() {
                 returnKeyType="done"
                 maxLength={40}
               />
+              {finished.has(item.id) && <Text style={styles.badge}>{t('tournament.finished.badge')}</Text>}
             </View>
             {errors[item.id] === 'empty' && <Text style={styles.error}>{t('tournament.teamsScreen.empty')}</Text>}
             {errors[item.id] === 'duplicate' && <Text style={styles.error}>{t('tournament.teamsScreen.duplicate')}</Text>}
@@ -80,6 +84,10 @@ const styles = StyleSheet.create({
   rowError: { borderColor: palette.error },
   line: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   dot: { width: 14, height: 14, borderRadius: 7 },
+  badge: {
+    fontSize: 11, fontFamily: 'Inter_600SemiBold', color: palette.success, overflow: 'hidden',
+    paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, backgroundColor: 'rgba(46, 160, 67, 0.15)',
+  },
   input: { flex: 1, fontSize: 15, fontFamily: 'Inter_500Medium', color: palette.textPrimary, paddingVertical: 8 },
   error: { fontSize: 12, fontFamily: 'Inter_500Medium', color: palette.error, marginLeft: 24 },
   saved: { fontSize: 12, fontFamily: 'Inter_500Medium', color: palette.success, marginLeft: 24 },

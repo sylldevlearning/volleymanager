@@ -10,7 +10,8 @@ import { getTournamentBundle, recordTournamentResult, type TournamentBundle } fr
 import { checkResultQr, decodeResultQr, type ResultCheckError, type ResultQr, type ResultQrError } from '../../../src/features/tournament/matchQr';
 import { evaluateScore, rulesForStage } from '../../../src/features/tournament/engine/results';
 import { matchTitle, scoreErrorText, scoreText } from '../../../src/features/tournament/display';
-import { resultRoute } from '../../../src/features/tournament/phases';
+import { justFinished, resultRoute } from '../../../src/features/tournament/phases';
+import { showFinished } from '../../../src/components/tournament/showFinished';
 
 /** Organiser: scans the referee's result QR, checks it, then records it like a typed score. */
 export default function ScanResultScreen() {
@@ -51,8 +52,11 @@ export default function ScanResultScreen() {
       const outcome = await recordTournamentResult(id, ready.match.id, { sets: result.sets, forfeitId: null, source: 'qr' });
       if (outcome.ok) {
         const next = resultRoute(id, bundle, outcome.bundle, ready.match.id);
-        if (next) router.replace(next);
-        else router.back();
+        // Teams with nothing left to play can leave: say so first
+        showFinished(justFinished(bundle, outcome.bundle), t, () => {
+          if (next) router.replace(next);
+          else router.back();
+        });
         return;
       }
       if (outcome.reason === 'blocked') {

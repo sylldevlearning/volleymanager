@@ -19,7 +19,7 @@ import {
   slotGroups,
   standingsTables,
 } from '../../../src/features/tournament/display';
-import { phaseStatuses, type PhaseInfo, type PhaseStatus } from '../../../src/features/tournament/phases';
+import { finishedTeamIds, phaseStatuses, type PhaseInfo, type PhaseStatus } from '../../../src/features/tournament/phases';
 
 type Tab = 'planning' | 'matches' | 'standings';
 type StatusFilter = 'all' | 'toPlay' | 'done';
@@ -99,6 +99,8 @@ export default function TournamentScreen() {
     }
   }
   const ranking = rankingRows(bundle);
+  // Nothing left to play: marked "Terminé" (follows the corrections)
+  const finished = finishedTeamIds(bundle);
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
@@ -233,11 +235,12 @@ export default function TournamentScreen() {
                 <View key={r.teamId} style={styles.rankingRow}>
                   <Text style={styles.rankingRank}>{r.rank}</Text>
                   <Text style={styles.rankingName} numberOfLines={1}>{r.name}</Text>
+                  {finished.has(r.teamId) && <Text style={styles.finishedBadge}>{t('tournament.finished.badge')}</Text>}
                 </View>
               ))}
             </View>
           )}
-          {standingsTables(bundle, t).map((table) => <StandingsTableView key={table.title} table={table} />)}
+          {standingsTables(bundle, t).map((table) => <StandingsTableView key={table.title} table={table} finished={finished} />)}
           {bracketRounds(bundle, t).map((round) => (
             <View key={round.title} style={styles.bracketRound}>
               <Text style={styles.sectionTitle}>{round.title}</Text>
@@ -314,6 +317,10 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   content: { flex: 1 },
+  finishedBadge: {
+    fontSize: 11, fontFamily: 'Inter_600SemiBold', color: palette.success, overflow: 'hidden',
+    paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, backgroundColor: 'rgba(46, 160, 67, 0.15)',
+  },
   progress: { fontSize: 13, fontFamily: 'Inter_500Medium', color: palette.textSecondary, paddingHorizontal: 16, paddingBottom: 8 },
   phaseStrip: { flexGrow: 0, marginBottom: 8 },
   phaseStripContent: { paddingHorizontal: 16, gap: 8 },
