@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
   Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Minus, Plus } from 'lucide-react-native';
@@ -11,6 +11,7 @@ import { PRESET_TEAM_COLORS } from '../../src/utils/constants';
 import { LIBERO_COLOR_CHOICES, defaultLiberoColor, resolveLiberoColor } from '../../src/features/teams/liberoColor';
 import { COMPACT_MAX_NUMBER, jerseyNumbers } from '../../src/features/teams/jerseyNumbers';
 import { FormField, Stepper, ToggleRow } from '../../src/components/ui/FormControls';
+import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
 import { DEFAULT_INDOOR_CONFIG } from '../../src/models/match';
 import type { MatchConfig, MatchFormat } from '../../src/models/match';
 import { FORMAT_PROFILES, applyPreset, defaultArbitrageConfig, isOfficial, presetOf } from '../../src/features/match/formatProfile';
@@ -130,6 +131,8 @@ export default function ArbitrageSetupScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
+      {/* What the format and the Leisure / Official rules change */}
+      <Stack.Screen options={{ headerRight: () => <InfoTooltip textKey="help.arbitrageSetup" /> }} />
       <View style={styles.formatRow} accessibilityRole="radiogroup" accessibilityLabel={t('arbitrageSetup.format')}>
         {(['indoor_6v6', 'indoor_4v4', 'indoor_3v3', 'beach_2v2'] as MatchFormat[]).map((f) => (
           <Pressable
