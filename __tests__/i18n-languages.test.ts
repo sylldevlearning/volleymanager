@@ -149,3 +149,13 @@ describe('language preference kept by the app', () => {
     expect(layout).toContain('i18n.changeLanguage(resolveLanguage(language, phoneLocales))');
   });
 });
+
+describe('volleyball positions in French', () => {
+  it('outside hitter is "Réceptionneur-attaquant", opposite is "Pointu"', () => {
+    const fr = load('fr') as { player: { positions: Record<string, string> } };
+    expect(fr.player.positions.outside).toBe('Réceptionneur-attaquant');
+    expect(fr.player.positions.opposite).toBe('Pointu');
+    const en = load('en') as { player: { positions: Record<string, string> } };
+    expect([en.player.positions.outside, en.player.positions.opposite]).toEqual(['Outside', 'Opposite']);
+  });
+});

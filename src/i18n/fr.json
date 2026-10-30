@@ -278,8 +278,8 @@
     "addedCount_other": "{{count}} ajoutés",
     "positions": {
       "setter": "Passeur",
-      "outside": "Pointu",
-      "opposite": "Opposite",
+      "outside": "Réceptionneur-attaquant",
+      "opposite": "Pointu",
       "middle": "Central",
       "libero": "Libéro",
       "universal": "Universel"

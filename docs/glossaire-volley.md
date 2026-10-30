@@ -10,7 +10,6 @@ Choix de traduction à valider en priorité :
 - **Temps mort** : « Pedido de tempo » au Brésil (bouton court « Tempo »), « Czas » en polonais, « Mola » en turc.
 - **Rotation** : « Rodízio » au Brésil, « Переход » en russe (terme du volley russe).
 - **Set** : « Партия » en russe, « 局 » en chinois (usage du volley).
-- **Note — poste « Pointu »** : en français, la clé « outside » (réceptionneur-attaquant, *outside hitter*) est libellée « Pointu », qui désigne d'habitude l'opposite. Les autres langues traduisent *outside hitter*. À trancher : renommer le libellé français en « Réceptionneur-attaquant » ?
 
 ## Match et règles
 
@@ -54,8 +53,8 @@ Choix de traduction à valider en priorité :
 | Terme | Français | English | Español | Português (BR) | Italiano | Deutsch | Polski | Türkçe | Русский | 日本語 | 简体中文 |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | Passeur | Passeur | Setter | Colocador | Levantador | Palleggiatore | Zuspieler | Rozgrywający | Pasör | Связующий | セッター | 二传 |
-| Pointu (réceptionneur-attaquant, voir note) | Pointu | Outside | Receptor-atacante | Ponteiro | Schiacciatore | Außen | Przyjmujący | Smaçör | Доигровщик | アウトサイドヒッター | 主攻 |
-| Opposite | Opposite | Opposite | Opuesto | Oposto | Opposto | Diagonal | Atakujący | Pasör çaprazı | Диагональный | オポジット | 接应 |
+| Réceptionneur-attaquant (R4) | Réceptionneur-attaquant | Outside | Receptor-atacante | Ponteiro | Schiacciatore | Außen | Przyjmujący | Smaçör | Доигровщик | アウトサイドヒッター | 主攻 |
+| Pointu (opposite) | Pointu | Opposite | Opuesto | Oposto | Opposto | Diagonal | Atakujący | Pasör çaprazı | Диагональный | オポジット | 接应 |
 | Central | Central | Middle blocker | Central | Central | Centrale | Mitte | Środkowy | Orta oyuncu | Центральный | ミドルブロッカー | 副攻 |
 | Libéro | Libéro | Libero | Líbero | Líbero | Libero | Libero | Libero | Libero | Либеро | リベロ | 自由人 |
 
