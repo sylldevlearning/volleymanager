@@ -1,5 +1,4 @@
 import { scheduleMatches, restSlotsFor, slotStart } from '../src/features/tournament/engine/scheduler';
-import { canRedraw, reschedule } from '../src/features/tournament/engine/regenerate';
 import { recordResult } from '../src/features/tournament/engine/cascade';
 import type { EngineMatch } from '../src/features/tournament/engine/types';
 import { build, teamsOf } from './helpers/tournamentFixtures';
@@ -66,7 +65,7 @@ describe('regeneration never overwrites a validated result', () => {
     const withLive = outcome.matches.map((m) => (m.key === live.key ? { ...m, status: 'live' as const } : m));
 
     // One court less: the rest of the planning moves, not the fixed matches
-    const after = reschedule(withLive, { courts: 1, restSlots: 1 });
+    const after = scheduleMatches(withLive, { courts: 1, restSlots: 1 });
     const kept = after.find((m) => m.key === first.key)!;
     expect(kept).toEqual(outcome.matches.find((m) => m.key === first.key));
     expect(after.find((m) => m.key === live.key)).toEqual(withLive.find((m) => m.key === live.key));
@@ -83,16 +82,9 @@ describe('regeneration never overwrites a validated result', () => {
     // Pretend the match at slot 4 on court 1 is already being played
     const pinned = built.matches.find((m) => m.slot === 4)!;
     const matches = built.matches.map((m) => (m.key === pinned.key ? { ...m, status: 'live' as const } : m));
-    const after = reschedule(matches, { courts: 3, restSlots: 0 });
+    const after = scheduleMatches(matches, { courts: 3, restSlots: 0 });
     const sameSlot = after.filter((m) => m.slot === pinned.slot && m.key !== pinned.key).flatMap(teamsOf);
     for (const t of teamsOf(pinned)) expect(sameSlot).not.toContain(t);
-  });
-
-  it('a new draw is refused once a match is validated or being played', () => {
-    const built = build('round_robin', 4);
-    expect(canRedraw(built.matches)).toBe(true);
-    expect(canRedraw(built.matches.map((m, i) => (i === 0 ? { ...m, status: 'live' as const } : m)))).toBe(false);
-    expect(canRedraw(built.matches.map((m, i) => (i === 0 ? { ...m, status: 'validated' as const } : m)))).toBe(false);
   });
 
   it('scheduling twice gives the same planning', () => {

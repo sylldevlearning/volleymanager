@@ -16,7 +16,8 @@
     "close": "Schließen",
     "add": "Hinzufügen",
     "search": "Suchen",
-    "filter": "Filtern"
+    "filter": "Filtern",
+    "actionFailed": "Das hat nicht geklappt. Versuche es erneut."
   },
   "home": {
     "title": "VolleyManager",
@@ -635,7 +636,6 @@
     "lineup": "Hake die anwesenden Spieler an und tippe auf das Etikett Starter / Bank, um die Starter jedes Teams zu wählen. Der Libero ⚡ wird separat behandelt.",
     "tournaments": "Deine Turniere, das neueste zuerst. Alles bleibt auf diesem Handy: kein Konto, keine Verbindung. „Neues Turnier“ öffnet einen Assistenten in 4 Schritten.",
     "tournamentWizard": "4 Schritte: Angaben, Format und Regeln, Teams und Spielplan, Übersicht. Die Vorschläge passen sich der Spielform und der Zahl der Teams an; du kannst alles ändern. „Neu auslosen“ lost die Gruppen vor dem Anlegen neu aus. „Als Vorlage speichern“ behält Regeln und Spielplan (ohne Teams) für ein nächstes Turnier.",
-    "tournament": "Spielplan: die Spiele nach Uhrzeit und Feld. Spiele: nach Status, Phase oder Team filtern. Tabelle: Gruppen, K.-o.-Runde und Endstand. Tippe auf ein Spiel, um sein Ergebnis einzugeben oder zu korrigieren. Über das Menü ⋯ lassen sich Teams umbenennen, der Spielplan neu berechnen oder das Turnier löschen.",
     "tournamentPlanning": "Spielplan: die Spiele nach Uhrzeit und Feld, in der Reihenfolge, in der sie gespielt werden. Tippe auf ein Spiel, um sein Ergebnis einzugeben oder zu korrigieren. Bei Verspätung berechnet „Spielplan und Felder“ (Menü ⋯) die Zeiten der kommenden Spiele neu.",
     "tournamentMatches": "Spiele: nach Status (offen, beendet), Phase oder Team filtern. Tippe auf ein kommendes Spiel, um sein Ergebnis einzugeben oder seinen QR-Code zu zeigen: der Schiedsrichter scannt ihn mit der App („Spiel-QR scannen“ auf dem Startbildschirm). Am Ende scannst du seinen Ergebnis-QR über das Menü ⋯ („Ergebnis-QR scannen“).",
     "tournamentStandings": "Tabelle: Fortschritt der Phasen, Gruppentabellen, K.-o.-Runde und Endstand. Wird mit jedem Ergebnis aktualisiert, auch nach einer Korrektur. Gleichstand: direkter Vergleich, dann Satzdifferenz, Punktdifferenz und erzielte Punkte."
@@ -1021,7 +1021,8 @@
         "planning": "Spielplan",
         "results": "Spiele und Ergebnisse",
         "standings": "Tabelle"
-      }
+      },
+      "imageTooTall": "Zu lang für ein Bild: wähle das PDF."
     }
   },
   "scan": {

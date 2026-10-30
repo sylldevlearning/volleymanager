@@ -9,6 +9,8 @@ import {
   exportHtml,
   exportOptions,
   formatTournamentDate,
+  imageExportSize,
+  IMAGE_MAX_HEIGHT,
 } from '../src/features/tournament/exportDoc';
 import { build, bundleFrom, playAll } from './helpers/tournamentFixtures';
 
@@ -136,5 +138,27 @@ describe('screens wiring and texts', () => {
         expect(e[key]).toBeTruthy();
       }
     }
+  });
+});
+
+describe('image export size', () => {
+  it('the image is 1080 px wide, height in proportion', () => {
+    expect(imageExportSize(360, 900)).toEqual({ width: 1080, height: 2700 });
+    expect(imageExportSize(540, 540)).toEqual({ width: 1080, height: 1080 });
+  });
+
+  it('too tall for an image (memory): no image, the PDF is proposed', () => {
+    expect(IMAGE_MAX_HEIGHT).toBe(6000);
+    expect(imageExportSize(360, 2000)).toEqual({ width: 1080, height: 6000 });
+    expect(imageExportSize(360, 2001)).toBeNull();
+    expect(imageExportSize(0, 100)).toBeNull();
+  });
+
+  it('the screen uses it and says so', () => {
+    const screen = fs.readFileSync(path.join(__dirname, '../app/tournament/[id]/export.tsx'), 'utf8');
+    expect(screen).toContain('imageExportSize(');
+    expect(screen).toContain("t('tournament.export.imageTooTall')");
+    expect(screen).toContain('width: size.width, height: size.height');
+    for (const dict of [fr, en]) expect((dict.tournament.export as Record<string, unknown>).imageTooTall).toBeTruthy();
   });
 });

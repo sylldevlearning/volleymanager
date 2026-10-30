@@ -16,7 +16,8 @@
     "close": "Fechar",
     "add": "Adicionar",
     "search": "Buscar",
-    "filter": "Filtrar"
+    "filter": "Filtrar",
+    "actionFailed": "Não foi possível concluir. Tente de novo."
   },
   "home": {
     "title": "VolleyManager",
@@ -635,7 +636,6 @@
     "lineup": "Marque os jogadores presentes e toque na etiqueta Titular / Banco para escolher os titulares de cada time. O líbero ⚡ é tratado à parte.",
     "tournaments": "Seus torneios, do mais recente ao mais antigo. Tudo fica neste celular: sem conta, sem conexão. «Novo torneio» abre um assistente em 4 etapas.",
     "tournamentWizard": "4 etapas: informações, formato e regras, times e programação, resumo. Os valores sugeridos se adaptam ao tipo de jogo e ao número de times; você pode mudar tudo. «Sortear de novo» refaz o sorteio dos grupos antes da criação. «Salvar como modelo» guarda as regras e a programação (sem os times) para um próximo torneio.",
-    "tournament": "Programação: as partidas por horário e por quadra. Partidas: filtre por situação, fase ou time. Classificação: grupos, chave final e classificação final. Toque numa partida para lançar ou corrigir o placar. O menu ⋯ permite renomear times, recalcular a programação ou excluir o torneio.",
     "tournamentPlanning": "Programação: as partidas por horário e por quadra, na ordem em que são jogadas. Toque numa partida para lançar ou corrigir o placar. Se o torneio atrasar, «Programação e quadras» (menu ⋯) recalcula os horários das próximas partidas.",
     "tournamentMatches": "Partidas: filtre por situação (a jogar, encerradas), fase ou time. Toque numa próxima partida para lançar o placar ou mostrar o QR code: o árbitro lê com o app («Ler o QR de uma partida» na tela inicial). No final, leia o QR do resultado pelo menu ⋯ («Ler um QR de resultado»).",
     "tournamentStandings": "Classificação: andamento das fases, classificação dos grupos, chave final e classificação geral. Atualizada a cada resultado, mesmo após uma correção. Desempates por confronto direto, depois saldo de sets, saldo de pontos e pontos marcados."
@@ -1021,7 +1021,8 @@
         "planning": "Programação",
         "results": "Partidas e resultados",
         "standings": "Classificação"
-      }
+      },
+      "imageTooTall": "Longo demais para uma imagem: escolha o PDF."
     }
   },
   "scan": {

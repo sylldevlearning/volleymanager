@@ -16,7 +16,8 @@
     "close": "Zamknij",
     "add": "Dodaj",
     "search": "Szukaj",
-    "filter": "Filtruj"
+    "filter": "Filtruj",
+    "actionFailed": "Nie udało się. Spróbuj ponownie."
   },
   "home": {
     "title": "VolleyManager",
@@ -645,7 +646,6 @@
     "lineup": "Zaznacz obecnych zawodników, potem dotknij etykiety Wyjściowy / Ławka, aby wybrać pierwszą szóstkę każdej drużyny. Libero ⚡ jest obsługiwany osobno.",
     "tournaments": "Twoje turnieje, od najnowszego. Wszystko zostaje na tym telefonie: bez konta i bez połączenia. „Nowy turniej” otwiera kreator w 4 krokach.",
     "tournamentWizard": "4 kroki: informacje, format i zasady, drużyny i harmonogram, podsumowanie. Proponowane wartości zależą od rodzaju gry i liczby drużyn; wszystko możesz zmienić. „Losuj ponownie” powtarza losowanie grup przed utworzeniem. „Zapisz jako szablon” zachowuje zasady i harmonogram (bez drużyn) na kolejny turniej.",
-    "tournament": "Harmonogram: mecze według godziny i boiska. Mecze: filtruj według stanu, fazy lub drużyny. Tabela: grupy, drabinka i klasyfikacja końcowa. Dotknij meczu, aby wpisać lub poprawić wynik. Menu ⋯ pozwala zmienić nazwy drużyn, przeliczyć harmonogram lub usunąć turniej.",
     "tournamentPlanning": "Harmonogram: mecze według godziny i boiska, w kolejności rozgrywania. Dotknij meczu, aby wpisać lub poprawić wynik. Gdy turniej ma opóźnienie, „Harmonogram i boiska” (menu ⋯) przelicza godziny kolejnych meczów.",
     "tournamentMatches": "Mecze: filtruj według stanu (do rozegrania, zakończone), fazy lub drużyny. Dotknij nadchodzącego meczu, aby wpisać wynik lub pokazać jego kod QR: sędzia skanuje go aplikacją („Zeskanuj QR meczu” na ekranie startowym). Na końcu zeskanuj jego QR wyniku z menu ⋯ („Zeskanuj QR wyniku”).",
     "tournamentStandings": "Tabela: postęp faz, tabele grup, drabinka i klasyfikacja ogólna. Aktualizuje się po każdym wyniku, także po korekcie. Przy remisie decyduje bezpośredni mecz, potem różnica setów, różnica punktów i zdobyte punkty."
@@ -1041,7 +1041,8 @@
         "planning": "Harmonogram",
         "results": "Mecze i wyniki",
         "standings": "Tabela"
-      }
+      },
+      "imageTooTall": "Za długie na obraz: wybierz PDF."
     }
   },
   "scan": {

@@ -16,7 +16,8 @@
     "close": "Close",
     "add": "Add",
     "search": "Search",
-    "filter": "Filter"
+    "filter": "Filter",
+    "actionFailed": "That did not work. Try again."
   },
   "home": {
     "title": "VolleyManager",
@@ -635,7 +636,6 @@
     "lineup": "Tick the players who are present, then tap the Starter / Bench badge to pick each team's starters. The libero ⚡ is handled separately.",
     "tournaments": "Your tournaments, most recent first. Everything stays on this phone: no account, no connection. \"New tournament\" opens a 4-step wizard.",
     "tournamentWizard": "4 steps: details, format and rules, teams and schedule, summary. Suggested values follow the game type and the number of teams; you can change everything. \"Redraw\" draws the pools again before creating. \"Save as template\" keeps the rules and schedule (without the teams) for a next tournament.",
-    "tournament": "Schedule: matches by time and court. Matches: filter by status, phase or team. Standings: pools, bracket and final ranking. Tap a match to enter or correct its score. The ⋯ menu renames teams, recomputes the schedule or deletes the tournament.",
     "tournamentPlanning": "Schedule: matches by time and court, in the order they are played. Tap a match to enter or correct its score. If the tournament runs late, \"Schedule and courts\" (⋯ menu) recomputes the times of the upcoming matches.",
     "tournamentMatches": "Matches: filter by status (to play, done), phase or team. Tap an upcoming match to enter its score or show its QR code: the referee scans it with the app (\"Scan a match QR\" on the home screen). At the end, scan their result QR from the ⋯ menu (\"Scan a result QR\").",
     "tournamentStandings": "Standings: progress of the phases, pool standings, the final bracket and the overall ranking. Updated with every result, even after a correction. Ties broken by head-to-head, then set difference, point difference and points scored."
@@ -1021,7 +1021,8 @@
         "planning": "Schedule",
         "results": "Matches and results",
         "standings": "Standings"
-      }
+      },
+      "imageTooTall": "Too long for an image: choose the PDF."
     }
   },
   "scan": {

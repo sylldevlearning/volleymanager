@@ -309,8 +309,11 @@ export async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
     });
   }
 
+  // From v14: one transaction on this connection, so an interrupted migration
+  // leaves nothing half-applied (withExclusiveTransactionAsync runs its own
+  // connection, and the statements sent on `db` were committed one by one)
   if (version < 14) {
-    await db.withExclusiveTransactionAsync(async () => {
+    await db.withTransactionAsync(async () => {
       // Tournament mode — results of refereed matches stay in matches/match_events
       await db.execAsync(`
         CREATE TABLE IF NOT EXISTS tournaments (
@@ -383,7 +386,7 @@ export async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
   }
 
   if (version < 15) {
-    await db.withExclusiveTransactionAsync(async () => {
+    await db.withTransactionAsync(async () => {
       // "Brassage + niveaux": mixing round / level of pools and matches
       await db.execAsync(`
         ALTER TABLE tournament_pools ADD COLUMN phase INTEGER;
@@ -403,7 +406,7 @@ export async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
     const fk = await db.getFirstAsync<{ foreign_keys: number }>('PRAGMA foreign_keys');
     await db.execAsync('PRAGMA foreign_keys = OFF');
     try {
-      await db.withExclusiveTransactionAsync(async () => {
+      await db.withTransactionAsync(async () => {
         await db.execAsync(`
           CREATE TABLE IF NOT EXISTS matches_v16 (
             id TEXT PRIMARY KEY,

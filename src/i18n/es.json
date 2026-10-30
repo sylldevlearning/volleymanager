@@ -16,7 +16,8 @@
     "close": "Cerrar",
     "add": "Añadir",
     "search": "Buscar",
-    "filter": "Filtrar"
+    "filter": "Filtrar",
+    "actionFailed": "La operación no se ha completado. Inténtalo de nuevo."
   },
   "home": {
     "title": "VolleyManager",
@@ -635,7 +636,6 @@
     "lineup": "Marca los jugadores presentes y toca la etiqueta Titular / Banquillo para elegir los titulares de cada equipo. El líbero ⚡ se gestiona aparte.",
     "tournaments": "Tus torneos, del más reciente al más antiguo. Todo se queda en este teléfono: sin cuenta ni conexión. «Nuevo torneo» abre un asistente de 4 pasos.",
     "tournamentWizard": "4 pasos: datos, formato y reglas, equipos y calendario, resumen. Los valores propuestos se adaptan al tipo de juego y al número de equipos; puedes cambiarlo todo. «Sortear de nuevo» repite el sorteo de grupos antes de crear. «Guardar como plantilla» conserva las reglas y el calendario (sin los equipos) para un próximo torneo.",
-    "tournament": "Calendario: los partidos por hora y por pista. Partidos: filtra por estado, fase o equipo. Clasificación: grupos, cuadro final y clasificación final. Toca un partido para introducir o corregir su resultado. El menú ⋯ permite renombrar equipos, recalcular el calendario o eliminar el torneo.",
     "tournamentPlanning": "Calendario: los partidos por hora y por pista, en el orden en que se juegan. Toca un partido para introducir o corregir su resultado. Si el torneo se retrasa, «Calendario y pistas» (menú ⋯) recalcula los horarios de los partidos pendientes.",
     "tournamentMatches": "Partidos: filtra por estado (por jugar, terminados), fase o equipo. Toca un partido pendiente para introducir su resultado o mostrar su código QR: el árbitro lo escanea con la app («Escanear el QR de un partido» en la pantalla de inicio). Al final, escanea su QR del resultado desde el menú ⋯ («Escanear un QR de resultado»).",
     "tournamentStandings": "Clasificación: avance de las fases, clasificaciones de grupo, cuadro final y clasificación general. Se actualiza con cada resultado, incluso tras una corrección. Desempates por enfrentamiento directo, después diferencia de sets, diferencia de puntos y puntos anotados."
@@ -1021,7 +1021,8 @@
         "planning": "Calendario",
         "results": "Partidos y resultados",
         "standings": "Clasificación"
-      }
+      },
+      "imageTooTall": "Demasiado largo para una imagen: elige el PDF."
     }
   },
   "scan": {

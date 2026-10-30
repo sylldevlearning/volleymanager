@@ -17,6 +17,7 @@ import {
   exportFileName,
   exportHtml,
   exportOptions,
+  imageExportSize,
   type ExportContent,
   type ExportFormat,
 } from '../../../src/features/tournament/exportDoc';
@@ -39,6 +40,10 @@ export default function TournamentExportScreen() {
   const [format, setFormat] = useState<ExportFormat>('pdf');
   const [busy, setBusy] = useState(false);
   const previewRef = useRef<ScrollView>(null);
+  // Preview size (dp): the image keeps its proportions at a fixed width, and is refused when too tall
+  const [previewSize, setContentSize] = useState({ w: 0, h: 0 });
+  const size = imageExportSize(previewSize.w, previewSize.h);
+  const imageTooTall = format === 'png' && previewSize.h > 0 && size === null;
 
   useEffect(() => {
     getTournamentBundle(id).then(setBundle);
@@ -62,7 +67,11 @@ export default function TournamentExportScreen() {
         const printed = await Print.printToFileAsync({ html: exportHtml(doc, lang), width: 595, height: 842 });
         uri = await renamed(printed.uri, name);
       } else {
-        const shot = await captureRef(previewRef, { format: 'png', quality: 1, result: 'tmpfile', snapshotContentContainer: true });
+        if (!size) return;
+        const shot = await captureRef(previewRef, {
+          format: 'png', quality: 1, result: 'tmpfile', snapshotContentContainer: true,
+          width: size.width, height: size.height,
+        });
         uri = await renamed(shot, name);
       }
       // The system share sheet: the user picks e-mail, Drive, Quick Share…
@@ -93,18 +102,24 @@ export default function TournamentExportScreen() {
           <Chip label={t('tournament.export.image')} active={format === 'png'} onPress={() => setFormat('png')} />
         </View>
         <Text style={styles.hint}>{t('tournament.export.hint')}</Text>
+        {imageTooTall && <Text style={styles.warning}>{t('tournament.export.imageTooTall')}</Text>}
       </View>
 
       {/* Preview — also the image that is shared */}
-      <ScrollView ref={previewRef} style={styles.preview} contentContainerStyle={styles.previewContent}>
+      <ScrollView
+        ref={previewRef}
+        style={styles.preview}
+        contentContainerStyle={styles.previewContent}
+        onContentSizeChange={(w, h) => setContentSize({ w, h })}
+      >
         <ExportView doc={doc} />
       </ScrollView>
 
       <View style={styles.footer}>
         <Pressable
-          style={({ pressed }) => [styles.primary, pressed && styles.pressed, busy && styles.disabled]}
+          style={({ pressed }) => [styles.primary, pressed && styles.pressed, (busy || imageTooTall) && styles.disabled]}
           onPress={share}
-          disabled={busy}
+          disabled={busy || imageTooTall}
           accessibilityRole="button"
         >
           {busy ? (
@@ -130,6 +145,7 @@ const styles = StyleSheet.create({
   label: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   hint: { fontSize: 13, fontFamily: 'Inter_400Regular', color: palette.textSecondary, lineHeight: 18 },
+  warning: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: palette.warning, lineHeight: 18 },
   preview: { flex: 1, marginHorizontal: 16, borderRadius: 12, backgroundColor: '#FFFFFF' },
   previewContent: { backgroundColor: '#FFFFFF' },
   footer: { padding: 16, borderTopWidth: 1, borderTopColor: palette.backgroundElevated },

@@ -218,3 +218,15 @@ export function exportFileName(bundle: TournamentBundle, content: ExportContent,
   const clean = (s: string) => s.replace(/[\\/:*?"<>|\u0000-\u001f]+/g, ' ').replace(/\s+/g, ' ').trim();
   return `${clean(bundle.tournament.name) || 'Tournoi'} - ${clean(contentTitle(content, t))}.${format}`;
 }
+
+/** Width of the shared image, in pixels — whatever the phone's density */
+export const IMAGE_WIDTH = 1080;
+/** Beyond this, the bitmap would take too much memory (1080 × 6000 ≈ 26 MB): the PDF is proposed instead */
+export const IMAGE_MAX_HEIGHT = 6000;
+
+/** Output size of the image for a preview of this size (dp), or null when it is too tall for an image. */
+export function imageExportSize(contentWidth: number, contentHeight: number): { width: number; height: number } | null {
+  if (contentWidth <= 0 || contentHeight <= 0) return null;
+  const height = Math.round((contentHeight * IMAGE_WIDTH) / contentWidth);
+  return height > IMAGE_MAX_HEIGHT ? null : { width: IMAGE_WIDTH, height };
+}

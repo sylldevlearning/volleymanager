@@ -53,6 +53,9 @@ function evalWhere(row: Row, whereClause: string | null, whereParams: unknown[])
 
 export class FakeSqlDb {
   tables = new Map<string, Row[]>();
+  /** Transactions opened, with the writes made inside each (to check atomic writes) */
+  transactions: { kind: 'same-connection' | 'exclusive'; writes: string[] }[] = [];
+  private current: { kind: 'same-connection' | 'exclusive'; writes: string[] } | null = null;
   /** Insertion order, keyed off-object so it never leaks into a row's own fields. */
   private insertSeq = new WeakMap<Row, number>();
   private nextSeq = 0;
@@ -64,6 +67,7 @@ export class FakeSqlDb {
 
   async runAsync(sql: string, params: unknown[] = []): Promise<void> {
     const s = sql.trim();
+    this.current?.writes.push(s);
 
     const insertMatch = s.match(/^INSERT INTO\s+(\w+)\s*\(([^)]+)\)\s*VALUES\s*\(([^)]+)\)/is);
     if (insertMatch) {
@@ -168,6 +172,21 @@ export class FakeSqlDb {
   }
 
   async withExclusiveTransactionAsync(cb: () => Promise<void>): Promise<void> {
-    await cb();
+    await this.transaction('exclusive', cb);
+  }
+
+  async withTransactionAsync(cb: () => Promise<void>): Promise<void> {
+    await this.transaction('same-connection', cb);
+  }
+
+  private async transaction(kind: 'same-connection' | 'exclusive', cb: () => Promise<void>): Promise<void> {
+    const record = { kind, writes: [] as string[] };
+    this.transactions.push(record);
+    this.current = record;
+    try {
+      await cb();
+    } finally {
+      this.current = null;
+    }
   }
 }

@@ -1,3 +1,4 @@
+import { getDb } from './database';
 import { createAdHocTeam } from './teamService';
 import { createMatch } from './matchService';
 import type { Match } from '../models/match';
@@ -10,12 +11,19 @@ function createSide(team: MatchQrTeam) {
 
 /** Quick match filled from a scanned match QR: these teams, this format, these rules. */
 export async function createMatchFromQr(qr: MatchQr): Promise<Match> {
-  const [home, away] = await Promise.all([createSide(qr.home), createSide(qr.away)]);
-  return createMatch({
-    format: qr.format,
-    mode: 'leisure',
-    teamHomeId: home.id,
-    teamAwayId: away.id,
-    config: quickMatchConfig(qr),
+  const db = await getDb();
+  let match: Match | null = null;
+  // One transaction: a failure leaves no orphan team behind
+  await db.withTransactionAsync(async () => {
+    const home = await createSide(qr.home);
+    const away = await createSide(qr.away);
+    match = await createMatch({
+      format: qr.format,
+      mode: 'leisure',
+      teamHomeId: home.id,
+      teamAwayId: away.id,
+      config: quickMatchConfig(qr),
+    });
   });
+  return match!;
 }

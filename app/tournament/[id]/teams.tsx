@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -33,7 +33,13 @@ export default function TournamentTeamsScreen() {
       setErrors(({ [team.id]: _, ...rest }) => rest);
       return;
     }
-    const outcome = await renameTournamentTeam(id, team.id, name);
+    let outcome: Awaited<ReturnType<typeof renameTournamentTeam>>;
+    try {
+      outcome = await renameTournamentTeam(id, team.id, name);
+    } catch {
+      Alert.alert(t('common.error'), t('common.actionFailed'));
+      return;
+    }
     if (outcome.ok) {
       setTeams((list) => list.map((x) => (x.id === team.id ? { ...x, name: name.trim() } : x)));
       setErrors(({ [team.id]: _, ...rest }) => rest);

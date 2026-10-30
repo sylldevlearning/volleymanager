@@ -80,8 +80,12 @@ export default function TournamentScreen() {
         text: t('common.delete'),
         style: 'destructive',
         onPress: async () => {
-          await deleteTournament(id);
-          router.back();
+          try {
+            await deleteTournament(id);
+            router.back();
+          } catch {
+            Alert.alert(t('common.error'), t('common.actionFailed'));
+          }
         },
       },
     ]);

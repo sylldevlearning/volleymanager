@@ -173,7 +173,7 @@ export async function createTournament(input: CreateTournamentInput): Promise<To
   const now = new Date().toISOString();
 
   const db = await getDb();
-  await db.withExclusiveTransactionAsync(async () => {
+  await db.withTransactionAsync(async () => {
     await db.runAsync(
       `INSERT INTO tournaments (id, name, date, location, game_type, format, rules_json, schedule_json, seed, seeding, secret, status, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -216,7 +216,7 @@ export async function createTournament(input: CreateTournamentInput): Promise<To
 
 export async function deleteTournament(id: string): Promise<void> {
   const db = await getDb();
-  await db.withExclusiveTransactionAsync(async () => {
+  await db.withTransactionAsync(async () => {
     await db.runAsync('DELETE FROM tournament_matches WHERE tournament_id = ?', [id]);
     await db.runAsync('DELETE FROM tournament_teams WHERE tournament_id = ?', [id]);
     await db.runAsync('DELETE FROM tournament_pools WHERE tournament_id = ?', [id]);
@@ -265,7 +265,7 @@ export async function recordTournamentResult(
   const byKey = new Map(outcome.matches.map((m) => [m.key, m]));
   const finished = outcome.matches.every((m) => m.status === 'validated');
   const db = await getDb();
-  await db.withExclusiveTransactionAsync(async () => {
+  await db.withTransactionAsync(async () => {
     for (const key of outcome.changed) {
       const m = byKey.get(key)!;
       if (key === matchId) {
@@ -300,7 +300,7 @@ export async function rescheduleTournament(tournamentId: string, schedule: Tourn
   const planned = scheduleMatches(engineMatches, { courts: schedule.courts, restSlots: restSlotsFor(schedule) });
   const now = new Date().toISOString();
   const db = await getDb();
-  await db.withExclusiveTransactionAsync(async () => {
+  await db.withTransactionAsync(async () => {
     for (const m of planned) {
       if (m.status !== 'scheduled') continue;
       await db.runAsync(

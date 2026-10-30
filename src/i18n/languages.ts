@@ -52,7 +52,3 @@ export function deviceLanguage(locales: DeviceLocale[]): AppLanguage {
 export function resolveLanguage(preference: LanguagePreference, locales: DeviceLocale[]): AppLanguage {
   return preference === 'system' ? deviceLanguage(locales) : preference;
 }
-
-export function isAppLanguage(value: unknown): value is AppLanguage {
-  return typeof value === 'string' && CODES.includes(value);
-}

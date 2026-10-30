@@ -27,6 +27,8 @@ type Row = Record<string, unknown>;
 class FakeMigrationDb {
   userVersion: number;
   tables: Record<string, Row[]>;
+  /** Kind of transaction and schema version it started from */
+  transactions: string[] = [];
 
   constructor(userVersion: number, tables: Record<string, Row[]>) {
     this.userVersion = userVersion;
@@ -111,6 +113,12 @@ class FakeMigrationDb {
   }
 
   async withExclusiveTransactionAsync(cb: () => Promise<void>): Promise<void> {
+    this.transactions.push(`exclusive@${this.userVersion}`);
+    await cb();
+  }
+
+  async withTransactionAsync(cb: () => Promise<void>): Promise<void> {
+    this.transactions.push(`same-connection@${this.userVersion}`);
     await cb();
   }
 }
@@ -278,4 +286,17 @@ test('migrating a v15 database to v16 keeps every match (6×6 and beach) and all
 test('the v16 matches table accepts the four formats', () => {
   const sql = fs.readFileSync(path.join(__dirname, '../src/services/database.ts'), 'utf8');
   expect(sql).toContain("CHECK(format IN ('indoor_6v6','indoor_4v4','indoor_3v3','beach_2v2'))");
+});
+
+test('v14 to v16 run each in one transaction on the same connection (atomic: no half-applied migration)', async () => {
+  // withExclusiveTransactionAsync opens a second connection: statements sent on `db`
+  // were committed one by one, so an interrupted migration could not be run again
+  const tables: Record<string, Row[]> = {
+    matches: [{ ...V8_MATCH_ROW, captain_home_id: null, captain_away_id: null, sides_swapped: 0, acting_captain_home_id: null, acting_captain_away_id: null }],
+    teams: [{ ...V8_TEAM_ROW, is_ad_hoc: 0, coach_name: null, libero_color: null }],
+  };
+  const db = new FakeMigrationDb(13, tables);
+  await runMigrations(db as unknown as SQLite.SQLiteDatabase);
+  expect(db.userVersion).toBe(16);
+  expect(db.transactions).toEqual(['same-connection@13', 'same-connection@14', 'same-connection@15']);
 });

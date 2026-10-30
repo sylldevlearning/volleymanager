@@ -16,7 +16,8 @@
     "close": "Chiudi",
     "add": "Aggiungi",
     "search": "Cerca",
-    "filter": "Filtra"
+    "filter": "Filtra",
+    "actionFailed": "L'operazione non è riuscita. Riprova."
   },
   "home": {
     "title": "VolleyManager",
@@ -635,7 +636,6 @@
     "lineup": "Spunta i giocatori presenti, poi tocca l'etichetta Titolare / Panchina per scegliere i titolari di ogni squadra. Il libero ⚡ è gestito a parte.",
     "tournaments": "I tuoi tornei, dal più recente. Tutto resta su questo telefono: niente account né connessione. «Nuovo torneo» apre una procedura guidata in 4 passaggi.",
     "tournamentWizard": "4 passaggi: dati, formato e regole, squadre e calendario, riepilogo. I valori proposti si adattano al tipo di gioco e al numero di squadre; puoi cambiare tutto. «Nuovo sorteggio» rifà il sorteggio dei gironi prima della creazione. «Salva come modello» conserva le regole e il calendario (senza le squadre) per un prossimo torneo.",
-    "tournament": "Calendario: le partite per orario e per campo. Partite: filtra per stato, fase o squadra. Classifica: gironi, tabellone e classifica finale. Tocca una partita per inserire o correggere il risultato. Il menu ⋯ permette di rinominare le squadre, ricalcolare il calendario o eliminare il torneo.",
     "tournamentPlanning": "Calendario: le partite per orario e per campo, nell'ordine in cui si giocano. Tocca una partita per inserire o correggere il risultato. Se il torneo è in ritardo, «Calendario e campi» (menu ⋯) ricalcola gli orari delle prossime partite.",
     "tournamentMatches": "Partite: filtra per stato (da giocare, terminate), fase o squadra. Tocca una partita da giocare per inserire il risultato o mostrarne il codice QR: l'arbitro lo scansiona con l'app («Scansiona il QR di una partita» nella schermata iniziale). Alla fine, scansiona il suo QR del risultato dal menu ⋯ («Scansiona un QR di risultato»).",
     "tournamentStandings": "Classifica: avanzamento delle fasi, classifiche dei gironi, tabellone finale e classifica generale. Si aggiorna a ogni risultato, anche dopo una correzione. Parità risolte con lo scontro diretto, poi differenza set, differenza punti e punti segnati."
@@ -1021,7 +1021,8 @@
         "planning": "Calendario",
         "results": "Partite e risultati",
         "standings": "Classifica"
-      }
+      },
+      "imageTooTall": "Troppo lungo per un'immagine: scegli il PDF."
     }
   },
   "scan": {

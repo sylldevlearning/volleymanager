@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -34,6 +34,8 @@ export default function ScanMatchQrScreen() {
     try {
       const match = await createMatchFromQr(scanned);
       router.replace(`/match/${match.id}/referee`);
+    } catch {
+      Alert.alert(t('common.error'), t('common.actionFailed'));
     } finally {
       setStarting(false);
     }

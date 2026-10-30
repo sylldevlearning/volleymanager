@@ -172,3 +172,15 @@ test('a team can be renamed after creation — not empty, not like another team'
   expect(await renameTournamentTeam(tournament.id, teams[1].id, 'les requins')).toEqual({ ok: false, reason: 'duplicate' });
   expect((await getTournamentBundle(tournament.id))!.teams[1].name).toBe('Équipe 2');
 });
+
+describe('atomic writes (one transaction on the same connection)', () => {
+  it('creation, result, schedule and deletion each write in a single transaction', async () => {
+    const created = await createTournament(input(4));
+    const match = created.matches[0];
+    await recordTournamentResult(created.tournament.id, match.id, { sets: [[25, 10], [25, 10], [25, 10]].slice(0, created.tournament.rules.match.setsToWin) as SetScore[], forfeitId: null, source: 'manual' });
+    await rescheduleTournament(created.tournament.id, { ...created.tournament.schedule, courts: 2 });
+    await deleteTournament(created.tournament.id);
+    expect(db.transactions.map((t) => t.kind)).toEqual(['same-connection', 'same-connection', 'same-connection', 'same-connection']);
+    for (const t of db.transactions) expect(t.writes.length).toBeGreaterThan(0);
+  });
+});

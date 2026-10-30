@@ -17,8 +17,6 @@ export const FORMAT_PROFILES: Record<MatchFormat, FormatProfile> = {
   beach_2v2: { courtSize: 2, hasLibero: false, maxRoster: 4 },
 };
 
-export const SMALL_FORMATS: MatchFormat[] = ['indoor_4v4', 'indoor_3v3', 'beach_2v2'];
-
 export function courtSize(format: MatchFormat): number {
   return FORMAT_PROFILES[format].courtSize;
 }

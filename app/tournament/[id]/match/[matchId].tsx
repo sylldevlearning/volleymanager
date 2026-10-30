@@ -95,6 +95,8 @@ export default function TournamentMatchScreen() {
       } else {
         Alert.alert(t('common.error'), t('tournament.score.teamsUnknown'));
       }
+    } catch {
+      Alert.alert(t('common.error'), t('common.actionFailed'));
     } finally {
       setSaving(false);
     }
