@@ -4,7 +4,7 @@ const BALL_IMG = require('../../assets/images/ballon.png');
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Volleyball, Users, History, ChevronRight, Zap, Whistle, Trophy } from 'lucide-react-native';
+import { Volleyball, Users, History, ChevronRight, Zap, Whistle, Trophy, ScanQrCode } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { palette } from '../../src/theme/tokens';
 import { COMPANY, ADMOB_IDS } from '../../src/utils/constants';
@@ -103,6 +103,21 @@ export default function HomeScreen() {
             <Text style={styles.quickMatchDesc}>{t('home.quickMatchDesc')}</Text>
           </View>
           {!creatingQuickMatch && <ChevronRight size={20} color={palette.textMuted} />}
+        </Pressable>
+
+        {/* Quick match filled from the "QR du match" of a tournament */}
+        <Pressable
+          style={({ pressed }) => [styles.quickMatchButton, pressed && styles.quickMatchButtonPressed]}
+          onPress={() => router.push('/scan')}
+          accessibilityLabel={t('home.scanMatchQr')}
+          accessibilityRole="button"
+        >
+          <ScanQrCode size={26} color={palette.success} strokeWidth={1.5} />
+          <View style={styles.quickMatchContent}>
+            <Text style={styles.quickMatchTitle}>{t('home.scanMatchQr')}</Text>
+            <Text style={styles.quickMatchDesc}>{t('home.scanMatchQrDesc')}</Text>
+          </View>
+          <ChevronRight size={20} color={palette.textMuted} />
         </Pressable>
 
         {/* New Match CTA */}

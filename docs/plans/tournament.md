@@ -245,22 +245,23 @@ transaction de création), moteur complet et ses tests. Pas d'écran.
 - Recalculés à chaque affichage : une correction est prise en compte. Partage
   en image : phase 5.
 
-### Phase 4 — QR codes
-- Format : `VMT1:` + JSON en base64url, avec `v`, `kind` (`match` | `result`),
-  `t` (tournoi), `m` (match), équipes, règles du match, et `sig`
-  (SHA-256 tronqué de la charge + `secret` du tournoi).
-- Organisateur : bouton « QR de ce match » sur la fiche du match.
-- Arbitre : « Scanner un QR » (accueil Tournoi) → ouvre la configuration
-  d'arbitrage déjà remplie (équipes, couleurs, règles, joueurs si connus) ; le
-  match arbitré garde la référence tournoi/match.
-- En fin de match arbitré : « QR du résultat » ; l'organisateur le scanne → récap
-  → « Enregistrer » ; refus clair si mauvais tournoi, mauvais match, QR modifié
-  ou version inconnue.
-- « Arbitrer ici » : arbitrer sur l'appareil organisateur, résultat repris
-  automatiquement.
-- La vérification protège contre les erreurs (mauvais QR, autre tournoi, QR
-  abîmé ou modifié à la main), pas contre une triche délibérée : la clé voyage
-  dans le QR du match.
+### Phase 4 — QR du match (version simplifiée, validée)
+- Format : `VMT1:` + JSON compact, sans signature :
+  `{f: format, h: [nom, couleur], a: [nom, couleur],
+  r: [sets gagnants, points, points du tie-break, écart, tie-break 0/1]}`.
+  Accents échappés (`\uXXXX`) : texte ASCII, lisible par tous les lecteurs.
+- Organisateur : bouton « QR du match » sur la fiche d'un match à venir dont les
+  deux équipes sont connues → écran avec le QR et « À scanner avec l'app
+  VolleyManager (Play Store) ». Règles = celles de la phase du match.
+- Arbitre : « Scanner un QR de match » sur l'accueil, sous « Match rapide » →
+  récapitulatif → « Commencer le match » : match rapide (mode loisir) avec ces
+  équipes (hors « Mes équipes »), ce format et ces règles ; le reste vient des
+  réglages loisir du format.
+- Messages : QR d'une autre app, version plus récente, QR illisible ou abîmé.
+- Rien d'autre : pas de migration, pas de QR de résultat, moteur du tournoi et
+  mode arbitrage inchangés.
+- Caméra : même permission `android.permission.CAMERA` (déjà présente via
+  expo-image-picker) ; plugin `expo-camera` sans micro.
 
 ### Phase 5 — Export
 - Planning et classement en image (rendu dédié, lisible sur un téléphone) ou
@@ -271,9 +272,8 @@ Chaque phase : `tsc`, tests, commit sur `feat/tournoi`. Version 1.1.0 à la fin.
 
 ## Nouvelles dépendances (versions Expo SDK 57 via `npx expo install`)
 - `react-native-qrcode-svg` (affichage QR, s'appuie sur react-native-svg) — phase 4.
-- `expo-camera` (lecture QR) — phase 4 : nouvelle permission caméra.
+- `expo-camera` (lecture QR) — phase 4 : même permission caméra que le scanner de licences.
 - `react-native-view-shot`, `expo-print`, `expo-sharing` — phase 5.
-- `expo-crypto` (SHA-256) — phase 4.
 Les phases 4 et 5 demandent un nouveau build natif pour être testées hors Expo Go.
 
 ## Hors périmètre

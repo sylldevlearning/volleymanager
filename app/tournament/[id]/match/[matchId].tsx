@@ -3,7 +3,7 @@ import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleShee
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { CircleCheck, Flag, Minus, Plus } from 'lucide-react-native';
+import { CircleCheck, Flag, Minus, Plus, QrCode } from 'lucide-react-native';
 import { palette } from '../../../../src/theme/tokens';
 import {
   getTournamentBundle,
@@ -14,6 +14,7 @@ import {
 import { evaluateScore, rulesForStage, type ScoreError } from '../../../../src/features/tournament/engine/results';
 import { matchTitle, scoreErrorText, sideName } from '../../../../src/features/tournament/display';
 import { roundJustCompleted } from '../../../../src/features/tournament/phases';
+import { matchQrOf } from '../../../../src/features/tournament/matchQr';
 import type { SetScore, TournamentTeam } from '../../../../src/models/tournament';
 
 type Row = [string, string];
@@ -139,6 +140,18 @@ export default function TournamentMatchScreen() {
             {rules.setsToWin > 1 && rules.tieBreak ? t('tournament.score.rulesTieBreak', { points: rules.pointsLastSet }) : ''}
           </Text>
 
+          {/* Upcoming match with both teams known: the referee scans it to open a filled quick match */}
+          {matchQrOf(bundle, match) && (
+            <Pressable
+              style={({ pressed }) => [styles.qrButton, pressed && styles.pressed]}
+              onPress={() => router.push(`/tournament/${id}/qr/${matchId}`)}
+              accessibilityRole="button"
+            >
+              <QrCode size={18} color={palette.textPrimary} />
+              <Text style={styles.smallButtonText}>{t('tournament.qr.button')}</Text>
+            </Pressable>
+          )}
+
           {isCorrection && (
             <View style={styles.validated}>
               <CircleCheck size={18} color={palette.success} />
@@ -261,6 +274,11 @@ const styles = StyleSheet.create({
   setActions: { flexDirection: 'row', gap: 8, marginTop: 4, marginLeft: 64 },
   smallButton: {
     flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 10,
+    backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
+  },
+  qrButton: {
+    flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 8, marginTop: 12,
+    paddingVertical: 10, paddingHorizontal: 14, borderRadius: 10,
     backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
   },
   smallButtonText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },

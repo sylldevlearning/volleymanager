@@ -43,7 +43,9 @@
     "arbitrageAbandonConfirmMessage": "Le match en cours sera marqué comme terminé et ne pourra plus être repris.",
     "arbitrageAbandonConfirm": "Abandonner",
     "tournament": "Tournoi",
-    "tournamentDesc": "Poules, tableau final, planning et classement"
+    "tournamentDesc": "Poules, tableau final, planning et classement",
+    "scanMatchQr": "Scanner un QR de match",
+    "scanMatchQrDesc": "Équipes et règles d'un match de tournoi"
   },
   "tabs": {
     "home": "Accueil",
@@ -614,7 +616,7 @@
     "selectStarters": "Appuyez sur le badge pour définir les titulaires"
   },
   "help": {
-    "home": "Match rapide : arbitrez tout de suite, sans saisir d'équipes. Nouveau match : choisissez vos équipes et le format. Arbitrage : match officiel avec composition, remplacements et sanctions. Tableau tactique : dessinez et animez vos schémas.",
+    "home": "Match rapide : arbitrez tout de suite, sans saisir d'équipes. Nouveau match : choisissez vos équipes et le format. Arbitrage : match officiel avec composition, remplacements et sanctions. Tableau tactique : dessinez et animez vos schémas. Scanner un QR de match : ouvre un match rapide avec les équipes et les règles d'un match de tournoi.",
     "referee": "+1 donne le point à l'équipe, -1 en retire un. Après un point, indiquez qui a marqué et comment, ou « Passer ». Touchez le compteur de temps morts ou de remplacements d'une équipe pour l'utiliser. Annuler revient sur la dernière action. Les rotations sont automatiques ; l'icône tactique ouvre le tableau.",
     "arbitrage": "Composition : touchez chaque poste du terrain pour y placer un titulaire, puis validez. En match : +1 donne le point, ⇄ inverse les côtés. Touchez un joueur sur le terrain pour le remplacer (ou faire sortir le libéro). Pour chaque équipe : Remplacement, Temps mort (ou touchez la pastille de l'équipe, ses points montrent les temps morts pris) et Carton ; Annuler revient sur la dernière action.",
     "coach": "Sélectionnez un joueur en haut, puis tapez l'action réalisée. Les stats se calculent en temps réel. L'icône graphique ouvre le tableau de bord du match.",
@@ -684,7 +686,9 @@
     "tournamentTeams": "Équipes",
     "tournamentSchedule": "Planning et terrains",
     "tournamentRound": "Tour",
-    "tournamentLevels": "Répartition des niveaux"
+    "tournamentLevels": "Répartition des niveaux",
+    "tournamentMatchQr": "QR du match",
+    "scan": "Scanner un QR"
   },
   "tournament": {
     "list": {
@@ -957,6 +961,26 @@
       "pending": "La répartition sera connue à la fin du dernier tour de brassage.",
       "count_one": "{{count}} équipe",
       "count_other": "{{count}} équipes"
+    },
+    "qr": {
+      "button": "QR du match",
+      "scanWith": "À scanner avec l'app VolleyManager (Play Store)",
+      "hint": "L'arbitre touche « Scanner un QR de match » sur l'accueil de l'app : le match rapide s'ouvre avec ces équipes et ces règles.",
+      "lead": " · {{margin}} points d'écart"
+    }
+  },
+  "scan": {
+    "aim": "Visez le QR du match affiché par l'organisateur",
+    "permissionTitle": "Accès à la caméra",
+    "permissionText": "La caméra sert uniquement à lire le QR code du match. L'image est analysée sur ce téléphone : rien n'est enregistré ni envoyé.",
+    "allow": "Autoriser la caméra",
+    "openSettings": "Ouvrir les réglages",
+    "start": "Commencer le match",
+    "rescan": "Scanner un autre QR",
+    "errors": {
+      "not_volleymanager": "Ce QR code ne vient pas de VolleyManager. Scannez le « QR du match » affiché dans le tournoi.",
+      "unsupported_version": "Ce QR code vient d'une version plus récente de VolleyManager : mettez l'app à jour depuis le Play Store.",
+      "invalid": "QR code illisible ou abîmé. Rapprochez-vous, évitez les reflets et scannez-le à nouveau."
     }
   }
 }

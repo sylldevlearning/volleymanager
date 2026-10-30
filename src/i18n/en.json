@@ -43,7 +43,9 @@
     "arbitrageAbandonConfirmMessage": "The current match will be marked as finished and cannot be resumed.",
     "arbitrageAbandonConfirm": "Abandon",
     "tournament": "Tournament",
-    "tournamentDesc": "Pools, bracket, schedule and standings"
+    "tournamentDesc": "Pools, bracket, schedule and standings",
+    "scanMatchQr": "Scan a match QR",
+    "scanMatchQrDesc": "Teams and rules of a tournament match"
   },
   "tabs": {
     "home": "Home",
@@ -614,7 +616,7 @@
     "selectStarters": "Tap the badge to toggle starters"
   },
   "help": {
-    "home": "Quick match: referee right away, no teams to enter. New match: pick your teams and format. Refereeing: official match with lineup, substitutions and sanctions. Tactical board: draw and animate your plays.",
+    "home": "Quick match: referee right away, no teams to enter. New match: pick your teams and format. Refereeing: official match with lineup, substitutions and sanctions. Tactical board: draw and animate your plays. Scan a match QR: opens a quick match with the teams and rules of a tournament match.",
     "referee": "+1 gives the team the point, -1 removes one. After a point, choose who scored and how, or \"Skip\". Tap a team's timeout or substitution counter to use it. Undo reverts the last action. Rotations are automatic; the tactical icon opens the board.",
     "arbitrage": "Lineup: tap each court position to place a starter, then confirm. During the match: +1 gives the point, ⇄ swaps sides. Tap a player on the court to substitute them (or take the libero out). For each team: Substitution, Timeout (or tap the team's badge, its dots show the timeouts taken) and Card; Undo reverts the last action.",
     "coach": "Select a player at the top, then tap the action they made. Stats update in real time. The chart icon opens the match dashboard.",
@@ -684,7 +686,9 @@
     "tournamentTeams": "Teams",
     "tournamentSchedule": "Schedule and courts",
     "tournamentRound": "Round",
-    "tournamentLevels": "Levels"
+    "tournamentLevels": "Levels",
+    "tournamentMatchQr": "Match QR",
+    "scan": "Scan a QR"
   },
   "tournament": {
     "list": {
@@ -957,6 +961,26 @@
       "pending": "The levels will be known at the end of the last mixing round.",
       "count_one": "{{count}} team",
       "count_other": "{{count}} teams"
+    },
+    "qr": {
+      "button": "Match QR",
+      "scanWith": "Scan with the VolleyManager app (Play Store)",
+      "hint": "The referee taps \"Scan a match QR\" on the app home screen: the quick match opens with these teams and these rules.",
+      "lead": " · {{margin}}-point lead"
+    }
+  },
+  "scan": {
+    "aim": "Aim at the match QR shown by the organiser",
+    "permissionTitle": "Camera access",
+    "permissionText": "The camera is only used to read the match QR code. The image is processed on this phone: nothing is saved or sent.",
+    "allow": "Allow the camera",
+    "openSettings": "Open settings",
+    "start": "Start the match",
+    "rescan": "Scan another QR",
+    "errors": {
+      "not_volleymanager": "This QR code does not come from VolleyManager. Scan the \"Match QR\" shown in the tournament.",
+      "unsupported_version": "This QR code comes from a newer VolleyManager: update the app from the Play Store.",
+      "invalid": "Unreadable or damaged QR code. Move closer, avoid reflections and scan it again."
     }
   }
 }

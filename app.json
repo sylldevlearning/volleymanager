@@ -55,7 +55,15 @@
       "expo-font",
       "expo-status-bar",
       "expo-web-browser",
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "VolleyManager utilise la caméra pour scanner les licences et les QR codes de match. L'image est analysée sur le téléphone, rien n'est enregistré ni envoyé.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": false

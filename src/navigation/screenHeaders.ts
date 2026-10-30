@@ -51,6 +51,8 @@ export const SCREEN_HEADERS: Record<string, ScreenHeader> = {
   // "Tour N terminé" / "Tour N en cours", set by the screen
   'tournament/[id]/round/[round]': { titleKey: 'nav.tournamentRound' },
   'tournament/[id]/levels': { titleKey: 'nav.tournamentLevels' },
+  'tournament/[id]/qr/[matchId]': { titleKey: 'nav.tournamentMatchQr' },
+  scan: { titleKey: 'nav.scan' },
   about: { titleKey: 'nav.about' },
   '+not-found': { titleKey: 'nav.notFound' },
 };
