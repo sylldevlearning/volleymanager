@@ -1015,7 +1015,7 @@
     "errors": {
       "other_tournament": "Ce résultat vient d'un autre tournoi. Scannez-le depuis le tournoi concerné.",
       "match_not_found": "Ce match n'existe pas dans ce tournoi (tournoi recréé ou match supprimé). Saisissez le score à la main.",
-      "teams_changed": "Les équipes de ce match ne correspondent plus au QR (résultat corrigé ou équipe renommée depuis). Saisissez le score à la main.",
+      "teams_changed": "Les équipes de ce match ont changé depuis l'affichage du QR (correction d'un résultat précédent). Saisissez le score à la main.",
       "match_qr": "C'est le QR d'un match, pas un résultat : il se scanne par l'arbitre pour lancer le match.",
       "not_volleymanager": "Ce QR code ne vient pas de VolleyManager. Scannez le « QR du résultat » affiché par l'arbitre.",
       "unsupported_version": "Ce QR code vient d'une version plus récente de VolleyManager : mettez l'app à jour depuis le Play Store.",

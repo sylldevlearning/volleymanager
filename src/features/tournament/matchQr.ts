@@ -7,9 +7,10 @@ import type { TournamentBundle } from './bundle';
 /**
  * QR codes of a tournament, without signature ("VMT1:" + compact JSON).
  * - Match (organiser → referee): {f, h: [name, colour], a: [name, colour],
- *   r: [setsToWin, pointsPerSet, pointsLastSet, winMargin, tieBreak 0/1], t?, m?}
- *   — t/m (tournament and match ids) are absent from the first QRs.
- * - Result (referee → organiser): {k: "r", t, m, h: name, a: name, s: [[home, away], …]}
+ *   r: [setsToWin, pointsPerSet, pointsLastSet, winMargin, tieBreak 0/1], t?, m?, ht?, at?}
+ *   — t/m (tournament and match ids) are absent from the first QRs, ht/at
+ *   (tournament team ids) from the next ones.
+ * - Result (referee → organiser): {k: "r", t, m, ht?, at?, h: name, a: name, s: [[home, away], …]}
  */
 export const MATCH_QR_PREFIX = 'VMT1:';
 
@@ -58,12 +59,32 @@ export function encodeMatchQr(qr: MatchQr): string {
     h: [qr.home.name, qr.home.color],
     a: [qr.away.name, qr.away.color],
     r: [r.setsToWin, r.pointsPerSet, r.pointsLastSet, r.winMargin, r.tieBreak ? 1 : 0],
-    ...(qr.ref ? { t: qr.ref.tournamentId, m: qr.ref.matchId } : {}),
+    ...(qr.ref ? refFields(qr.ref) : {}),
   });
 }
 
+/** t, m, and ht/at when the team ids are known */
+function refFields(ref: TournamentRef) {
+  return {
+    t: ref.tournamentId,
+    m: ref.matchId,
+    ...(ref.homeTeamId && ref.awayTeamId ? { ht: ref.homeTeamId, at: ref.awayTeamId } : {}),
+  };
+}
+
+function refOf(body: Record<string, unknown>): TournamentRef | null {
+  const tournamentId = idOf(body.t);
+  const matchId = idOf(body.m);
+  if (!tournamentId || !matchId) return null;
+  const ref: TournamentRef = { tournamentId, matchId };
+  const homeTeamId = idOf(body.ht);
+  const awayTeamId = idOf(body.at);
+  if (homeTeamId && awayTeamId) Object.assign(ref, { homeTeamId, awayTeamId });
+  return ref;
+}
+
 export function encodeResultQr(result: ResultQr): string {
-  return encode({ k: 'r', t: result.ref.tournamentId, m: result.ref.matchId, h: result.home, a: result.away, s: result.sets });
+  return encode({ k: 'r', ...refFields(result.ref), h: result.home, a: result.away, s: result.sets });
 }
 
 function nameOf(value: unknown): string | null {
@@ -125,16 +146,15 @@ function bodyOf(text: string): { ok: true; body: Record<string, unknown> } | { o
 export function decodeMatchQr(text: string): MatchQrDecoded {
   const parsed = bodyOf(text);
   if (!parsed.ok) return parsed;
-  const { f, h, a, r, k, t, m } = parsed.body;
+  const { f, h, a, r, k } = parsed.body;
   if (k === 'r') return { ok: false, reason: 'result_qr' };
   const home = teamOf(h);
   const away = teamOf(a);
   const rules = rulesOf(r);
   if (!FORMATS.includes(f as TournamentGameType) || !home || !away || !rules) return { ok: false, reason: 'invalid' };
-  const tournamentId = idOf(t);
-  const matchId = idOf(m);
   const qr: MatchQr = { format: f as TournamentGameType, home, away, rules };
-  if (tournamentId && matchId) qr.ref = { tournamentId, matchId };
+  const ref = refOf(parsed.body);
+  if (ref) qr.ref = ref;
   return { ok: true, qr };
 }
 
@@ -142,15 +162,14 @@ export function decodeMatchQr(text: string): MatchQrDecoded {
 export function decodeResultQr(text: string): ResultQrDecoded {
   const parsed = bodyOf(text);
   if (!parsed.ok) return parsed;
-  const { k, t, m, h, a, s } = parsed.body;
+  const { k, h, a, s } = parsed.body;
   if (k !== 'r') return { ok: false, reason: 'f' in parsed.body ? 'match_qr' : 'invalid' };
-  const tournamentId = idOf(t);
-  const matchId = idOf(m);
+  const ref = refOf(parsed.body);
   const home = nameOf(h);
   const away = nameOf(a);
   const sets = setsOf(s);
-  if (!tournamentId || !matchId || !home || !away || !sets) return { ok: false, reason: 'invalid' };
-  return { ok: true, result: { ref: { tournamentId, matchId }, home, away, sets } };
+  if (!ref || !home || !away || !sets) return { ok: false, reason: 'invalid' };
+  return { ok: true, result: { ref, home, away, sets } };
 }
 
 /** QR of an upcoming match whose two teams are known (null otherwise). */
@@ -164,7 +183,7 @@ export function matchQrOf(bundle: TournamentBundle, match: TournamentMatch): Mat
     home: { name: home.name, color: home.color },
     away: { name: away.name, color: away.color },
     rules: rulesForStage(bundle.tournament.rules, match.stage),
-    ref: { tournamentId: bundle.tournament.id, matchId: match.id },
+    ref: { tournamentId: bundle.tournament.id, matchId: match.id, homeTeamId: home.id, awayTeamId: away.id },
   };
 }
 
@@ -218,10 +237,13 @@ export function checkResultQr(bundle: TournamentBundle, result: ResultQr): Resul
   if (!match) return { ok: false, reason: 'match_not_found' };
   const home = bundle.teams.find((x) => x.id === match.homeId);
   const away = bundle.teams.find((x) => x.id === match.awayId);
-  // Teams can move when an earlier result is corrected: the result would go to the wrong teams
-  if (!home || !away || !sameName(home.name, result.home) || !sameName(away.name, result.away)) {
-    return { ok: false, reason: 'teams_changed' };
-  }
+  // Teams can move when an earlier result is corrected: the result would go to the wrong teams.
+  // Compared by id (a renaming does not matter); older QRs without ids, by name.
+  const { homeTeamId, awayTeamId } = result.ref;
+  const sameTeams = homeTeamId && awayTeamId
+    ? home?.id === homeTeamId && away?.id === awayTeamId
+    : !!home && !!away && sameName(home.name, result.home) && sameName(away.name, result.away);
+  if (!home || !away || !sameTeams) return { ok: false, reason: 'teams_changed' };
   const alreadyPlayed = match.status === 'validated';
   const sameResult = alreadyPlayed && !match.forfeitId && JSON.stringify(match.sets) === JSON.stringify(result.sets);
   return { ok: true, match, home, away, alreadyPlayed, sameResult };

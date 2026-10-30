@@ -94,6 +94,25 @@ describe('result QR (referee → organiser)', () => {
   });
 });
 
+describe('team ids in both QRs', () => {
+  const withIds = { ...ref, homeTeamId: 'x', awayTeamId: 'y' };
+
+  it('the match QR and the result QR carry them, back and forth', () => {
+    const qr = { ...matchQr, ref: withIds };
+    expect(encodeMatchQr(qr)).toContain('"ht":"x","at":"y"');
+    expect(decodeMatchQr(encodeMatchQr(qr))).toEqual({ ok: true, qr });
+    expect(quickMatchConfig(qr).tournamentRef).toEqual(withIds);
+    const res = { ...result, ref: withIds };
+    expect(encodeResultQr(res)).toContain('"ht":"x","at":"y"');
+    expect(decodeResultQr(encodeResultQr(res))).toEqual({ ok: true, result: res });
+  });
+
+  it('a QR with only one of the two ids keeps the name check', () => {
+    const text = encodeResultQr(result).replace('"m":"tm-7"', '"m":"tm-7","ht":"x"');
+    expect(decodeResultQr(text)).toEqual({ ok: true, result });
+  });
+});
+
 describe('organiser check before recording', () => {
   const team = (id: string, name: string) => ({
     id, tournamentId: 'tour-1', teamId: null, name, color: '#000000', seedRank: null, poolId: null, position: 0,
@@ -125,6 +144,29 @@ describe('organiser check before recording', () => {
   it('teams changed since the match QR (a result corrected before)', () => {
     expect(checkResultQr(bundle(tm({ awayId: null })), result)).toEqual({ ok: false, reason: 'teams_changed' });
     expect(checkResultQr(bundle(tm({})), { ...result, away: 'Autre' })).toEqual({ ok: false, reason: 'teams_changed' });
+  });
+
+  it('with the team ids: a renamed team still gets its result', () => {
+    const renamed = { ...bundle(tm({})), teams: [team('x', 'Sable Club'), team('y', 'Les Vagues')] } as TournamentBundle;
+    const withIds = { ...result, ref: { ...ref, homeTeamId: 'x', awayTeamId: 'y' } };
+    const check = checkResultQr(renamed, withIds);
+    expect(check).toMatchObject({ ok: true });
+    if (check.ok) expect([check.home.name, check.away.name]).toEqual(['Sable Club', 'Les Vagues']);
+  });
+
+  it('with the team ids: refused when the teams of the match really changed', () => {
+    const moved = { ...bundle(tm({ awayId: 'z' })), teams: [team('x', 'Sable'), team('y', 'Vagues'), team('z', 'Vagues')] } as TournamentBundle;
+    // Same name, but another team: still refused
+    expect(checkResultQr(moved, { ...result, ref: { ...ref, homeTeamId: 'x', awayTeamId: 'y' } }))
+      .toEqual({ ok: false, reason: 'teams_changed' });
+    expect(checkResultQr(bundle(tm({ awayId: null })), { ...result, ref: { ...ref, homeTeamId: 'x', awayTeamId: 'y' } }))
+      .toEqual({ ok: false, reason: 'teams_changed' });
+  });
+
+  it('an older result QR without team ids: still checked by name', () => {
+    const renamed = { ...bundle(tm({})), teams: [team('x', 'Sable Club'), team('y', 'Vagues')] } as TournamentBundle;
+    expect(checkResultQr(renamed, result)).toEqual({ ok: false, reason: 'teams_changed' });
+    expect(checkResultQr(bundle(tm({})), result)).toMatchObject({ ok: true });
   });
 
   it('a match already played: replace after confirmation, or nothing to do if it is the same score', () => {

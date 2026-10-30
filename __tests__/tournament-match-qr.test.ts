@@ -91,7 +91,7 @@ describe('QR content from a tournament match', () => {
       home: { name: 'Sable', color: '#F59E0B' },
       away: { name: 'Vagues', color: '#1D4ED8' },
       rules: rules.match,
-      ref: { tournamentId: 'tour', matchId: 'm' },
+      ref: { tournamentId: 'tour', matchId: 'm', homeTeamId: 'a', awayTeamId: 'b' },
     });
     expect(matchQrOf(bundle, match({ stage: 'knockout' }))!.rules).toEqual(rules.finalsMatch);
   });

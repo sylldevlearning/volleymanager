@@ -274,8 +274,10 @@ transaction de création), moteur complet et ses tests. Pas d'écran.
   équipes, sets, « Vérifiez que ce résultat correspond bien au match joué avant
   de valider ») → `recordTournamentResult` comme une saisie (source `qr`),
   même suite (écran de fin de tour ou des niveaux).
-- Refus : autre tournoi, match introuvable, équipes changées (résultat corrigé
-  ou équipe renommée), QR de match au lieu d'un résultat, QR illisible ou plus
+- Équipes comparées par identifiant (`ht`/`at` dans les deux QR) : un renommage
+  ne bloque pas ; les QR sans ces identifiants gardent le contrôle par nom.
+- Refus : autre tournoi, match introuvable, équipes changées (correction d'un
+  résultat précédent), QR de match au lieu d'un résultat, QR illisible ou plus
   récent. Match déjà joué : remplacer après confirmation, bloqué si un match
   suivant en dépend ; même score : « déjà enregistré ».
 - Aide : page « Tournoi » dans la présentation (5 pages), « ? » propre à chaque

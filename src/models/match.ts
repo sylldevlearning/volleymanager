@@ -34,6 +34,9 @@ export interface MatchConfig {
 export interface TournamentRef {
   tournamentId: string;
   matchId: string;
+  /** Tournament team ids at the time of the match QR — absent from older QRs (checked by name then) */
+  homeTeamId?: string;
+  awayTeamId?: string;
 }
 
 export const DEFAULT_INDOOR_CONFIG: MatchConfig = {

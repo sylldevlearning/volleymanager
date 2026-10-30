@@ -1015,7 +1015,7 @@
     "errors": {
       "other_tournament": "This result comes from another tournament. Scan it from that tournament.",
       "match_not_found": "This match is not in this tournament (tournament recreated or match deleted). Enter the score by hand.",
-      "teams_changed": "The teams of this match no longer match the QR (result corrected or team renamed since). Enter the score by hand.",
+      "teams_changed": "The teams of this match changed since the QR was shown (an earlier result was corrected). Enter the score by hand.",
       "match_qr": "This is a match QR, not a result: the referee scans it to start the match.",
       "not_volleymanager": "This QR code does not come from VolleyManager. Scan the \"Result QR\" shown by the referee.",
       "unsupported_version": "This QR code comes from a newer VolleyManager: update the app from the Play Store.",
