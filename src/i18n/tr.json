@@ -631,14 +631,14 @@
     "newMatch": "Takımları, biçimi, modu ve ilk servisi kimin atacağını seç. Kurallar (setler, sayılar, molalar, değişiklikler) ayarlanabilir.",
     "stats": "İki takımı beceri beceri karşılaştır, en iyi oyuncuları ve sayıların nasıl alındığını gör. Ayrıntılar için bir oyuncuya dokun.",
     "history": "Devam etmek veya özetini görmek için bir maça dokun; silmek için uzun bas. Duruma veya takıma göre filtrele.",
-    "settings": "Dili değiştir, titreşimi aç ve uygulama yardımını yeniden gör.",
+    "settings": "Dili değiştir, titreşimi aç ve uygulama yardımını yeniden gör. Uygulama varsayılan olarak telefonun dilini kullanır; 11 dil arasından başka birini seçebilirsin.",
     "substitution": "Önce kimin çıkacağını, sonra kimin gireceğini seç. Libero ⚡ değişiklik sınırına sayılmaz.",
     "lineup": "Gelen oyuncuları işaretle, sonra her takımın ilk oyuncularını seçmek için İlk oyuncu / Yedek etiketine dokun. Libero ⚡ ayrıca yönetilir.",
     "tournaments": "Turnuvaların, en yeniden eskiye. Her şey bu telefonda kalır: hesap yok, bağlantı yok. «Yeni turnuva» 4 adımlı bir sihirbaz açar.",
     "tournamentWizard": "4 adım: bilgiler, biçim ve kurallar, takımlar ve program, özet. Önerilen değerler oyun türüne ve takım sayısına göre ayarlanır; her şeyi değiştirebilirsin. «Yeniden kura» oluşturmadan önce grup kurasını yeniler. «Şablon olarak kaydet» kuralları ve programı (takımlar olmadan) sonraki turnuva için saklar.",
-    "tournamentPlanning": "Program: oynanma sırasına göre, saate ve sahaya göre maçlar. Skor girmek veya düzeltmek için bir maça dokun. Turnuva gecikirse «Program ve sahalar» (⋯ menüsü) sıradaki maçların saatlerini yeniden hesaplar.",
-    "tournamentMatches": "Maçlar: duruma (oynanacak, bitti), aşamaya veya takıma göre filtrele. Skorunu girmek veya QR kodunu göstermek için sıradaki bir maça dokun: hakem uygulamayla tarar (ana ekranda «Maç QR kodunu tara»). Sonunda sonuç QR kodunu ⋯ menüsünden tara («Sonuç QR kodu tara»).",
-    "tournamentStandings": "Sıralama: aşamaların ilerleyişi, grup sıralamaları, eleme tablosu ve genel sıralama. Her sonuçta, düzeltmeden sonra bile güncellenir. Eşitlikte ikili averaj, sonra set farkı, sayı farkı ve atılan sayılar."
+    "tournamentPlanning": "Program: oynanma sırasına göre, saate ve sahaya göre maçlar. Skor girmek veya düzeltmek için bir maça dokun. Turnuva gecikirse «Program ve sahalar» (⋯ menüsü) sıradaki maçların saatlerini yeniden hesaplar. «Dışa aktar» (⋯ menüsü) programı, sonuçları veya sıralamayı PDF ya da görsel olarak paylaşır.",
+    "tournamentMatches": "Maçlar: duruma (oynanacak, bitti), aşamaya veya takıma göre filtrele. Skorunu girmek veya QR kodunu göstermek için sıradaki bir maça dokun: hakem uygulamayla tarar (ana ekranda «Maç QR kodunu tara»). Sonunda sonuç QR kodunu ⋯ menüsünden tara («Sonuç QR kodu tara»). Bir sonuçtan sonra uygulama, turnuvasını bitirip ayrılabilecek takımları gösterir. «Dışa aktar» (⋯ menüsü) programı, sonuçları veya sıralamayı PDF ya da görsel olarak paylaşır.",
+    "tournamentStandings": "Sıralama: aşamaların ilerleyişi, grup sıralamaları, eleme tablosu ve genel sıralama. Her sonuçta, düzeltmeden sonra bile güncellenir. Eşitlikte ikili averaj, sonra set farkı, sayı farkı ve atılan sayılar. Oynayacak maçı kalmayan takımlar «Bitirdi» olarak işaretlenir. «Dışa aktar» (⋯ menüsü) programı, sonuçları veya sıralamayı PDF ya da görsel olarak paylaşır."
   },
   "onboarding": {
     "skip": "Atla",
@@ -650,7 +650,7 @@
     },
     "arbitrage": {
       "title": "Hakemlik",
-      "body": "Resmî kurallarla gerçek bir maçı yönet: başlangıç dizilişi, değişiklikler, libero, molalar ve cezalar. Maç sürekli kaydedilir, istediğin an devam edebilirsin."
+      "body": "Resmî kurallarla gerçek bir maçı yönet: başlangıç dizilişi, değişiklikler, libero, molalar ve cezalar. 6×6, 4×4, 3×3 veya 2×2'de, Eğlence ya da Resmî kurallarla. Maç sürekli kaydedilir, istediğin an devam edebilirsin."
     },
     "tournament": {
       "title": "Turnuva",

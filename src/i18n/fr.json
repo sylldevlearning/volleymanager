@@ -631,14 +631,14 @@
     "newMatch": "Choisissez les équipes, le format, le mode et qui sert en premier. Les règles (sets, points, temps morts, remplacements) sont ajustables.",
     "stats": "Comparez les deux équipes compétence par compétence, découvrez les meilleurs joueurs et la répartition des points. Touchez un joueur pour voir son détail.",
     "history": "Touchez un match pour le reprendre ou voir son résumé, appui long pour le supprimer. Filtrez par statut ou par équipe.",
-    "settings": "Changez la langue, activez les vibrations et revoyez l'aide de l'app.",
+    "settings": "Changez la langue, activez les vibrations et revoyez l'aide de l'app. Par défaut, l'app suit la langue du téléphone ; vous pouvez en choisir une autre parmi 11.",
     "substitution": "Choisissez qui sort puis qui entre. Le libéro ⚡ ne compte pas dans le quota de remplacements.",
     "lineup": "Cochez les joueurs présents, puis touchez le badge Titulaire / Remplaçant pour choisir les titulaires de chaque équipe. Le libéro ⚡ est géré à part.",
     "tournaments": "Tes tournois, du plus récent au plus ancien. Tout reste sur ce téléphone : pas de compte ni de connexion. « Nouveau tournoi » ouvre un assistant en 4 étapes.",
     "tournamentWizard": "4 étapes : informations, format et règles, équipes et planning, récapitulatif. Les valeurs proposées s'adaptent au type de jeu et au nombre d'équipes ; tu peux tout modifier. « Retirer au sort » refait le tirage des poules avant la création. « Enregistrer comme modèle » garde les règles et le planning (sans les équipes) pour un prochain tournoi.",
-    "tournamentPlanning": "Planning : les matchs par heure et par terrain, dans l'ordre où ils se jouent. Touchez un match pour saisir ou corriger son score. Si le tournoi prend du retard, « Planning et terrains » (menu ⋯) permet de recalculer les horaires des matchs à venir.",
-    "tournamentMatches": "Matchs : filtrez par statut (à jouer, terminés), par phase ou par équipe. Touchez un match à venir pour saisir son score ou afficher son QR code : l'arbitre le scanne avec l'app (« Scanner un QR de match » sur l'accueil). À la fin, scannez son QR du résultat depuis le menu ⋯ (« Scanner un QR de résultat »).",
-    "tournamentStandings": "Classement : l'avancement des phases, les classements de poule, le tableau final et le classement général. Il se met à jour à chaque résultat, même après une correction. Égalités départagées par la confrontation directe, puis la différence de sets, la différence de points et les points marqués."
+    "tournamentPlanning": "Planning : les matchs par heure et par terrain, dans l'ordre où ils se jouent. Touchez un match pour saisir ou corriger son score. Si le tournoi prend du retard, « Planning et terrains » (menu ⋯) permet de recalculer les horaires des matchs à venir. « Exporter » (menu ⋯) partage le planning, les résultats ou le classement en PDF ou en image.",
+    "tournamentMatches": "Matchs : filtrez par statut (à jouer, terminés), par phase ou par équipe. Touchez un match à venir pour saisir son score ou afficher son QR code : l'arbitre le scanne avec l'app (« Scanner un QR de match » sur l'accueil). À la fin, scannez son QR du résultat depuis le menu ⋯ (« Scanner un QR de résultat »). Après un résultat, l'app indique les équipes qui ont terminé leur tournoi et peuvent partir. « Exporter » (menu ⋯) partage le planning, les résultats ou le classement en PDF ou en image.",
+    "tournamentStandings": "Classement : l'avancement des phases, les classements de poule, le tableau final et le classement général. Il se met à jour à chaque résultat, même après une correction. Égalités départagées par la confrontation directe, puis la différence de sets, la différence de points et les points marqués. Les équipes qui n'ont plus de match à jouer sont marquées « Terminé ». « Exporter » (menu ⋯) partage le planning, les résultats ou le classement en PDF ou en image."
   },
   "onboarding": {
     "skip": "Passer",
@@ -650,7 +650,7 @@
     },
     "arbitrage": {
       "title": "Arbitrage",
-      "body": "Arbitrez un vrai match selon les règles officielles : composition de départ, remplacements, libéro, temps morts et sanctions. Le match est sauvegardé en continu, vous pouvez le reprendre à tout moment."
+      "body": "Arbitrez un vrai match selon les règles officielles : composition de départ, remplacements, libéro, temps morts et sanctions. En 6×6, 4×4, 3×3 ou 2×2, avec les règles Loisir ou Officiel. Le match est sauvegardé en continu, vous pouvez le reprendre à tout moment."
     },
     "tournament": {
       "title": "Tournoi",

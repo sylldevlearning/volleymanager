@@ -631,14 +631,14 @@
     "newMatch": "Escolha os times, o formato, o modo e quem saca primeiro. As regras (sets, pontos, pedidos de tempo, substituições) podem ser ajustadas.",
     "stats": "Compare os dois times fundamento por fundamento, veja os destaques e como os pontos foram feitos. Toque num jogador para ver os detalhes.",
     "history": "Toque numa partida para retomá-la ou ver o resumo; toque longo para excluí-la. Filtre por situação ou por time.",
-    "settings": "Mude o idioma, ative a vibração e veja de novo a ajuda do app.",
+    "settings": "Mude o idioma, ative a vibração e veja de novo a ajuda do app. Por padrão, o app segue o idioma do celular; você pode escolher outro entre 11 idiomas.",
     "substitution": "Escolha quem sai e depois quem entra. O líbero ⚡ não conta no limite de substituições.",
     "lineup": "Marque os jogadores presentes e toque na etiqueta Titular / Banco para escolher os titulares de cada time. O líbero ⚡ é tratado à parte.",
     "tournaments": "Seus torneios, do mais recente ao mais antigo. Tudo fica neste celular: sem conta, sem conexão. «Novo torneio» abre um assistente em 4 etapas.",
     "tournamentWizard": "4 etapas: informações, formato e regras, times e programação, resumo. Os valores sugeridos se adaptam ao tipo de jogo e ao número de times; você pode mudar tudo. «Sortear de novo» refaz o sorteio dos grupos antes da criação. «Salvar como modelo» guarda as regras e a programação (sem os times) para um próximo torneio.",
-    "tournamentPlanning": "Programação: as partidas por horário e por quadra, na ordem em que são jogadas. Toque numa partida para lançar ou corrigir o placar. Se o torneio atrasar, «Programação e quadras» (menu ⋯) recalcula os horários das próximas partidas.",
-    "tournamentMatches": "Partidas: filtre por situação (a jogar, encerradas), fase ou time. Toque numa próxima partida para lançar o placar ou mostrar o QR code: o árbitro lê com o app («Ler o QR de uma partida» na tela inicial). No final, leia o QR do resultado pelo menu ⋯ («Ler um QR de resultado»).",
-    "tournamentStandings": "Classificação: andamento das fases, classificação dos grupos, chave final e classificação geral. Atualizada a cada resultado, mesmo após uma correção. Desempates por confronto direto, depois saldo de sets, saldo de pontos e pontos marcados."
+    "tournamentPlanning": "Programação: as partidas por horário e por quadra, na ordem em que são jogadas. Toque numa partida para lançar ou corrigir o placar. Se o torneio atrasar, «Programação e quadras» (menu ⋯) recalcula os horários das próximas partidas. «Exportar» (menu ⋯) compartilha a programação, os resultados ou a classificação em PDF ou imagem.",
+    "tournamentMatches": "Partidas: filtre por situação (a jogar, encerradas), fase ou time. Toque numa próxima partida para lançar o placar ou mostrar o QR code: o árbitro lê com o app («Ler o QR de uma partida» na tela inicial). No final, leia o QR do resultado pelo menu ⋯ («Ler um QR de resultado»). Após um resultado, o app indica os times que terminaram o torneio e podem ir embora. «Exportar» (menu ⋯) compartilha a programação, os resultados ou a classificação em PDF ou imagem.",
+    "tournamentStandings": "Classificação: andamento das fases, classificação dos grupos, chave final e classificação geral. Atualizada a cada resultado, mesmo após uma correção. Desempates por confronto direto, depois saldo de sets, saldo de pontos e pontos marcados. Os times sem partidas a jogar aparecem como «Encerrado». «Exportar» (menu ⋯) compartilha a programação, os resultados ou a classificação em PDF ou imagem."
   },
   "onboarding": {
     "skip": "Pular",
@@ -650,7 +650,7 @@
     },
     "arbitrage": {
       "title": "Arbitragem",
-      "body": "Arbitre uma partida de verdade pelas regras oficiais: formação inicial, substituições, líbero, pedidos de tempo e sanções. A partida é salva continuamente: dá para retomá-la a qualquer momento."
+      "body": "Arbitre uma partida de verdade pelas regras oficiais: formação inicial, substituições, líbero, pedidos de tempo e sanções. Em 6×6, 4×4, 3×3 ou 2×2, com regras de Lazer ou Oficiais. A partida é salva continuamente: dá para retomá-la a qualquer momento."
     },
     "tournament": {
       "title": "Torneio",

@@ -631,14 +631,14 @@
     "newMatch": "Wähle die Teams, das Format, den Modus und wer zuerst aufschlägt. Die Regeln (Sätze, Punkte, Auszeiten, Wechsel) lassen sich anpassen.",
     "stats": "Vergleiche beide Teams Element für Element, sieh die besten Spieler und wie die Punkte entstanden sind. Tippe auf einen Spieler für Details.",
     "history": "Tippe auf ein Spiel, um es fortzusetzen oder die Übersicht zu sehen; lange drücken zum Löschen. Filtere nach Status oder Team.",
-    "settings": "Ändere die Sprache, schalte die Vibration ein und sieh dir die Hilfe der App erneut an.",
+    "settings": "Ändere die Sprache, schalte die Vibration ein und sieh dir die Hilfe der App erneut an. Standardmäßig folgt die App der Sprache des Handys; du kannst eine von 11 Sprachen wählen.",
     "substitution": "Wähle, wer rausgeht, dann wer reinkommt. Der Libero ⚡ zählt nicht zum Wechselkontingent.",
     "lineup": "Hake die anwesenden Spieler an und tippe auf das Etikett Starter / Bank, um die Starter jedes Teams zu wählen. Der Libero ⚡ wird separat behandelt.",
     "tournaments": "Deine Turniere, das neueste zuerst. Alles bleibt auf diesem Handy: kein Konto, keine Verbindung. „Neues Turnier“ öffnet einen Assistenten in 4 Schritten.",
     "tournamentWizard": "4 Schritte: Angaben, Format und Regeln, Teams und Spielplan, Übersicht. Die Vorschläge passen sich der Spielform und der Zahl der Teams an; du kannst alles ändern. „Neu auslosen“ lost die Gruppen vor dem Anlegen neu aus. „Als Vorlage speichern“ behält Regeln und Spielplan (ohne Teams) für ein nächstes Turnier.",
-    "tournamentPlanning": "Spielplan: die Spiele nach Uhrzeit und Feld, in der Reihenfolge, in der sie gespielt werden. Tippe auf ein Spiel, um sein Ergebnis einzugeben oder zu korrigieren. Bei Verspätung berechnet „Spielplan und Felder“ (Menü ⋯) die Zeiten der kommenden Spiele neu.",
-    "tournamentMatches": "Spiele: nach Status (offen, beendet), Phase oder Team filtern. Tippe auf ein kommendes Spiel, um sein Ergebnis einzugeben oder seinen QR-Code zu zeigen: der Schiedsrichter scannt ihn mit der App („Spiel-QR scannen“ auf dem Startbildschirm). Am Ende scannst du seinen Ergebnis-QR über das Menü ⋯ („Ergebnis-QR scannen“).",
-    "tournamentStandings": "Tabelle: Fortschritt der Phasen, Gruppentabellen, K.-o.-Runde und Endstand. Wird mit jedem Ergebnis aktualisiert, auch nach einer Korrektur. Gleichstand: direkter Vergleich, dann Satzdifferenz, Punktdifferenz und erzielte Punkte."
+    "tournamentPlanning": "Spielplan: die Spiele nach Uhrzeit und Feld, in der Reihenfolge, in der sie gespielt werden. Tippe auf ein Spiel, um sein Ergebnis einzugeben oder zu korrigieren. Bei Verspätung berechnet „Spielplan und Felder“ (Menü ⋯) die Zeiten der kommenden Spiele neu. „Exportieren“ (Menü ⋯) teilt Spielplan, Ergebnisse oder Tabelle als PDF oder Bild.",
+    "tournamentMatches": "Spiele: nach Status (offen, beendet), Phase oder Team filtern. Tippe auf ein kommendes Spiel, um sein Ergebnis einzugeben oder seinen QR-Code zu zeigen: der Schiedsrichter scannt ihn mit der App („Spiel-QR scannen“ auf dem Startbildschirm). Am Ende scannst du seinen Ergebnis-QR über das Menü ⋯ („Ergebnis-QR scannen“). Nach einem Ergebnis zeigt die App, welche Teams ihr Turnier beendet haben und gehen können. „Exportieren“ (Menü ⋯) teilt Spielplan, Ergebnisse oder Tabelle als PDF oder Bild.",
+    "tournamentStandings": "Tabelle: Fortschritt der Phasen, Gruppentabellen, K.-o.-Runde und Endstand. Wird mit jedem Ergebnis aktualisiert, auch nach einer Korrektur. Gleichstand: direkter Vergleich, dann Satzdifferenz, Punktdifferenz und erzielte Punkte. Teams ohne weiteres Spiel sind als „Fertig“ markiert. „Exportieren“ (Menü ⋯) teilt Spielplan, Ergebnisse oder Tabelle als PDF oder Bild."
   },
   "onboarding": {
     "skip": "Überspringen",
@@ -650,7 +650,7 @@
     },
     "arbitrage": {
       "title": "Schiedsrichter",
-      "body": "Pfeife ein echtes Spiel nach den offiziellen Regeln: Startaufstellung, Wechsel, Libero, Auszeiten und Strafen. Das Spiel wird laufend gespeichert und lässt sich jederzeit fortsetzen."
+      "body": "Pfeife ein echtes Spiel nach den offiziellen Regeln: Startaufstellung, Wechsel, Libero, Auszeiten und Strafen. Im 6×6, 4×4, 3×3 oder 2×2, mit Freizeit- oder offiziellen Regeln. Das Spiel wird laufend gespeichert und lässt sich jederzeit fortsetzen."
     },
     "tournament": {
       "title": "Turnier",

@@ -631,14 +631,14 @@
     "newMatch": "Scegli le squadre, il formato, la modalità e chi batte per primo. Le regole (set, punti, time-out, sostituzioni) si possono regolare.",
     "stats": "Confronta le due squadre fondamentale per fondamentale, guarda i migliori giocatori e come sono arrivati i punti. Tocca un giocatore per vedere il dettaglio.",
     "history": "Tocca una partita per riprenderla o vederne il riepilogo; tieni premuto per eliminarla. Filtra per stato o per squadra.",
-    "settings": "Cambia la lingua, attiva le vibrazioni e rivedi l'aiuto dell'app.",
+    "settings": "Cambia la lingua, attiva le vibrazioni e rivedi l'aiuto dell'app. Di default l'app segue la lingua del telefono; puoi sceglierne un'altra tra 11.",
     "substitution": "Scegli chi esce, poi chi entra. Il libero ⚡ non conta nel limite di sostituzioni.",
     "lineup": "Spunta i giocatori presenti, poi tocca l'etichetta Titolare / Panchina per scegliere i titolari di ogni squadra. Il libero ⚡ è gestito a parte.",
     "tournaments": "I tuoi tornei, dal più recente. Tutto resta su questo telefono: niente account né connessione. «Nuovo torneo» apre una procedura guidata in 4 passaggi.",
     "tournamentWizard": "4 passaggi: dati, formato e regole, squadre e calendario, riepilogo. I valori proposti si adattano al tipo di gioco e al numero di squadre; puoi cambiare tutto. «Nuovo sorteggio» rifà il sorteggio dei gironi prima della creazione. «Salva come modello» conserva le regole e il calendario (senza le squadre) per un prossimo torneo.",
-    "tournamentPlanning": "Calendario: le partite per orario e per campo, nell'ordine in cui si giocano. Tocca una partita per inserire o correggere il risultato. Se il torneo è in ritardo, «Calendario e campi» (menu ⋯) ricalcola gli orari delle prossime partite.",
-    "tournamentMatches": "Partite: filtra per stato (da giocare, terminate), fase o squadra. Tocca una partita da giocare per inserire il risultato o mostrarne il codice QR: l'arbitro lo scansiona con l'app («Scansiona il QR di una partita» nella schermata iniziale). Alla fine, scansiona il suo QR del risultato dal menu ⋯ («Scansiona un QR di risultato»).",
-    "tournamentStandings": "Classifica: avanzamento delle fasi, classifiche dei gironi, tabellone finale e classifica generale. Si aggiorna a ogni risultato, anche dopo una correzione. Parità risolte con lo scontro diretto, poi differenza set, differenza punti e punti segnati."
+    "tournamentPlanning": "Calendario: le partite per orario e per campo, nell'ordine in cui si giocano. Tocca una partita per inserire o correggere il risultato. Se il torneo è in ritardo, «Calendario e campi» (menu ⋯) ricalcola gli orari delle prossime partite. «Esporta» (menu ⋯) condivide il calendario, i risultati o la classifica in PDF o come immagine.",
+    "tournamentMatches": "Partite: filtra per stato (da giocare, terminate), fase o squadra. Tocca una partita da giocare per inserire il risultato o mostrarne il codice QR: l'arbitro lo scansiona con l'app («Scansiona il QR di una partita» nella schermata iniziale). Alla fine, scansiona il suo QR del risultato dal menu ⋯ («Scansiona un QR di risultato»). Dopo un risultato, l'app indica le squadre che hanno terminato il torneo e possono andare via. «Esporta» (menu ⋯) condivide il calendario, i risultati o la classifica in PDF o come immagine.",
+    "tournamentStandings": "Classifica: avanzamento delle fasi, classifiche dei gironi, tabellone finale e classifica generale. Si aggiorna a ogni risultato, anche dopo una correzione. Parità risolte con lo scontro diretto, poi differenza set, differenza punti e punti segnati. Le squadre senza più partite da giocare sono segnate «Terminato». «Esporta» (menu ⋯) condivide il calendario, i risultati o la classifica in PDF o come immagine."
   },
   "onboarding": {
     "skip": "Salta",
@@ -650,7 +650,7 @@
     },
     "arbitrage": {
       "title": "Arbitraggio",
-      "body": "Arbitra una vera partita secondo le regole ufficiali: formazione iniziale, sostituzioni, libero, time-out e sanzioni. La partita è salvata in continuo: puoi riprenderla in qualsiasi momento."
+      "body": "Arbitra una vera partita secondo le regole ufficiali: formazione iniziale, sostituzioni, libero, time-out e sanzioni. In 6×6, 4×4, 3×3 o 2×2, con regole Amatoriale o Ufficiale. La partita è salvata in continuo: puoi riprenderla in qualsiasi momento."
     },
     "tournament": {
       "title": "Torneo",
