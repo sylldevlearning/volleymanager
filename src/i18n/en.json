@@ -256,7 +256,7 @@
     "deleteConfirm": "Delete {{name}} and all players?",
     "deleteWithMatches": "This team has {{count}} matches in history. Deletion is irreversible.",
     "deleted": "Deleted team",
-    "playerCount": "{{count}} player",
+    "playerCount_one": "{{count}} player",
     "playerCount_other": "{{count}} players"
   },
   "player": {
@@ -274,7 +274,7 @@
     "addAnother": "Add another",
     "done": "Done",
     "batchMode": "Quick add",
-    "addedCount": "{{count}} added",
+    "addedCount_one": "{{count}} added",
     "addedCount_other": "{{count}} added",
     "positions": {
       "setter": "Setter",
@@ -400,7 +400,9 @@
     },
     "noData": "No statistics available",
     "noMatches": "No matches played",
-    "setEndStats": "Enter stats for the last point"
+    "setEndStats": "Enter stats for the last point",
+    "aces_one": "{{count}} ace",
+    "aces_other": "{{count}} aces"
   },
   "history": {
     "title": "History",
@@ -440,7 +442,7 @@
       "reset": "Reset",
       "speed": "Speed",
       "stepOf": "Step {{current}} / {{total}}",
-      "historyCount": "{{count}} step",
+      "historyCount_one": "{{count}} step",
       "historyCount_other": "{{count}} steps",
       "playAll": "Play all",
       "stop": "Stop",
@@ -576,7 +578,8 @@
     "version": "Version",
     "help": "Help",
     "replayHelp": "Show help again",
-    "privacyOptions": "Privacy settings"
+    "privacyOptions": "Privacy settings",
+    "languageSystem": "Phone language ({{name}})"
   },
   "scoring": {
     "removePoint": "-1 Point",
@@ -719,7 +722,6 @@
       "indoor_3v3": "3×3",
       "beach_2v2": "Beach 2×2"
     },
-    "manualOnly": "For this game type, scores are entered by hand (no refereeing, no QR code).",
     "format": {
       "round_robin": "League",
       "pools_knockout": "Pools + finals",
@@ -837,7 +839,9 @@
       "brassageHint": "Round 1: pools drawn at random. Next rounds: pools of the same level, from the ranking of the previous round. Levels follow the ranking of the last round.",
       "matchesPerTeam_one": "Each team plays {{count}} match",
       "matchesPerTeam_other": "Each team plays {{count}} matches",
-      "matchesPerTeamRange": "Each team plays {{min}} to {{max}} matches"
+      "matchesPerTeamRange": "Each team plays {{min}} to {{max}} matches",
+      "durationMinutes": "{{m}} min",
+      "durationHours": "{{h}} h {{m}}"
     },
     "errors": {
       "name_required": "Give the tournament a name.",

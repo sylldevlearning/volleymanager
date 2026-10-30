@@ -2,6 +2,7 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useTranslation } from 'react-i18next';
+import { formatClock, formatDate, uses12HourClock } from '../../i18n/format';
 import { CalendarDays, ChevronDown, ChevronUp, Clock, Save, Shuffle, Users, X } from 'lucide-react-native';
 import { palette } from '../../theme/tokens';
 import { FormField, Stepper, ToggleRow } from '../ui/FormControls';
@@ -118,6 +119,7 @@ export function PickerField({ mode, value, label, onPick }: { mode: 'date' | 'ti
   const [open, setOpen] = useState(false);
   const Icon = mode === 'date' ? CalendarDays : Clock;
 
+  const { i18n } = useTranslation();
   function handleChange(event: DateTimePickerEvent, picked?: Date) {
     setOpen(false);
     if (event.type === 'set' && picked) onPick(picked);
@@ -132,10 +134,10 @@ export function PickerField({ mode, value, label, onPick }: { mode: 'date' | 'ti
   return (
     <>
       <Pressable style={[styles.input, styles.pickerButton]} onPress={() => setOpen(true)} accessibilityRole="button" accessibilityLabel={label}>
-        <Text style={styles.pickerText}>{mode === 'date' ? displayDate(isoFromDate(value)) : timeFromDate(value)}</Text>
+        <Text style={styles.pickerText}>{mode === 'date' ? formatDate(value, i18n.language) : formatClock(timeFromDate(value), i18n.language)}</Text>
         <Icon size={18} color={palette.textSecondary} />
       </Pressable>
-      {open && <DateTimePicker value={value} mode={mode} is24Hour onChange={handleChange} />}
+      {open && <DateTimePicker value={value} mode={mode} is24Hour={!uses12HourClock(i18n.language)} onChange={handleChange} />}
     </>
   );
 }
@@ -149,7 +151,7 @@ export function DetailsStep({
   onApplyTemplate: (template: TournamentTemplate) => void;
   onDeleteTemplate: (template: TournamentTemplate) => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   return (
     <View>
@@ -196,9 +198,6 @@ export function DetailsStep({
             <Chip key={type} label={t(`tournament.gameType.${type}`)} active={state.gameType === type} onPress={() => onChange(setGameType(state, type))} />
           ))}
         </View>
-        {(state.gameType === 'indoor_4v4' || state.gameType === 'indoor_3v3') && (
-          <Text style={styles.hint}>{t('tournament.manualOnly')}</Text>
-        )}
       </FormField>
     </View>
   );
@@ -207,7 +206,7 @@ export function DetailsStep({
 // ─── Step 2: format and rules ──────────────────────────────────────────────
 
 function SetRulesEditor({ rules, onChange }: { rules: SetRules; onChange: (rules: SetRules) => void }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const hasDecidingSet = rules.setsToWin > 1;
   return (
     <View>
@@ -232,7 +231,7 @@ const POINT_ROWS: (keyof PointsScale)[] = ['winClear', 'winTight', 'lossTight', 
 const samePoints = (a: PointsScale, b: PointsScale) => POINT_ROWS.every((k) => a[k] === b[k]);
 
 export function FormatStep({ state, onChange }: StepProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [advanced, setAdvanced] = useState(false);
 
   function moveTiebreaker(rule: TiebreakerRule, delta: -1 | 1) {
@@ -335,15 +334,15 @@ function poolSizesText(pools: string[][], t: (key: string, opts?: Record<string,
     .join(t('tournament.wizard.and'));
 }
 
-/** "6 h 45", "40 min" */
-function durationText(minutes: number): string {
+/** "6 h 45", "40 min" — written by each language */
+function durationText(minutes: number, t: (key: string, opts?: Record<string, unknown>) => string): string {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
-  return h === 0 ? `${m} min` : `${h} h ${String(m).padStart(2, '0')}`;
+  return h === 0 ? t('tournament.wizard.durationMinutes', { m }) : t('tournament.wizard.durationHours', { h, m: String(m).padStart(2, '0') });
 }
 
 export function TeamsStep({ state, onChange }: StepProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [libraryOpen, setLibraryOpen] = useState(false);
   const label = (k: number) => t('tournament.wizard.teamNumber', { n: k });
   const hint = formatHint(state);
@@ -377,9 +376,9 @@ export function TeamsStep({ state, onChange }: StepProps) {
             <>
               {estimate.pools.length > 0 && <Text style={styles.estimateStrong}>{poolSizesText(estimate.pools, t)}</Text>}
               <Text style={styles.estimateText}>
-                {t('tournament.wizard.summaryMatches', { count: estimate.matchCount })} · {t('tournament.wizard.summaryEnd', { time: estimate.endTime })}
+                {t('tournament.wizard.summaryMatches', { count: estimate.matchCount })} · {t('tournament.wizard.summaryEnd', { time: formatClock(estimate.endTime ?? '', i18n.language) })}
               </Text>
-              <Text style={styles.estimateText}>{t('tournament.wizard.summaryDuration', { duration: durationText(estimate.durationMinutes ?? 0) })}</Text>
+              <Text style={styles.estimateText}>{t('tournament.wizard.summaryDuration', { duration: durationText(estimate.durationMinutes ?? 0, t) })}</Text>
               {estimate.matchesPerTeam && (
                 <Text style={styles.estimateText}>
                   {estimate.matchesPerTeam.min === estimate.matchesPerTeam.max
@@ -508,7 +507,7 @@ export function SummaryStep({
   onRedraw: () => void;
   onSaveTemplate: (name: string) => Promise<void>;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [templateName, setTemplateName] = useState('');
   const [saved, setSaved] = useState(false);
   const rules = state.match;
@@ -523,18 +522,18 @@ export function SummaryStep({
     <View>
       <View style={styles.summaryCard}>
         <Text style={styles.summaryTitle}>{state.name.trim()}</Text>
-        <Text style={styles.summaryLine}>{[state.date ? displayDate(state.date) : '', state.location.trim()].filter(Boolean).join(' · ')}</Text>
+        <Text style={styles.summaryLine}>{[state.date ? formatDate(state.date, i18n.language) : '', state.location.trim()].filter(Boolean).join(' · ')}</Text>
         <Text style={styles.summaryLine}>{t(`tournament.gameType.${state.gameType}`)} · {t(`tournament.format.${state.format}`)}</Text>
         <Text style={styles.summaryLine}>
           {t('tournament.wizard.summaryRules', { sets: rules.setsToWin, points: rules.pointsPerSet })}
           {rules.setsToWin > 1 && rules.tieBreak ? t('tournament.wizard.summaryTieBreak', { points: rules.pointsLastSet }) : ''}
         </Text>
         <Text style={styles.summaryLine}>
-          {t('tournament.wizard.summaryTeams', { count: state.teams.length })} · {t('tournament.wizard.summaryCourts', { count: resolvedCourts(state), time: state.startTime })}
+          {t('tournament.wizard.summaryTeams', { count: state.teams.length })} · {t('tournament.wizard.summaryCourts', { count: resolvedCourts(state), time: formatClock(state.startTime, i18n.language) })}
         </Text>
         {preview.errors.length === 0 && (
           <Text style={styles.summaryStrong}>
-            {t('tournament.wizard.summaryMatches', { count: preview.matchCount })} · {t('tournament.wizard.summaryEnd', { time: preview.endTime })}
+            {t('tournament.wizard.summaryMatches', { count: preview.matchCount })} · {t('tournament.wizard.summaryEnd', { time: formatClock(preview.endTime ?? '', i18n.language) })}
           </Text>
         )}
       </View>

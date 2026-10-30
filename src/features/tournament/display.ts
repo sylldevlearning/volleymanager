@@ -6,14 +6,24 @@ import { computeStandings, type StandingRow } from './engine/standings';
 
 export type Translate = (key: string, opts?: Record<string, unknown>) => string;
 
-/** 1er, 2e… / 1st, 2nd, 3rd, 4th… */
+/** 1er, 2e / 1st, 2nd / 1.º / 1. / 1-е / 1位 / 第1名… — a place, in each language */
 export function ordinal(n: number, lang: string): string {
-  if (lang === 'en') {
-    const tens = n % 100;
-    if (tens >= 11 && tens <= 13) return `${n}th`;
-    return `${n}${{ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] ?? 'th'}`;
+  switch (lang) {
+    case 'en': {
+      const tens = n % 100;
+      if (tens >= 11 && tens <= 13) return `${n}th`;
+      return `${n}${{ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] ?? 'th'}`;
+    }
+    case 'fr': return n === 1 ? '1er' : `${n}e`;
+    case 'es': return `${n}.º`;
+    case 'pt-BR':
+    case 'it': return `${n}º`;
+    case 'ru': return `${n}-е`;
+    case 'ja': return `${n}位`;
+    case 'zh-Hans': return `第${n}名`;
+    // de, pl, tr
+    default: return `${n}.`;
   }
-  return n === 1 ? '1er' : `${n}e`;
 }
 
 const levelName = (level: number, t: Translate) => t(`tournament.level.${Math.min(level, 3)}`);

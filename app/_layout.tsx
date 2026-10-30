@@ -19,6 +19,8 @@ import { useSettingsHydrated } from '../src/hooks/useSettingsHydrated';
 import { seedDefaultDataIfEmpty } from '../src/services/seedService';
 import { initAds } from '../src/features/ads/adsService';
 import i18n from '../src/i18n';
+import { useLocales } from 'expo-localization';
+import { resolveLanguage } from '../src/i18n/languages';
 import { SCREEN_HEADERS, darkHeaderOptions } from '../src/navigation/screenHeaders';
 
 SplashScreen.preventAutoHideAsync();
@@ -70,9 +72,10 @@ function RootLayoutNav() {
 
   useEffect(() => { segmentsRef.current = segments; }, [segments]);
 
+  const phoneLocales = useLocales();
   useEffect(() => {
-    i18n.changeLanguage(language);
-  }, [language]);
+    i18n.changeLanguage(resolveLanguage(language, phoneLocales));
+  }, [language, phoneLocales]);
 
   // First launch, or "Revoir l'aide" in Settings → show the presentation.
   // Wait for AsyncStorage: before hydration the flag always reads "unseen".

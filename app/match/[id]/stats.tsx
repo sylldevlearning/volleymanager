@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View, Pressable, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { formatPercent } from '../../../src/i18n/format';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft } from 'lucide-react-native';
 
@@ -16,7 +17,7 @@ import { InfoTooltip } from '../../../src/components/ui/InfoTooltip';
 
 export default function MatchStatsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
 
   const [dashboard, setDashboard] = useState<MatchDashboardData | null>(null);
@@ -178,7 +179,7 @@ export default function MatchStatsScreen() {
                 category={t('stats.topPerformer.bestAttacker')}
                 playerName={topPerformers.bestAttacker.player.playerName || `#${topPerformers.bestAttacker.player.playerNumber}`}
                 playerNumber={topPerformers.bestAttacker.player.playerNumber}
-                value={`${topPerformers.bestAttacker.value}%`}
+                value={formatPercent(topPerformers.bestAttacker.value, i18n.language)}
               />
             )}
             {topPerformers.bestServer && (
@@ -186,7 +187,7 @@ export default function MatchStatsScreen() {
                 category={t('stats.topPerformer.bestServer')}
                 playerName={topPerformers.bestServer.player.playerName || `#${topPerformers.bestServer.player.playerNumber}`}
                 playerNumber={topPerformers.bestServer.player.playerNumber}
-                value={`${topPerformers.bestServer.value} ace${topPerformers.bestServer.value > 1 ? 's' : ''}`}
+                value={t('stats.aces', { count: topPerformers.bestServer.value })}
               />
             )}
             {topPerformers.bestReceiver && (
@@ -194,7 +195,7 @@ export default function MatchStatsScreen() {
                 category={t('stats.topPerformer.bestReceiver')}
                 playerName={topPerformers.bestReceiver.player.playerName || `#${topPerformers.bestReceiver.player.playerNumber}`}
                 playerNumber={topPerformers.bestReceiver.player.playerNumber}
-                value={`${topPerformers.bestReceiver.value}%`}
+                value={formatPercent(topPerformers.bestReceiver.value, i18n.language)}
               />
             )}
             {topPerformers.bestBlocker && (

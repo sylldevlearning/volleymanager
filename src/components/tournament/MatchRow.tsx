@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { formatClock } from '../../i18n/format';
 import { ChevronRight } from 'lucide-react-native';
 import { palette } from '../../theme/tokens';
 import { matchTitle, sideName } from '../../features/tournament/display';
@@ -27,7 +28,7 @@ export function MatchRow({ match, bundle, onPress, showTime = true }: Props) {
   return (
     <Pressable style={({ pressed }) => [styles.row, pressed && styles.pressed]} onPress={onPress} accessibilityRole="button">
       <View style={styles.when}>
-        {showTime && <Text style={styles.time}>{match.scheduledAt?.slice(11, 16) ?? ''}</Text>}
+        {showTime && <Text style={styles.time}>{formatClock(match.scheduledAt?.slice(11, 16) ?? '', i18n.language)}</Text>}
         {match.court !== null && <Text style={styles.court}>{t('tournament.view.court', { n: match.court })}</Text>}
       </View>
       <View style={styles.body}>
@@ -41,7 +42,7 @@ export function MatchRow({ match, bundle, onPress, showTime = true }: Props) {
           <Text style={[styles.scoreText, match.winnerId === match.awayId && styles.winner]}>{setsAway}</Text>
         </View>
       ) : (
-        <Text style={[styles.status, match.status === 'live' && styles.statusLive]}>
+        <Text style={[styles.status, match.status === 'live' && styles.statusLive]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>
           {match.status === 'live' ? t('tournament.view.statusLive') : known ? t('tournament.view.statusScheduled') : t('tournament.view.waiting')}
         </Text>
       )}

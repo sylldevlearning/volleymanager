@@ -12,6 +12,7 @@ import {
 } from './display';
 import { levelsSummary, roundSummary } from './phases';
 import type { TournamentMatch } from '../../models/tournament';
+import { formatClock, formatDate } from '../../i18n/format';
 
 /** What can be exported: 'planning' | 'results' | 'standings' | 'levels' | 'round:<n>' */
 export type ExportContent = string;
@@ -34,10 +35,7 @@ export interface ExportDoc {
 
 /** "samedi 16 mai 2026" — the tournament day in the format of the language. */
 export function formatTournamentDate(iso: string, locale: string): string {
-  const [y, m, d] = iso.split('-').map(Number);
-  if (!y || !m || !d) return iso;
-  return new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
-    .format(new Date(y, m - 1, d));
+  return formatDate(iso, locale, 'long');
 }
 
 /** Contents ready to export: rounds once complete, levels once known. */
@@ -70,14 +68,14 @@ export function buildExportDoc(bundle: TournamentBundle, content: ExportContent,
   const subtitle = [formatTournamentDate(tournament.date, locale), tournament.location].filter(Boolean).join(' · ');
   const side = (m: TournamentMatch, s: 'home' | 'away') => sideName(m, s, bundle, t, locale);
   const score = (m: TournamentMatch) => scoreText(m, t) ?? '';
-  const time = (m: TournamentMatch) => m.scheduledAt?.slice(11, 16) ?? '';
+  const time = (m: TournamentMatch) => formatClock(m.scheduledAt?.slice(11, 16) ?? '', locale);
   const court = (m: TournamentMatch) => (m.court === null ? '' : String(m.court));
   const col = (key: string) => t(`tournament.export.${key}`);
   const blocks: ExportBlock[] = [];
 
   if (content === 'planning') {
     const rows = slotGroups(bundle.matches).flatMap((g) => g.matches.map((m) => [
-      g.time, court(m), matchTitle(m, bundle, t), side(m, 'home'), side(m, 'away'), score(m),
+      formatClock(g.time, locale), court(m), matchTitle(m, bundle, t), side(m, 'home'), side(m, 'away'), score(m),
     ]));
     blocks.push({ kind: 'table', columns: [col('colTime'), col('colCourt'), col('colMatch'), col('colTeam'), col('colTeam'), col('colScore')], rows });
   } else if (content === 'results') {

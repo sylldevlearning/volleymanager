@@ -1,12 +1,13 @@
 import { useCallback, useState } from 'react';
-import { Alert, StyleSheet, Text, View, Switch, Pressable } from 'react-native';
+import { Alert, FlatList, Modal, StyleSheet, Text, View, Switch, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Zap, Globe, Info, ChevronRight, LifeBuoy, ShieldCheck } from 'lucide-react-native';
+import { Zap, Globe, Info, ChevronRight, LifeBuoy, ShieldCheck, Check } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSettingsStore } from '../../src/stores/settingsStore';
 import { palette } from '../../src/theme/tokens';
-import i18n from '../../src/i18n';
+import { useLocales } from 'expo-localization';
+import { LANGUAGES, deviceLanguage, type LanguagePreference } from '../../src/i18n/languages';
 import { APP_VERSION, ADMOB_IDS } from '../../src/utils/constants';
 import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
 import { AdBanner } from '../../src/components/ads/AdBanner';
@@ -27,10 +28,13 @@ export default function SettingsScreen() {
     return () => { active = false; };
   }, []));
 
-  const changeLanguage = (lang: 'fr' | 'en') => {
-    setLanguage(lang);
-    i18n.changeLanguage(lang);
-  };
+  // The root layout applies it (phone language resolved there)
+  const [languageOpen, setLanguageOpen] = useState(false);
+  const phoneLanguage = deviceLanguage(useLocales());
+  const nameOf = (code: string) => LANGUAGES.find((l) => l.code === code)?.name ?? code;
+  const languageLabel = (pref: LanguagePreference) =>
+    (pref === 'system' ? t('settings.languageSystem', { name: nameOf(phoneLanguage) }) : nameOf(pref));
+  const languageChoices: LanguagePreference[] = ['system', ...LANGUAGES.map((l) => l.code)];
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
@@ -40,17 +44,16 @@ export default function SettingsScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{t('settings.language')}</Text>
         <View style={styles.card}>
-          <LanguageOption
-            label="Français"
-            active={language === 'fr'}
-            onPress={() => changeLanguage('fr')}
-          />
-          <View style={styles.divider} />
-          <LanguageOption
-            label="English"
-            active={language === 'en'}
-            onPress={() => changeLanguage('en')}
-          />
+          <Pressable
+            style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+            onPress={() => setLanguageOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel={`${t('settings.language')} : ${languageLabel(language)}`}
+          >
+            <Globe size={20} color={palette.accentPrimary} />
+            <Text style={styles.rowLabel} numberOfLines={1}>{languageLabel(language)}</Text>
+            <ChevronRight size={16} color={palette.textMuted} />
+          </Pressable>
         </View>
       </View>
 
@@ -148,6 +151,26 @@ export default function SettingsScreen() {
         </View>
       </View>
       <AdBanner unitId={ADMOB_IDS.BANNER_SETTINGS} />
+
+      <Modal visible={languageOpen} transparent animationType="fade" onRequestClose={() => setLanguageOpen(false)}>
+        <Pressable style={styles.backdrop} onPress={() => setLanguageOpen(false)}>
+          <View style={styles.sheet}>
+            <Text style={styles.sheetTitle}>{t('settings.language')}</Text>
+            <FlatList
+              data={languageChoices}
+              keyExtractor={(code) => code}
+              ItemSeparatorComponent={() => <View style={styles.divider} />}
+              renderItem={({ item }) => (
+                <LanguageOption
+                  label={languageLabel(item)}
+                  active={language === item}
+                  onPress={() => { setLanguage(item); setLanguageOpen(false); }}
+                />
+              )}
+            />
+          </View>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -186,9 +209,8 @@ function LanguageOption({
       accessibilityRole="button"
       accessibilityState={{ selected: active }}
     >
-      <Globe size={20} color={active ? palette.accentPrimary : palette.textMuted} />
       <Text style={[styles.rowLabel, active && { color: palette.accentPrimary }]}>{label}</Text>
-      {active && <View style={styles.activeDot} />}
+      {active && <Check size={18} color={palette.accentPrimary} />}
     </Pressable>
   );
 }
@@ -227,10 +249,10 @@ const styles = StyleSheet.create({
     color: palette.textPrimary,
   },
   divider: { height: 1, backgroundColor: palette.backgroundElevated, marginLeft: 14 },
-  activeDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: palette.accentPrimary,
+  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', padding: 24 },
+  sheet: {
+    maxHeight: '80%', backgroundColor: palette.backgroundSurface, borderRadius: 16,
+    borderWidth: 1, borderColor: palette.backgroundElevated, overflow: 'hidden',
   },
+  sheetTitle: { fontSize: 17, fontFamily: 'Inter_700Bold', color: palette.textPrimary, padding: 16, paddingBottom: 8 },
 });

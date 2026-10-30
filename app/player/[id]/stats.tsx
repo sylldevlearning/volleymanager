@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View, Pressable, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { formatDate } from '../../../src/i18n/format';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft } from 'lucide-react-native';
 
@@ -15,7 +16,7 @@ type EvolutionKey = 'attack' | 'reception' | 'serve' | 'defense';
 
 export default function PlayerCareerScreen() {
   const { id: playerId } = useLocalSearchParams<{ id: string }>();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
 
   const [career, setCareer] = useState<PlayerCareerStats | null>(null);
@@ -88,7 +89,7 @@ export default function PlayerCareerScreen() {
   }
 
   const lineData = career.history.slice().reverse().map((h) => ({
-    label: new Date(h.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }),
+    label: formatDate(h.date, i18n.language, 'dayMonth'),
     value: getEvolutionValue(h, activeKey),
   }));
 
@@ -188,7 +189,7 @@ export default function PlayerCareerScreen() {
             >
               <View style={styles.historyLeft}>
                 <Text style={styles.historyDate}>
-                  {new Date(h.date).toLocaleDateString()}
+                  {formatDate(h.date, i18n.language)}
                 </Text>
                 <Text style={styles.historyOpponent} numberOfLines={1}>
                   vs {h.opponentName}
@@ -217,13 +218,14 @@ function RecordRow({
   suffix?: string;
   date: string;
 }) {
+  const { i18n } = useTranslation();
   return (
     <View style={styles.recordRow}>
       <Text style={styles.recordLabel}>{label}</Text>
       <View style={styles.recordRight}>
         <Text style={styles.recordValue}>{value}{suffix}</Text>
         {date && (
-          <Text style={styles.recordDate}>{new Date(date).toLocaleDateString()}</Text>
+          <Text style={styles.recordDate}>{formatDate(date, i18n.language)}</Text>
         )}
       </View>
     </View>

@@ -770,7 +770,7 @@ function AttributionStrip({
                 accessibilityRole="radio"
                 accessibilityState={{ selected: isSelected }}
               >
-                <Text style={[attrStyles.actionText, isSelected && { color: palette.error }]}>{label}</Text>
+                <Text style={[attrStyles.actionText, isSelected && { color: palette.error }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{label}</Text>
               </Pressable>
             );
           })}

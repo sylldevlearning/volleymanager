@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { Alert, FlatList, ScrollView, StyleSheet, Text, View, Pressable, RefreshControl } from 'react-native';
 import { useRouter, useFocusEffect, type ImperativeRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { formatDate } from '../../src/i18n/format';
 import { Plus, Calendar } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getAllMatches, deleteMatch } from '../../src/services/matchService';
@@ -211,8 +212,8 @@ function MatchCard({
   onPress: () => void;
   onDelete: () => void;
 }) {
-  const { t } = useTranslation();
-  const date = new Date(match.date).toLocaleDateString();
+  const { t, i18n } = useTranslation();
+  const date = formatDate(match.date, i18n.language);
   const isLive = match.status === 'live';
   const isFinished = match.status === 'finished';
   const showCoach = !isFinished;

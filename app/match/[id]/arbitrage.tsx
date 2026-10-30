@@ -852,14 +852,14 @@ export default function ArbitrageScreen() {
                 onPress={() => { setSubSide(leftData.side); setPreselectedOut(null); setShowSubSheet(true); }}
                 accessibilityRole="button"
               >
-                <Text style={styles.subBtnText}>{t('match.substitution')}</Text>
+                <Text style={styles.subBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{t('match.substitution')}</Text>
               </Pressable>
               <Pressable
                 style={styles.subBtn}
                 onPress={() => { setSubSide(rightData.side); setPreselectedOut(null); setShowSubSheet(true); }}
                 accessibilityRole="button"
               >
-                <Text style={styles.subBtnText}>{t('match.substitution')}</Text>
+                <Text style={styles.subBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{t('match.substitution')}</Text>
               </Pressable>
               <CounterPill
                 label={rightData.team.shortName ?? rightData.team.name.slice(0, 3).toUpperCase()}
@@ -884,7 +884,7 @@ export default function ArbitrageScreen() {
                 accessibilityRole="button"
               >
                 <AlertTriangle size={14} color={palette.warning} />
-                <Text style={styles.sanctionBtnText}>{t('sanction.button')}</Text>
+                <Text style={styles.sanctionBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{t('sanction.button')}</Text>
               </Pressable>
               <Pressable
                 style={styles.sanctionBtn}
@@ -892,7 +892,7 @@ export default function ArbitrageScreen() {
                 accessibilityRole="button"
               >
                 <AlertTriangle size={14} color={palette.warning} />
-                <Text style={styles.sanctionBtnText}>{t('sanction.button')}</Text>
+                <Text style={styles.sanctionBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{t('sanction.button')}</Text>
               </Pressable>
               <TimeoutButton
                 label={t('arbitrage.timeoutButton')}
@@ -1112,7 +1112,7 @@ function TimeoutButton({ label, color, onPress }: { label: string; color: string
       accessibilityLabel={label}
     >
       <Timer size={14} color={color} />
-      <Text style={[styles.timeoutBtnText, { color }]} numberOfLines={1}>{label}</Text>
+      <Text style={[styles.timeoutBtnText, { color }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{label}</Text>
     </Pressable>
   );
 }

@@ -17,12 +17,12 @@ export function StandingsTableView({ table, finished }: { table: StandingsTable;
       <View style={[styles.row, styles.head]}>
         <Text style={[styles.cell, styles.rank]}>#</Text>
         <Text style={[styles.cell, styles.team, styles.headText]}>{t('tournament.view.colTeam')}</Text>
-        <Text style={[styles.cell, styles.num, styles.headText]}>{t('tournament.view.colPlayed')}</Text>
-        <Text style={[styles.cell, styles.num, styles.headText]}>{t('tournament.view.colWon')}</Text>
-        <Text style={[styles.cell, styles.num, styles.headText]}>{t('tournament.view.colLost')}</Text>
-        <Text style={[styles.cell, styles.num, styles.headText]}>{t('tournament.view.colPoints')}</Text>
-        <Text style={[styles.cell, styles.wide, styles.headText]}>{t('tournament.view.colSets')}</Text>
-        <Text style={[styles.cell, styles.wide, styles.headText]}>{t('tournament.view.colDiff')}</Text>
+        <Text style={[styles.cell, styles.num, styles.headText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{t('tournament.view.colPlayed')}</Text>
+        <Text style={[styles.cell, styles.num, styles.headText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{t('tournament.view.colWon')}</Text>
+        <Text style={[styles.cell, styles.num, styles.headText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{t('tournament.view.colLost')}</Text>
+        <Text style={[styles.cell, styles.num, styles.headText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{t('tournament.view.colPoints')}</Text>
+        <Text style={[styles.cell, styles.wide, styles.headText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{t('tournament.view.colSets')}</Text>
+        <Text style={[styles.cell, styles.wide, styles.headText]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{t('tournament.view.colDiff')}</Text>
       </View>
       {table.rows.map((r) => (
         <View key={r.teamId} style={styles.row}>

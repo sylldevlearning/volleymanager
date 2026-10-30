@@ -40,6 +40,8 @@ describe('ordinals', () => {
   it('French and English', () => {
     expect([1, 2, 3, 11].map((n) => ordinal(n, 'fr'))).toEqual(['1er', '2e', '3e', '11e']);
     expect([1, 2, 3, 4, 11, 12, 13, 21, 22].map((n) => ordinal(n, 'en'))).toEqual(['1st', '2nd', '3rd', '4th', '11th', '12th', '13th', '21st', '22nd']);
+    expect(['es', 'pt-BR', 'it', 'de', 'pl', 'tr', 'ru', 'ja', 'zh-Hans'].map((l) => ordinal(2, l)))
+      .toEqual(['2.º', '2º', '2º', '2.', '2.', '2.', '2-е', '2位', '第2名']);
   });
 });
 

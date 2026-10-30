@@ -256,7 +256,7 @@
     "deleteConfirm": "Supprimer {{name}} et tous ses joueurs ?",
     "deleteWithMatches": "Cette équipe a {{count}} matchs en historique. La suppression est irréversible.",
     "deleted": "Équipe supprimée",
-    "playerCount": "{{count}} joueur",
+    "playerCount_one": "{{count}} joueur",
     "playerCount_other": "{{count}} joueurs"
   },
   "player": {
@@ -274,7 +274,7 @@
     "addAnother": "Ajouter un autre",
     "done": "Terminé",
     "batchMode": "Ajout rapide",
-    "addedCount": "{{count}} ajouté",
+    "addedCount_one": "{{count}} ajouté",
     "addedCount_other": "{{count}} ajoutés",
     "positions": {
       "setter": "Passeur",
@@ -400,7 +400,9 @@
     },
     "noData": "Aucune donnée statistique",
     "noMatches": "Aucun match joué",
-    "setEndStats": "Saisissez les stats du dernier point"
+    "setEndStats": "Saisissez les stats du dernier point",
+    "aces_one": "{{count}} ace",
+    "aces_other": "{{count}} aces"
   },
   "history": {
     "title": "Historique",
@@ -440,7 +442,7 @@
       "reset": "Remettre à zéro",
       "speed": "Vitesse",
       "stepOf": "Étape {{current}} / {{total}}",
-      "historyCount": "{{count}} étape",
+      "historyCount_one": "{{count}} étape",
       "historyCount_other": "{{count}} étapes",
       "playAll": "Rejouer tout",
       "stop": "Stop",
@@ -576,7 +578,8 @@
     "version": "Version",
     "help": "Aide",
     "replayHelp": "Revoir l'aide",
-    "privacyOptions": "Paramètres de confidentialité"
+    "privacyOptions": "Paramètres de confidentialité",
+    "languageSystem": "Langue du téléphone ({{name}})"
   },
   "scoring": {
     "removePoint": "-1 Point",
@@ -719,7 +722,6 @@
       "indoor_3v3": "3×3",
       "beach_2v2": "Beach 2×2"
     },
-    "manualOnly": "Pour ce type de jeu, les scores se saisissent à la main (pas d'arbitrage ni de QR code).",
     "format": {
       "round_robin": "Championnat",
       "pools_knockout": "Poules + phases finales",
@@ -837,7 +839,9 @@
       "brassageHint": "Tour 1 : poules tirées au sort. Tours suivants : poules de même niveau d'après le classement du tour précédent. Les niveaux se répartissent selon le classement du dernier tour.",
       "matchesPerTeam_one": "Chaque équipe joue {{count}} match",
       "matchesPerTeam_other": "Chaque équipe joue {{count}} matchs",
-      "matchesPerTeamRange": "Chaque équipe joue {{min}} à {{max}} matchs"
+      "matchesPerTeamRange": "Chaque équipe joue {{min}} à {{max}} matchs",
+      "durationMinutes": "{{m}} min",
+      "durationHours": "{{h}} h {{m}}"
     },
     "errors": {
       "name_required": "Donne un nom au tournoi.",

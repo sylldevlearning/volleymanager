@@ -2,6 +2,7 @@ import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Alert, FlatList, Modal, Pressable, ScrollView, SectionList, StyleSheet, Text, View } from 'react-native';
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { formatClock } from '../../../src/i18n/format';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CalendarClock, ChevronRight, Ellipsis, Pencil, ScanQrCode, Share2, Shuffle, Trash2 } from 'lucide-react-native';
 import { palette } from '../../../src/theme/tokens';
@@ -33,7 +34,7 @@ const TAB_HELP: Record<Tab, string> = {
 
 export default function TournamentScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const [bundle, setBundle] = useState<TournamentBundle | null>(null);
   const [tab, setTab] = useState<Tab>('planning');
@@ -86,7 +87,7 @@ export default function TournamentScreen() {
     ]);
   }
 
-  const sections = slotGroups(bundle.matches).map((g) => ({ title: g.time, data: g.matches }));
+  const sections = slotGroups(bundle.matches).map((g) => ({ title: formatClock(g.time, i18n.language), data: g.matches }));
   const statusText = (status: PhaseStatus) => t(STATUS_KEYS[status]);
   // A filter chip and its phase: pools share the status of the pool phase
   const phaseOfGroup = (key: string) => phases.find((ph) => ph.key === (key.startsWith('pool:') ? 'pools' : key));

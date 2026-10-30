@@ -118,7 +118,7 @@ export function ToolBar({
             accessibilityRole="button"
           >
             <Text style={styles.syncBtnIcon}>🔄</Text>
-            <Text style={styles.syncBtnText}>{t('tactical.syncFromMatch')}</Text>
+            <Text style={styles.syncBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{t('tactical.syncFromMatch')}</Text>
           </Pressable>
         )}
 
@@ -130,7 +130,7 @@ export function ToolBar({
             accessibilityRole="button"
           >
             <Text style={styles.syncBtnIcon}>✅</Text>
-            <Text style={styles.applyBtnText}>{t('tactical.apply.button')}</Text>
+            <Text style={styles.applyBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{t('tactical.apply.button')}</Text>
           </Pressable>
         )}
 

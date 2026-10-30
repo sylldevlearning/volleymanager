@@ -2,16 +2,16 @@ import { useCallback, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Stack, useFocusEffect, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { formatDate } from '../../src/i18n/format';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Plus, Trophy } from 'lucide-react-native';
 import { palette } from '../../src/theme/tokens';
 import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
 import { getTournaments } from '../../src/services/tournamentService';
-import { displayDate } from '../../src/features/tournament/wizard';
 import type { Tournament } from '../../src/models/tournament';
 
 export default function TournamentListScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const [tournaments, setTournaments] = useState<Tournament[] | null>(null);
 
@@ -51,7 +51,7 @@ export default function TournamentListScreen() {
               </View>
             </View>
             <Text style={styles.cardLine}>
-              {[displayDate(item.date), item.location].filter(Boolean).join(' · ')}
+              {[formatDate(item.date, i18n.language), item.location].filter(Boolean).join(' · ')}
             </Text>
             <Text style={styles.cardLine}>
               {t(`tournament.gameType.${item.gameType}`)} · {t(`tournament.format.${item.format}`)}

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { formatClock } from '../../../../src/i18n/format';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CircleCheck, Flag, Minus, Plus, QrCode } from 'lucide-react-native';
 import { palette } from '../../../../src/theme/tokens';
@@ -126,7 +127,7 @@ export default function TournamentMatchScreen() {
     );
   }
 
-  const time = match.scheduledAt?.slice(11, 16);
+  const time = match.scheduledAt ? formatClock(match.scheduledAt.slice(11, 16), i18n.language) : undefined;
   const forfeitTeam = teamOf(match.forfeitId);
 
   return (

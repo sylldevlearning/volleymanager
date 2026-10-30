@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { formatDate } from '../../../../src/i18n/format';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft } from 'lucide-react-native';
 import { Pressable } from 'react-native';
@@ -25,7 +26,7 @@ import { getPlayerDisplayName } from '../../../../src/features/players/player-he
 
 export default function PlayerStatsScreen() {
   const { id: matchId, playerId } = useLocalSearchParams<{ id: string; playerId: string }>();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
 
   const [stats, setStats] = useState<PlayerMatchStats | null>(null);
@@ -49,7 +50,7 @@ export default function PlayerStatsScreen() {
         setPerSetStats(ss);
         setPlayer(p);
         if (m) {
-          setMatchDate(new Date(m.date).toLocaleDateString());
+          setMatchDate(formatDate(m.date, i18n.language));
           if (p) {
             const t2 = await getTeamById(p.teamId);
             setTeam(t2);
