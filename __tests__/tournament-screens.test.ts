@@ -94,8 +94,9 @@ describe('tournament screens (phase 3)', () => {
 
   it('shown right after the last result of a round, then consultable from the tournament', () => {
     const score = read('app/tournament/[id]/match/[matchId].tsx');
-    expect(score).toContain('roundJustCompleted(bundle!, outcome.bundle, matchId)');
-    expect(score).toContain('router.replace(lastRound ? `/tournament/${id}/levels` : `/tournament/${id}/round/${round}`)');
+    // Round / levels screen chosen by resultRoute (tested in tournament-result-qr)
+    expect(score).toContain('resultRoute(id, bundle!, outcome.bundle, matchId)');
+    expect(score).toContain('if (next) router.replace(next);');
     const screen = read('app/tournament/[id]/index.tsx');
     expect(screen).toContain('phaseStatuses(bundle, t)');
     expect(screen).toContain('router.push(`/tournament/${id}/round/${phase.screen.round}`)');

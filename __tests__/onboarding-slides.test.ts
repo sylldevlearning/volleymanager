@@ -9,8 +9,17 @@ function lookup(dict: Dict, key: string): unknown {
 }
 
 describe('ONBOARDING_SLIDES', () => {
-  it('has at most 4 pages, in the agreed order', () => {
-    expect(ONBOARDING_SLIDES.map((s) => s.id)).toEqual(['quickMatch', 'arbitrage', 'tactical', 'teams']);
+  it('has 5 pages, in the agreed order', () => {
+    expect(ONBOARDING_SLIDES.map((s) => s.id)).toEqual(['quickMatch', 'arbitrage', 'tournament', 'tactical', 'teams']);
+  });
+
+  it('the tournament page: a few steps, mixing and levels, QR codes for the referees', () => {
+    const body = lookup(fr as Dict, 'onboarding.tournament.body') as string;
+    expect(body).toMatch(/étapes/);
+    expect(body).toMatch(/brassage/i);
+    expect(body).toMatch(/niveaux/);
+    expect(body).toMatch(/QR/);
+    expect(body).toMatch(/arbitre/);
   });
 
   it.each(['fr', 'en'] as const)('every slide text exists in %s', (lang) => {

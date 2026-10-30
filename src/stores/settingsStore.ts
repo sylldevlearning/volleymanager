@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 type AppTheme = 'dark' | 'light';
 type AppLanguage = 'fr' | 'en';
 /** Screens with first-use help bubbles */
-export type HelpTipId = 'arbitrage' | 'tactical';
+export type HelpTipId = 'arbitrage' | 'tactical' | 'tournament';
 
 interface SettingsState {
   theme: AppTheme;

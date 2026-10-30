@@ -263,6 +263,26 @@ transaction de création), moteur complet et ses tests. Pas d'écran.
 - Caméra : même permission `android.permission.CAMERA` (déjà présente via
   expo-image-picker) ; plugin `expo-camera` sans micro.
 
+### Phase 4 bis — QR du résultat, aide, repos à 0
+- QR du match : ajoute `t` (tournoi) et `m` (match). Les anciens QR sans ces
+  champs ouvrent toujours le match rapide, sans QR du résultat.
+- Le match rapide garde le lien dans sa configuration (`config.tournamentRef`,
+  pas de migration). Match terminé → le résumé (fin de match et historique)
+  affiche le « QR du résultat » : `{k: "r", t, m, h, a, s: [[dom, ext], …]}`,
+  sans signature.
+- Organisateur : menu ⋯ → « Scanner un QR de résultat » → vérification (match,
+  équipes, sets, « Vérifiez que ce résultat correspond bien au match joué avant
+  de valider ») → `recordTournamentResult` comme une saisie (source `qr`),
+  même suite (écran de fin de tour ou des niveaux).
+- Refus : autre tournoi, match introuvable, équipes changées (résultat corrigé
+  ou équipe renommée), QR de match au lieu d'un résultat, QR illisible ou plus
+  récent. Match déjà joué : remplacer après confirmation, bloqué si un match
+  suivant en dépend ; même score : « déjà enregistré ».
+- Aide : page « Tournoi » dans la présentation (5 pages), « ? » propre à chaque
+  onglet de l'écran du tournoi, bulles au premier usage (onglets, phases,
+  matchs, menu ⋯).
+- Assistant : repos entre deux matchs à 0 minute par défaut.
+
 ### Phase 5 — Export
 - Planning et classement en image (rendu dédié, lisible sur un téléphone) ou
   PDF (HTML généré par une fonction pure, testée), partagés par la feuille de

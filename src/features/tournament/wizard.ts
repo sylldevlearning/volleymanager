@@ -108,7 +108,8 @@ export function initialWizardState(today: Date, seed: number, label: TeamLabel):
     courts: null,
     startTime: schedule.startTime,
     matchMinutes: schedule.matchMinutes,
-    restMinutes: schedule.restMinutes,
+    // Teams usually play again right away
+    restMinutes: 0,
     seed,
   };
   return setTeamCount(empty, DEFAULT_TEAM_COUNT, label);

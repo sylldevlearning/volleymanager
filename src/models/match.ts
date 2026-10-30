@@ -27,6 +27,13 @@ export interface MatchConfig {
   courtSwitch?: { every: number; everyDecidingSet: number } | null;
   /** Beach: 30 s technical time-out at 21 points in sets 1 and 2 */
   technicalTimeout?: boolean;
+  /** Quick match started from a tournament match QR: its result QR goes back to this match */
+  tournamentRef?: TournamentRef;
+}
+
+export interface TournamentRef {
+  tournamentId: string;
+  matchId: string;
 }
 
 export const DEFAULT_INDOOR_CONFIG: MatchConfig = {

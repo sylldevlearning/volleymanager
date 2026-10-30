@@ -4,6 +4,7 @@ import type { HelpTipId } from '../../stores/settingsStore';
 export const HELP_TIPS = {
   arbitrage: ['score', 'sides', 'actions', 'undo'],
   tactical: ['court', 'bench', 'tools', 'steps'],
+  tournament: ['tabs', 'phases', 'matches', 'menu'],
 } as const satisfies Record<HelpTipId, readonly string[]>;
 
 export type HelpTipStep<T extends HelpTipId> = (typeof HELP_TIPS)[T][number];

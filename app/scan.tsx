@@ -1,28 +1,23 @@
-import { useRef, useState } from 'react';
-import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { CameraView, useCameraPermissions } from 'expo-camera';
-import { CircleAlert, ScanQrCode } from 'lucide-react-native';
+import { CircleAlert } from 'lucide-react-native';
 import { palette } from '../src/theme/tokens';
 import { decodeMatchQr, type MatchQr, type MatchQrError } from '../src/features/tournament/matchQr';
 import { createMatchFromQr } from '../src/services/qrMatchService';
+import { QrScanner } from '../src/components/qr/QrScanner';
 
 /** Referee: reads the "QR du match" of a tournament and opens a filled quick match. */
 export default function ScanMatchQrScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState<MatchQr | null>(null);
   const [error, setError] = useState<MatchQrError | null>(null);
   const [starting, setStarting] = useState(false);
-  // The camera reports the same code many times per second: read it once
-  const lockRef = useRef(false);
 
   function handleScan(data: string) {
-    if (lockRef.current) return;
-    lockRef.current = true;
     const decoded = decodeMatchQr(data);
     if (decoded.ok) setScanned(decoded.qr);
     else setError(decoded.reason);
@@ -31,7 +26,6 @@ export default function ScanMatchQrScreen() {
   function rescan() {
     setScanned(null);
     setError(null);
-    lockRef.current = false;
   }
 
   async function start() {
@@ -45,42 +39,12 @@ export default function ScanMatchQrScreen() {
     }
   }
 
-  if (!permission) return <SafeAreaView style={styles.container} edges={['bottom']} />;
-
-  if (!permission.granted) {
-    return (
-      <SafeAreaView style={[styles.container, styles.centered]} edges={['bottom']}>
-        <ScanQrCode size={48} color={palette.textSecondary} strokeWidth={1.5} />
-        <Text style={styles.title}>{t('scan.permissionTitle')}</Text>
-        <Text style={styles.text}>{t('scan.permissionText')}</Text>
-        <Pressable
-          style={({ pressed }) => [styles.primary, pressed && styles.pressed]}
-          onPress={() => (permission.canAskAgain ? requestPermission() : Linking.openSettings())}
-          accessibilityRole="button"
-        >
-          <Text style={styles.primaryText}>{permission.canAskAgain ? t('scan.allow') : t('scan.openSettings')}</Text>
-        </Pressable>
-      </SafeAreaView>
-    );
-  }
-
   const r = scanned?.rules;
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       {!scanned && !error ? (
-        <View style={styles.flex}>
-          <CameraView
-            style={styles.flex}
-            facing="back"
-            barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
-            onBarcodeScanned={({ data }) => handleScan(data)}
-          />
-          <View pointerEvents="none" style={styles.overlay}>
-            <View style={styles.frame} />
-            <Text style={styles.aim}>{t('scan.aim')}</Text>
-          </View>
-        </View>
+        <QrScanner aim={t('scan.aim')} onScan={handleScan} active={!scanned && !error} />
       ) : (
         <View style={[styles.flex, styles.result]}>
           {error && (
@@ -126,20 +90,11 @@ export default function ScanMatchQrScreen() {
   );
 }
 
-const FRAME = 240;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
   flex: { flex: 1 },
-  centered: { alignItems: 'center', justifyContent: 'center', padding: 24, gap: 12 },
-  overlay: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center', gap: 20 },
-  frame: { width: FRAME, height: FRAME, borderRadius: 20, borderWidth: 3, borderColor: '#fff' },
-  aim: {
-    fontSize: 15, fontFamily: 'Inter_600SemiBold', color: '#fff', textAlign: 'center',
-    paddingHorizontal: 16, paddingVertical: 8, borderRadius: 10, backgroundColor: 'rgba(0, 0, 0, 0.55)',
-  },
   result: { padding: 16, justifyContent: 'center', gap: 16 },
-  title: { fontSize: 20, fontFamily: 'Inter_700Bold', color: palette.textPrimary, textAlign: 'center' },
   text: { fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textSecondary, lineHeight: 20, textAlign: 'center' },
   errorBox: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 10, padding: 14, borderRadius: 12,

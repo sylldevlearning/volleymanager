@@ -632,7 +632,10 @@
     "lineup": "Tick the players who are present, then tap the Starter / Bench badge to pick each team's starters. The libero ⚡ is handled separately.",
     "tournaments": "Your tournaments, most recent first. Everything stays on this phone: no account, no connection. \"New tournament\" opens a 4-step wizard.",
     "tournamentWizard": "4 steps: details, format and rules, teams and schedule, summary. Suggested values follow the game type and the number of teams; you can change everything. \"Redraw\" draws the pools again before creating. \"Save as template\" keeps the rules and schedule (without the teams) for a next tournament.",
-    "tournament": "Schedule: matches by time and court. Matches: filter by status, phase or team. Standings: pools, bracket and final ranking. Tap a match to enter or correct its score. The ⋯ menu renames teams, recomputes the schedule or deletes the tournament."
+    "tournament": "Schedule: matches by time and court. Matches: filter by status, phase or team. Standings: pools, bracket and final ranking. Tap a match to enter or correct its score. The ⋯ menu renames teams, recomputes the schedule or deletes the tournament.",
+    "tournamentPlanning": "Schedule: matches by time and court, in the order they are played. Tap a match to enter or correct its score. If the tournament runs late, \"Schedule and courts\" (⋯ menu) recomputes the times of the upcoming matches.",
+    "tournamentMatches": "Matches: filter by status (to play, done), phase or team. Tap an upcoming match to enter its score or show its QR code: the referee scans it with the app (\"Scan a match QR\" on the home screen). At the end, scan their result QR from the ⋯ menu (\"Scan a result QR\").",
+    "tournamentStandings": "Standings: progress of the phases, pool standings, the final bracket and the overall ranking. Updated with every result, even after a correction. Ties broken by head-to-head, then set difference, point difference and points scored."
   },
   "onboarding": {
     "skip": "Skip",
@@ -645,6 +648,10 @@
     "arbitrage": {
       "title": "Refereeing",
       "body": "Referee a real match under the official rules: starting lineup, substitutions, libero, timeouts and sanctions. The match is saved continuously, so you can resume it at any time."
+    },
+    "tournament": {
+      "title": "Tournament",
+      "body": "Create a tournament in a few steps: teams, courts, rules, and the schedule is computed for you. Mixing rounds then levels for balanced matches, or pools and a final bracket. One QR code per match: the referee scans it and referees on their phone, then you scan their result QR."
     },
     "tactical": {
       "title": "Tactical board",
@@ -669,6 +676,12 @@
       "bench": "Drop a substitute on a player to swap them. Drag a player here to take them off.",
       "tools": "1. Tap a player or the ball (yellow halo). 2. Draw the arrow anywhere: they will follow it when you play the step. An empty area deselects.",
       "steps": "Tap “T1” to animate the step, long-press to go back to the start. Save from the ⋮ menu."
+    },
+    "tournament": {
+      "tabs": "Schedule: matches by time and court. Matches: filter by status, phase or team. Standings: pools, bracket and final ranking.",
+      "phases": "Progress of each phase: done, in progress or upcoming. Tap one to see its matches or its summary.",
+      "matches": "Tap a match to enter its score, or to show its QR code for the referee to scan.",
+      "menu": "The ⋯ menu: scan a referee's result QR, rename teams, recompute the schedule or delete the tournament."
     }
   },
   "nav": {
@@ -688,7 +701,8 @@
     "tournamentRound": "Round",
     "tournamentLevels": "Levels",
     "tournamentMatchQr": "Match QR",
-    "scan": "Scan a QR"
+    "scan": "Scan a QR",
+    "scanResult": "Scan a result"
   },
   "tournament": {
     "list": {
@@ -907,7 +921,8 @@
       "pools": "Pools",
       "statusDone": "Finished",
       "statusUpcoming": "To come",
-      "phases": "Phases"
+      "phases": "Phases",
+      "menuScanResult": "Scan a result QR"
     },
     "score": {
       "rules": "{{sets}} winning set(s) of {{points}} points",
@@ -965,7 +980,7 @@
     "qr": {
       "button": "Match QR",
       "scanWith": "Scan with the VolleyManager app (Play Store)",
-      "hint": "The referee taps \"Scan a match QR\" on the app home screen: the quick match opens with these teams and these rules.",
+      "hint": "The referee taps \"Scan a match QR\" on the app home screen: the quick match opens with these teams and these rules. At the end of the match, the referee's app shows the result QR: scan it from the tournament ⋯ menu.",
       "lead": " · {{margin}}-point lead"
     }
   },
@@ -979,6 +994,30 @@
     "rescan": "Scan another QR",
     "errors": {
       "not_volleymanager": "This QR code does not come from VolleyManager. Scan the \"Match QR\" shown in the tournament.",
+      "unsupported_version": "This QR code comes from a newer VolleyManager: update the app from the Play Store.",
+      "invalid": "Unreadable or damaged QR code. Move closer, avoid reflections and scan it again.",
+      "result_qr": "This is a result QR: the organiser scans it, from the tournament (⋯ menu)."
+    }
+  },
+  "resultQr": {
+    "title": "Result QR",
+    "hint": "For the tournament organiser to scan (⋯ menu → \"Scan a result QR\")."
+  },
+  "scanResult": {
+    "aim": "Aim at the result QR shown by the referee",
+    "checkWarning": "Check that this result matches the match played before validating",
+    "validate": "Validate the result",
+    "replace": "Replace the result",
+    "replaceTitle": "Replace the result?",
+    "replaceMessage": "This match already has a result ({{score}}). Replace it with the one of this QR code?",
+    "alreadyPlayed": "This match already has a result ({{score}}).",
+    "same": "This result is already recorded.",
+    "errors": {
+      "other_tournament": "This result comes from another tournament. Scan it from that tournament.",
+      "match_not_found": "This match is not in this tournament (tournament recreated or match deleted). Enter the score by hand.",
+      "teams_changed": "The teams of this match no longer match the QR (result corrected or team renamed since). Enter the score by hand.",
+      "match_qr": "This is a match QR, not a result: the referee scans it to start the match.",
+      "not_volleymanager": "This QR code does not come from VolleyManager. Scan the \"Result QR\" shown by the referee.",
       "unsupported_version": "This QR code comes from a newer VolleyManager: update the app from the Play Store.",
       "invalid": "Unreadable or damaged QR code. Move closer, avoid reflections and scan it again."
     }

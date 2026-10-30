@@ -632,7 +632,10 @@
     "lineup": "Cochez les joueurs présents, puis touchez le badge Titulaire / Remplaçant pour choisir les titulaires de chaque équipe. Le libéro ⚡ est géré à part.",
     "tournaments": "Tes tournois, du plus récent au plus ancien. Tout reste sur ce téléphone : pas de compte ni de connexion. « Nouveau tournoi » ouvre un assistant en 4 étapes.",
     "tournamentWizard": "4 étapes : informations, format et règles, équipes et planning, récapitulatif. Les valeurs proposées s'adaptent au type de jeu et au nombre d'équipes ; tu peux tout modifier. « Retirer au sort » refait le tirage des poules avant la création. « Enregistrer comme modèle » garde les règles et le planning (sans les équipes) pour un prochain tournoi.",
-    "tournament": "Planning : les matchs par heure et par terrain. Matchs : filtre par statut, phase ou équipe. Classement : poules, tableau et classement final. Touche un match pour saisir ou corriger son score. Le menu ⋯ permet de renommer les équipes, de recalculer le planning ou de supprimer le tournoi."
+    "tournament": "Planning : les matchs par heure et par terrain. Matchs : filtre par statut, phase ou équipe. Classement : poules, tableau et classement final. Touche un match pour saisir ou corriger son score. Le menu ⋯ permet de renommer les équipes, de recalculer le planning ou de supprimer le tournoi.",
+    "tournamentPlanning": "Planning : les matchs par heure et par terrain, dans l'ordre où ils se jouent. Touchez un match pour saisir ou corriger son score. Si le tournoi prend du retard, « Planning et terrains » (menu ⋯) permet de recalculer les horaires des matchs à venir.",
+    "tournamentMatches": "Matchs : filtrez par statut (à jouer, terminés), par phase ou par équipe. Touchez un match à venir pour saisir son score ou afficher son QR code : l'arbitre le scanne avec l'app (« Scanner un QR de match » sur l'accueil). À la fin, scannez son QR du résultat depuis le menu ⋯ (« Scanner un QR de résultat »).",
+    "tournamentStandings": "Classement : l'avancement des phases, les classements de poule, le tableau final et le classement général. Il se met à jour à chaque résultat, même après une correction. Égalités départagées par la confrontation directe, puis la différence de sets, la différence de points et les points marqués."
   },
   "onboarding": {
     "skip": "Passer",
@@ -645,6 +648,10 @@
     "arbitrage": {
       "title": "Arbitrage",
       "body": "Arbitrez un vrai match selon les règles officielles : composition de départ, remplacements, libéro, temps morts et sanctions. Le match est sauvegardé en continu, vous pouvez le reprendre à tout moment."
+    },
+    "tournament": {
+      "title": "Tournoi",
+      "body": "Créez un tournoi en quelques étapes : équipes, terrains, règles, et le planning se calcule tout seul. Brassage puis niveaux pour des matchs équilibrés, ou poules et tableau final. Un QR code par match : l'arbitre le scanne et arbitre sur son téléphone, puis vous scannez son QR du résultat."
     },
     "tactical": {
       "title": "Tableau tactique",
@@ -669,6 +676,12 @@
       "bench": "Glissez un remplaçant sur un joueur pour les échanger. Ramenez un joueur ici pour le faire sortir.",
       "tools": "1. Touchez un joueur ou le ballon (halo jaune). 2. Tracez la flèche n'importe où : il suivra ce chemin quand vous lancerez l'étape. Une zone vide désélectionne.",
       "steps": "Touchez « T1 » pour animer l'étape, appui long pour revenir au début. Le menu ⋮ permet de sauvegarder."
+    },
+    "tournament": {
+      "tabs": "Planning : les matchs par heure et par terrain. Matchs : filtrez par statut, phase ou équipe. Classement : poules, tableau et classement final.",
+      "phases": "L'avancement de chaque phase : terminée, en cours ou à venir. Touchez-en une pour voir ses matchs ou son bilan.",
+      "matches": "Touchez un match pour saisir son score, ou pour afficher son QR code à faire scanner par l'arbitre.",
+      "menu": "Le menu ⋯ : scanner le QR du résultat d'un arbitre, renommer les équipes, recalculer le planning ou supprimer le tournoi."
     }
   },
   "nav": {
@@ -688,7 +701,8 @@
     "tournamentRound": "Tour",
     "tournamentLevels": "Répartition des niveaux",
     "tournamentMatchQr": "QR du match",
-    "scan": "Scanner un QR"
+    "scan": "Scanner un QR",
+    "scanResult": "Scanner un résultat"
   },
   "tournament": {
     "list": {
@@ -907,7 +921,8 @@
       "pools": "Poules",
       "statusDone": "Terminé",
       "statusUpcoming": "À venir",
-      "phases": "Phases"
+      "phases": "Phases",
+      "menuScanResult": "Scanner un QR de résultat"
     },
     "score": {
       "rules": "{{sets}} set(s) gagnant(s) de {{points}} points",
@@ -965,7 +980,7 @@
     "qr": {
       "button": "QR du match",
       "scanWith": "À scanner avec l'app VolleyManager (Play Store)",
-      "hint": "L'arbitre touche « Scanner un QR de match » sur l'accueil de l'app : le match rapide s'ouvre avec ces équipes et ces règles.",
+      "hint": "L'arbitre touche « Scanner un QR de match » sur l'accueil de l'app : le match rapide s'ouvre avec ces équipes et ces règles. À la fin du match, l'app de l'arbitre affiche le QR du résultat : scannez-le depuis le menu ⋯ du tournoi.",
       "lead": " · {{margin}} points d'écart"
     }
   },
@@ -979,6 +994,30 @@
     "rescan": "Scanner un autre QR",
     "errors": {
       "not_volleymanager": "Ce QR code ne vient pas de VolleyManager. Scannez le « QR du match » affiché dans le tournoi.",
+      "unsupported_version": "Ce QR code vient d'une version plus récente de VolleyManager : mettez l'app à jour depuis le Play Store.",
+      "invalid": "QR code illisible ou abîmé. Rapprochez-vous, évitez les reflets et scannez-le à nouveau.",
+      "result_qr": "C'est le QR d'un résultat : c'est l'organisateur qui le scanne, depuis le tournoi (menu ⋯)."
+    }
+  },
+  "resultQr": {
+    "title": "QR du résultat",
+    "hint": "À faire scanner par l'organisateur du tournoi (menu ⋯ → « Scanner un QR de résultat »)."
+  },
+  "scanResult": {
+    "aim": "Visez le QR du résultat affiché par l'arbitre",
+    "checkWarning": "Vérifiez que ce résultat correspond bien au match joué avant de valider",
+    "validate": "Valider le résultat",
+    "replace": "Remplacer le résultat",
+    "replaceTitle": "Remplacer le résultat ?",
+    "replaceMessage": "Ce match a déjà un résultat ({{score}}). Le remplacer par celui de ce QR code ?",
+    "alreadyPlayed": "Ce match a déjà un résultat ({{score}}).",
+    "same": "Ce résultat est déjà enregistré.",
+    "errors": {
+      "other_tournament": "Ce résultat vient d'un autre tournoi. Scannez-le depuis le tournoi concerné.",
+      "match_not_found": "Ce match n'existe pas dans ce tournoi (tournoi recréé ou match supprimé). Saisissez le score à la main.",
+      "teams_changed": "Les équipes de ce match ne correspondent plus au QR (résultat corrigé ou équipe renommée depuis). Saisissez le score à la main.",
+      "match_qr": "C'est le QR d'un match, pas un résultat : il se scanne par l'arbitre pour lancer le match.",
+      "not_volleymanager": "Ce QR code ne vient pas de VolleyManager. Scannez le « QR du résultat » affiché par l'arbitre.",
       "unsupported_version": "Ce QR code vient d'une version plus récente de VolleyManager : mettez l'app à jour depuis le Play Store.",
       "invalid": "QR code illisible ou abîmé. Rapprochez-vous, évitez les reflets et scannez-le à nouveau."
     }

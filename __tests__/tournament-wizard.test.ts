@@ -38,12 +38,12 @@ function withTeams(n: number, base: WizardState = initial()): WizardState {
 }
 
 describe('defaults', () => {
-  it('a 6×6 tournament today, 8 teams, pools + finals, 9:00, 45 min, 10 min rest', () => {
+  it('a 6×6 tournament today, 8 teams, pools + finals, 9:00, 45 min, no rest', () => {
     const s = initial();
     expect(s).toMatchObject({
       name: '', date: '2026-05-16', location: '', gameType: 'indoor_6v6', format: 'pools_knockout',
       match: defaultSetRules('indoor_6v6'), finalsMatch: null, thirdPlace: true, legs: 1,
-      pools: null, courts: null, startTime: '09:00', matchMinutes: 45, restMinutes: 10,
+      pools: null, courts: null, startTime: '09:00', matchMinutes: 45, restMinutes: 0,
       seeding: 'random', seed: 42,
     });
     expect(DEFAULT_TEAM_COUNT).toBe(8);
@@ -208,7 +208,7 @@ describe('creation input', () => {
     expect(input).toMatchObject({
       name: 'Open de Lyon', date: '2026-05-16', location: 'Gymnase', gameType: 'indoor_6v6',
       format: 'pools_knockout', seeding: 'random', seed: 42,
-      schedule: { courts: 2, startTime: '09:00', matchMinutes: 45, restMinutes: 10 },
+      schedule: { courts: 2, startTime: '09:00', matchMinutes: 45, restMinutes: 0 },
     });
     expect(input.rules.pools).toEqual(defaultPoolRules(8));
     expect(input.rules.knockout).toEqual({ thirdPlace: true });

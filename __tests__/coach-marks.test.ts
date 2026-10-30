@@ -9,15 +9,16 @@ function lookup(dict: Dict, key: string): unknown {
 }
 
 describe('HELP_TIPS', () => {
-  it('covers the arbitrage screen and the tactical board', () => {
-    expect(Object.keys(HELP_TIPS).sort()).toEqual(['arbitrage', 'tactical']);
+  it('covers the arbitrage screen, the tactical board and the tournament screen', () => {
+    expect(Object.keys(HELP_TIPS).sort()).toEqual(['arbitrage', 'tactical', 'tournament']);
+    expect(HELP_TIPS.tournament).toEqual(['tabs', 'phases', 'matches', 'menu']);
     expect(HELP_TIPS.arbitrage).toHaveLength(4);
     expect(HELP_TIPS.tactical).toHaveLength(4);
   });
 
   it.each(['fr', 'en'] as const)('every bubble text exists in %s', (lang) => {
     const dict = (lang === 'fr' ? fr : en) as Dict;
-    for (const id of ['arbitrage', 'tactical'] as const) {
+    for (const id of ['arbitrage', 'tactical', 'tournament'] as const) {
       for (const step of HELP_TIPS[id]) {
         expect(typeof lookup(dict, tipTextKey(id, step))).toBe('string');
       }

@@ -80,7 +80,7 @@ describe('QR content from a tournament match', () => {
     id: 'm', stage: 'pool', homeId: 'a', awayId: 'b', status: 'scheduled', ...patch,
   }) as TournamentMatch;
   const bundle = {
-    tournament: { gameType: 'beach_2v2', rules },
+    tournament: { id: 'tour', gameType: 'beach_2v2', rules },
     teams: [team('a', 'Sable', '#F59E0B'), team('b', 'Vagues', '#1D4ED8')],
     matches: [],
   } as unknown as TournamentBundle;
@@ -91,6 +91,7 @@ describe('QR content from a tournament match', () => {
       home: { name: 'Sable', color: '#F59E0B' },
       away: { name: 'Vagues', color: '#1D4ED8' },
       rules: rules.match,
+      ref: { tournamentId: 'tour', matchId: 'm' },
     });
     expect(matchQrOf(bundle, match({ stage: 'knockout' }))!.rules).toEqual(rules.finalsMatch);
   });
@@ -139,8 +140,7 @@ describe('screens wiring', () => {
     expect(home).toContain("router.push('/scan')");
     expect(fr.home.scanMatchQr).toBe('Scanner un QR de match');
     const scan = read('app/scan.tsx');
-    expect(scan).toContain('CameraView');
-    expect(scan).toContain("barcodeTypes: ['qr']");
+    expect(scan).toContain('<QrScanner');
     expect(scan).toContain('decodeMatchQr(');
     expect(scan).toContain('createMatchFromQr(');
     expect(scan).toContain('/referee');

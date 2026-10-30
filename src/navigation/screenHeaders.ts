@@ -52,6 +52,7 @@ export const SCREEN_HEADERS: Record<string, ScreenHeader> = {
   'tournament/[id]/round/[round]': { titleKey: 'nav.tournamentRound' },
   'tournament/[id]/levels': { titleKey: 'nav.tournamentLevels' },
   'tournament/[id]/qr/[matchId]': { titleKey: 'nav.tournamentMatchQr' },
+  'tournament/[id]/scan-result': { titleKey: 'nav.scanResult' },
   scan: { titleKey: 'nav.scan' },
   about: { titleKey: 'nav.about' },
   '+not-found': { titleKey: 'nav.notFound' },

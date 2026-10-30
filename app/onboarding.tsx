@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Zap, Whistle, Users } from 'lucide-react-native';
+import { Zap, Whistle, Users, Trophy } from 'lucide-react-native';
 import { ONBOARDING_SLIDES, type OnboardingSlide, type OnboardingSlideId } from '../src/features/onboarding/slides';
 import { TacticalBoardIcon } from '../src/components/ui/TacticalBoardIcon';
 import { useSettingsStore } from '../src/stores/settingsStore';
@@ -24,6 +24,7 @@ const ICON_SIZE = 56;
 const SLIDE_COLORS: Record<OnboardingSlideId, string> = {
   quickMatch: palette.success,
   arbitrage: palette.accentSecondary,
+  tournament: '#D4AF37',
   tactical: palette.accentPrimary,
   teams: palette.warning,
 };
@@ -33,6 +34,7 @@ function SlideIcon({ id }: { id: OnboardingSlideId }) {
   switch (id) {
     case 'quickMatch': return <Zap size={ICON_SIZE} color={color} strokeWidth={1.5} />;
     case 'arbitrage': return <Whistle size={ICON_SIZE} color={color} strokeWidth={1.5} />;
+    case 'tournament': return <Trophy size={ICON_SIZE} color={color} strokeWidth={1.5} />;
     case 'tactical': return <TacticalBoardIcon size={ICON_SIZE} />;
     case 'teams': return <Users size={ICON_SIZE} color={color} strokeWidth={1.5} />;
   }

@@ -29,6 +29,8 @@ import { BarChart } from '../../../src/components/stats/BarChart';
 import { palette } from '../../../src/theme/tokens';
 import { useInterstitialAd } from '../../../src/components/ads/useInterstitialAd';
 import { maybeRequestReview } from '../../../src/features/review/reviewPrompt';
+import { encodeResultQr, resultQrOf } from '../../../src/features/tournament/matchQr';
+import { ResultQrCard } from '../../../src/components/qr/ResultQrCard';
 
 export default function SummaryScreen() {
   const { id, justFinished } = useLocalSearchParams<{ id: string; justFinished?: string }>();
@@ -94,6 +96,8 @@ export default function SummaryScreen() {
   const setsHome = sets.filter((s) => s.winnerTeamId === match.teamHomeId).length;
   const setsAway = sets.filter((s) => s.winnerTeamId === match.teamAwayId).length;
   const winner = match.winnerTeamId === match.teamHomeId ? homeTeam : awayTeam;
+  // Quick match started from a tournament match QR: the organiser scans its result
+  const resultQr = resultQrOf(match, homeTeam.name, awayTeam.name, sets);
 
   const homePlayerIds = new Set(
     players.filter((p) => p.teamId === match.teamHomeId).map((p) => p.id)
@@ -136,6 +140,8 @@ export default function SummaryScreen() {
           <Text style={styles.vs}>-</Text>
           <TeamScore name={awayTeam.name} color={palette.teamAway} sets={setsAway} />
         </View>
+
+        {resultQr && <ResultQrCard value={encodeResultQr(resultQr)} result={resultQr} />}
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('match.sets')}</Text>

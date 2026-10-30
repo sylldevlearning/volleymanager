@@ -124,6 +124,14 @@ export function roundJustCompleted(before: TournamentBundle, after: TournamentBu
   return complete(after) && !complete(before) ? match.phase : null;
 }
 
+/** Screen to open after a recorded result: the end of the round, the levels after the last one, or null (go back). */
+export function resultRoute(tournamentId: string, before: TournamentBundle, after: TournamentBundle, matchId: string): string | null {
+  const round = roundJustCompleted(before, after, matchId);
+  if (round === null) return null;
+  const lastRound = !after.matches.some((m) => m.phase === round + 1);
+  return lastRound ? `/tournament/${tournamentId}/levels` : `/tournament/${tournamentId}/round/${round}`;
+}
+
 export interface LevelSummary {
   level: number;
   name: string;
