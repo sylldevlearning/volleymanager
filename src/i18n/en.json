@@ -702,7 +702,8 @@
     "tournamentLevels": "Levels",
     "tournamentMatchQr": "Match QR",
     "scan": "Scan a QR",
-    "scanResult": "Scan a result"
+    "scanResult": "Scan a result",
+    "tournamentExport": "Export"
   },
   "tournament": {
     "list": {
@@ -922,7 +923,8 @@
       "statusDone": "Finished",
       "statusUpcoming": "To come",
       "phases": "Phases",
-      "menuScanResult": "Scan a result QR"
+      "menuScanResult": "Scan a result QR",
+      "menuExport": "Export"
     },
     "score": {
       "rules": "{{sets}} winning set(s) of {{points}} points",
@@ -991,6 +993,31 @@
       "line": "• {{team}}{{place}}",
       "badge": "Finished",
       "ok": "OK"
+    },
+    "export": {
+      "title": "Export",
+      "content": "Content",
+      "format": "Format",
+      "pdf": "PDF (A4)",
+      "image": "Image",
+      "share": "Share",
+      "preparing": "Preparing…",
+      "error": "The export could not be created. Try again.",
+      "unavailable": "Sharing is not available on this device.",
+      "hint": "The PDF can be printed or projected; the image fits in a chat. You then pick the app: e-mail, Drive, Quick Share…",
+      "footer": "Made with VolleyManager",
+      "colTime": "Time",
+      "colCourt": "Court",
+      "colMatch": "Match",
+      "colScore": "Score",
+      "colTeam": "Team",
+      "colRank": "Rank",
+      "colPool": "Pool",
+      "contents": {
+        "planning": "Schedule",
+        "results": "Matches and results",
+        "standings": "Standings"
+      }
     }
   },
   "scan": {

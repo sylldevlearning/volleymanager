@@ -300,17 +300,24 @@ transaction de création), moteur complet et ses tests. Pas d'écran.
 - Badge « Terminé » : tableaux et classement final de l'onglet Classement,
   liste des équipes.
 
-### Phase 5 — Export
-- Planning et classement en image (rendu dédié, lisible sur un téléphone) ou
-  PDF (HTML généré par une fonction pure, testée), partagés par la feuille de
-  partage du système (WhatsApp, etc.).
+### Phase 5 — Export (fait)
+- Menu ⋯ → « Exporter » : contenu (planning, matchs et résultats, classement,
+  « Tour N terminé » une fois le tour fini, « Répartition des niveaux » une fois
+  connue) et format (PDF A4 ou image), aperçu, puis « Partager » → feuille de
+  partage du système (e-mail, Drive, Quick Share…), aucune app imposée.
+- Un seul document (`exportDoc.ts`, pur et testé) : titre, date au format de la
+  langue (`Intl`), lieu, blocs (tableaux, listes). Deux rendus :
+  HTML A4 (`exportHtml`, CSS `@page`, pied « Réalisé avec VolleyManager » fixe
+  sur chaque page) → `expo-print` ; vue native claire (`ExportView`) capturée
+  par `react-native-view-shot` pour l'image.
+- Fichier renommé (« Open de Lyon - Planning.pdf ») avec `expo-file-system`.
 
 Chaque phase : `tsc`, tests, commit sur `feat/tournoi`. Version 1.1.0 à la fin.
 
 ## Nouvelles dépendances (versions Expo SDK 57 via `npx expo install`)
 - `react-native-qrcode-svg` (affichage QR, s'appuie sur react-native-svg) — phase 4.
 - `expo-camera` (lecture QR) — phase 4 : même permission caméra que le scanner de licences.
-- `react-native-view-shot`, `expo-print`, `expo-sharing` — phase 5.
+- `react-native-view-shot`, `expo-print`, `expo-sharing`, `expo-file-system` — phase 5.
 Les phases 4 et 5 demandent un nouveau build natif pour être testées hors Expo Go.
 
 ## Hors périmètre

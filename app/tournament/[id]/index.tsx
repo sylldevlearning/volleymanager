@@ -3,7 +3,7 @@ import { Alert, FlatList, Modal, Pressable, ScrollView, SectionList, StyleSheet,
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { CalendarClock, ChevronRight, Ellipsis, Pencil, ScanQrCode, Shuffle, Trash2 } from 'lucide-react-native';
+import { CalendarClock, ChevronRight, Ellipsis, Pencil, ScanQrCode, Share2, Shuffle, Trash2 } from 'lucide-react-native';
 import { palette } from '../../../src/theme/tokens';
 import { InfoTooltip } from '../../../src/components/ui/InfoTooltip';
 import { CoachMarks } from '../../../src/components/ui/CoachMarks';
@@ -262,6 +262,8 @@ export default function TournamentScreen() {
             <Text style={styles.sheetTitle}>{t('tournament.view.menu')}</Text>
             <MenuItem icon={<ScanQrCode size={20} color={palette.textPrimary} />} label={t('tournament.view.menuScanResult')}
               onPress={() => { setMenuOpen(false); router.push(`/tournament/${id}/scan-result`); }} />
+            <MenuItem icon={<Share2 size={20} color={palette.textPrimary} />} label={t('tournament.view.menuExport')}
+              onPress={() => { setMenuOpen(false); router.push(`/tournament/${id}/export`); }} />
             <MenuItem icon={<Pencil size={20} color={palette.textPrimary} />} label={t('tournament.view.menuTeams')}
               onPress={() => { setMenuOpen(false); router.push(`/tournament/${id}/teams`); }} />
             <MenuItem icon={<CalendarClock size={20} color={palette.textPrimary} />} label={t('tournament.view.menuSchedule')}

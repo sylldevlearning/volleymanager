@@ -702,7 +702,8 @@
     "tournamentLevels": "Répartition des niveaux",
     "tournamentMatchQr": "QR du match",
     "scan": "Scanner un QR",
-    "scanResult": "Scanner un résultat"
+    "scanResult": "Scanner un résultat",
+    "tournamentExport": "Exporter"
   },
   "tournament": {
     "list": {
@@ -922,7 +923,8 @@
       "statusDone": "Terminé",
       "statusUpcoming": "À venir",
       "phases": "Phases",
-      "menuScanResult": "Scanner un QR de résultat"
+      "menuScanResult": "Scanner un QR de résultat",
+      "menuExport": "Exporter"
     },
     "score": {
       "rules": "{{sets}} set(s) gagnant(s) de {{points}} points",
@@ -991,6 +993,31 @@
       "line": "• {{team}}{{place}}",
       "badge": "Terminé",
       "ok": "OK"
+    },
+    "export": {
+      "title": "Exporter",
+      "content": "Contenu",
+      "format": "Format",
+      "pdf": "PDF (A4)",
+      "image": "Image",
+      "share": "Partager",
+      "preparing": "Préparation…",
+      "error": "L'export n'a pas pu être créé. Réessayez.",
+      "unavailable": "Le partage n'est pas disponible sur cet appareil.",
+      "hint": "Le PDF s'imprime ou se projette ; l'image s'envoie dans une conversation. Vous choisissez ensuite l'app : e-mail, Drive, Quick Share…",
+      "footer": "Réalisé avec VolleyManager",
+      "colTime": "Heure",
+      "colCourt": "Terrain",
+      "colMatch": "Match",
+      "colScore": "Score",
+      "colTeam": "Équipe",
+      "colRank": "Rang",
+      "colPool": "Poule",
+      "contents": {
+        "planning": "Planning",
+        "results": "Matchs et résultats",
+        "standings": "Classement"
+      }
     }
   },
   "scan": {
