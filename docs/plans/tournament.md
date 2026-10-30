@@ -314,6 +314,8 @@ transaction de création), moteur complet et ses tests. Pas d'écran.
 
 Chaque phase : `tsc`, tests, commit sur `feat/tournoi`. Version 1.1.0 à la fin.
 
+- Colonnes du PDF typées (`short` / `score` / `text`) : heure, terrain, rang et chiffres ne passent jamais à la ligne (« 2:30 PM », « Площадка ») ; un score ne se coupe qu'entre deux sets, jamais dans « 25-20 ».
+
 ## Nouvelles dépendances (versions Expo SDK 57 via `npx expo install`)
 - `react-native-qrcode-svg` (affichage QR, s'appuie sur react-native-svg) — phase 4.
 - `expo-camera` (lecture QR) — phase 4 : même permission caméra que le scanner de licences.

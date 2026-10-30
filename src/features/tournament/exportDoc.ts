@@ -18,8 +18,11 @@ import { formatClock, formatDate } from '../../i18n/format';
 export type ExportContent = string;
 export type ExportFormat = 'pdf' | 'png';
 
+/** short: never wraps (time, court, rank, numbers); score: breaks only between sets; text: names. */
+export type ColumnKind = 'short' | 'score' | 'text';
+
 export type ExportBlock =
-  | { kind: 'table'; title?: string; columns: string[]; rows: string[][] }
+  | { kind: 'table'; title?: string; columns: string[]; kinds: ColumnKind[]; rows: string[][] }
   | { kind: 'list'; title: string; color?: string; items: string[] }
   | { kind: 'note'; text: string };
 
@@ -77,7 +80,12 @@ export function buildExportDoc(bundle: TournamentBundle, content: ExportContent,
     const rows = slotGroups(bundle.matches).flatMap((g) => g.matches.map((m) => [
       formatClock(g.time, locale), court(m), matchTitle(m, bundle, t), side(m, 'home'), side(m, 'away'), score(m),
     ]));
-    blocks.push({ kind: 'table', columns: [col('colTime'), col('colCourt'), col('colMatch'), col('colTeam'), col('colTeam'), col('colScore')], rows });
+    blocks.push({
+      kind: 'table',
+      columns: [col('colTime'), col('colCourt'), col('colMatch'), col('colTeam'), col('colTeam'), col('colScore')],
+      kinds: ['short', 'short', 'text', 'text', 'text', 'score'],
+      rows,
+    });
   } else if (content === 'results') {
     for (const group of matchGroups(bundle, t)) {
       const ids = new Set(group.matchIds);
@@ -88,6 +96,7 @@ export function buildExportDoc(bundle: TournamentBundle, content: ExportContent,
         kind: 'table',
         title: group.label,
         columns: [col('colTime'), col('colCourt'), col('colTeam'), col('colTeam'), col('colScore')],
+        kinds: ['short', 'short', 'text', 'text', 'score'],
         rows: list.map((m) => [time(m), court(m), side(m, 'home'), side(m, 'away'), score(m)]),
       });
     }
@@ -100,6 +109,7 @@ export function buildExportDoc(bundle: TournamentBundle, content: ExportContent,
         kind: 'table',
         title: view('finalRanking'),
         columns: [col('colRank'), col('colTeam')],
+        kinds: ['short', 'text'],
         rows: ranking.map((r) => [String(r.rank), r.name]),
       });
     }
@@ -108,6 +118,7 @@ export function buildExportDoc(bundle: TournamentBundle, content: ExportContent,
         kind: 'table',
         title: table.complete ? table.title : `${table.title} · ${view('tableInProgress')}`,
         columns: ['#', view('colTeam'), view('colPlayed'), view('colWon'), view('colLost'), view('colPoints'), view('colSets'), view('colDiff')],
+        kinds: ['short', 'text', 'short', 'short', 'short', 'short', 'short', 'short'],
         rows: table.rows.map((r) => [
           String(r.rank), r.name, String(r.played), String(r.won), String(r.lost), String(r.points),
           diff(r.setsWon - r.setsLost), diff(r.pointsWon - r.pointsLost),
@@ -119,6 +130,7 @@ export function buildExportDoc(bundle: TournamentBundle, content: ExportContent,
         kind: 'table',
         title: round.title,
         columns: [col('colMatch'), col('colTeam'), col('colTeam'), col('colScore')],
+        kinds: ['text', 'text', 'text', 'score'],
         rows: round.matches.map((m) => [matchTitle(m, bundle, t), side(m, 'home'), side(m, 'away'), score(m)]),
       });
     }
@@ -139,6 +151,7 @@ export function buildExportDoc(bundle: TournamentBundle, content: ExportContent,
         kind: 'table',
         title: t('tournament.round.ranking', { n: round }),
         columns: [col('colRank'), col('colTeam'), col('colPool')],
+        kinds: ['short', 'text', 'short'],
         rows: summary.ranking.map((r) => [String(r.rank), r.name, r.pool]),
       });
       if (summary.next?.kind === 'round') {
@@ -157,6 +170,13 @@ export function buildExportDoc(bundle: TournamentBundle, content: ExportContent,
 const escapeHtml = (text: string) => text
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
+/** "2-1 · 25-20, 18-25" → blocks that do not wrap, the match score kept with its "·". */
+const scoreHtml = (score: string) => score
+  .replace(/ · /g, '\u00A0· ')
+  .split(' ')
+  .map((part) => `<span class="nw">${escapeHtml(part)}</span>`)
+  .join(' ');
+
 /** Self-contained HTML for an A4 PDF: readable printed or projected, footer on every page. */
 export function exportHtml(doc: ExportDoc, lang: string): string {
   const e = escapeHtml;
@@ -166,11 +186,12 @@ export function exportHtml(doc: ExportDoc, lang: string): string {
       const bar = b.color ? ` style="border-left-color: ${e(b.color)}"` : '';
       return `<section class="list"${bar}><h3>${e(b.title)}</h3><ol>${b.items.map((i) => `<li>${e(i)}</li>`).join('')}</ol></section>`;
     }
-    // Columns of short values (rank, numbers) stay narrow, names get the room
-    const narrow = b.columns.map((c, k) => [c, ...b.rows.map((r) => r[k] ?? '')].every((v) => v.length <= 6));
-    const cls = (k: number) => (narrow[k] ? ' class="narrow"' : '');
+    // Short columns (time, court, numbers) fit their longest value on one line ("2:30 PM", "Площадка"),
+    // names get the room; a score wraps only between sets, never inside "25-20"
+    const cls = (k: number) => (b.kinds[k] === 'text' ? '' : ` class="${b.kinds[k]}"`);
+    const cell = (c: string, k: number) => (b.kinds[k] === 'score' ? scoreHtml(c) : e(c));
     const head = b.columns.map((c, k) => `<th${cls(k)}>${e(c)}</th>`).join('');
-    const rows = b.rows.map((r) => `<tr>${r.map((c, k) => `<td${cls(k)}>${e(c)}</td>`).join('')}</tr>`).join('');
+    const rows = b.rows.map((r) => `<tr>${r.map((c, k) => `<td${cls(k)}>${cell(c, k)}</td>`).join('')}</tr>`).join('');
     return `<section>${b.title ? `<h3>${e(b.title)}</h3>` : ''}<table><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table></section>`;
   }).join('\n');
 
@@ -191,7 +212,8 @@ export function exportHtml(doc: ExportDoc, lang: string): string {
   table { width: 100%; border-collapse: collapse; }
   th { background: #EEF1F5; text-align: left; font-size: 10pt; }
   th, td { border: 1px solid #C9CFD8; padding: 5px 6px; }
-  .narrow { width: 1%; white-space: nowrap; text-align: center; }
+  .short { width: 1%; white-space: nowrap; text-align: center; }
+  .nw { white-space: nowrap; }
   tr { break-inside: avoid; page-break-inside: avoid; }
   tbody tr:nth-child(even) td { background: #F8F9FB; }
   .list { border-left: 6px solid #1D4ED8; padding-left: 10px; }

@@ -19,6 +19,11 @@ beforeAll(async () => {
   await tr.init({ lng: 'fr', resources: { fr: { translation: fr } } });
 });
 const t = (key: string, opts?: Record<string, unknown>) => tr.t(key, opts) as string;
+const enT = i18n.createInstance();
+beforeAll(async () => {
+  await enT.init({ lng: 'en', resources: { en: { translation: en } } });
+});
+const tEn = (key: string, opts?: Record<string, unknown>) => enT.t(key, opts) as string;
 
 const withPlace = <T extends { tournament: object }>(b: T) =>
   ({ ...b, tournament: { ...b.tournament, name: 'Open de Lyon', location: 'Gymnase Jean Macé' } }) as T;
@@ -109,6 +114,36 @@ describe('PDF (HTML for A4) and file name', () => {
     expect(html).toContain('Réalisé avec VolleyManager');
     expect(html).toContain('Open &lt;A&amp;B&gt;');
     expect(html).not.toContain('<A&B>');
+  });
+
+  it('time, court, rank and numbers never wrap, whatever the language; a score breaks only between sets', () => {
+    const played = withPlace(bundleFrom(built, playAll(built)));
+    for (const [lang, tl] of [['fr', t], ['en', tEn]] as const) {
+      for (const content of ['planning', 'results', 'standings']) {
+        const doc = buildExportDoc(played, content, tl, lang);
+        const html = exportHtml(doc, lang);
+        for (const b of doc.blocks) {
+          if (b.kind !== 'table') continue;
+          expect(b.kinds).toHaveLength(b.columns.length);
+          b.columns.forEach((c, k) => {
+            if (c === tl('tournament.export.colTime') || c === tl('tournament.export.colCourt') || c === '#') expect(b.kinds[k]).toBe('short');
+            if (c === tl('tournament.export.colScore')) expect(b.kinds[k]).toBe('score');
+          });
+        }
+        // Every time of the planning sits in a cell that does not wrap ("2:30 PM" in English)
+        if (content === 'planning') {
+          const table = doc.blocks[0];
+          if (table.kind !== 'table') throw new Error('table expected');
+          for (const row of table.rows) expect(html).toContain(`<td class="short">${row[0]}</td>`);
+        }
+      }
+    }
+    expect(exportHtml(buildExportDoc(played, 'planning', tEn, 'en'), 'en')).toMatch(/<td class="short">\d{1,2}:\d{2} [AP]M<\/td>/);
+    const html = exportHtml(buildExportDoc(played, 'planning', t, 'fr'), 'fr');
+    expect(html).toMatch(/\.short \{[^}]*white-space: nowrap/);
+    expect(html).toMatch(/\.nw \{[^}]*white-space: nowrap/);
+    // "25-20" never splits at its hyphen: each part of the score is a block that does not wrap
+    expect(html).toMatch(/<td class="score"><span class="nw">\d-\d ·<\/span> <span class="nw">\d+-\d+,?<\/span>/);
   });
 
   it('a readable file name, without characters the share targets refuse', () => {
