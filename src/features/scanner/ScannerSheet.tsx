@@ -126,6 +126,11 @@ export function ScannerSheet({
     );
   }
 
+  // OCR split of compound names is a guess: both fields can be corrected
+  function updateName(id: string, field: 'lastName' | 'firstName', value: string) {
+    setDetected((prev) => prev.map((p) => (p.id === id ? { ...p, [field]: value } : p)));
+  }
+
   function addManually() {
     setDetected((prev) => [
       ...prev,
@@ -275,6 +280,8 @@ export function ScannerSheet({
                   player={item}
                   onToggle={() => toggleSelect(item.id)}
                   onNumberChange={(v) => updateNumber(item.id, v)}
+                  onLastNameChange={(v) => updateName(item.id, 'lastName', v)}
+                  onFirstNameChange={(v) => updateName(item.id, 'firstName', v)}
                 />
               )}
               ListFooterComponent={
@@ -308,12 +315,17 @@ function PlayerResultRow({
   player,
   onToggle,
   onNumberChange,
+  onLastNameChange,
+  onFirstNameChange,
 }: {
   player: DetectedPlayer;
   onToggle: () => void;
   onNumberChange: (v: string) => void;
+  onLastNameChange: (v: string) => void;
+  onFirstNameChange: (v: string) => void;
 }) {
   const styles = useThemedStyles(makeStyles);
+  const { t } = useTranslation();
   return (
     <View style={styles.resultRow}>
       <Pressable
@@ -325,9 +337,28 @@ function PlayerResultRow({
         {player.isSelected && <Text style={styles.checkMark}>✓</Text>}
       </Pressable>
       <View style={styles.playerInfo}>
-        <Text style={[styles.playerName, !player.isSelected && styles.playerNameDimmed]} numberOfLines={1}>
-          {player.lastName}{player.firstName ? ` ${player.firstName}` : ''}
-        </Text>
+        <View style={styles.nameFields}>
+          <TextInput
+            style={[styles.nameInput, !player.isSelected && styles.numberInputDimmed]}
+            value={player.lastName}
+            onChangeText={onLastNameChange}
+            placeholder={t('player.lastName')}
+            placeholderTextColor={palette.textMuted}
+            accessibilityLabel={t('player.lastName')}
+            autoCapitalize="words"
+            editable={player.isSelected}
+          />
+          <TextInput
+            style={[styles.nameInput, !player.isSelected && styles.numberInputDimmed]}
+            value={player.firstName}
+            onChangeText={onFirstNameChange}
+            placeholder={t('player.firstName')}
+            placeholderTextColor={palette.textMuted}
+            accessibilityLabel={t('player.firstName')}
+            autoCapitalize="words"
+            editable={player.isSelected}
+          />
+        </View>
         {player.licenseNumber && (
           <Text style={[styles.licenseText, !player.isSelected && styles.playerNameDimmed]}>
             Lic. {player.licenseNumber}
@@ -473,6 +504,19 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   },
   checkMark: { fontSize: 13, color: a.onFill, fontFamily: 'Inter_700Bold' },
   playerInfo: { flex: 1 },
+  nameFields: { flexDirection: 'row', gap: 6 },
+  nameInput: {
+    flex: 1,
+    minHeight: 36,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    backgroundColor: palette.backgroundSurface,
+    borderWidth: 1,
+    borderColor: palette.backgroundElevated,
+    color: palette.textPrimary,
+    fontFamily: 'Inter_500Medium',
+    fontSize: 14,
+  },
   playerName: {
     fontSize: 15,
     fontFamily: 'Inter_500Medium',
