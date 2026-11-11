@@ -135,10 +135,10 @@ describe('screens wiring', () => {
     expect(en.tournament.qr.scanWith).toBeTruthy();
   });
 
-  it('referee: "Scanner un QR de match" next to Match rapide, opens a filled quick match', () => {
-    const home = read('app/(tabs)/index.tsx');
-    expect(home).toContain("router.push('/scan')");
-    expect(fr.home.scanMatchQr).toBe('Scanner un QR de match');
+  it('referee: "Scanner un QR de match" on the tournament list, opens a filled quick match', () => {
+    const list = read('app/tournament/index.tsx');
+    expect(list).toContain("router.push('/scan')");
+    expect(fr.tournament.list.scanMatchQr).toBe('Scanner un QR de match');
     const scan = read('app/scan.tsx');
     expect(scan).toContain('<QrScanner');
     expect(scan).toContain('decodeMatchQr(');

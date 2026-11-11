@@ -44,9 +44,7 @@
     "arbitrageAbandonConfirmMessage": "The current match will be marked as finished and cannot be resumed.",
     "arbitrageAbandonConfirm": "Abandon",
     "tournament": "Tournament",
-    "tournamentDesc": "Pools, bracket, schedule and standings",
-    "scanMatchQr": "Scan a match QR",
-    "scanMatchQrDesc": "Teams and rules of a tournament match"
+    "tournamentDesc": "Pools, schedule, standings, match QR"
   },
   "tabs": {
     "home": "Home",
@@ -634,7 +632,7 @@
     "selectStarters": "Tap the badge to toggle starters"
   },
   "help": {
-    "home": "Quick match: referee right away, no teams to enter. New match: pick your teams and format. Refereeing: official match with lineup, substitutions and sanctions. Tactical board: draw and animate your plays. Scan a match QR: opens a quick match with the teams and rules of a tournament match. Tournament: create and run a full tournament (pools, schedule, standings).",
+    "home": "Quick match: referee right away, no teams to enter. New match: pick your teams and format. Refereeing: official match with lineup, substitutions and sanctions. Tactical board: draw and animate your plays. Tournament: create and run a full tournament (pools, schedule, standings); the referee of a tournament match finds \"Scan a match QR\" there.",
     "referee": "+1 gives the team the point, -1 removes one. After a point, choose who scored and how, or \"Skip\". Tap a team's timeout or substitution counter to use it. Undo reverts the last action. Rotations are automatic; the tactical icon opens the board.",
     "arbitrage": "Lineup: tap each court position to place a starter, then confirm. During the match: +1 gives the point, ⇄ swaps sides. Tap a player on the court to substitute them (or take the libero out). For each team: Substitution, Timeout (or tap the team's badge, its dots show the timeouts taken) and Card; Undo reverts the last action.",
     "arbitrageSetup": "The format sets the number of players on court. 6×6 follows the FIVB rules: 6 substitutions and 2 timeouts per set, libero. In 4×4, 3×3 and 2×2, no libero and two rule choices. Leisure: free, unlimited substitutions, 1 timeout per set. Official 4×4 (U13 FFVolley): 4 substitutions and 2 timeouts per set. Official 3×3 (FIVB snow): 2 substitutions, 1 timeout, sets of 15 points. Official 2×2 (FIVB beach): no substitution, 1 timeout and a technical time-out at 21 points. Everything can still be changed in the Rules tab.",
@@ -649,10 +647,10 @@
     "settings": "Change the language, turn vibrations on and replay the app help. By default the app follows the phone language; you can pick another of the 11 languages.",
     "substitution": "Choose who goes out, then who comes in. The libero ⚡ does not count towards the substitution limit.",
     "lineup": "Tick the players who are present, then tap the Starter / Bench badge to pick each team's starters. The libero ⚡ is handled separately.",
-    "tournaments": "Your tournaments, most recent first. Everything stays on this phone: no account, no connection. \"New tournament\" opens a 4-step wizard.",
+    "tournaments": "Your tournaments, most recent first. Everything stays on this phone: no account, no connection. \"New tournament\" opens a 4-step wizard. Refereeing a tournament match? \"Scan a match QR\" opens a quick match with that match's teams and rules.",
     "tournamentWizard": "4 steps: details, format and rules, teams and schedule, summary. Suggested values follow the game type and the number of teams; you can change everything. \"Redraw\" draws the pools again before creating. \"Save as template\" keeps the rules and schedule (without the teams) for a next tournament.",
     "tournamentPlanning": "Schedule: matches by time and court, in the order they are played. Tap a match to enter or correct its score. If the tournament runs late, \"Schedule and courts\" (⋯ menu) recomputes the times of the upcoming matches. \"Export\" (⋯ menu) shares the schedule, results or standings as a PDF or an image.",
-    "tournamentMatches": "Matches: filter by status (to play, done), phase or team. Tap an upcoming match to enter its score or show its QR code: the referee scans it with the app (\"Scan a match QR\" on the home screen). At the end, scan their result QR from the ⋯ menu (\"Scan a result QR\"). After a result, the app tells which teams have finished their tournament and can leave. \"Export\" (⋯ menu) shares the schedule, results or standings as a PDF or an image.",
+    "tournamentMatches": "Matches: filter by status (to play, done), phase or team. Tap an upcoming match to enter its score or show its QR code: the referee scans it with the app (Tournament button, then \"Scan a match QR\"). At the end, scan their result QR from the ⋯ menu (\"Scan a result QR\"). After a result, the app tells which teams have finished their tournament and can leave. \"Export\" (⋯ menu) shares the schedule, results or standings as a PDF or an image.",
     "tournamentStandings": "Standings: progress of the phases, pool standings, the final bracket and the overall ranking. Updated with every result, even after a correction. Ties broken by head-to-head, then set difference, point difference and points scored. Teams with no match left to play are marked \"Finished\". \"Export\" (⋯ menu) shares the schedule, results or standings as a PDF or an image."
   },
   "onboarding": {
@@ -669,7 +667,7 @@
     },
     "tournament": {
       "title": "Tournament",
-      "body": "Create a tournament in a few steps: teams, courts, rules, and the schedule is computed for you. Mixing rounds then levels for balanced matches, or pools and a final bracket. One QR code per match: the referee scans it and referees on their phone, then you scan their result QR."
+      "body": "Create a tournament in a few steps: teams, courts, rules, and the schedule is computed for you. Mixing rounds then levels for balanced matches, or pools and a final bracket. One QR code per match: the referee scans it (Tournament › \"Scan a match QR\") and referees on their phone, then you scan their result QR."
     },
     "tactical": {
       "title": "Tactical board",
@@ -698,7 +696,7 @@
     "tournament": {
       "tabs": "Schedule: matches by time and court. Matches: filter by status, phase or team. Standings: pools, bracket and final ranking.",
       "phases": "Progress of each phase: done, in progress or upcoming. Tap one to see its matches or its summary.",
-      "matches": "Tap a match to enter its score, or to show its QR code for the referee to scan.",
+      "matches": "Tap a match to enter its score, or to show its QR code: the referee scans it with Tournament › \"Scan a match QR\".",
       "menu": "The ⋯ menu: scan a referee's result QR, \"Export\" as a PDF or an image, rename teams, recompute the schedule or delete the tournament."
     }
   },
@@ -729,7 +727,9 @@
       "emptyHint": "Create your first tournament: pools, bracket, schedule by court and standings.",
       "new": "New tournament",
       "live": "In progress",
-      "finished": "Finished"
+      "finished": "Finished",
+      "scanMatchQr": "Scan a match QR",
+      "scanMatchQrDesc": "Teams and rules of a tournament match"
     },
     "gameType": {
       "indoor_6v6": "6×6",
@@ -832,7 +832,6 @@
       "templateName": "Template name",
       "templateNamePlaceholder": "E.g. Saturday tournament",
       "templateSaved": "Template saved",
-      "create": "Create the tournament",
       "creating": "Creating…",
       "fixErrors": "To fix",
       "leaveTitle": "Discard the tournament?",
@@ -856,7 +855,9 @@
       "matchesPerTeam_other": "Each team plays {{count}} matches",
       "matchesPerTeamRange": "Each team plays {{min}} to {{max}} matches",
       "durationMinutes": "{{m}} min",
-      "durationHours": "{{h}} h {{m}}"
+      "durationHours": "{{h}} h {{m}}",
+      "createAndLaunch": "Create and start",
+      "saveForLater": "Save for later"
     },
     "errors": {
       "name_required": "Give the tournament a name.",
@@ -1001,7 +1002,7 @@
     "qr": {
       "button": "Match QR",
       "scanWith": "Scan with the VolleyManager app (Play Store)",
-      "hint": "The referee taps \"Scan a match QR\" on the app home screen: the quick match opens with these teams and these rules. At the end of the match, the referee's app shows the result QR: scan it from the tournament ⋯ menu.",
+      "hint": "The referee taps Tournament, then \"Scan a match QR\" in the app: the quick match opens with these teams and these rules. At the end of the match, the referee's app shows the result QR: scan it from the tournament ⋯ menu.",
       "lead": " · {{margin}}-point lead"
     },
     "finished": {

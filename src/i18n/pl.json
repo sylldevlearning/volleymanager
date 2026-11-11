@@ -44,9 +44,7 @@
     "arbitrageAbandonConfirmMessage": "Obecny mecz zostanie oznaczony jako zakończony i nie będzie można go wznowić.",
     "arbitrageAbandonConfirm": "Przerwij",
     "tournament": "Turniej",
-    "tournamentDesc": "Grupy, drabinka, harmonogram i tabela",
-    "scanMatchQr": "Zeskanuj QR meczu",
-    "scanMatchQrDesc": "Drużyny i zasady meczu turniejowego"
+    "tournamentDesc": "Grupy, harmonogram, tabela, QR meczu"
   },
   "tabs": {
     "home": "Start",
@@ -644,7 +642,7 @@
     "selectStarters": "Dotknij etykiety, aby oznaczyć zawodników wyjściowych"
   },
   "help": {
-    "home": "Szybki mecz: sędziuj od razu, bez wpisywania drużyn. Nowy mecz: wybierz drużyny i format. Sędziowanie: oficjalny mecz z ustawieniem, zmianami i karami. Tablica taktyczna: rysuj i animuj zagrywki. Zeskanuj QR meczu: otwiera szybki mecz z drużynami i zasadami meczu turniejowego. Turniej: utwórz i prowadź pełny turniej (grupy, harmonogram, tabela).",
+    "home": "Szybki mecz: sędziuj od razu, bez wpisywania drużyn. Nowy mecz: wybierz drużyny i format. Sędziowanie: oficjalny mecz z ustawieniem, zmianami i karami. Tablica taktyczna: rysuj i animuj zagrywki. Turniej: utwórz i prowadź pełny turniej (grupy, harmonogram, tabela); sędzia meczu turniejowego znajdzie tam „Zeskanuj QR meczu”.",
     "referee": "+1 daje punkt drużynie, -1 go odejmuje. Po punkcie wybierz, kto zdobył punkt i jak, albo „Pomiń”. Dotknij licznika czasów lub zmian drużyny, aby z niego skorzystać. Cofnij anuluje ostatnią akcję. Rotacje są automatyczne; ikona taktyki otwiera tablicę.",
     "arbitrage": "Ustawienie: dotknij każdej pozycji na boisku, aby ustawić zawodnika wyjściowego, i potwierdź. W trakcie meczu: +1 daje punkt, ⇄ zamienia strony. Dotknij zawodnika na boisku, aby go zmienić (lub zdjąć libero). Dla każdej drużyny: Zmiana, Czas (albo dotknij etykiety drużyny, jej kropki pokazują wzięte czasy) i Kartka; Cofnij anuluje ostatnią akcję.",
     "arbitrageSetup": "Format określa liczbę zawodników na boisku. 6×6 według przepisów FIVB: 6 zmian i 2 czasy w secie, libero. W 4×4, 3×3 i 2×2 nie ma libero i są dwa warianty zasad. Rekreacja: zmiany dowolne i bez limitu, 1 czas w secie. Oficjalne 4×4 (U13 FFVolley): 4 zmiany i 2 czasy w secie. Oficjalne 3×3 (siatkówka na śniegu FIVB): 2 zmiany, 1 czas, sety do 15 punktów. Oficjalne 2×2 (plażowa FIVB): bez zmian, 1 czas i czas techniczny przy 21 punktach. Wszystko można zmienić w zakładce Zasady.",
@@ -659,10 +657,10 @@
     "settings": "Zmień język, włącz wibracje i obejrzyj ponownie pomoc aplikacji. Domyślnie aplikacja używa języka telefonu; możesz wybrać inny spośród 11 języków.",
     "substitution": "Wybierz, kto schodzi, potem kto wchodzi. Libero ⚡ nie wlicza się do limitu zmian.",
     "lineup": "Zaznacz obecnych zawodników, potem dotknij etykiety Wyjściowy / Ławka, aby wybrać pierwszą szóstkę każdej drużyny. Libero ⚡ jest obsługiwany osobno.",
-    "tournaments": "Twoje turnieje, od najnowszego. Wszystko zostaje na tym telefonie: bez konta i bez połączenia. „Nowy turniej” otwiera kreator w 4 krokach.",
+    "tournaments": "Twoje turnieje, od najnowszego. Wszystko zostaje na tym telefonie: bez konta i bez połączenia. „Nowy turniej” otwiera kreator w 4 krokach. Sędziujesz mecz turniejowy? „Zeskanuj QR meczu” otwiera szybki mecz z drużynami i zasadami tego meczu.",
     "tournamentWizard": "4 kroki: informacje, format i zasady, drużyny i harmonogram, podsumowanie. Proponowane wartości zależą od rodzaju gry i liczby drużyn; wszystko możesz zmienić. „Losuj ponownie” powtarza losowanie grup przed utworzeniem. „Zapisz jako szablon” zachowuje zasady i harmonogram (bez drużyn) na kolejny turniej.",
     "tournamentPlanning": "Harmonogram: mecze według godziny i boiska, w kolejności rozgrywania. Dotknij meczu, aby wpisać lub poprawić wynik. Gdy turniej ma opóźnienie, „Harmonogram i boiska” (menu ⋯) przelicza godziny kolejnych meczów. „Eksportuj” (menu ⋯) udostępnia harmonogram, wyniki lub tabelę jako PDF albo obraz.",
-    "tournamentMatches": "Mecze: filtruj według stanu (do rozegrania, zakończone), fazy lub drużyny. Dotknij nadchodzącego meczu, aby wpisać wynik lub pokazać jego kod QR: sędzia skanuje go aplikacją („Zeskanuj QR meczu” na ekranie startowym). Na końcu zeskanuj jego QR wyniku z menu ⋯ („Zeskanuj QR wyniku”). Po wyniku aplikacja pokazuje drużyny, które zakończyły turniej i mogą już iść. „Eksportuj” (menu ⋯) udostępnia harmonogram, wyniki lub tabelę jako PDF albo obraz.",
+    "tournamentMatches": "Mecze: filtruj według stanu (do rozegrania, zakończone), fazy lub drużyny. Dotknij nadchodzącego meczu, aby wpisać wynik lub pokazać jego kod QR: sędzia skanuje go aplikacją (przycisk Turniej, potem „Zeskanuj QR meczu”). Na końcu zeskanuj jego QR wyniku z menu ⋯ („Zeskanuj QR wyniku”). Po wyniku aplikacja pokazuje drużyny, które zakończyły turniej i mogą już iść. „Eksportuj” (menu ⋯) udostępnia harmonogram, wyniki lub tabelę jako PDF albo obraz.",
     "tournamentStandings": "Tabela: postęp faz, tabele grup, drabinka i klasyfikacja ogólna. Aktualizuje się po każdym wyniku, także po korekcie. Przy remisie decyduje bezpośredni mecz, potem różnica setów, różnica punktów i zdobyte punkty. Drużyny bez meczów do rozegrania są oznaczone jako „Zakończyła”. „Eksportuj” (menu ⋯) udostępnia harmonogram, wyniki lub tabelę jako PDF albo obraz."
   },
   "onboarding": {
@@ -679,7 +677,7 @@
     },
     "tournament": {
       "title": "Turniej",
-      "body": "Utwórz turniej w kilku krokach: drużyny, boiska, zasady, a harmonogram oblicza się sam. Rundy mieszane, a potem poziomy dla wyrównanych meczów, albo grupy i drabinka. Jeden kod QR na mecz: sędzia skanuje go i sędziuje na swoim telefonie, a potem ty skanujesz jego QR wyniku."
+      "body": "Utwórz turniej w kilku krokach: drużyny, boiska, zasady, a harmonogram oblicza się sam. Rundy mieszane, a potem poziomy dla wyrównanych meczów, albo grupy i drabinka. Jeden kod QR na mecz: sędzia skanuje go (Turniej › „Zeskanuj QR meczu”) i sędziuje na swoim telefonie, a potem ty skanujesz jego QR wyniku."
     },
     "tactical": {
       "title": "Tablica taktyczna",
@@ -708,7 +706,7 @@
     "tournament": {
       "tabs": "Harmonogram: mecze według godziny i boiska. Mecze: filtruj według stanu, fazy lub drużyny. Tabela: grupy, drabinka i klasyfikacja końcowa.",
       "phases": "Postęp każdej fazy: zakończona, w trakcie lub nadchodząca. Dotknij jej, aby zobaczyć mecze lub podsumowanie.",
-      "matches": "Dotknij meczu, aby wpisać wynik albo pokazać jego kod QR do zeskanowania przez sędziego.",
+      "matches": "Dotknij meczu, aby wpisać wynik albo pokazać jego kod QR: sędzia skanuje go przez Turniej › „Zeskanuj QR meczu”.",
       "menu": "Menu ⋯: zeskanuj QR wyniku od sędziego, „Eksportuj” do PDF lub obrazu, zmień nazwy drużyn, przelicz harmonogram lub usuń turniej."
     }
   },
@@ -739,7 +737,9 @@
       "emptyHint": "Utwórz pierwszy turniej: grupy, drabinka, harmonogram według boisk i tabela.",
       "new": "Nowy turniej",
       "live": "W trakcie",
-      "finished": "Zakończony"
+      "finished": "Zakończony",
+      "scanMatchQr": "Zeskanuj QR meczu",
+      "scanMatchQrDesc": "Drużyny i zasady meczu turniejowego"
     },
     "gameType": {
       "indoor_6v6": "6×6",
@@ -842,7 +842,6 @@
       "templateName": "Nazwa szablonu",
       "templateNamePlaceholder": "Np. Turniej sobotni",
       "templateSaved": "Szablon zapisany",
-      "create": "Utwórz turniej",
       "creating": "Tworzenie…",
       "fixErrors": "Do poprawy",
       "leaveTitle": "Porzucić turniej?",
@@ -870,7 +869,9 @@
       "matchesPerTeam_other": "Każda drużyna gra {{count}} meczu",
       "matchesPerTeamRange": "Każda drużyna gra od {{min}} do {{max}} meczów",
       "durationMinutes": "{{m}} min",
-      "durationHours": "{{h}} godz. {{m}}"
+      "durationHours": "{{h}} godz. {{m}}",
+      "createAndLaunch": "Utwórz i rozpocznij",
+      "saveForLater": "Zapisz na później"
     },
     "errors": {
       "name_required": "Nadaj turniejowi nazwę.",
@@ -1021,7 +1022,7 @@
     "qr": {
       "button": "QR meczu",
       "scanWith": "Do zeskanowania w aplikacji VolleyManager (Sklep Play)",
-      "hint": "Sędzia dotyka „Zeskanuj QR meczu” na ekranie startowym aplikacji: szybki mecz otwiera się z tymi drużynami i zasadami. Po meczu aplikacja sędziego pokazuje QR wyniku: zeskanuj go z menu ⋯ turnieju.",
+      "hint": "Sędzia dotyka w aplikacji Turniej, a potem „Zeskanuj QR meczu”: szybki mecz otwiera się z tymi drużynami i zasadami. Po meczu aplikacja sędziego pokazuje QR wyniku: zeskanuj go z menu ⋯ turnieju.",
       "lead": " · {{margin}} punkty przewagi"
     },
     "finished": {

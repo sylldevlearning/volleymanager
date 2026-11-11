@@ -4,15 +4,16 @@ import { Stack, useFocusEffect, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { formatDate } from '../../src/i18n/format';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Plus, Trophy } from 'lucide-react-native';
+import { ChevronRight, Plus, ScanQrCode, Trophy } from 'lucide-react-native';
 import { palette } from '../../src/theme/tokens';
 import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
 import { getTournaments } from '../../src/services/tournamentService';
 import type { Tournament } from '../../src/models/tournament';
-import { type AccentTheme, useThemedStyles } from '../../src/theme/useAccent';
+import { type AccentTheme, useAccent, useThemedStyles } from '../../src/theme/useAccent';
 
 export default function TournamentListScreen() {
   const styles = useThemedStyles(makeStyles);
+  const accent = useAccent();
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const [tournaments, setTournaments] = useState<Tournament[] | null>(null);
@@ -27,6 +28,21 @@ export default function TournamentListScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <Stack.Screen options={{ headerRight: () => <InfoTooltip textKey="help.tournaments" /> }} />
+      {/* Referee side: quick match filled from the "QR du match" of a tournament run on another phone.
+          Above the list, so it shows even with no tournament here. */}
+      <Pressable
+        style={({ pressed }) => [styles.scanButton, pressed && styles.cardPressed]}
+        onPress={() => router.push('/scan')}
+        accessibilityLabel={t('tournament.list.scanMatchQr')}
+        accessibilityRole="button"
+      >
+        <ScanQrCode size={26} color={palette.success} strokeWidth={1.5} />
+        <View style={styles.scanContent}>
+          <Text style={styles.scanTitle}>{t('tournament.list.scanMatchQr')}</Text>
+          <Text style={styles.scanDesc}>{t('tournament.list.scanMatchQrDesc')}</Text>
+        </View>
+        <ChevronRight size={20} color={palette.textMuted} />
+      </Pressable>
       <FlatList
         data={tournaments ?? []}
         keyExtractor={(item) => item.id}
@@ -67,7 +83,7 @@ export default function TournamentListScreen() {
           onPress={() => router.push('/tournament/new')}
           accessibilityRole="button"
         >
-          <Plus size={20} color="#fff" />
+          <Plus size={20} color={accent.onFill} />
           <Text style={styles.newButtonText}>{t('tournament.list.new')}</Text>
         </Pressable>
       </View>
@@ -78,6 +94,14 @@ export default function TournamentListScreen() {
 const makeStyles = (a: AccentTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
   list: { padding: 16, gap: 12, flexGrow: 1 },
+  scanButton: {
+    flexDirection: 'row', alignItems: 'center', gap: 14, marginHorizontal: 16, marginTop: 16,
+    padding: 16, borderRadius: 16, backgroundColor: 'rgba(46, 160, 67, 0.10)',
+    borderWidth: 1, borderColor: 'rgba(46, 160, 67, 0.35)',
+  },
+  scanContent: { flex: 1, gap: 2 },
+  scanTitle: { fontSize: 16, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
+  scanDesc: { fontSize: 13, fontFamily: 'Inter_400Regular', color: palette.textSecondary },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10, paddingHorizontal: 24, paddingVertical: 48 },
   emptyTitle: { fontSize: 16, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary, textAlign: 'center' },
   emptyHint: { fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textSecondary, textAlign: 'center', lineHeight: 20 },

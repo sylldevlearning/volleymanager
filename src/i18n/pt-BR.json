@@ -44,9 +44,7 @@
     "arbitrageAbandonConfirmMessage": "A partida atual será marcada como encerrada e não poderá ser retomada.",
     "arbitrageAbandonConfirm": "Abandonar",
     "tournament": "Torneio",
-    "tournamentDesc": "Grupos, chave final, programação e classificação",
-    "scanMatchQr": "Ler o QR de uma partida",
-    "scanMatchQrDesc": "Times e regras de uma partida de torneio"
+    "tournamentDesc": "Grupos, programação, classificação, QR da partida"
   },
   "tabs": {
     "home": "Início",
@@ -634,7 +632,7 @@
     "selectStarters": "Toque na etiqueta para marcar os titulares"
   },
   "help": {
-    "home": "Partida rápida: arbitre na hora, sem digitar times. Nova partida: escolha seus times e o formato. Arbitragem: partida oficial com formação, substituições e sanções. Prancheta tática: desenhe e anime suas jogadas. Ler o QR de uma partida: abre uma partida rápida com os times e as regras de uma partida de torneio. Torneio: crie e acompanhe um torneio completo (grupos, programação, classificação).",
+    "home": "Partida rápida: arbitre na hora, sem digitar times. Nova partida: escolha seus times e o formato. Arbitragem: partida oficial com formação, substituições e sanções. Prancheta tática: desenhe e anime suas jogadas. Torneio: crie e acompanhe um torneio completo (grupos, programação, classificação); o árbitro de uma partida de torneio encontra ali «Ler o QR de uma partida».",
     "referee": "+1 dá o ponto ao time, -1 tira. Depois de um ponto, escolha quem marcou e como, ou «Pular». Toque no contador de pedidos de tempo ou de substituições de um time para usá-lo. Desfazer cancela a última ação. Os rodízios são automáticos; o ícone tático abre a prancheta.",
     "arbitrage": "Formação: toque em cada posição da quadra para colocar um titular e confirme. Durante a partida: +1 dá o ponto, ⇄ inverte os lados. Toque num jogador na quadra para substituí-lo (ou tirar o líbero). Para cada time: Substituição, Pedido de tempo (ou toque na etiqueta do time, seus pontos mostram os pedidos de tempo usados) e Cartão; Desfazer cancela a última ação.",
     "arbitrageSetup": "O formato define o número de jogadores na quadra. O 6×6 segue as regras da FIVB: 6 substituições e 2 pedidos de tempo por set, líbero. No 4×4, 3×3 e 2×2, não há líbero e há duas opções de regras. Lazer: substituições livres e ilimitadas, 1 pedido de tempo por set. Oficial 4×4 (sub-13 FFVolley): 4 substituições e 2 pedidos de tempo por set. Oficial 3×3 (vôlei na neve FIVB): 2 substituições, 1 pedido de tempo, sets de 15 pontos. Oficial 2×2 (praia FIVB): nenhuma substituição, 1 pedido de tempo e um tempo técnico aos 21 pontos. Tudo continua editável na aba Regras.",
@@ -649,10 +647,10 @@
     "settings": "Mude o idioma, ative a vibração e veja de novo a ajuda do app. Por padrão, o app segue o idioma do celular; você pode escolher outro entre 11 idiomas.",
     "substitution": "Escolha quem sai e depois quem entra. O líbero ⚡ não conta no limite de substituições.",
     "lineup": "Marque os jogadores presentes e toque na etiqueta Titular / Banco para escolher os titulares de cada time. O líbero ⚡ é tratado à parte.",
-    "tournaments": "Seus torneios, do mais recente ao mais antigo. Tudo fica neste celular: sem conta, sem conexão. «Novo torneio» abre um assistente em 4 etapas.",
+    "tournaments": "Seus torneios, do mais recente ao mais antigo. Tudo fica neste celular: sem conta, sem conexão. «Novo torneio» abre um assistente em 4 etapas. Vai arbitrar uma partida de torneio? «Ler o QR de uma partida» abre uma partida rápida com os times e as regras dessa partida.",
     "tournamentWizard": "4 etapas: informações, formato e regras, times e programação, resumo. Os valores sugeridos se adaptam ao tipo de jogo e ao número de times; você pode mudar tudo. «Sortear de novo» refaz o sorteio dos grupos antes da criação. «Salvar como modelo» guarda as regras e a programação (sem os times) para um próximo torneio.",
     "tournamentPlanning": "Programação: as partidas por horário e por quadra, na ordem em que são jogadas. Toque numa partida para lançar ou corrigir o placar. Se o torneio atrasar, «Programação e quadras» (menu ⋯) recalcula os horários das próximas partidas. «Exportar» (menu ⋯) compartilha a programação, os resultados ou a classificação em PDF ou imagem.",
-    "tournamentMatches": "Partidas: filtre por situação (a jogar, encerradas), fase ou time. Toque numa próxima partida para lançar o placar ou mostrar o QR code: o árbitro lê com o app («Ler o QR de uma partida» na tela inicial). No final, leia o QR do resultado pelo menu ⋯ («Ler um QR de resultado»). Após um resultado, o app indica os times que terminaram o torneio e podem ir embora. «Exportar» (menu ⋯) compartilha a programação, os resultados ou a classificação em PDF ou imagem.",
+    "tournamentMatches": "Partidas: filtre por situação (a jogar, encerradas), fase ou time. Toque numa próxima partida para lançar o placar ou mostrar o QR code: o árbitro lê com o app (botão Torneio e depois «Ler o QR de uma partida»). No final, leia o QR do resultado pelo menu ⋯ («Ler um QR de resultado»). Após um resultado, o app indica os times que terminaram o torneio e podem ir embora. «Exportar» (menu ⋯) compartilha a programação, os resultados ou a classificação em PDF ou imagem.",
     "tournamentStandings": "Classificação: andamento das fases, classificação dos grupos, chave final e classificação geral. Atualizada a cada resultado, mesmo após uma correção. Desempates por confronto direto, depois saldo de sets, saldo de pontos e pontos marcados. Os times sem partidas a jogar aparecem como «Encerrado». «Exportar» (menu ⋯) compartilha a programação, os resultados ou a classificação em PDF ou imagem."
   },
   "onboarding": {
@@ -669,7 +667,7 @@
     },
     "tournament": {
       "title": "Torneio",
-      "body": "Crie um torneio em poucas etapas: times, quadras, regras, e a programação é calculada sozinha. Rodadas de mistura e depois níveis para partidas equilibradas, ou grupos e chave final. Um QR code por partida: o árbitro lê e arbitra no próprio celular, e depois você lê o QR do resultado dele."
+      "body": "Crie um torneio em poucas etapas: times, quadras, regras, e a programação é calculada sozinha. Rodadas de mistura e depois níveis para partidas equilibradas, ou grupos e chave final. Um QR code por partida: o árbitro lê (Torneio › «Ler o QR de uma partida») e arbitra no próprio celular, e depois você lê o QR do resultado dele."
     },
     "tactical": {
       "title": "Prancheta tática",
@@ -698,7 +696,7 @@
     "tournament": {
       "tabs": "Programação: as partidas por horário e por quadra. Partidas: filtre por situação, fase ou time. Classificação: grupos, chave final e classificação final.",
       "phases": "O andamento de cada fase: encerrada, em andamento ou a seguir. Toque numa para ver as partidas ou o balanço.",
-      "matches": "Toque numa partida para lançar o placar ou mostrar o QR code que o árbitro vai ler.",
+      "matches": "Toque numa partida para lançar o placar ou mostrar o QR code: o árbitro lê com Torneio › «Ler o QR de uma partida».",
       "menu": "O menu ⋯: ler o QR do resultado de um árbitro, «Exportar» em PDF ou imagem, renomear times, recalcular a programação ou excluir o torneio."
     }
   },
@@ -729,7 +727,9 @@
       "emptyHint": "Crie seu primeiro torneio: grupos, chave final, programação por quadra e classificação.",
       "new": "Novo torneio",
       "live": "Em andamento",
-      "finished": "Encerrado"
+      "finished": "Encerrado",
+      "scanMatchQr": "Ler o QR de uma partida",
+      "scanMatchQrDesc": "Times e regras de uma partida de torneio"
     },
     "gameType": {
       "indoor_6v6": "6×6",
@@ -832,7 +832,6 @@
       "templateName": "Nome do modelo",
       "templateNamePlaceholder": "Ex.: Torneio de sábado",
       "templateSaved": "Modelo salvo",
-      "create": "Criar o torneio",
       "creating": "Criando…",
       "fixErrors": "A corrigir",
       "leaveTitle": "Descartar o torneio?",
@@ -856,7 +855,9 @@
       "matchesPerTeam_other": "Cada time joga {{count}} partidas",
       "matchesPerTeamRange": "Cada time joga de {{min}} a {{max}} partidas",
       "durationMinutes": "{{m}} min",
-      "durationHours": "{{h}} h {{m}}"
+      "durationHours": "{{h}} h {{m}}",
+      "createAndLaunch": "Criar e iniciar",
+      "saveForLater": "Salvar para depois"
     },
     "errors": {
       "name_required": "Dê um nome ao torneio.",
@@ -1001,7 +1002,7 @@
     "qr": {
       "button": "QR da partida",
       "scanWith": "Para ler com o app VolleyManager (Play Store)",
-      "hint": "O árbitro toca em «Ler o QR de uma partida» na tela inicial do app: a partida rápida abre com estes times e estas regras. No fim da partida, o app do árbitro mostra o QR do resultado: leia pelo menu ⋯ do torneio.",
+      "hint": "O árbitro toca em Torneio e depois em «Ler o QR de uma partida» no app: a partida rápida abre com estes times e estas regras. No fim da partida, o app do árbitro mostra o QR do resultado: leia pelo menu ⋯ do torneio.",
       "lead": " · {{margin}} pontos de vantagem"
     },
     "finished": {

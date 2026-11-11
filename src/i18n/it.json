@@ -44,9 +44,7 @@
     "arbitrageAbandonConfirmMessage": "La partita attuale sarà segnata come terminata e non potrà essere ripresa.",
     "arbitrageAbandonConfirm": "Abbandona",
     "tournament": "Torneo",
-    "tournamentDesc": "Gironi, tabellone, calendario e classifica",
-    "scanMatchQr": "Scansiona il QR di una partita",
-    "scanMatchQrDesc": "Squadre e regole di una partita del torneo"
+    "tournamentDesc": "Gironi, calendario, classifica, QR della partita"
   },
   "tabs": {
     "home": "Home",
@@ -634,7 +632,7 @@
     "selectStarters": "Tocca l'etichetta per indicare i titolari"
   },
   "help": {
-    "home": "Partita veloce: arbitra subito, senza inserire squadre. Nuova partita: scegli le squadre e il formato. Arbitraggio: partita ufficiale con formazione, sostituzioni e sanzioni. Lavagna tattica: disegna e anima i tuoi schemi. Scansiona il QR di una partita: apre una partita veloce con le squadre e le regole di una partita del torneo. Torneo: crea e segui un torneo completo (gironi, calendario, classifica).",
+    "home": "Partita veloce: arbitra subito, senza inserire squadre. Nuova partita: scegli le squadre e il formato. Arbitraggio: partita ufficiale con formazione, sostituzioni e sanzioni. Lavagna tattica: disegna e anima i tuoi schemi. Torneo: crea e segui un torneo completo (gironi, calendario, classifica); l'arbitro di una partita del torneo ci trova «Scansiona il QR di una partita».",
     "referee": "+1 assegna il punto alla squadra, -1 lo toglie. Dopo un punto, scegli chi ha segnato e come, oppure «Salta». Tocca il contatore dei time-out o delle sostituzioni di una squadra per usarlo. Annulla cancella l'ultima azione. Le rotazioni sono automatiche; l'icona tattica apre la lavagna.",
     "arbitrage": "Formazione: tocca ogni posizione del campo per inserire un titolare, poi conferma. Durante la partita: +1 assegna il punto, ⇄ inverte i lati. Tocca un giocatore in campo per sostituirlo (o far uscire il libero). Per ogni squadra: Sostituzione, Time-out (oppure tocca l'etichetta della squadra, i suoi punti mostrano i time-out chiesti) e Cartellino; Annulla cancella l'ultima azione.",
     "arbitrageSetup": "Il formato stabilisce il numero di giocatori in campo. Il 6×6 segue le regole FIVB: 6 sostituzioni e 2 time-out per set, libero. In 4×4, 3×3 e 2×2 niente libero e due scelte di regole. Amatoriale: sostituzioni libere e illimitate, 1 time-out per set. Ufficiale 4×4 (Under 13 FFVolley): 4 sostituzioni e 2 time-out per set. Ufficiale 3×3 (snow volley FIVB): 2 sostituzioni, 1 time-out, set da 15 punti. Ufficiale 2×2 (beach FIVB): nessuna sostituzione, 1 time-out e un time-out tecnico a 21 punti. Tutto resta modificabile nella scheda Regole.",
@@ -649,10 +647,10 @@
     "settings": "Cambia la lingua, attiva le vibrazioni e rivedi l'aiuto dell'app. Di default l'app segue la lingua del telefono; puoi sceglierne un'altra tra 11.",
     "substitution": "Scegli chi esce, poi chi entra. Il libero ⚡ non conta nel limite di sostituzioni.",
     "lineup": "Spunta i giocatori presenti, poi tocca l'etichetta Titolare / Panchina per scegliere i titolari di ogni squadra. Il libero ⚡ è gestito a parte.",
-    "tournaments": "I tuoi tornei, dal più recente. Tutto resta su questo telefono: niente account né connessione. «Nuovo torneo» apre una procedura guidata in 4 passaggi.",
+    "tournaments": "I tuoi tornei, dal più recente. Tutto resta su questo telefono: niente account né connessione. «Nuovo torneo» apre una procedura guidata in 4 passaggi. Arbitri una partita del torneo? «Scansiona il QR di una partita» apre una partita veloce con le squadre e le regole di quella partita.",
     "tournamentWizard": "4 passaggi: dati, formato e regole, squadre e calendario, riepilogo. I valori proposti si adattano al tipo di gioco e al numero di squadre; puoi cambiare tutto. «Nuovo sorteggio» rifà il sorteggio dei gironi prima della creazione. «Salva come modello» conserva le regole e il calendario (senza le squadre) per un prossimo torneo.",
     "tournamentPlanning": "Calendario: le partite per orario e per campo, nell'ordine in cui si giocano. Tocca una partita per inserire o correggere il risultato. Se il torneo è in ritardo, «Calendario e campi» (menu ⋯) ricalcola gli orari delle prossime partite. «Esporta» (menu ⋯) condivide il calendario, i risultati o la classifica in PDF o come immagine.",
-    "tournamentMatches": "Partite: filtra per stato (da giocare, terminate), fase o squadra. Tocca una partita da giocare per inserire il risultato o mostrarne il codice QR: l'arbitro lo scansiona con l'app («Scansiona il QR di una partita» nella schermata iniziale). Alla fine, scansiona il suo QR del risultato dal menu ⋯ («Scansiona un QR di risultato»). Dopo un risultato, l'app indica le squadre che hanno terminato il torneo e possono andare via. «Esporta» (menu ⋯) condivide il calendario, i risultati o la classifica in PDF o come immagine.",
+    "tournamentMatches": "Partite: filtra per stato (da giocare, terminate), fase o squadra. Tocca una partita da giocare per inserire il risultato o mostrarne il codice QR: l'arbitro lo scansiona con l'app (pulsante Torneo, poi «Scansiona il QR di una partita»). Alla fine, scansiona il suo QR del risultato dal menu ⋯ («Scansiona un QR di risultato»). Dopo un risultato, l'app indica le squadre che hanno terminato il torneo e possono andare via. «Esporta» (menu ⋯) condivide il calendario, i risultati o la classifica in PDF o come immagine.",
     "tournamentStandings": "Classifica: avanzamento delle fasi, classifiche dei gironi, tabellone finale e classifica generale. Si aggiorna a ogni risultato, anche dopo una correzione. Parità risolte con lo scontro diretto, poi differenza set, differenza punti e punti segnati. Le squadre senza più partite da giocare sono segnate «Terminato». «Esporta» (menu ⋯) condivide il calendario, i risultati o la classifica in PDF o come immagine."
   },
   "onboarding": {
@@ -669,7 +667,7 @@
     },
     "tournament": {
       "title": "Torneo",
-      "body": "Crea un torneo in pochi passaggi: squadre, campi, regole, e il calendario si calcola da solo. Turni di rimescolamento e poi livelli per partite equilibrate, oppure gironi e tabellone finale. Un codice QR per partita: l'arbitro lo scansiona e arbitra sul proprio telefono, poi tu scansioni il suo QR del risultato."
+      "body": "Crea un torneo in pochi passaggi: squadre, campi, regole, e il calendario si calcola da solo. Turni di rimescolamento e poi livelli per partite equilibrate, oppure gironi e tabellone finale. Un codice QR per partita: l'arbitro lo scansiona (Torneo › «Scansiona il QR di una partita») e arbitra sul proprio telefono, poi tu scansioni il suo QR del risultato."
     },
     "tactical": {
       "title": "Lavagna tattica",
@@ -698,7 +696,7 @@
     "tournament": {
       "tabs": "Calendario: le partite per orario e per campo. Partite: filtra per stato, fase o squadra. Classifica: gironi, tabellone e classifica finale.",
       "phases": "L'avanzamento di ogni fase: terminata, in corso o in arrivo. Toccane una per vederne le partite o il bilancio.",
-      "matches": "Tocca una partita per inserire il risultato o mostrare il codice QR che l'arbitro scansionerà.",
+      "matches": "Tocca una partita per inserire il risultato o mostrare il codice QR: l'arbitro lo scansiona con Torneo › «Scansiona il QR di una partita».",
       "menu": "Il menu ⋯: scansionare il QR del risultato di un arbitro, «Esporta» in PDF o come immagine, rinominare le squadre, ricalcolare il calendario o eliminare il torneo."
     }
   },
@@ -729,7 +727,9 @@
       "emptyHint": "Crea il tuo primo torneo: gironi, tabellone, calendario per campo e classifica.",
       "new": "Nuovo torneo",
       "live": "In corso",
-      "finished": "Terminato"
+      "finished": "Terminato",
+      "scanMatchQr": "Scansiona il QR di una partita",
+      "scanMatchQrDesc": "Squadre e regole di una partita del torneo"
     },
     "gameType": {
       "indoor_6v6": "6×6",
@@ -832,7 +832,6 @@
       "templateName": "Nome del modello",
       "templateNamePlaceholder": "Es.: Torneo del sabato",
       "templateSaved": "Modello salvato",
-      "create": "Crea il torneo",
       "creating": "Creazione…",
       "fixErrors": "Da correggere",
       "leaveTitle": "Rinunciare al torneo?",
@@ -856,7 +855,9 @@
       "matchesPerTeam_other": "Ogni squadra gioca {{count}} partite",
       "matchesPerTeamRange": "Ogni squadra gioca da {{min}} a {{max}} partite",
       "durationMinutes": "{{m}} min",
-      "durationHours": "{{h}} h {{m}}"
+      "durationHours": "{{h}} h {{m}}",
+      "createAndLaunch": "Crea e avvia",
+      "saveForLater": "Salva per dopo"
     },
     "errors": {
       "name_required": "Dai un nome al torneo.",
@@ -1001,7 +1002,7 @@
     "qr": {
       "button": "QR della partita",
       "scanWith": "Da scansionare con l'app VolleyManager (Play Store)",
-      "hint": "L'arbitro tocca «Scansiona il QR di una partita» nella schermata iniziale dell'app: la partita veloce si apre con queste squadre e queste regole. A fine partita, l'app dell'arbitro mostra il QR del risultato: scansionalo dal menu ⋯ del torneo.",
+      "hint": "L'arbitro tocca Torneo e poi «Scansiona il QR di una partita» nell'app: la partita veloce si apre con queste squadre e queste regole. A fine partita, l'app dell'arbitro mostra il QR del risultato: scansionalo dal menu ⋯ del torneo.",
       "lead": " · {{margin}} punti di scarto"
     },
     "finished": {

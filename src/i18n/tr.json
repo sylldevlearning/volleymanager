@@ -44,9 +44,7 @@
     "arbitrageAbandonConfirmMessage": "Mevcut maç bitmiş olarak işaretlenecek ve devam ettirilemeyecek.",
     "arbitrageAbandonConfirm": "Bırak",
     "tournament": "Turnuva",
-    "tournamentDesc": "Gruplar, eleme tablosu, program ve sıralama",
-    "scanMatchQr": "Maç QR kodunu tara",
-    "scanMatchQrDesc": "Bir turnuva maçının takımları ve kuralları"
+    "tournamentDesc": "Gruplar, program, sıralama, maç QR kodu"
   },
   "tabs": {
     "home": "Ana sayfa",
@@ -634,7 +632,7 @@
     "selectStarters": "İlk oyuncuları seçmek için etikete dokun"
   },
   "help": {
-    "home": "Hızlı maç: takım girmeden hemen hakemlik yap. Yeni maç: takımlarını ve biçimi seç. Hakemlik: diziliş, oyuncu değişikliği ve cezalarla resmî maç. Taktik tahtası: oyunlarını çiz ve canlandır. Maç QR kodunu tara: bir turnuva maçının takımları ve kurallarıyla hızlı maç açar. Turnuva: eksiksiz bir turnuva oluştur ve takip et (gruplar, program, sıralama).",
+    "home": "Hızlı maç: takım girmeden hemen hakemlik yap. Yeni maç: takımlarını ve biçimi seç. Hakemlik: diziliş, oyuncu değişikliği ve cezalarla resmî maç. Taktik tahtası: oyunlarını çiz ve canlandır. Turnuva: eksiksiz bir turnuva oluştur ve takip et (gruplar, program, sıralama); bir turnuva maçının hakemi «Maç QR kodunu tara» düğmesini burada bulur.",
     "referee": "+1 takıma sayı verir, -1 geri alır. Bir sayıdan sonra kimin nasıl sayı aldığını seç veya «Atla». Kullanmak için bir takımın mola veya değişiklik sayacına dokun. Geri al son işlemi iptal eder. Rotasyonlar otomatiktir; taktik simgesi tahtayı açar.",
     "arbitrage": "Diziliş: ilk oyuncuyu yerleştirmek için sahadaki her pozisyona dokun, sonra onayla. Maç sırasında: +1 sayı verir, ⇄ tarafları değiştirir. Değiştirmek için sahadaki bir oyuncuya dokun (veya liberoyu çıkar). Her takım için: Değişiklik, Mola (veya takım etiketine dokun, noktaları alınan molaları gösterir) ve Kart; Geri al son işlemi iptal eder.",
     "arbitrageSetup": "Biçim, sahadaki oyuncu sayısını belirler. 6×6 FIVB kurallarını izler: set başına 6 değişiklik ve 2 mola, libero. 4×4, 3×3 ve 2×2'de libero yoktur ve iki kural seçeneği vardır. Eğlence: serbest ve sınırsız değişiklik, set başına 1 mola. Resmî 4×4 (U13 FFVolley): set başına 4 değişiklik ve 2 mola. Resmî 3×3 (kar voleybolu FIVB): 2 değişiklik, 1 mola, 15 sayılık setler. Resmî 2×2 (plaj FIVB): değişiklik yok, 1 mola ve 21 sayıda teknik mola. Her şey Kurallar sekmesinde değiştirilebilir.",
@@ -649,10 +647,10 @@
     "settings": "Dili değiştir, titreşimi aç ve uygulama yardımını yeniden gör. Uygulama varsayılan olarak telefonun dilini kullanır; 11 dil arasından başka birini seçebilirsin.",
     "substitution": "Önce kimin çıkacağını, sonra kimin gireceğini seç. Libero ⚡ değişiklik sınırına sayılmaz.",
     "lineup": "Gelen oyuncuları işaretle, sonra her takımın ilk oyuncularını seçmek için İlk oyuncu / Yedek etiketine dokun. Libero ⚡ ayrıca yönetilir.",
-    "tournaments": "Turnuvaların, en yeniden eskiye. Her şey bu telefonda kalır: hesap yok, bağlantı yok. «Yeni turnuva» 4 adımlı bir sihirbaz açar.",
+    "tournaments": "Turnuvaların, en yeniden eskiye. Her şey bu telefonda kalır: hesap yok, bağlantı yok. «Yeni turnuva» 4 adımlı bir sihirbaz açar. Bir turnuva maçında hakem misin? «Maç QR kodunu tara», o maçın takımları ve kurallarıyla hızlı maç açar.",
     "tournamentWizard": "4 adım: bilgiler, biçim ve kurallar, takımlar ve program, özet. Önerilen değerler oyun türüne ve takım sayısına göre ayarlanır; her şeyi değiştirebilirsin. «Yeniden kura» oluşturmadan önce grup kurasını yeniler. «Şablon olarak kaydet» kuralları ve programı (takımlar olmadan) sonraki turnuva için saklar.",
     "tournamentPlanning": "Program: oynanma sırasına göre, saate ve sahaya göre maçlar. Skor girmek veya düzeltmek için bir maça dokun. Turnuva gecikirse «Program ve sahalar» (⋯ menüsü) sıradaki maçların saatlerini yeniden hesaplar. «Dışa aktar» (⋯ menüsü) programı, sonuçları veya sıralamayı PDF ya da görsel olarak paylaşır.",
-    "tournamentMatches": "Maçlar: duruma (oynanacak, bitti), aşamaya veya takıma göre filtrele. Skorunu girmek veya QR kodunu göstermek için sıradaki bir maça dokun: hakem uygulamayla tarar (ana ekranda «Maç QR kodunu tara»). Sonunda sonuç QR kodunu ⋯ menüsünden tara («Sonuç QR kodu tara»). Bir sonuçtan sonra uygulama, turnuvasını bitirip ayrılabilecek takımları gösterir. «Dışa aktar» (⋯ menüsü) programı, sonuçları veya sıralamayı PDF ya da görsel olarak paylaşır.",
+    "tournamentMatches": "Maçlar: duruma (oynanacak, bitti), aşamaya veya takıma göre filtrele. Skorunu girmek veya QR kodunu göstermek için sıradaki bir maça dokun: hakem uygulamayla tarar (Turnuva düğmesi, ardından «Maç QR kodunu tara»). Sonunda sonuç QR kodunu ⋯ menüsünden tara («Sonuç QR kodu tara»). Bir sonuçtan sonra uygulama, turnuvasını bitirip ayrılabilecek takımları gösterir. «Dışa aktar» (⋯ menüsü) programı, sonuçları veya sıralamayı PDF ya da görsel olarak paylaşır.",
     "tournamentStandings": "Sıralama: aşamaların ilerleyişi, grup sıralamaları, eleme tablosu ve genel sıralama. Her sonuçta, düzeltmeden sonra bile güncellenir. Eşitlikte ikili averaj, sonra set farkı, sayı farkı ve atılan sayılar. Oynayacak maçı kalmayan takımlar «Bitirdi» olarak işaretlenir. «Dışa aktar» (⋯ menüsü) programı, sonuçları veya sıralamayı PDF ya da görsel olarak paylaşır."
   },
   "onboarding": {
@@ -669,7 +667,7 @@
     },
     "tournament": {
       "title": "Turnuva",
-      "body": "Birkaç adımda turnuva oluştur: takımlar, sahalar, kurallar; program kendiliğinden hesaplanır. Dengeli maçlar için karışık turlar ve sonra seviyeler, ya da gruplar ve eleme tablosu. Her maça bir QR kodu: hakem tarar ve kendi telefonunda yönetir, sonra sen onun sonuç QR kodunu tararsın."
+      "body": "Birkaç adımda turnuva oluştur: takımlar, sahalar, kurallar; program kendiliğinden hesaplanır. Dengeli maçlar için karışık turlar ve sonra seviyeler, ya da gruplar ve eleme tablosu. Her maça bir QR kodu: hakem tarar (Turnuva › «Maç QR kodunu tara») ve kendi telefonunda yönetir, sonra sen onun sonuç QR kodunu tararsın."
     },
     "tactical": {
       "title": "Taktik tahtası",
@@ -698,7 +696,7 @@
     "tournament": {
       "tabs": "Program: saate ve sahaya göre maçlar. Maçlar: duruma, aşamaya veya takıma göre filtrele. Sıralama: gruplar, eleme tablosu ve genel sıralama.",
       "phases": "Her aşamanın durumu: bitti, devam ediyor veya sırada. Maçlarını veya özetini görmek için birine dokun.",
-      "matches": "Skorunu girmek veya hakemin tarayacağı QR kodunu göstermek için bir maça dokun.",
+      "matches": "Skorunu girmek veya QR kodunu göstermek için bir maça dokun: hakem bunu Turnuva › «Maç QR kodunu tara» ile tarar.",
       "menu": "⋯ menüsü: hakemin sonuç QR kodunu tara, PDF veya görsel olarak «Dışa aktar», takımları yeniden adlandır, programı yeniden hesapla veya turnuvayı sil."
     }
   },
@@ -729,7 +727,9 @@
       "emptyHint": "İlk turnuvanı oluştur: gruplar, eleme tablosu, sahaya göre program ve sıralama.",
       "new": "Yeni turnuva",
       "live": "Devam ediyor",
-      "finished": "Bitti"
+      "finished": "Bitti",
+      "scanMatchQr": "Maç QR kodunu tara",
+      "scanMatchQrDesc": "Bir turnuva maçının takımları ve kuralları"
     },
     "gameType": {
       "indoor_6v6": "6×6",
@@ -832,7 +832,6 @@
       "templateName": "Şablon adı",
       "templateNamePlaceholder": "Örn. Cumartesi turnuvası",
       "templateSaved": "Şablon kaydedildi",
-      "create": "Turnuvayı oluştur",
       "creating": "Oluşturuluyor…",
       "fixErrors": "Düzeltilecekler",
       "leaveTitle": "Turnuvadan vazgeçilsin mi?",
@@ -856,7 +855,9 @@
       "matchesPerTeam_other": "Her takım {{count}} maç oynar",
       "matchesPerTeamRange": "Her takım {{min}} ile {{max}} arası maç oynar",
       "durationMinutes": "{{m}} dk",
-      "durationHours": "{{h}} sa {{m}}"
+      "durationHours": "{{h}} sa {{m}}",
+      "createAndLaunch": "Oluştur ve başlat",
+      "saveForLater": "Sonra için kaydet"
     },
     "errors": {
       "name_required": "Turnuvaya bir ad ver.",
@@ -1001,7 +1002,7 @@
     "qr": {
       "button": "Maç QR kodu",
       "scanWith": "VolleyManager uygulamasıyla tara (Play Store)",
-      "hint": "Hakem uygulamanın ana ekranında «Maç QR kodunu tara»ya dokunur: hızlı maç bu takımlar ve kurallarla açılır. Maç sonunda hakemin uygulaması sonuç QR kodunu gösterir: turnuvanın ⋯ menüsünden tara.",
+      "hint": "Hakem uygulamada Turnuva'ya, ardından «Maç QR kodunu tara»ya dokunur: hızlı maç bu takımlar ve kurallarla açılır. Maç sonunda hakemin uygulaması sonuç QR kodunu gösterir: turnuvanın ⋯ menüsünden tara.",
       "lead": " · {{margin}} sayı fark"
     },
     "finished": {

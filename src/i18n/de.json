@@ -44,9 +44,7 @@
     "arbitrageAbandonConfirmMessage": "Das aktuelle Spiel wird als beendet markiert und kann nicht fortgesetzt werden.",
     "arbitrageAbandonConfirm": "Abbrechen",
     "tournament": "Turnier",
-    "tournamentDesc": "Gruppen, K.-o.-Runde, Spielplan und Tabelle",
-    "scanMatchQr": "Spiel-QR scannen",
-    "scanMatchQrDesc": "Teams und Regeln eines Turnierspiels"
+    "tournamentDesc": "Gruppen, Spielplan, Tabelle, Spiel-QR"
   },
   "tabs": {
     "home": "Start",
@@ -634,7 +632,7 @@
     "selectStarters": "Tippe auf das Etikett, um Starter festzulegen"
   },
   "help": {
-    "home": "Schnelles Spiel: sofort pfeifen, ohne Teams einzugeben. Neues Spiel: wähle deine Teams und das Format. Schiedsrichter: offizielles Spiel mit Aufstellung, Wechseln und Strafen. Taktiktafel: zeichne und animiere deine Spielzüge. Spiel-QR scannen: öffnet ein schnelles Spiel mit den Teams und Regeln eines Turnierspiels. Turnier: lege ein komplettes Turnier an und verfolge es (Gruppen, Spielplan, Tabelle).",
+    "home": "Schnelles Spiel: sofort pfeifen, ohne Teams einzugeben. Neues Spiel: wähle deine Teams und das Format. Schiedsrichter: offizielles Spiel mit Aufstellung, Wechseln und Strafen. Taktiktafel: zeichne und animiere deine Spielzüge. Turnier: lege ein komplettes Turnier an und verfolge es (Gruppen, Spielplan, Tabelle); der Schiedsrichter eines Turnierspiels findet dort „Spiel-QR scannen“.",
     "referee": "+1 gibt dem Team den Punkt, -1 nimmt ihn zurück. Wähle nach einem Punkt, wer wie gepunktet hat, oder „Überspringen“. Tippe auf den Auszeit- oder Wechselzähler eines Teams, um ihn zu nutzen. Rückgängig nimmt die letzte Aktion zurück. Rotationen laufen automatisch; das Taktiksymbol öffnet die Tafel.",
     "arbitrage": "Aufstellung: tippe auf jede Feldposition, um einen Starter zu setzen, dann bestätigen. Im Spiel: +1 gibt den Punkt, ⇄ tauscht die Seiten. Tippe auf einen Spieler auf dem Feld, um ihn auszuwechseln (oder den Libero rauszunehmen). Für jedes Team: Wechsel, Auszeit (oder tippe auf das Team-Etikett, seine Punkte zeigen die genommenen Auszeiten) und Karte; Rückgängig nimmt die letzte Aktion zurück.",
     "arbitrageSetup": "Das Format legt die Zahl der Spieler auf dem Feld fest. 6×6 folgt den FIVB-Regeln: 6 Wechsel und 2 Auszeiten pro Satz, Libero. Bei 4×4, 3×3 und 2×2 gibt es keinen Libero und zwei Regelvarianten. Freizeit: freie, unbegrenzte Wechsel, 1 Auszeit pro Satz. Offiziell 4×4 (U13 FFVolley): 4 Wechsel und 2 Auszeiten pro Satz. Offiziell 3×3 (Snow-Volleyball FIVB): 2 Wechsel, 1 Auszeit, Sätze bis 15 Punkte. Offiziell 2×2 (Beach FIVB): kein Wechsel, 1 Auszeit und eine technische Auszeit bei 21 Punkten. Alles bleibt im Reiter Regeln änderbar.",
@@ -649,10 +647,10 @@
     "settings": "Ändere die Sprache, schalte die Vibration ein und sieh dir die Hilfe der App erneut an. Standardmäßig folgt die App der Sprache des Handys; du kannst eine von 11 Sprachen wählen.",
     "substitution": "Wähle, wer rausgeht, dann wer reinkommt. Der Libero ⚡ zählt nicht zum Wechselkontingent.",
     "lineup": "Hake die anwesenden Spieler an und tippe auf das Etikett Starter / Bank, um die Starter jedes Teams zu wählen. Der Libero ⚡ wird separat behandelt.",
-    "tournaments": "Deine Turniere, das neueste zuerst. Alles bleibt auf diesem Handy: kein Konto, keine Verbindung. „Neues Turnier“ öffnet einen Assistenten in 4 Schritten.",
+    "tournaments": "Deine Turniere, das neueste zuerst. Alles bleibt auf diesem Handy: kein Konto, keine Verbindung. „Neues Turnier“ öffnet einen Assistenten in 4 Schritten. Du pfeifst ein Turnierspiel? „Spiel-QR scannen“ öffnet ein schnelles Spiel mit den Teams und Regeln dieses Spiels.",
     "tournamentWizard": "4 Schritte: Angaben, Format und Regeln, Teams und Spielplan, Übersicht. Die Vorschläge passen sich der Spielform und der Zahl der Teams an; du kannst alles ändern. „Neu auslosen“ lost die Gruppen vor dem Anlegen neu aus. „Als Vorlage speichern“ behält Regeln und Spielplan (ohne Teams) für ein nächstes Turnier.",
     "tournamentPlanning": "Spielplan: die Spiele nach Uhrzeit und Feld, in der Reihenfolge, in der sie gespielt werden. Tippe auf ein Spiel, um sein Ergebnis einzugeben oder zu korrigieren. Bei Verspätung berechnet „Spielplan und Felder“ (Menü ⋯) die Zeiten der kommenden Spiele neu. „Exportieren“ (Menü ⋯) teilt Spielplan, Ergebnisse oder Tabelle als PDF oder Bild.",
-    "tournamentMatches": "Spiele: nach Status (offen, beendet), Phase oder Team filtern. Tippe auf ein kommendes Spiel, um sein Ergebnis einzugeben oder seinen QR-Code zu zeigen: der Schiedsrichter scannt ihn mit der App („Spiel-QR scannen“ auf dem Startbildschirm). Am Ende scannst du seinen Ergebnis-QR über das Menü ⋯ („Ergebnis-QR scannen“). Nach einem Ergebnis zeigt die App, welche Teams ihr Turnier beendet haben und gehen können. „Exportieren“ (Menü ⋯) teilt Spielplan, Ergebnisse oder Tabelle als PDF oder Bild.",
+    "tournamentMatches": "Spiele: nach Status (offen, beendet), Phase oder Team filtern. Tippe auf ein kommendes Spiel, um sein Ergebnis einzugeben oder seinen QR-Code zu zeigen: der Schiedsrichter scannt ihn mit der App (Schaltfläche Turnier, dann „Spiel-QR scannen“). Am Ende scannst du seinen Ergebnis-QR über das Menü ⋯ („Ergebnis-QR scannen“). Nach einem Ergebnis zeigt die App, welche Teams ihr Turnier beendet haben und gehen können. „Exportieren“ (Menü ⋯) teilt Spielplan, Ergebnisse oder Tabelle als PDF oder Bild.",
     "tournamentStandings": "Tabelle: Fortschritt der Phasen, Gruppentabellen, K.-o.-Runde und Endstand. Wird mit jedem Ergebnis aktualisiert, auch nach einer Korrektur. Gleichstand: direkter Vergleich, dann Satzdifferenz, Punktdifferenz und erzielte Punkte. Teams ohne weiteres Spiel sind als „Fertig“ markiert. „Exportieren“ (Menü ⋯) teilt Spielplan, Ergebnisse oder Tabelle als PDF oder Bild."
   },
   "onboarding": {
@@ -669,7 +667,7 @@
     },
     "tournament": {
       "title": "Turnier",
-      "body": "Lege ein Turnier in wenigen Schritten an: Teams, Felder, Regeln – der Spielplan wird automatisch berechnet. Mischrunden und dann Leistungsstufen für ausgeglichene Spiele, oder Gruppen und K.-o.-Runde. Ein QR-Code pro Spiel: der Schiedsrichter scannt ihn und pfeift auf seinem Handy, danach scannst du seinen Ergebnis-QR."
+      "body": "Lege ein Turnier in wenigen Schritten an: Teams, Felder, Regeln – der Spielplan wird automatisch berechnet. Mischrunden und dann Leistungsstufen für ausgeglichene Spiele, oder Gruppen und K.-o.-Runde. Ein QR-Code pro Spiel: der Schiedsrichter scannt ihn (Turnier › „Spiel-QR scannen“) und pfeift auf seinem Handy, danach scannst du seinen Ergebnis-QR."
     },
     "tactical": {
       "title": "Taktiktafel",
@@ -698,7 +696,7 @@
     "tournament": {
       "tabs": "Spielplan: die Spiele nach Uhrzeit und Feld. Spiele: nach Status, Phase oder Team filtern. Tabelle: Gruppen, K.-o.-Runde und Endstand.",
       "phases": "Der Fortschritt jeder Phase: beendet, läuft oder kommt noch. Tippe darauf, um ihre Spiele oder ihre Bilanz zu sehen.",
-      "matches": "Tippe auf ein Spiel, um sein Ergebnis einzugeben oder seinen QR-Code für den Schiedsrichter zu zeigen.",
+      "matches": "Tippe auf ein Spiel, um sein Ergebnis einzugeben oder seinen QR-Code zu zeigen: der Schiedsrichter scannt ihn über Turnier › „Spiel-QR scannen“.",
       "menu": "Das Menü ⋯: Ergebnis-QR eines Schiedsrichters scannen, „Exportieren“ als PDF oder Bild, Teams umbenennen, Spielplan neu berechnen oder Turnier löschen."
     }
   },
@@ -729,7 +727,9 @@
       "emptyHint": "Lege dein erstes Turnier an: Gruppen, K.-o.-Runde, Spielplan nach Feld und Tabelle.",
       "new": "Neues Turnier",
       "live": "Läuft",
-      "finished": "Beendet"
+      "finished": "Beendet",
+      "scanMatchQr": "Spiel-QR scannen",
+      "scanMatchQrDesc": "Teams und Regeln eines Turnierspiels"
     },
     "gameType": {
       "indoor_6v6": "6×6",
@@ -832,7 +832,6 @@
       "templateName": "Name der Vorlage",
       "templateNamePlaceholder": "z. B. Samstagsturnier",
       "templateSaved": "Vorlage gespeichert",
-      "create": "Turnier anlegen",
       "creating": "Wird angelegt…",
       "fixErrors": "Zu korrigieren",
       "leaveTitle": "Turnier verwerfen?",
@@ -856,7 +855,9 @@
       "matchesPerTeam_other": "Jedes Team spielt {{count}} Spiele",
       "matchesPerTeamRange": "Jedes Team spielt {{min}} bis {{max}} Spiele",
       "durationMinutes": "{{m}} min",
-      "durationHours": "{{h}} h {{m}}"
+      "durationHours": "{{h}} h {{m}}",
+      "createAndLaunch": "Anlegen und starten",
+      "saveForLater": "Für später speichern"
     },
     "errors": {
       "name_required": "Gib dem Turnier einen Namen.",
@@ -1001,7 +1002,7 @@
     "qr": {
       "button": "Spiel-QR",
       "scanWith": "Mit der App VolleyManager scannen (Play Store)",
-      "hint": "Der Schiedsrichter tippt auf dem Startbildschirm der App auf „Spiel-QR scannen“: das schnelle Spiel öffnet sich mit diesen Teams und Regeln. Am Spielende zeigt die App des Schiedsrichters den Ergebnis-QR: scanne ihn über das Menü ⋯ des Turniers.",
+      "hint": "Der Schiedsrichter tippt in der App auf Turnier und dann auf „Spiel-QR scannen“: das schnelle Spiel öffnet sich mit diesen Teams und Regeln. Am Spielende zeigt die App des Schiedsrichters den Ergebnis-QR: scanne ihn über das Menü ⋯ des Turniers.",
       "lead": " · {{margin}} Punkte Vorsprung"
     },
     "finished": {
