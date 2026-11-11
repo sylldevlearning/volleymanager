@@ -1087,7 +1087,7 @@
     "noBackup": "オンラインのバックアップはありません",
     "checking": "バックアップを確認しています…",
     "backupNow": "今すぐバックアップ",
-    "notIncluded": "ロゴと写真は含まれません。",
+    "notIncluded": "ロゴ、写真、戦術ボードは含まれません。",
     "restore": "復元",
     "deleteOnline": "オンラインのバックアップを削除",
     "disconnect": "ログアウト",

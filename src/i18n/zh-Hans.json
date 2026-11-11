@@ -1087,7 +1087,7 @@
     "noBackup": "没有在线备份",
     "checking": "正在查找备份…",
     "backupNow": "立即备份",
-    "notIncluded": "不包含队徽和照片。",
+    "notIncluded": "不包含队徽、照片和战术图。",
     "restore": "恢复",
     "deleteOnline": "删除在线备份",
     "disconnect": "退出登录",
