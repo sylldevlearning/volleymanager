@@ -145,7 +145,10 @@
       "attackFault": "进攻失误",
       "blockFault": "拦网失误",
       "defenseFault": "防守失误"
-    }
+    },
+    "renameTeamTitle": "队名",
+    "renameTeamHint": "点按以修改队名",
+    "renameTeamInvalid": "请输入 1 到 {{max}} 个字符的名称。"
   },
   "arbitrage": {
     "title": "执裁",

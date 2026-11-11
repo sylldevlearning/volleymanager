@@ -145,7 +145,10 @@
       "attackFault": "Err. attacco",
       "blockFault": "Err. muro",
       "defenseFault": "Err. difesa"
-    }
+    },
+    "renameTeamTitle": "Nome della squadra",
+    "renameTeamHint": "Tocca per rinominare la squadra",
+    "renameTeamInvalid": "Inserisci un nome da 1 a {{max}} caratteri."
   },
   "arbitrage": {
     "title": "Arbitraggio",

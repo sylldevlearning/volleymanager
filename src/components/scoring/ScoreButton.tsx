@@ -8,6 +8,7 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
+import { Pencil } from 'lucide-react-native';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { useResponsive } from '../../hooks/useResponsive';
 import { ANIMATION_DURATION_SHORT } from '../../utils/constants';
@@ -20,11 +21,15 @@ interface ScoreButtonProps {
   onPress: () => void;
   onRemove?: () => void;
   disabled?: boolean;
+  /** Quick match: the team name is a button that opens the renaming sheet */
+  onNamePress?: () => void;
+  /** Accessibility hint of the name button */
+  nameHint?: string;
 }
 
 const DEBOUNCE_MS = 400;
 
-export function ScoreButton({ teamName, score, teamColor, onPress, onRemove, disabled }: ScoreButtonProps) {
+export function ScoreButton({ teamName, score, teamColor, onPress, onRemove, disabled, onNamePress, nameHint }: ScoreButtonProps) {
   const hapticsEnabled = useSettingsStore((s) => s.hapticsEnabled);
   const { scoreFontSize, scoreButtonSize } = useResponsive();
   const scale = useSharedValue(1);
@@ -62,9 +67,24 @@ export function ScoreButton({ teamName, score, teamColor, onPress, onRemove, dis
 
   return (
     <View style={styles.container}>
-      <Text style={styles.teamName} numberOfLines={1}>
-        {teamName}
-      </Text>
+      {onNamePress ? (
+        <Pressable
+          style={styles.nameButton}
+          onPress={onNamePress}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityHint={nameHint}
+        >
+          <Text style={styles.teamName} numberOfLines={1}>
+            {teamName}
+          </Text>
+          <Pencil size={12} color="#8B949E" />
+        </Pressable>
+      ) : (
+        <Text style={styles.teamName} numberOfLines={1}>
+          {teamName}
+        </Text>
+      )}
       {/* GestureDetector covers only the score circle — keeps badges separate */}
       <GestureDetector gesture={gesture}>
         <Animated.View style={animatedStyle}>
@@ -103,6 +123,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     gap: 12,
+  },
+  nameButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    maxWidth: '90%',
   },
   teamName: {
     fontSize: 14,

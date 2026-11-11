@@ -12,9 +12,8 @@ import { TacticalBoard } from '../../src/components/tactical/TacticalBoard';
 import { TacticalBoardIcon } from '../../src/components/ui/TacticalBoardIcon';
 import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
 import { AdBanner } from '../../src/components/ads/AdBanner';
-import { createTeam } from '../../src/services/teamService';
-import { createMatch, getInProgressAdHocMatch, updateMatchStatus } from '../../src/services/matchService';
-import { DEFAULT_INDOOR_CONFIG } from '../../src/models/match';
+import { getInProgressAdHocMatch, updateMatchStatus } from '../../src/services/matchService';
+import { createQuickMatch } from '../../src/services/quickMatchService';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -55,17 +54,7 @@ export default function HomeScreen() {
     if (creatingQuickMatch) return;
     setCreatingQuickMatch(true);
     try {
-      const [home, away] = await Promise.all([
-        createTeam({ name: 'France', shortName: 'FRA', logoUri: null, color: '#1D4ED8' }),
-        createTeam({ name: 'Brésil', shortName: 'BRA', logoUri: null, color: '#F59E0B' }),
-      ]);
-      const match = await createMatch({
-        format: 'indoor_6v6',
-        mode: 'leisure',
-        teamHomeId: home.id,
-        teamAwayId: away.id,
-        config: DEFAULT_INDOOR_CONFIG,
-      });
+      const match = await createQuickMatch();
       router.replace(`/match/${match.id}/referee`);
     } finally {
       setCreatingQuickMatch(false);

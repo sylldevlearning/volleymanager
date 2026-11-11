@@ -145,7 +145,10 @@
       "attackFault": "Ошибка атаки",
       "blockFault": "Ошибка блока",
       "defenseFault": "Ошибка защиты"
-    }
+    },
+    "renameTeamTitle": "Название команды",
+    "renameTeamHint": "Нажмите, чтобы переименовать команду",
+    "renameTeamInvalid": "Введите название от 1 до {{max}} символов."
   },
   "arbitrage": {
     "title": "Судейство",

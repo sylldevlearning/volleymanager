@@ -22,7 +22,7 @@ export async function createMatchFromQr(qr: MatchQr): Promise<Match> {
       mode: 'leisure',
       teamHomeId: home.id,
       teamAwayId: away.id,
-      config: quickMatchConfig(qr),
+      config: { ...quickMatchConfig(qr), quickMatch: true },
     });
   });
   return match!;

@@ -145,7 +145,10 @@
       "attackFault": "Błąd ataku",
       "blockFault": "Błąd bloku",
       "defenseFault": "Błąd obrony"
-    }
+    },
+    "renameTeamTitle": "Nazwa drużyny",
+    "renameTeamHint": "Dotknij, aby zmienić nazwę drużyny",
+    "renameTeamInvalid": "Wpisz nazwę od 1 do {{max}} znaków."
   },
   "arbitrage": {
     "title": "Sędziowanie",

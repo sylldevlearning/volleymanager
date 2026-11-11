@@ -145,7 +145,10 @@
       "attackFault": "Hücum hatası",
       "blockFault": "Blok hatası",
       "defenseFault": "Savunma hatası"
-    }
+    },
+    "renameTeamTitle": "Takım adı",
+    "renameTeamHint": "Takımı yeniden adlandırmak için dokunun",
+    "renameTeamInvalid": "1 ile {{max}} karakter arasında bir ad girin."
   },
   "arbitrage": {
     "title": "Hakemlik",

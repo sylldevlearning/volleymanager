@@ -145,7 +145,10 @@
       "attackFault": "Angriffsfehler",
       "blockFault": "Blockfehler",
       "defenseFault": "Abwehrfehler"
-    }
+    },
+    "renameTeamTitle": "Teamname",
+    "renameTeamHint": "Tippen, um das Team umzubenennen",
+    "renameTeamInvalid": "Gib einen Namen mit 1 bis {{max}} Zeichen ein."
   },
   "arbitrage": {
     "title": "Schiedsrichter",

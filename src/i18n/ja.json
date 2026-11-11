@@ -145,7 +145,10 @@
       "attackFault": "アタックミス",
       "blockFault": "ブロックミス",
       "defenseFault": "ディグミス"
-    }
+    },
+    "renameTeamTitle": "チーム名",
+    "renameTeamHint": "タップしてチーム名を変更",
+    "renameTeamInvalid": "1〜{{max}}文字の名前を入力してください。"
   },
   "arbitrage": {
     "title": "審判",

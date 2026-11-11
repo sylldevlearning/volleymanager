@@ -198,7 +198,7 @@ export function quickMatchConfig(qr: MatchQr): MatchConfig {
     pointsLastSet: tieBreak ? rules.pointsLastSet : rules.pointsPerSet,
     winMargin: rules.winMargin,
   };
-  if (qr.ref) config.tournamentRef = { ...qr.ref };
+  if (qr.ref) config.tournamentRef = { ...qr.ref, homeName: qr.home.name, awayName: qr.away.name };
   return config;
 }
 
@@ -210,7 +210,15 @@ export function resultQrOf(match: Match, homeName: string, awayName: string, set
     .filter((s) => s.winnerTeamId !== null)
     .sort((x, y) => x.setNumber - y.setNumber)
     .map((s): SetScore => [s.scoreHome, s.scoreAway]);
-  return { ref: { ...ref }, home: homeName, away: awayName, sets: played };
+  const { homeName: tournamentHome, awayName: tournamentAway, ...qrRef } = ref;
+  // Older QR (no team ids) is checked by name: the tournament names, even if the teams were renamed
+  const byName = !qrRef.homeTeamId || !qrRef.awayTeamId;
+  return {
+    ref: qrRef,
+    home: byName && tournamentHome ? tournamentHome : homeName,
+    away: byName && tournamentAway ? tournamentAway : awayName,
+    sets: played,
+  };
 }
 
 export type ResultCheckError = 'other_tournament' | 'match_not_found' | 'teams_changed';

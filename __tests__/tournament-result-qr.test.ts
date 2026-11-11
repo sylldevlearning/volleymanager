@@ -35,7 +35,7 @@ describe('match QR with the tournament and match ids', () => {
   });
 
   it('the quick match keeps the link, to show the result QR at the end', () => {
-    expect(quickMatchConfig(matchQr).tournamentRef).toEqual(ref);
+    expect(quickMatchConfig(matchQr).tournamentRef).toEqual({ ...ref, homeName: 'Sable', awayName: 'Vagues' });
   });
 
   it('an older match QR without ids still opens the quick match, without result QR', () => {
@@ -101,7 +101,7 @@ describe('team ids in both QRs', () => {
     const qr = { ...matchQr, ref: withIds };
     expect(encodeMatchQr(qr)).toContain('"ht":"x","at":"y"');
     expect(decodeMatchQr(encodeMatchQr(qr))).toEqual({ ok: true, qr });
-    expect(quickMatchConfig(qr).tournamentRef).toEqual(withIds);
+    expect(quickMatchConfig(qr).tournamentRef).toEqual({ ...withIds, homeName: 'Sable', awayName: 'Vagues' });
     const res = { ...result, ref: withIds };
     expect(encodeResultQr(res)).toContain('"ht":"x","at":"y"');
     expect(decodeResultQr(encodeResultQr(res))).toEqual({ ok: true, result: res });

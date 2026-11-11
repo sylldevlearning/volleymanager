@@ -23,6 +23,9 @@ import { SetTracker } from '../../../src/components/scoring/SetTracker';
 import { UndoButton } from '../../../src/components/scoring/UndoButton';
 import { SubstitutionSheet } from '../../../src/components/scoring/SubstitutionSheet';
 import { TimeoutTimerSheet } from '../../../src/components/scoring/TimeoutTimerSheet';
+import { TeamNameSheet } from '../../../src/components/scoring/TeamNameSheet';
+import { renameQuickMatchTeam } from '../../../src/services/quickMatchService';
+import { canRenameTeams } from '../../../src/features/match/teamRename';
 import { TacticalBoard } from '../../../src/components/tactical/TacticalBoard';
 import { TacticalBoardIcon } from '../../../src/components/ui/TacticalBoardIcon';
 import { InfoTooltip } from '../../../src/components/ui/InfoTooltip';
@@ -90,6 +93,8 @@ export default function RefereeScreen() {
   const [timeoutTeamColor, setTimeoutTeamColor] = useState<string>(palette.teamHome);
   const attributionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [pendingSetEnd, setPendingSetEnd] = useState<PendingSetEnd | null>(null);
+  /** Quick match: side whose team is being renamed */
+  const [renameSide, setRenameSide] = useState<'home' | 'away' | null>(null);
   const pendingSetEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Animated ball bounce for service indicator
@@ -403,6 +408,21 @@ export default function RefereeScreen() {
     ]);
   };
 
+  async function handleRename(name: string) {
+    const side = renameSide;
+    if (!match || !side) return;
+    setRenameSide(null);
+    try {
+      const saved = await renameQuickMatchTeam(match.id, side, name);
+      if (saved === null) return;
+      const update = (team: Team | null) => (team ? { ...team, name: saved, shortName: null } : team);
+      if (side === 'home') setHomeTeam(update);
+      else setAwayTeam(update);
+    } catch {
+      Alert.alert(t('common.error'), t('common.actionFailed'));
+    }
+  }
+
   if (loading || !match || !homeTeam || !awayTeam) {
     return (
       <View style={styles.loading}>
@@ -415,6 +435,7 @@ export default function RefereeScreen() {
   const currentSetNum = currentSet?.setNumber ?? 1;
   const maxTimeouts = match.config.timeoutsPerSet ?? 2;
   const setIsOver = !!currentSet?.winnerTeamId;
+  const renamable = canRenameTeams(match);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -434,6 +455,8 @@ export default function RefereeScreen() {
           teamName={homeTeam.name}
           score={scoreHome}
           teamColor={homeTeam.color || palette.teamHome}
+          onNamePress={renamable ? () => setRenameSide('home') : undefined}
+          nameHint={t('referee.renameTeamHint')}
           onPress={() => handlePoint('home')}
           onRemove={() => handleRemovePoint('home')}
           disabled={setIsOver || showTimeoutSheet}
@@ -448,6 +471,8 @@ export default function RefereeScreen() {
           teamName={awayTeam.name}
           score={scoreAway}
           teamColor={palette.teamAway}
+          onNamePress={renamable ? () => setRenameSide('away') : undefined}
+          nameHint={t('referee.renameTeamHint')}
           onPress={() => handlePoint('away')}
           onRemove={() => handleRemovePoint('away')}
           disabled={setIsOver || showTimeoutSheet}
@@ -583,6 +608,15 @@ export default function RefereeScreen() {
           <Text style={[styles.actionText, { color: palette.error }]}>{t('match.endMatch')}</Text>
         </Pressable>
       </ScrollView>
+
+      {/* Quick match: rename a team (tap on its name) */}
+      <TeamNameSheet
+        visible={renameSide !== null}
+        name={renameSide === 'away' ? awayTeam.name : homeTeam.name}
+        teamColor={renameSide === 'away' ? palette.teamAway : (homeTeam.color || palette.teamHome)}
+        onClose={() => setRenameSide(null)}
+        onSave={handleRename}
+      />
 
       {/* Timeout countdown sheet */}
       <TimeoutTimerSheet

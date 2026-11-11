@@ -145,7 +145,10 @@
       "attackFault": "Erro de ataque",
       "blockFault": "Erro de bloqueio",
       "defenseFault": "Erro de defesa"
-    }
+    },
+    "renameTeamTitle": "Nome do time",
+    "renameTeamHint": "Toque para renomear o time",
+    "renameTeamInvalid": "Digite um nome de 1 a {{max}} caracteres."
   },
   "arbitrage": {
     "title": "Arbitragem",

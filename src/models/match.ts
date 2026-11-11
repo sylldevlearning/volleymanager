@@ -29,6 +29,8 @@ export interface MatchConfig {
   technicalTimeout?: boolean;
   /** Quick match started from a tournament match QR: its result QR goes back to this match */
   tournamentRef?: TournamentRef;
+  /** Quick match (home button or match QR): team names can be changed until the end (1.2.0+) */
+  quickMatch?: boolean;
 }
 
 export interface TournamentRef {
@@ -37,6 +39,12 @@ export interface TournamentRef {
   /** Tournament team ids at the time of the match QR — absent from older QRs (checked by name then) */
   homeTeamId?: string;
   awayTeamId?: string;
+  /**
+   * Tournament names of the teams, kept on this phone only (never in a QR). A result of an older
+   * QR without ids is checked by name: it carries these names even if the teams were renamed.
+   */
+  homeName?: string;
+  awayName?: string;
 }
 
 export const DEFAULT_INDOOR_CONFIG: MatchConfig = {
