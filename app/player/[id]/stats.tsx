@@ -10,13 +10,13 @@ import { getPlayerCareerStats, type PlayerCareerStats } from '../../../src/servi
 import { RadarChart } from '../../../src/components/stats/RadarChart';
 import { LineChart } from '../../../src/components/charts/LineChart';
 import { StatCard } from '../../../src/components/charts/StatCard';
-import { palette } from '../../../src/theme/tokens';
-import { useAccent } from '../../../src/theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../../src/theme/useAppTheme';
 
 type EvolutionKey = 'attack' | 'reception' | 'serve' | 'defense';
 
 export default function PlayerCareerScreen() {
-  const accent = useAccent();
+  const colors = useAppTheme();
+  const styles = useThemedStyles(makeStyles);
   const { id: playerId } = useLocalSearchParams<{ id: string }>();
   const { t, i18n } = useTranslation();
   const router = useRouter();
@@ -41,7 +41,7 @@ export default function PlayerCareerScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator color={accent.color} />
+        <ActivityIndicator color={colors.color} />
       </View>
     );
   }
@@ -51,7 +51,7 @@ export default function PlayerCareerScreen() {
       <SafeAreaView style={styles.container} edges={['bottom']}>
         <View style={styles.header}>
           <Pressable onPress={() => router.back()} style={styles.backBtn} accessibilityRole="button">
-            <ArrowLeft size={22} color={palette.textSecondary} />
+            <ArrowLeft size={22} color={colors.textSecondary} />
           </Pressable>
           <Text style={styles.headerTitle}>{career?.playerName ?? t('stats.career.title')}</Text>
         </View>
@@ -99,7 +99,7 @@ export default function PlayerCareerScreen() {
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backBtn} accessibilityRole="button">
-          <ArrowLeft size={22} color={palette.textSecondary} />
+          <ArrowLeft size={22} color={colors.textSecondary} />
         </Pressable>
         <View style={styles.headerInfo}>
           <Text style={styles.headerTitle}>{career.playerName}</Text>
@@ -122,7 +122,7 @@ export default function PlayerCareerScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{t('stats.career.averages')}</Text>
             <View style={styles.radarWrap}>
-              <RadarChart metrics={radarMetrics} size={200} color={palette.accentSecondary} />
+              <RadarChart metrics={radarMetrics} size={200} color={colors.accentSecondary} />
             </View>
           </View>
         )}
@@ -147,7 +147,7 @@ export default function PlayerCareerScreen() {
               ))}
             </View>
             <View style={styles.lineWrap}>
-              <LineChart data={lineData} color={palette.accentSecondary} height={120} />
+              <LineChart data={lineData} color={colors.accentSecondary} height={120} />
             </View>
           </View>
         )}
@@ -220,6 +220,7 @@ function RecordRow({
   suffix?: string;
   date: string;
 }) {
+  const styles = useThemedStyles(makeStyles);
   const { i18n } = useTranslation();
   return (
     <View style={styles.recordRow}>
@@ -234,9 +235,9 @@ function RecordRow({
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: palette.background },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: a.background },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -244,30 +245,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
+    borderBottomColor: a.backgroundElevated,
   },
   backBtn: { padding: 4 },
   headerInfo: { flex: 1 },
-  headerTitle: { fontSize: 17, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
-  headerSub: { fontSize: 12, fontFamily: 'Inter_400Regular', color: palette.textSecondary, marginTop: 2 },
+  headerTitle: { fontSize: 17, fontFamily: 'Inter_700Bold', color: a.textPrimary },
+  headerSub: { fontSize: 12, fontFamily: 'Inter_400Regular', color: a.textSecondary, marginTop: 2 },
   scroll: { padding: 16, gap: 14, paddingBottom: 40 },
   summaryRow: { flexDirection: 'row', gap: 10 },
   section: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
     overflow: 'hidden',
   },
   sectionTitle: {
     fontSize: 11,
     fontFamily: 'Inter_700Bold',
-    color: palette.textMuted,
+    color: a.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
     padding: 14,
     borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
+    borderBottomColor: a.backgroundElevated,
   },
   radarWrap: { alignItems: 'center', paddingVertical: 12 },
   toggleRow: {
@@ -276,22 +277,22 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     padding: 12,
     borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
+    borderBottomColor: a.backgroundElevated,
   },
   toggleChip: {
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 16,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     borderWidth: 1,
     borderColor: 'transparent',
   },
   toggleChipActive: {
-    borderColor: palette.accentSecondary,
-    backgroundColor: `${palette.accentSecondary}20`,
+    borderColor: a.accentSecondary,
+    backgroundColor: `${a.accentSecondary}20`,
   },
-  toggleLabel: { fontSize: 12, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
-  toggleLabelActive: { color: palette.accentSecondary },
+  toggleLabel: { fontSize: 12, fontFamily: 'Inter_500Medium', color: a.textSecondary },
+  toggleLabelActive: { color: a.accentSecondary },
   lineWrap: { paddingHorizontal: 4, paddingVertical: 8 },
   recordRow: {
     flexDirection: 'row',
@@ -300,12 +301,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
+    borderBottomColor: a.backgroundElevated,
   },
-  recordLabel: { flex: 1, fontSize: 13, fontFamily: 'Inter_400Regular', color: palette.textSecondary },
+  recordLabel: { flex: 1, fontSize: 13, fontFamily: 'Inter_400Regular', color: a.textSecondary },
   recordRight: { alignItems: 'flex-end', gap: 2 },
-  recordValue: { fontSize: 16, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
-  recordDate: { fontSize: 10, fontFamily: 'Inter_400Regular', color: palette.textMuted },
+  recordValue: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.textPrimary },
+  recordDate: { fontSize: 10, fontFamily: 'Inter_400Regular', color: a.textMuted },
   historyRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -313,14 +314,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
+    borderBottomColor: a.backgroundElevated,
   },
   historyRowPressed: { opacity: 0.7 },
   historyLeft: { gap: 2 },
-  historyDate: { fontSize: 12, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
-  historyOpponent: { fontSize: 12, fontFamily: 'Inter_400Regular', color: palette.textSecondary },
+  historyDate: { fontSize: 12, fontFamily: 'Inter_700Bold', color: a.textPrimary },
+  historyOpponent: { fontSize: 12, fontFamily: 'Inter_400Regular', color: a.textSecondary },
   historyRight: { alignItems: 'flex-end', gap: 2 },
-  historyPoints: { fontSize: 14, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
-  historyEff: { fontSize: 12, fontFamily: 'Inter_500Medium', color: palette.textMuted },
-  emptyText: { color: palette.textMuted, fontFamily: 'Inter_400Regular', textAlign: 'center' },
+  historyPoints: { fontSize: 14, fontFamily: 'Inter_700Bold', color: a.textPrimary },
+  historyEff: { fontSize: 12, fontFamily: 'Inter_500Medium', color: a.textMuted },
+  emptyText: { color: a.textMuted, fontFamily: 'Inter_400Regular', textAlign: 'center' },
 });

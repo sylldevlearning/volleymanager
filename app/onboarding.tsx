@@ -17,21 +17,20 @@ import { Zap, Whistle, Users, Trophy } from 'lucide-react-native';
 import { ONBOARDING_SLIDES, type OnboardingSlide, type OnboardingSlideId } from '../src/features/onboarding/slides';
 import { TacticalBoardIcon } from '../src/components/ui/TacticalBoardIcon';
 import { useSettingsStore } from '../src/stores/settingsStore';
-import { palette } from '../src/theme/tokens';
-import { type AccentTheme, useThemedStyles } from '../src/theme/useAccent';
+import { useAppTheme, useThemedStyles, type AppTheme } from '../src/theme/useAppTheme';
 
 const ICON_SIZE = 56;
 
-const SLIDE_COLORS: Record<OnboardingSlideId, string> = {
-  quickMatch: palette.success,
-  arbitrage: palette.accentSecondary,
+const slideColors = (c: AppTheme): Record<OnboardingSlideId, string> => ({
+  quickMatch: c.success,
+  arbitrage: c.accentSecondary,
   tournament: '#D4AF37',
   tactical: '#E63946', // feature colour, fixed like the others
-  teams: palette.warning,
-};
+  teams: c.warning,
+});
 
 function SlideIcon({ id }: { id: OnboardingSlideId }) {
-  const color = SLIDE_COLORS[id];
+  const color = slideColors(useAppTheme())[id];
   switch (id) {
     case 'quickMatch': return <Zap size={ICON_SIZE} color={color} strokeWidth={1.5} />;
     case 'arbitrage': return <Whistle size={ICON_SIZE} color={color} strokeWidth={1.5} />;
@@ -43,6 +42,7 @@ function SlideIcon({ id }: { id: OnboardingSlideId }) {
 
 export default function OnboardingScreen() {
   const styles = useThemedStyles(makeStyles);
+  const colors = useAppTheme();
   const { t } = useTranslation();
   const router = useRouter();
   const { width } = useWindowDimensions();
@@ -104,7 +104,7 @@ export default function OnboardingScreen() {
         getItemLayout={(_d, i) => ({ length: width, offset: width * i, index: i })}
         renderItem={({ item }) => (
           <View style={[styles.slide, { width }]}>
-            <View style={[styles.iconCircle, { borderColor: SLIDE_COLORS[item.id] + '55' }]}>
+            <View style={[styles.iconCircle, { borderColor: slideColors(colors)[item.id] + '55' }]}>
               <SlideIcon id={item.id} />
             </View>
             <Text style={styles.title}>{t(item.titleKey)}</Text>
@@ -131,8 +131,8 @@ export default function OnboardingScreen() {
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
   topBar: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
@@ -143,12 +143,12 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 10,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
   },
   skipText: {
     fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textSecondary,
+    color: a.textSecondary,
   },
   slide: {
     flex: 1,
@@ -162,7 +162,7 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     height: 120,
     borderRadius: 60,
     borderWidth: 2,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
@@ -170,13 +170,13 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   title: {
     fontSize: 26,
     fontFamily: 'Inter_900Black',
-    color: palette.textPrimary,
+    color: a.textPrimary,
     textAlign: 'center',
   },
   body: {
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
-    color: palette.textSecondary,
+    color: a.textSecondary,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -194,7 +194,7 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
   },
   dotActive: {
     width: 24,

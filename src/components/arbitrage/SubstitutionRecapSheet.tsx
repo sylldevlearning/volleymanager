@@ -8,6 +8,7 @@ import type { Player } from '../../models/player';
 import type { Team } from '../../models/team';
 import type { MatchSet } from '../../models/match';
 import { palette } from '../../theme/tokens';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../theme/useAppTheme';
 
 interface SubstitutionRecapSheetProps {
   visible: boolean;
@@ -27,6 +28,8 @@ function numberOf(playerId: string, roster: Player[]): number | string {
 export function SubstitutionRecapSheet({
   visible, onClose, matchId, sets, homeTeam, awayTeam, homePlayers, awayPlayers,
 }: SubstitutionRecapSheetProps) {
+  const colors = useAppTheme();
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const [homePairs, setHomePairs] = useState<SubstitutionPair[]>([]);
   const [awayPairs, setAwayPairs] = useState<SubstitutionPair[]>([]);
@@ -57,7 +60,7 @@ export function SubstitutionRecapSheet({
         <View style={styles.header}>
           <Text style={styles.title}>{t('arbitrage.recapTitle')}</Text>
           <Pressable onPress={onClose} accessibilityRole="button">
-            <X size={20} color={palette.textSecondary} />
+            <X size={20} color={colors.textSecondary} />
           </Pressable>
         </View>
 
@@ -97,6 +100,7 @@ function SetRecap({
   awayPlayers: Player[];
   t: (key: string, opts?: Record<string, unknown>) => string;
 }) {
+  const styles = useThemedStyles(makeStyles);
   if (homePairs.length === 0 && awayPairs.length === 0) return null;
   return (
     <View style={styles.setBlock}>
@@ -115,6 +119,7 @@ function TeamRecap({
   roster: Player[];
   t: (key: string, opts?: Record<string, unknown>) => string;
 }) {
+  const styles = useThemedStyles(makeStyles);
   if (pairs.length === 0) return null;
   const regular = pairs.filter((p) => !p.isLibero);
   const libero = pairs.filter((p) => p.isLibero);
@@ -157,10 +162,10 @@ function TeamRecap({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AppTheme) => StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
   sheet: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: '80%',
@@ -169,24 +174,24 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 20, paddingVertical: 16,
-    borderBottomWidth: 1, borderBottomColor: palette.backgroundElevated,
+    borderBottomWidth: 1, borderBottomColor: a.backgroundElevated,
   },
-  title: { fontSize: 17, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
+  title: { fontSize: 17, fontFamily: 'Inter_700Bold', color: a.textPrimary },
   body: { padding: 16, gap: 16 },
-  emptyText: { fontSize: 14, color: palette.textMuted, textAlign: 'center', paddingVertical: 24 },
+  emptyText: { fontSize: 14, color: a.textMuted, textAlign: 'center', paddingVertical: 24 },
   setBlock: {
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     borderRadius: 14,
     padding: 14,
     gap: 10,
   },
-  setTitle: { fontSize: 13, fontFamily: 'Inter_700Bold', color: palette.textPrimary, textTransform: 'uppercase', letterSpacing: 0.5 },
+  setTitle: { fontSize: 13, fontFamily: 'Inter_700Bold', color: a.textPrimary, textTransform: 'uppercase', letterSpacing: 0.5 },
   teamBlock: { gap: 4 },
   teamHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 },
   teamDot: { width: 8, height: 8, borderRadius: 4 },
-  teamName: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary },
+  teamName: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: a.textSecondary },
   row: { paddingVertical: 2, paddingLeft: 14 },
-  rowText: { fontSize: 13, fontFamily: 'Inter_500Medium', color: palette.textPrimary },
+  rowText: { fontSize: 13, fontFamily: 'Inter_500Medium', color: a.textPrimary },
   liberoBlock: { marginTop: 2 },
   liberoLabel: { fontSize: 11, fontFamily: 'Inter_600SemiBold', color: palette.libero, paddingLeft: 14, textTransform: 'uppercase', letterSpacing: 0.3 },
 });

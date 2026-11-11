@@ -15,7 +15,7 @@ import type { LiberoState } from '../../../src/models/substitution';
 import type { CourtMap } from '../../../src/stores/scoringStore';
 import { palette } from '../../../src/theme/tokens';
 import { InfoTooltip } from '../../../src/components/ui/InfoTooltip';
-import { type AccentTheme, useThemedStyles } from '../../../src/theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../../src/theme/useAppTheme';
 
 interface PlayerSlot {
   player: Player;
@@ -51,6 +51,7 @@ function buildSideLineup(slots: PlayerSlot[]): { courtMap: CourtMap; bench: Play
 }
 
 export default function LineupScreen() {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
@@ -149,7 +150,7 @@ export default function LineupScreen() {
             accessibilityLabel={t('common.back')}
             hitSlop={8}
           >
-            <ArrowLeft size={22} color={palette.textPrimary} />
+            <ArrowLeft size={22} color={colors.textPrimary} />
           </Pressable>
           <Text style={styles.headerTitle}>{t('lineup.title')}</Text>
           <InfoTooltip textKey="help.lineup" />
@@ -303,16 +304,16 @@ function PlayerRow({
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
-  loadingText: { color: palette.textMuted, textAlign: 'center', marginTop: 40 },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
+  loadingText: { color: a.textMuted, textAlign: 'center', marginTop: 40 },
 
   header: {
     paddingHorizontal: 20,
     paddingTop: 16,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
+    borderBottomColor: a.backgroundElevated,
   },
   backBtn: { padding: 4, marginLeft: -4 },
   headerTitleRow: {
@@ -325,13 +326,13 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     marginLeft: 8,
     fontSize: 20,
     fontFamily: 'Inter_700Bold',
-    color: palette.textPrimary,
+    color: a.textPrimary,
     marginBottom: 4,
   },
   headerHint: {
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
-    color: palette.textMuted,
+    color: a.textMuted,
   },
 
   scroll: { paddingBottom: 24 },
@@ -339,11 +340,11 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   section: {
     marginTop: 20,
     marginHorizontal: 16,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderRadius: 14,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -351,21 +352,21 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     gap: 8,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
   },
   teamDot: { width: 10, height: 10, borderRadius: 5 },
   sectionTeamName: {
     flex: 1,
     fontSize: 14,
     fontFamily: 'Inter_700Bold',
-    color: palette.textPrimary,
+    color: a.textPrimary,
   },
   startersCount: {
     fontSize: 13,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textMuted,
+    color: a.textMuted,
   },
-  startersCountFull: { color: palette.success },
+  startersCountFull: { color: a.success },
 
   playerRow: {
     flexDirection: 'row',
@@ -374,7 +375,7 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 11,
     borderTopWidth: 1,
-    borderTopColor: palette.backgroundElevated,
+    borderTopColor: a.backgroundElevated,
   },
   playerRowAbsent: { opacity: 0.45 },
 
@@ -383,7 +384,7 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     height: 22,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: palette.textMuted,
+    borderColor: a.textMuted,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -397,19 +398,19 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 8,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  jerseyText: { fontSize: 13, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
+  jerseyText: { fontSize: 13, fontFamily: 'Inter_700Bold', color: a.textPrimary },
 
   playerName: {
     flex: 1,
     fontSize: 14,
     fontFamily: 'Inter_500Medium',
-    color: palette.textPrimary,
+    color: a.textPrimary,
   },
-  playerNameDimmed: { color: palette.textMuted },
+  playerNameDimmed: { color: a.textMuted },
 
   badge: {
     paddingHorizontal: 8,
@@ -418,18 +419,18 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     minWidth: 58,
     alignItems: 'center',
   },
-  badgeText: { fontSize: 11, fontFamily: 'Inter_700Bold', letterSpacing: 0.3, color: palette.textPrimary },
+  badgeText: { fontSize: 11, fontFamily: 'Inter_700Bold', letterSpacing: 0.3, color: a.textPrimary },
   badgeStarter: { backgroundColor: a.muted, borderWidth: 1, borderColor: a.color },
-  badgeBench: { backgroundColor: palette.backgroundElevated },
-  badgeAbsent: { backgroundColor: 'transparent', borderWidth: 1, borderColor: palette.backgroundElevated },
+  badgeBench: { backgroundColor: a.backgroundElevated },
+  badgeAbsent: { backgroundColor: 'transparent', borderWidth: 1, borderColor: a.backgroundElevated },
   badgeLibero: { backgroundColor: palette.libero + '25', borderWidth: 1, borderColor: palette.libero },
 
-  emptyText: { fontSize: 13, color: palette.textMuted, padding: 14, textAlign: 'center' },
+  emptyText: { fontSize: 13, color: a.textMuted, padding: 14, textAlign: 'center' },
 
   footer: {
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: palette.backgroundElevated,
+    borderTopColor: a.backgroundElevated,
   },
   validateBtn: {
     backgroundColor: a.fill,

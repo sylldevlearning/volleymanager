@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, Pressable } from 'react-native';
 import Svg, { Line, Rect, Circle, Text as SvgText, G } from 'react-native-svg';
 import { palette } from '../../theme/tokens';
-import { useAccent } from '../../theme/useAccent';
+import { useAppTheme } from '../../theme/useAppTheme';
 
 export interface PlayerInPosition {
   position: 1 | 2 | 3 | 4 | 5 | 6;
@@ -47,7 +47,7 @@ export function IndoorCourt({
   showOpponentHalf = true,
   showAttackLines = true,
 }: IndoorCourtProps) {
-  const accent = useAccent();
+  const colors = useAppTheme();
   const height = width * 0.6;
   const pad = 16;
   const courtW = width - pad * 2;
@@ -59,7 +59,7 @@ export function IndoorCourt({
     <View style={[styles.container, { width, height }]}>
       <Svg width={width} height={height}>
         {/* Court background */}
-        <Rect x={pad} y={pad} width={courtW} height={courtH} fill={palette.backgroundElevated} rx={8} />
+        <Rect x={pad} y={pad} width={courtW} height={courtH} fill={colors.backgroundElevated} rx={8} />
 
         {/* Court lines */}
         {/* Net */}
@@ -68,7 +68,7 @@ export function IndoorCourt({
           y1={pad + courtH / 2}
           x2={pad + courtW}
           y2={pad + courtH / 2}
-          stroke={palette.textSecondary}
+          stroke={colors.textSecondary}
           strokeWidth={2}
         />
         {/* Attack lines (3m line) */}
@@ -79,7 +79,7 @@ export function IndoorCourt({
               y1={pad + courtH * 0.25}
               x2={pad + courtW}
               y2={pad + courtH * 0.25}
-              stroke={palette.textMuted}
+              stroke={colors.textMuted}
               strokeWidth={1}
               strokeDasharray="4,4"
             />
@@ -88,7 +88,7 @@ export function IndoorCourt({
               y1={pad + courtH * 0.75}
               x2={pad + courtW}
               y2={pad + courtH * 0.75}
-              stroke={palette.textMuted}
+              stroke={colors.textMuted}
               strokeWidth={1}
               strokeDasharray="4,4"
             />
@@ -113,15 +113,15 @@ export function IndoorCourt({
                 fill={player
                   ? player.isLibero
                     ? palette.libero + '40'
-                    : palette.accentSecondary + '30'
-                  : palette.backgroundHover}
+                    : colors.accentSecondary + '30'
+                  : colors.backgroundHover}
                 stroke={isServing
-                  ? accent.color
+                  ? colors.color
                   : player
                     ? player.isLibero
                       ? palette.libero
-                      : palette.accentSecondary
-                    : palette.backgroundHover}
+                      : colors.accentSecondary
+                    : colors.backgroundHover}
                 strokeWidth={isServing ? 2.5 : 1.5}
                 strokeDasharray={player?.isLibero ? '4 2' : undefined}
               />
@@ -133,7 +133,7 @@ export function IndoorCourt({
                   alignmentBaseline="middle"
                   fontSize={13}
                   fontWeight="700"
-                  fill={palette.textPrimary}
+                  fill={colors.textPrimary}
                 >
                   {player.number}
                 </SvgText>
@@ -144,13 +144,13 @@ export function IndoorCourt({
                   textAnchor="middle"
                   alignmentBaseline="middle"
                   fontSize={12}
-                  fill={palette.textMuted}
+                  fill={colors.textMuted}
                 >
                   P{pos}
                 </SvgText>
               )}
               {isServing && (
-                <Circle cx={cx + r - 4} cy={cy - r + 4} r={5} fill={accent.color} />
+                <Circle cx={cx + r - 4} cy={cy - r + 4} r={5} fill={colors.color} />
               )}
               {player?.isLibero && (
                 <G>
@@ -160,7 +160,7 @@ export function IndoorCourt({
               )}
               {player?.isCaptain && (
                 <G>
-                  <Circle cx={cx - r + 5} cy={cy - r + 5} r={7} fill={palette.warning} />
+                  <Circle cx={cx - r + 5} cy={cy - r + 5} r={7} fill={colors.warning} />
                   <SvgText x={cx - r + 5} y={cy - r + 6} textAnchor="middle" alignmentBaseline="middle" fontSize={8} fontWeight="700" fill="#0D1117">C</SvgText>
                 </G>
               )}
@@ -176,7 +176,7 @@ export function IndoorCourt({
               y={pad}
               width={courtW}
               height={courtH / 2 - 2}
-              fill={palette.backgroundSurface}
+              fill={colors.backgroundSurface}
               rx={8}
               opacity={0.5}
             />
@@ -186,7 +186,7 @@ export function IndoorCourt({
               textAnchor="middle"
               alignmentBaseline="middle"
               fontSize={12}
-              fill={palette.textMuted}
+              fill={colors.textMuted}
             >
               ADVERSAIRE
             </SvgText>

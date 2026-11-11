@@ -1,7 +1,7 @@
 import { StyleSheet, Text, Pressable } from 'react-native';
 import { RotateCcw } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { palette } from '../../theme/tokens';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../theme/useAppTheme';
 
 interface UndoButtonProps {
   onPress: () => void;
@@ -9,6 +9,8 @@ interface UndoButtonProps {
 }
 
 export function UndoButton({ onPress, disabled }: UndoButtonProps) {
+  const colors = useAppTheme();
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
 
   return (
@@ -23,13 +25,13 @@ export function UndoButton({ onPress, disabled }: UndoButtonProps) {
       accessibilityLabel={t('match.undo')}
       accessibilityRole="button"
     >
-      <RotateCcw size={18} color={disabled ? palette.textMuted : palette.textSecondary} />
+      <RotateCcw size={18} color={disabled ? colors.textMuted : colors.textSecondary} />
       <Text style={[styles.text, disabled && styles.textDisabled]}>{t('match.undo')}</Text>
     </Pressable>
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AppTheme) => StyleSheet.create({
   button: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -37,16 +39,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 10,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
   },
   buttonPressed: { opacity: 0.7 },
   buttonDisabled: { opacity: 0.4 },
   text: {
     fontSize: 13,
     fontFamily: 'Inter_500Medium',
-    color: palette.textSecondary,
+    color: a.textSecondary,
   },
-  textDisabled: { color: palette.textMuted },
+  textDisabled: { color: a.textMuted },
 });

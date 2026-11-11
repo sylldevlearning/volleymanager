@@ -37,7 +37,7 @@ import { takeLineupDraft } from '../../../src/features/lineup/lineupDraft';
 import { buildLineupState } from '../../../src/features/lineup/lineupState';
 import { resumeQuickMatch, saveStartingLineups, startingCourtForNextSet } from '../../../src/features/match/quickMatchLineup';
 import { palette } from '../../../src/theme/tokens';
-import { type AccentTheme, useThemedStyles } from '../../../src/theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../../src/theme/useAppTheme';
 
 type PointAction =
   | 'serve_ace' | 'attack_kill' | 'block_kill'
@@ -64,6 +64,7 @@ interface AttributionState {
 }
 
 export default function RefereeScreen() {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
@@ -588,7 +589,7 @@ export default function RefereeScreen() {
           }}
           accessibilityRole="button"
         >
-          <ArrowLeft size={16} color={palette.textSecondary} />
+          <ArrowLeft size={16} color={colors.textSecondary} />
           <Text style={styles.actionText}>{t('home.backToMenu')}</Text>
         </Pressable>
         <UndoButton onPress={handleUndo} disabled={setIsOver} />
@@ -606,8 +607,8 @@ export default function RefereeScreen() {
           accessibilityLabel={t('match.endMatch')}
           accessibilityRole="button"
         >
-          <Flag size={16} color={palette.error} />
-          <Text style={[styles.actionText, { color: palette.error }]}>{t('match.endMatch')}</Text>
+          <Flag size={16} color={colors.error} />
+          <Text style={[styles.actionText, { color: colors.error }]}>{t('match.endMatch')}</Text>
         </Pressable>
       </ScrollView>
 
@@ -712,13 +713,15 @@ function AttributionStrip({
   onDismiss: () => void;
   t: ReturnType<typeof useTranslation>['t'];
 }) {
+  const colors = useAppTheme();
+  const attrStyles = useThemedStyles(makeAttrStyles);
   const isFaultAction = selectedAction ? FAULT_ACTIONS.has(selectedAction) : false;
   // Points → scoring team's players; Faults → opposing team's players (they made the error)
   const players = isFaultAction
     ? (scoringTeam === 'home' ? awayPlayers : homePlayers)
     : (scoringTeam === 'home' ? homePlayers : awayPlayers);
   const teamColor = scoringTeam === 'home' ? homeColor : awayColor;
-  const chipColor = isFaultAction ? palette.error : teamColor;
+  const chipColor = isFaultAction ? colors.error : teamColor;
 
   const POINT_ACTIONS: { key: PointAction; label: string }[] = [
     { key: 'serve_ace', label: t('referee.attribution.ace') },
@@ -801,12 +804,12 @@ function AttributionStrip({
             return (
               <Pressable
                 key={key}
-                style={[attrStyles.actionBtn, isSelected && { borderColor: palette.error, backgroundColor: palette.error + '20' }]}
+                style={[attrStyles.actionBtn, isSelected && { borderColor: colors.error, backgroundColor: colors.error + '20' }]}
                 onPress={() => onSelectAction(key)}
                 accessibilityRole="radio"
                 accessibilityState={{ selected: isSelected }}
               >
-                <Text style={[attrStyles.actionText, isSelected && { color: palette.error }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{label}</Text>
+                <Text style={[attrStyles.actionText, isSelected && { color: colors.error }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{label}</Text>
               </Pressable>
             );
           })}
@@ -816,14 +819,14 @@ function AttributionStrip({
   );
 }
 
-const attrStyles = StyleSheet.create({
+const makeAttrStyles = (a: AppTheme) => StyleSheet.create({
   strip: {
     marginHorizontal: 16,
     marginBottom: 8,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
     paddingVertical: 10,
     gap: 8,
   },
@@ -833,9 +836,9 @@ const attrStyles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 12,
   },
-  title: { fontSize: 12, fontFamily: 'Inter_600SemiBold', color: palette.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 },
+  title: { fontSize: 12, fontFamily: 'Inter_600SemiBold', color: a.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 },
   skipBtn: { paddingHorizontal: 8, paddingVertical: 2 },
-  skipText: { fontSize: 12, fontFamily: 'Inter_400Regular', color: palette.textMuted },
+  skipText: { fontSize: 12, fontFamily: 'Inter_400Regular', color: a.textMuted },
   playerList: { paddingHorizontal: 12, gap: 6 },
   playerChip: {
     flexDirection: 'row',
@@ -844,26 +847,26 @@ const attrStyles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 20,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     borderWidth: 1,
     borderColor: 'transparent',
   },
-  playerNum: { fontSize: 12, fontFamily: 'Inter_700Bold', color: palette.textMuted },
-  playerName: { fontSize: 12, fontFamily: 'Inter_500Medium', color: palette.textSecondary, maxWidth: 72 },
+  playerNum: { fontSize: 12, fontFamily: 'Inter_700Bold', color: a.textMuted },
+  playerName: { fontSize: 12, fontFamily: 'Inter_500Medium', color: a.textSecondary, maxWidth: 72 },
   sectionBlock: { gap: 6, paddingHorizontal: 12 },
-  sectionTitle: { fontSize: 10, fontFamily: 'Inter_600SemiBold', color: palette.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 },
-  faultSectionTitle: { color: palette.error + 'AA' },
+  sectionTitle: { fontSize: 10, fontFamily: 'Inter_600SemiBold', color: a.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 },
+  faultSectionTitle: { color: a.error + 'AA' },
   actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   actionBtn: {
     paddingVertical: 7,
     paddingHorizontal: 10,
     borderRadius: 10,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: 'transparent',
   },
-  actionText: { fontSize: 12, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary },
+  actionText: { fontSize: 12, fontFamily: 'Inter_600SemiBold', color: a.textSecondary },
 });
 
 function SubIndicator({
@@ -936,10 +939,10 @@ function TimeoutIndicator({
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
-  loading: { flex: 1, backgroundColor: palette.background, alignItems: 'center', justifyContent: 'center' },
-  loadingText: { color: palette.textSecondary, fontFamily: 'Inter_400Regular' },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
+  loading: { flex: 1, backgroundColor: a.background, alignItems: 'center', justifyContent: 'center' },
+  loadingText: { color: a.textSecondary, fontFamily: 'Inter_400Regular' },
   setsRow: { paddingTop: 12, paddingBottom: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingRight: 12 },
   scoreArea: {
     flex: 1,
@@ -949,8 +952,8 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     gap: 8,
   },
   scoreSeparator: { alignItems: 'center', gap: 4, width: 56 },
-  setsScore: { fontSize: 20, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
-  setLabel: { fontSize: 9, fontFamily: 'Inter_600SemiBold', color: palette.textMuted, letterSpacing: 1 },
+  setsScore: { fontSize: 20, fontFamily: 'Inter_700Bold', color: a.textPrimary },
+  setLabel: { fontSize: 9, fontFamily: 'Inter_600SemiBold', color: a.textMuted, letterSpacing: 1 },
   serviceRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -958,16 +961,16 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     gap: 10,
     paddingVertical: 10,
     marginHorizontal: 16,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
     marginBottom: 8,
   },
   serviceBall: { width: 28, height: 28, marginHorizontal: 4 },
-  serviceDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: palette.backgroundHover },
+  serviceDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: a.backgroundHover },
   serviceDotActive: { backgroundColor: a.fill },
-  serviceText: { fontSize: 13, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
+  serviceText: { fontSize: 13, fontFamily: 'Inter_500Medium', color: a.textSecondary },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -983,20 +986,20 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 6,
   },
-  subSeparator: { fontSize: 10, fontFamily: 'Inter_500Medium', color: palette.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 },
+  subSeparator: { fontSize: 10, fontFamily: 'Inter_500Medium', color: a.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 },
   subGroup: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   subGroupReversed: { flexDirection: 'row-reverse' },
   subGroupFull: { opacity: 0.4 },
   subLabel: { fontSize: 11, fontFamily: 'Inter_700Bold' },
   subDots: { flexDirection: 'row', gap: 3 },
   subDot: { width: 7, height: 7, borderRadius: 3.5 },
-  subInf: { fontSize: 14, color: palette.textMuted, fontFamily: 'Inter_700Bold' },
+  subInf: { fontSize: 14, color: a.textMuted, fontFamily: 'Inter_700Bold' },
   timeoutGroup: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   timeoutGroupReversed: { flexDirection: 'row-reverse' },
   timeoutLabel: { fontSize: 13, fontFamily: 'Inter_700Bold' },
   timeoutDots: { flexDirection: 'row', gap: 4 },
   timeoutDot: { width: 10, height: 10, borderRadius: 5 },
-  timeoutInf: { fontSize: 16, color: palette.textMuted, fontFamily: 'Inter_700Bold' },
+  timeoutInf: { fontSize: 16, color: a.textMuted, fontFamily: 'Inter_700Bold' },
   actionsScroll: {
     flexShrink: 0,
   },
@@ -1016,9 +1019,9 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     gap: 6,
     paddingVertical: 12,
     borderRadius: 12,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
   },
   actionBtnEnd: {
     flexDirection: 'row',
@@ -1028,23 +1031,23 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 14,
     borderRadius: 12,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderWidth: 1,
-    borderColor: palette.error + '40',
+    borderColor: a.error + '40',
   },
   tacticalBtn: {
     width: 48,
     height: 48,
     borderRadius: 12,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
     alignItems: 'center',
     justifyContent: 'center',
   },
   tacticalIcon: { alignItems: 'center', justifyContent: 'center' },
   actionBtnPressed: { opacity: 0.7 },
-  actionText: { fontSize: 12, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
+  actionText: { fontSize: 12, fontFamily: 'Inter_500Medium', color: a.textSecondary },
   setEndBanner: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1082,7 +1085,7 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     justifyContent: 'center',
   },
   changeEndsCard: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderRadius: 20,
     padding: 32,
     alignItems: 'center',
@@ -1092,7 +1095,7 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   changeEndsTitle: {
     fontSize: 22,
     fontFamily: 'Inter_700Bold',
-    color: palette.textPrimary,
+    color: a.textPrimary,
     textAlign: 'center',
   },
   changeEndsBtn: {

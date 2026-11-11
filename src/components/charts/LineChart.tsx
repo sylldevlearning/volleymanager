@@ -1,5 +1,6 @@
 import React from 'react';
 import Svg, { Polyline, Circle, Line, Text as SvgText, G } from 'react-native-svg';
+import { useAppTheme } from '../../theme/useAppTheme';
 
 interface LineChartPoint {
   label: string;
@@ -19,6 +20,7 @@ export function LineChart({
   height = 100,
   width = 280,
 }: LineChartProps) {
+  const colors = useAppTheme();
   if (data.length < 2) {
     return null;
   }
@@ -51,10 +53,10 @@ export function LineChart({
           <G key={g}>
             <Line
               x1={padL} y1={gy} x2={padL + chartW} y2={gy}
-              stroke="rgba(255,255,255,0.06)"
+              stroke={colors.textPrimary + '10'}
               strokeWidth={1}
             />
-            <SvgText x={padL - 2} y={gy + 3} textAnchor="end" fontSize={8} fill="rgba(139,148,158,0.5)">
+            <SvgText x={padL - 2} y={gy + 3} textAnchor="end" fontSize={8} fill={colors.textMuted}>
               {g}
             </SvgText>
           </G>
@@ -88,7 +90,7 @@ export function LineChart({
             y={padT + chartH + 14}
             textAnchor="middle"
             fontSize={9}
-            fill="rgba(139,148,158,0.8)"
+            fill={colors.textSecondary}
           >
             {p.label}
           </SvgText>

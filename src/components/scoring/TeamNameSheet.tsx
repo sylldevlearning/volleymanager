@@ -11,9 +11,8 @@ import {
 } from 'react-native';
 import { X } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { palette } from '../../theme/tokens';
 import { normalizeTeamName, TEAM_NAME_MAX_LENGTH } from '../../features/match/teamRename';
-import { type AccentTheme, useThemedStyles } from '../../theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../theme/useAppTheme';
 
 interface TeamNameSheetProps {
   visible: boolean;
@@ -27,6 +26,7 @@ interface TeamNameSheetProps {
 
 /** Quick match: rename a team from the scoring screen (tap on its name). */
 export function TeamNameSheet({ visible, name, teamColor, onClose, onSave }: TeamNameSheetProps) {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const [value, setValue] = useState(name);
@@ -63,7 +63,7 @@ export function TeamNameSheet({ visible, name, teamColor, onClose, onSave }: Tea
                 accessibilityRole="button"
                 accessibilityLabel={t('common.close')}
               >
-                <X size={18} color={palette.textSecondary} />
+                <X size={18} color={colors.textSecondary} />
               </Pressable>
             </View>
 
@@ -77,7 +77,7 @@ export function TeamNameSheet({ visible, name, teamColor, onClose, onSave }: Tea
               autoCapitalize="words"
               returnKeyType="done"
               onSubmitEditing={handleSave}
-              placeholderTextColor={palette.textMuted}
+              placeholderTextColor={colors.textMuted}
               accessibilityLabel={t('referee.renameTeamTitle')}
             />
 
@@ -108,7 +108,7 @@ export function TeamNameSheet({ visible, name, teamColor, onClose, onSave }: Tea
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
+const makeStyles = (a: AppTheme) => StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',
@@ -116,7 +116,7 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   },
   kav: { width: '100%' },
   sheet: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
@@ -125,20 +125,20 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   },
   header: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   headerDot: { width: 12, height: 12, borderRadius: 6 },
-  title: { flex: 1, fontSize: 17, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
+  title: { flex: 1, fontSize: 17, fontFamily: 'Inter_700Bold', color: a.textPrimary },
   closeBtn: { padding: 6 },
   input: {
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: palette.backgroundHover,
+    borderColor: a.backgroundHover,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 16,
     fontFamily: 'Inter_500Medium',
-    color: palette.textPrimary,
+    color: a.textPrimary,
   },
-  error: { fontSize: 13, fontFamily: 'Inter_500Medium', color: palette.error },
+  error: { fontSize: 13, fontFamily: 'Inter_500Medium', color: a.error },
   actions: { flexDirection: 'row', gap: 12 },
   button: {
     flex: 1,
@@ -147,9 +147,9 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cancelBtn: { backgroundColor: palette.backgroundElevated },
+  cancelBtn: { backgroundColor: a.backgroundElevated },
   saveBtn: { backgroundColor: a.fill },
   pressed: { opacity: 0.8 },
-  cancelText: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },
+  cancelText: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: a.textPrimary },
   saveText: { fontSize: 15, fontFamily: 'Inter_700Bold', color: a.onFill },
 });

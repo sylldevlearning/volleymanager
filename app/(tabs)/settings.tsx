@@ -5,7 +5,6 @@ import { Zap, Globe, Info, ChevronRight, LifeBuoy, ShieldCheck, Check } from 'lu
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSettingsStore } from '../../src/stores/settingsStore';
-import { palette } from '../../src/theme/tokens';
 import { useLocales } from 'expo-localization';
 import { LANGUAGES, deviceLanguage, type LanguagePreference } from '../../src/i18n/languages';
 import { APP_VERSION, ADMOB_IDS } from '../../src/utils/constants';
@@ -13,19 +12,19 @@ import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
 import { AdBanner } from '../../src/components/ads/AdBanner';
 import { deleteAllMatches } from '../../src/services/matchService';
 import { isPrivacyOptionsRequired, openPrivacyOptions } from '../../src/features/ads/adsService';
-import { useAccent } from '../../src/theme/useAccent';
-import { ACCENTS } from '../../src/theme/accent';
+import type { Appearance } from '../../src/theme/colors';
 import { DriveBackupSection } from '../../src/components/settings/DriveBackupSection';
 import { isDriveAvailable } from '../../src/features/backup/googleAccount';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../src/theme/useAppTheme';
 
-// Two rows of four swatches
-const ACCENT_ROWS = [ACCENTS.slice(0, 4), ACCENTS.slice(4)];
+const APPEARANCES: Appearance[] = ['system', 'light', 'dark'];
 
 export default function SettingsScreen() {
-  const accent = useAccent();
+  const colors = useAppTheme();
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const router = useRouter();
-  const { hapticsEnabled, setHapticsEnabled, language, setLanguage, resetHelp, accentColor, setAccentColor } = useSettingsStore();
+  const { hapticsEnabled, setHapticsEnabled, language, setLanguage, resetHelp, appearance, setAppearance } = useSettingsStore();
 
   // UMP only offers the privacy form where it's required (EEA / UK) — re-checked on
   // each visit since consent is gathered asynchronously at startup.
@@ -59,34 +58,24 @@ export default function SettingsScreen() {
             accessibilityRole="button"
             accessibilityLabel={`${t('settings.language')} : ${languageLabel(language)}`}
           >
-            <Globe size={20} color={accent.color} />
+            <Globe size={20} color={colors.color} />
             <Text style={styles.rowLabel} numberOfLines={1}>{languageLabel(language)}</Text>
-            <ChevronRight size={16} color={palette.textMuted} />
+            <ChevronRight size={16} color={colors.textMuted} />
           </Pressable>
         </View>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('settings.accentTitle')}</Text>
-        <View style={[styles.card, styles.swatchCard]}>
-          {ACCENT_ROWS.map((row) => (
-            <View key={row[0].id} style={styles.swatchRow}>
-              {row.map((choice) => {
-                const active = accentColor === choice.id;
-                return (
-                  <Pressable
-                    key={choice.id}
-                    style={[styles.swatch, { backgroundColor: choice.fill }, active && styles.swatchActive]}
-                    onPress={() => setAccentColor(choice.id)}
-                    hitSlop={4}
-                    accessibilityRole="radio"
-                    accessibilityState={{ selected: active }}
-                    accessibilityLabel={t(`settings.accentColors.${choice.id}`)}
-                  >
-                    {active && <Check size={20} color={choice.onFill} strokeWidth={3} />}
-                  </Pressable>
-                );
-              })}
+        <Text style={styles.sectionTitle}>{t('settings.appearance.title')}</Text>
+        <View style={styles.card}>
+          {APPEARANCES.map((choice, i) => (
+            <View key={choice}>
+              {i > 0 && <View style={styles.divider} />}
+              <LanguageOption
+                label={t(`settings.appearance.${choice}`)}
+                active={appearance === choice}
+                onPress={() => setAppearance(choice)}
+              />
             </View>
           ))}
         </View>
@@ -98,13 +87,13 @@ export default function SettingsScreen() {
         <Text style={styles.sectionTitle}>{t('settings.haptics')}</Text>
         <View style={styles.card}>
           <SettingRow
-            icon={<Zap size={20} color={palette.warning} />}
+            icon={<Zap size={20} color={colors.warning} />}
             label={t('settings.hapticsDesc')}
             right={
               <Switch
                 value={hapticsEnabled}
                 onValueChange={setHapticsEnabled}
-                trackColor={{ false: palette.backgroundHover, true: palette.accentSecondary }}
+                trackColor={{ false: colors.backgroundHover, true: colors.secondaryFill }}
                 thumbColor="#fff"
               />
             }
@@ -121,9 +110,9 @@ export default function SettingsScreen() {
             onPress={resetHelp}
             accessibilityRole="button"
           >
-            <LifeBuoy size={20} color={palette.accentSecondary} />
+            <LifeBuoy size={20} color={colors.accentSecondary} />
             <Text style={styles.rowLabel}>{t('settings.replayHelp')}</Text>
-            <ChevronRight size={16} color={palette.textMuted} />
+            <ChevronRight size={16} color={colors.textMuted} />
           </Pressable>
         </View>
       </View>
@@ -135,9 +124,9 @@ export default function SettingsScreen() {
             onPress={() => router.push('/about' as never)}
             accessibilityRole="button"
           >
-            <Info size={20} color={palette.textMuted} />
+            <Info size={20} color={colors.textMuted} />
             <Text style={styles.rowLabel}>{t('about.title')}</Text>
-            <ChevronRight size={16} color={palette.textMuted} />
+            <ChevronRight size={16} color={colors.textMuted} />
           </Pressable>
           {privacyRequired && (
             <>
@@ -147,15 +136,15 @@ export default function SettingsScreen() {
                 onPress={() => { openPrivacyOptions(); }}
                 accessibilityRole="button"
               >
-                <ShieldCheck size={20} color={palette.textMuted} />
+                <ShieldCheck size={20} color={colors.textMuted} />
                 <Text style={styles.rowLabel}>{t('settings.privacyOptions')}</Text>
-                <ChevronRight size={16} color={palette.textMuted} />
+                <ChevronRight size={16} color={colors.textMuted} />
               </Pressable>
             </>
           )}
           <View style={styles.divider} />
           <SettingRow
-            icon={<Info size={20} color={palette.textMuted} />}
+            icon={<Info size={20} color={colors.textMuted} />}
             label={`${t('settings.version')} ${APP_VERSION}`}
             right={null}
           />
@@ -181,7 +170,7 @@ export default function SettingsScreen() {
             }}
             accessibilityRole="button"
           >
-            <Text style={[styles.rowLabel, { color: palette.error }]}>
+            <Text style={[styles.rowLabel, { color: colors.error }]}>
               {t('match.deleteAll')}
             </Text>
           </Pressable>
@@ -222,6 +211,7 @@ function SettingRow({
   label: string;
   right: React.ReactNode;
 }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.row}>
       {icon}
@@ -240,7 +230,8 @@ function LanguageOption({
   active: boolean;
   onPress: () => void;
 }) {
-  const accent = useAccent();
+  const colors = useAppTheme();
+  const styles = useThemedStyles(makeStyles);
   return (
     <Pressable
       style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
@@ -248,43 +239,31 @@ function LanguageOption({
       accessibilityRole="button"
       accessibilityState={{ selected: active }}
     >
-      <Text style={[styles.rowLabel, active && { color: accent.color }]}>{label}</Text>
-      {active && <Check size={18} color={accent.color} />}
+      <Text style={[styles.rowLabel, active && { color: colors.color }]}>{label}</Text>
+      {active && <Check size={18} color={colors.color} />}
     </Pressable>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
   scroll: { padding: 16 },
-  swatchCard: { padding: 14, gap: 12 },
-  swatchRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  swatch: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  swatchActive: { borderColor: palette.textPrimary },
   topBar: { flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 4 },
   section: { marginBottom: 20 },
   sectionTitle: {
     fontSize: 12,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textMuted,
+    color: a.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
     marginBottom: 8,
     marginLeft: 4,
   },
   card: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
     overflow: 'hidden',
   },
   row: {
@@ -293,18 +272,18 @@ const styles = StyleSheet.create({
     gap: 12,
     padding: 14,
   },
-  rowPressed: { backgroundColor: palette.backgroundElevated },
+  rowPressed: { backgroundColor: a.backgroundElevated },
   rowLabel: {
     flex: 1,
     fontSize: 15,
     fontFamily: 'Inter_400Regular',
-    color: palette.textPrimary,
+    color: a.textPrimary,
   },
-  divider: { height: 1, backgroundColor: palette.backgroundElevated, marginLeft: 14 },
+  divider: { height: 1, backgroundColor: a.backgroundElevated, marginLeft: 14 },
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', padding: 24 },
   sheet: {
-    maxHeight: '80%', backgroundColor: palette.backgroundSurface, borderRadius: 16,
-    borderWidth: 1, borderColor: palette.backgroundElevated, overflow: 'hidden',
+    maxHeight: '80%', backgroundColor: a.backgroundSurface, borderRadius: 16,
+    borderWidth: 1, borderColor: a.backgroundElevated, overflow: 'hidden',
   },
-  sheetTitle: { fontSize: 17, fontFamily: 'Inter_700Bold', color: palette.textPrimary, padding: 16, paddingBottom: 8 },
+  sheetTitle: { fontSize: 17, fontFamily: 'Inter_700Bold', color: a.textPrimary, padding: 16, paddingBottom: 8 },
 });

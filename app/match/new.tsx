@@ -23,9 +23,8 @@ import {
   DEFAULT_BEACH_CONFIG,
   DEFAULT_LEISURE_CONFIG,
 } from '../../src/models/match';
-import { palette } from '../../src/theme/tokens';
 import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
-import { type AccentTheme, useAccent, useThemedStyles } from '../../src/theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../src/theme/useAppTheme';
 
 type FormatOption = { id: MatchFormat; label: string };
 type ModeOption = { id: MatchMode; label: string };
@@ -251,7 +250,7 @@ function ServePicker({
   selected: string;
   onSelect: (id: string) => void;
 }) {
-  const accent = useAccent();
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.serveRow}>
@@ -260,7 +259,7 @@ function ServePicker({
         return (
           <Pressable
             key={team.id}
-            style={[styles.serveOption, isSelected && { borderColor: team.color ?? accent.color }]}
+            style={[styles.serveOption, isSelected && { borderColor: team.color ?? colors.color }]}
             onPress={() => onSelect(team.id)}
             accessibilityRole="radio"
             accessibilityState={{ selected: isSelected }}
@@ -312,22 +311,22 @@ function ConfigRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
   topBar: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 16, paddingTop: 8 },
   scroll: { padding: 20, gap: 0, paddingBottom: 40 },
   section: { marginBottom: 20 },
   sectionTitle: {
     fontSize: 12,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textMuted,
+    color: a.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
     marginBottom: 8,
   },
   segmentRow: {
     flexDirection: 'row',
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderRadius: 12,
     padding: 4,
     gap: 4,
@@ -339,14 +338,14 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     alignItems: 'center',
   },
   segmentActive: { backgroundColor: a.fill },
-  segmentText: { fontSize: 14, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
+  segmentText: { fontSize: 14, fontFamily: 'Inter_500Medium', color: a.textSecondary },
   segmentTextActive: { color: a.onFill, fontFamily: 'Inter_700Bold' },
   teamPicker: { gap: 8 },
   teamOption: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     padding: 14,
     borderRadius: 12,
     borderWidth: 2,
@@ -354,42 +353,42 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   },
   teamOptionActive: { borderColor: a.color, backgroundColor: a.muted },
   teamDot: { width: 12, height: 12, borderRadius: 6 },
-  teamOptionText: { fontSize: 15, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
-  teamOptionTextActive: { color: palette.textPrimary, fontFamily: 'Inter_600SemiBold' },
-  noTeamText: { fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textMuted, padding: 12 },
+  teamOptionText: { fontSize: 15, fontFamily: 'Inter_500Medium', color: a.textSecondary },
+  teamOptionTextActive: { color: a.textPrimary, fontFamily: 'Inter_600SemiBold' },
+  noTeamText: { fontSize: 14, fontFamily: 'Inter_400Regular', color: a.textMuted, padding: 12 },
   serveRow: { flexDirection: 'row', gap: 10 },
   serveOption: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     padding: 14,
     borderRadius: 12,
     borderWidth: 2,
     borderColor: 'transparent',
   },
-  serveOptionText: { flex: 1, fontSize: 14, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
-  serveOptionTextActive: { color: palette.textPrimary, fontFamily: 'Inter_700Bold' },
+  serveOptionText: { flex: 1, fontSize: 14, fontFamily: 'Inter_500Medium', color: a.textSecondary },
+  serveOptionTextActive: { color: a.textPrimary, fontFamily: 'Inter_700Bold' },
   serveIcon: { width: 22, height: 22 },
   configPreview: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderRadius: 14,
     padding: 16,
     marginBottom: 24,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
   },
   configTitle: {
     fontSize: 13,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textSecondary,
+    color: a.textSecondary,
     marginBottom: 10,
   },
   configRows: { gap: 6 },
   configRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  configLabel: { fontSize: 13, fontFamily: 'Inter_400Regular', color: palette.textSecondary },
-  configValue: { fontSize: 13, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
+  configLabel: { fontSize: 13, fontFamily: 'Inter_400Regular', color: a.textSecondary },
+  configValue: { fontSize: 13, fontFamily: 'Inter_700Bold', color: a.textPrimary },
   startButton: {
     backgroundColor: a.fill,
     paddingVertical: 18,

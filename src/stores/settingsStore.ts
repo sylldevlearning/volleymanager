@@ -2,19 +2,17 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { LanguagePreference } from '../i18n/languages';
-import { DEFAULT_ACCENT_ID, isAccentId, type AccentId } from '../theme/accent';
+import { isAppearance, type Appearance } from '../theme/colors';
 
-type AppTheme = 'dark' | 'light';
 /** Screens with first-use help bubbles */
 export type HelpTipId = 'arbitrage' | 'tactical' | 'tournament';
 
 interface SettingsState {
-  theme: AppTheme;
+  /** Settings › Appearance: 'system' (Automatique) follows the phone */
+  appearance: Appearance;
   /** 'system' follows the phone */
   language: LanguagePreference;
   hapticsEnabled: boolean;
-  /** Main colour of the app (Settings), red by default */
-  accentColor: AccentId;
   /** E-mail of the Google account used for the Drive backup (shown in Settings), null = not signed in */
   driveAccount: string | null;
   hasSeenOnboarding: boolean;
@@ -26,12 +24,10 @@ interface SettingsState {
   /** Epoch ms of the first launch with this feature (install-date proxy) */
   firstLaunchAt: number | null;
   hasRequestedReview: boolean;
-  setTheme: (theme: AppTheme) => void;
+  setAppearance: (appearance: Appearance) => void;
   setLanguage: (lang: LanguagePreference) => void;
   setHapticsEnabled: (enabled: boolean) => void;
-  setAccentColor: (accent: AccentId) => void;
   setDriveAccount: (account: string | null) => void;
-  toggleTheme: () => void;
   markOnboardingSeen: () => void;
   markTipSeen: (id: HelpTipId) => void;
   /** "Revoir l'aide" — shows the onboarding and every help bubble again */
@@ -46,10 +42,9 @@ const COUNTED_MATCH_IDS_MAX = 20;
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set, get) => ({
-      theme: 'dark',
+      appearance: 'system',
       language: 'system',
       hapticsEnabled: true,
-      accentColor: DEFAULT_ACCENT_ID,
       driveAccount: null,
       hasSeenOnboarding: false,
       seenTips: {},
@@ -57,12 +52,10 @@ export const useSettingsStore = create<SettingsState>()(
       countedMatchIds: [],
       firstLaunchAt: null,
       hasRequestedReview: false,
-      setTheme: (theme) => set({ theme }),
+      setAppearance: (appearance) => set({ appearance }),
       setLanguage: (language) => set({ language }),
       setHapticsEnabled: (hapticsEnabled) => set({ hapticsEnabled }),
-      setAccentColor: (accentColor) => set({ accentColor }),
       setDriveAccount: (driveAccount) => set({ driveAccount }),
-      toggleTheme: () => set({ theme: get().theme === 'dark' ? 'light' : 'dark' }),
       markOnboardingSeen: () => set({ hasSeenOnboarding: true }),
       markTipSeen: (id) => set({ seenTips: { ...get().seenTips, [id]: true } }),
       resetHelp: () => set({ hasSeenOnboarding: false, seenTips: {} }),
@@ -84,13 +77,15 @@ export const useSettingsStore = create<SettingsState>()(
       storage: createJSONStorage(() => AsyncStorage),
       version: 1,
       migrate: (persisted, version) => migrateSettings(persisted, version) as SettingsState,
-      // Settings saved before 1.2.0 have no accent; an unknown one goes back to red
+      // Settings saved before 1.2.0 have no appearance (and an unused theme field): Automatique.
+      // An unknown value goes back to Automatique too.
       merge: (persisted, current) => {
-        const saved = (persisted ?? {}) as Partial<SettingsState>;
+        const { theme: _theme, accentColor: _accent, ...saved } =
+          (persisted ?? {}) as Partial<SettingsState> & { theme?: unknown; accentColor?: unknown };
         return {
           ...current,
           ...saved,
-          accentColor: isAccentId(saved.accentColor) ? saved.accentColor : current.accentColor,
+          appearance: isAppearance(saved.appearance) ? saved.appearance : current.appearance,
         };
       },
     }

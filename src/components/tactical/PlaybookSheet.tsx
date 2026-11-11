@@ -13,8 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { getAllPlays, savePlay, updatePlay, deletePlay } from '../../features/tactical/tacticalService';
 import type { TacticalPlay, PlayerPosition, Arrow, TacticalCategory } from '../../models/tactical';
 import type { MatchFormat } from '../../models/match';
-import { palette } from '../../theme/tokens';
-import { type AccentTheme, useThemedStyles } from '../../theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../theme/useAppTheme';
 
 interface PlaybookSheetProps {
   visible: boolean;
@@ -50,6 +49,7 @@ export function PlaybookSheet({
   onClose,
   onPlayDeleted,
 }: PlaybookSheetProps) {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const [plays, setPlays] = useState<TacticalPlay[]>([]);
@@ -161,7 +161,7 @@ export function PlaybookSheet({
               value={saveName}
               onChangeText={setSaveName}
               placeholder={t('tactical.playbook.name')}
-              placeholderTextColor={palette.textMuted}
+              placeholderTextColor={colors.textMuted}
               maxLength={40}
               autoFocus
             />
@@ -253,6 +253,7 @@ function PlayRow({
   onDelete?: () => void;
   t: (key: string) => string;
 }) {
+  const rowStyles = useThemedStyles(makeRowStyles);
   const catEmoji = CATEGORIES.find((c) => c.key === play.category)?.emoji ?? '📋';
   return (
     <View style={rowStyles.row}>
@@ -286,12 +287,12 @@ function PlayRow({
   );
 }
 
-const rowStyles = StyleSheet.create({
+const makeRowStyles = (a: AppTheme) => StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
+    borderBottomColor: a.backgroundElevated,
   },
   main: {
     flex: 1,
@@ -306,28 +307,28 @@ const rowStyles = StyleSheet.create({
   name: {
     fontSize: 15,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textPrimary,
+    color: a.textPrimary,
   },
   meta: {
     fontSize: 12,
     fontFamily: 'Inter_400Regular',
-    color: palette.textMuted,
+    color: a.textMuted,
     marginTop: 2,
   },
-  chevron: { fontSize: 20, color: palette.textMuted, marginRight: 4 },
+  chevron: { fontSize: 20, color: a.textMuted, marginRight: 4 },
   actions: { flexDirection: 'row' },
   actionBtn: { padding: 10 },
   editText: { fontSize: 16 },
   deleteText: { fontSize: 16 },
 });
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
+const makeStyles = (a: AppTheme) => StyleSheet.create({
   backdrop: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   sheet: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingHorizontal: 16,
@@ -337,7 +338,7 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   handle: {
     width: 40,
     height: 4,
-    backgroundColor: palette.backgroundHover,
+    backgroundColor: a.backgroundHover,
     borderRadius: 2,
     alignSelf: 'center',
     marginTop: 12,
@@ -353,49 +354,49 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     flex: 1,
     fontSize: 17,
     fontFamily: 'Inter_700Bold',
-    color: palette.textPrimary,
+    color: a.textPrimary,
   },
   modeToggle: {
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 8,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
   },
   modeToggleText: {
     fontSize: 11,
     fontFamily: 'Inter_500Medium',
-    color: palette.textSecondary,
+    color: a.textSecondary,
   },
   list: { maxHeight: 460 },
   sectionTitle: {
     fontSize: 12,
     fontFamily: 'Inter_700Bold',
-    color: palette.textMuted,
+    color: a.textMuted,
     letterSpacing: 0.5,
     paddingVertical: 8,
   },
   sectionDivider: {
     height: 1,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     marginVertical: 8,
   },
   emptyText: {
-    color: palette.textMuted,
+    color: a.textMuted,
     fontFamily: 'Inter_400Regular',
     textAlign: 'center',
     paddingVertical: 24,
   },
   saveForm: { gap: 12 },
   input: {
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    color: palette.textPrimary,
+    color: a.textPrimary,
     fontFamily: 'Inter_400Regular',
     fontSize: 15,
     borderWidth: 1,
-    borderColor: palette.backgroundHover,
+    borderColor: a.backgroundHover,
   },
   categoryRow: {
     flexDirection: 'row',
@@ -409,7 +410,7 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 20,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
   },
   catChipActive: {
     backgroundColor: a.muted,
@@ -420,7 +421,7 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   catText: {
     fontSize: 12,
     fontFamily: 'Inter_500Medium',
-    color: palette.textMuted,
+    color: a.textMuted,
   },
   catTextActive: { color: a.color },
   saveBtn: {

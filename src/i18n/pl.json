@@ -597,16 +597,11 @@
     "replayHelp": "Pokaż pomoc ponownie",
     "privacyOptions": "Ustawienia prywatności",
     "languageSystem": "Język telefonu ({{name}})",
-    "accentTitle": "Kolor główny",
-    "accentColors": {
-      "red": "Czerwony",
-      "blue": "Niebieski",
-      "violet": "Fioletowy",
-      "pink": "Różowy",
-      "green": "Zielony",
-      "teal": "Morski",
-      "orange": "Pomarańczowy",
-      "gold": "Złoty"
+    "appearance": {
+      "title": "Wygląd",
+      "system": "Automatyczny (jak w telefonie)",
+      "light": "Jasny",
+      "dark": "Ciemny"
     }
   },
   "scoring": {

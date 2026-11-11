@@ -22,13 +22,13 @@ import { getPlayerDisplayName } from '../../src/features/players/player-helpers'
 import { ScannerSheet } from '../../src/features/scanner/ScannerSheet';
 import { palette } from '../../src/theme/tokens';
 import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
-import { type AccentTheme, useAccent, useThemedStyles } from '../../src/theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../src/theme/useAppTheme';
 
 const POSITIONS: PPos[] = ['setter', 'outside', 'opposite', 'middle', 'libero', 'universal'];
 
 export default function TeamDetailScreen() {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
-  const accent = useAccent();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
   const router = useRouter();
@@ -88,7 +88,7 @@ export default function TeamDetailScreen() {
           style={styles.deleteBtn}
           accessibilityRole="button"
         >
-          <Trash2 size={18} color={palette.error} />
+          <Trash2 size={18} color={colors.error} />
         </Pressable>
       </View>
 
@@ -123,7 +123,7 @@ export default function TeamDetailScreen() {
         accessibilityLabel={t('team.addPlayer')}
         accessibilityRole="button"
       >
-        <Plus size={26} color={accent.onFill} />
+        <Plus size={26} color={colors.onFill} />
       </Pressable>
 
       <ScannerSheet
@@ -147,6 +147,7 @@ export default function TeamDetailScreen() {
 }
 
 function PlayerRow({ player, onDelete }: { player: Player; onDelete: () => void }) {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const router = useRouter();
@@ -172,10 +173,10 @@ function PlayerRow({ player, onDelete }: { player: Player; onDelete: () => void 
         accessibilityRole="button"
         accessibilityLabel={t('stats.career.title')}
       >
-        <BarChart2 size={16} color={palette.textMuted} />
+        <BarChart2 size={16} color={colors.textMuted} />
       </Pressable>
       <Pressable onPress={onDelete} style={styles.deleteRowBtn} accessibilityRole="button">
-        <Trash2 size={16} color={palette.textMuted} />
+        <Trash2 size={16} color={colors.textMuted} />
       </Pressable>
     </View>
   );
@@ -196,6 +197,7 @@ function AddPlayerModal({
   onAdded: () => void;
   onAddedAnother: () => void;
 }) {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const [lastName, setLastName] = useState('');
@@ -267,7 +269,7 @@ function AddPlayerModal({
             )}
           </View>
           <Pressable onPress={handleClose} accessibilityRole="button">
-            <X size={24} color={palette.textSecondary} />
+            <X size={24} color={colors.textSecondary} />
           </Pressable>
         </View>
 
@@ -280,7 +282,7 @@ function AddPlayerModal({
                 value={number}
                 onChangeText={setNumber}
                 placeholder="7"
-                placeholderTextColor={palette.textMuted}
+                placeholderTextColor={colors.textMuted}
                 keyboardType="number-pad"
                 maxLength={2}
                 autoFocus
@@ -295,7 +297,7 @@ function AddPlayerModal({
                 value={lastName}
                 onChangeText={setLastName}
                 placeholder={t('player.namePlaceholder')}
-                placeholderTextColor={palette.textMuted}
+                placeholderTextColor={colors.textMuted}
                 autoCapitalize="words"
                 returnKeyType="done"
                 accessibilityLabel="Nom"
@@ -359,38 +361,38 @@ function AddPlayerModal({
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     margin: 16,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderRadius: 16,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
   },
   colorBand: { width: 8, alignSelf: 'stretch' },
   headerContent: { flex: 1, padding: 16 },
-  teamName: { fontSize: 20, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
+  teamName: { fontSize: 20, fontFamily: 'Inter_700Bold', color: a.textPrimary },
   shortName: {
     fontSize: 14,
     fontFamily: 'Inter_500Medium',
-    color: palette.textSecondary,
+    color: a.textSecondary,
     marginTop: 2,
   },
   playerCount: {
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
-    color: palette.textMuted,
+    color: a.textMuted,
     marginTop: 4,
   },
   deleteBtn: { padding: 16 },
   list: { padding: 16, gap: 8, paddingBottom: 80 },
   emptyText: {
     textAlign: 'center',
-    color: palette.textMuted,
+    color: a.textMuted,
     fontFamily: 'Inter_400Regular',
     marginTop: 40,
   },
@@ -398,29 +400,29 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     padding: 14,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
   },
   numberBadge: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  numberText: { fontSize: 15, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
+  numberText: { fontSize: 15, fontFamily: 'Inter_700Bold', color: a.textPrimary },
   liberoBadge: { backgroundColor: palette.libero + '25', borderWidth: 1.5, borderColor: palette.libero },
   liberoText: { color: palette.libero, fontSize: 13 },
   playerInfo: { flex: 1 },
-  playerName: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },
+  playerName: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: a.textPrimary },
   playerPosition: {
     fontSize: 12,
     fontFamily: 'Inter_400Regular',
-    color: palette.textSecondary,
+    color: a.textSecondary,
     marginTop: 2,
   },
   statsRowBtn: { padding: 8 },
@@ -435,8 +437,8 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     borderRadius: 24,
-    backgroundColor: palette.accentSecondary,
-    shadowColor: palette.accentSecondary,
+    backgroundColor: a.secondaryFill,
+    shadowColor: a.secondaryFill,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.35,
     shadowRadius: 6,
@@ -445,7 +447,7 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   fabScannerText: {
     fontSize: 12,
     fontFamily: 'Inter_500Medium',
-    color: '#8B949E',
+    color: '#FFFFFF', // on the blue button
     maxWidth: 160,
   },
   fab: {
@@ -461,20 +463,20 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     elevation: 8,
   },
   fabPressed: { opacity: 0.85, transform: [{ scale: 0.95 }] },
-  modal: { flex: 1, backgroundColor: palette.backgroundSurface },
+  modal: { flex: 1, backgroundColor: a.backgroundSurface },
   modalHeader: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
+    borderBottomColor: a.backgroundElevated,
   },
-  modalTitle: { fontSize: 18, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
+  modalTitle: { fontSize: 18, fontFamily: 'Inter_700Bold', color: a.textPrimary },
   batchCount: {
     fontSize: 12,
     fontFamily: 'Inter_500Medium',
-    color: palette.success,
+    color: a.success,
     marginTop: 3,
   },
   modalBody: { flex: 1, padding: 20 },
@@ -483,22 +485,22 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   fieldLabel: {
     fontSize: 12,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textSecondary,
+    color: a.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 6,
     marginTop: 14,
   },
   input: {
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     borderWidth: 1,
-    borderColor: palette.backgroundHover,
+    borderColor: a.backgroundHover,
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 11,
     fontSize: 15,
     fontFamily: 'Inter_400Regular',
-    color: palette.textPrimary,
+    color: a.textPrimary,
   },
   inputCenter: { textAlign: 'center', fontSize: 20, fontFamily: 'Inter_700Bold' },
   positionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 2 },
@@ -506,7 +508,7 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: 20,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     borderWidth: 1,
     borderColor: 'transparent',
   },
@@ -514,29 +516,29 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     borderColor: a.color,
     backgroundColor: a.muted,
   },
-  positionChipText: { fontSize: 13, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
-  positionChipTextActive: { color: palette.textPrimary },
+  positionChipText: { fontSize: 13, fontFamily: 'Inter_500Medium', color: a.textSecondary },
+  positionChipTextActive: { color: a.textPrimary },
   modalButtons: {
     flexDirection: 'row',
     gap: 10,
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: palette.backgroundElevated,
+    borderTopColor: a.backgroundElevated,
   },
   batchBtn: {
     flex: 1,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     paddingVertical: 14,
     borderRadius: 14,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: palette.backgroundHover,
+    borderColor: a.backgroundHover,
   },
   batchBtnPressed: { opacity: 0.8 },
   batchBtnText: {
     fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textSecondary,
+    color: a.textSecondary,
   },
   addButton: {
     flex: 1,

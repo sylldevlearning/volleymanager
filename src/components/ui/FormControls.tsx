@@ -1,14 +1,14 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Minus, Plus } from 'lucide-react-native';
-import { palette } from '../../theme/tokens';
-import { type AccentTheme, useThemedStyles } from '../../theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../theme/useAppTheme';
 
 // Form rows shared by the setup screens (arbitrage, tournament)
 
 export function Stepper({
   label, value, onChange, min = 0, max = 99, step = 1,
 }: { label: string; value: number; onChange: (v: number) => void; min?: number; max?: number; step?: number }) {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.stepperRow}>
@@ -20,7 +20,7 @@ export function Stepper({
           disabled={value <= min}
           accessibilityRole="button"
         >
-          <Minus size={16} color={value <= min ? palette.textMuted : palette.textPrimary} />
+          <Minus size={16} color={value <= min ? colors.textMuted : colors.textPrimary} />
         </Pressable>
         <Text style={styles.stepperValue}>{value}</Text>
         <Pressable
@@ -29,7 +29,7 @@ export function Stepper({
           disabled={value >= max}
           accessibilityRole="button"
         >
-          <Plus size={16} color={value >= max ? palette.textMuted : palette.textPrimary} />
+          <Plus size={16} color={value >= max ? colors.textMuted : colors.textPrimary} />
         </Pressable>
       </View>
     </View>
@@ -61,32 +61,32 @@ export function FormField({ label, required, children }: { label: string; requir
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
+const makeStyles = (a: AppTheme) => StyleSheet.create({
   field: { marginBottom: 20 },
   fieldLabel: {
-    fontSize: 13, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary,
+    fontSize: 13, fontFamily: 'Inter_600SemiBold', color: a.textSecondary,
     marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5,
   },
   required: { color: a.color },
   stepperRow: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: palette.backgroundElevated,
+    paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: a.backgroundElevated,
   },
-  stepperLabel: { flex: 1, fontSize: 14, fontFamily: 'Inter_500Medium', color: palette.textPrimary, paddingRight: 12 },
+  stepperLabel: { flex: 1, fontSize: 14, fontFamily: 'Inter_500Medium', color: a.textPrimary, paddingRight: 12 },
   stepperControls: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   stepperBtn: {
     width: 32, height: 32, borderRadius: 8,
     alignItems: 'center', justifyContent: 'center',
-    backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundSurface, borderWidth: 1, borderColor: a.backgroundElevated,
   },
   stepperBtnDisabled: { opacity: 0.4 },
-  stepperValue: { fontSize: 15, fontFamily: 'Inter_700Bold', color: palette.textPrimary, minWidth: 32, textAlign: 'center' },
+  stepperValue: { fontSize: 15, fontFamily: 'Inter_700Bold', color: a.textPrimary, minWidth: 32, textAlign: 'center' },
   toggleRow: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: palette.backgroundElevated,
+    paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: a.backgroundElevated,
   },
   toggleTrack: {
-    width: 44, height: 26, borderRadius: 13, backgroundColor: palette.backgroundElevated,
+    width: 44, height: 26, borderRadius: 13, backgroundColor: a.backgroundElevated,
     padding: 3, justifyContent: 'center',
   },
   toggleTrackActive: { backgroundColor: a.fill },

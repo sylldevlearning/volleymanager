@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { palette } from '../../theme/tokens';
+import { useThemedStyles, type AppTheme } from '../../theme/useAppTheme';
 
 interface MirrorBarProps {
   label: string;
@@ -17,6 +18,7 @@ export function MirrorBar({
   homeColor = palette.teamHome,
   awayColor = palette.teamAway,
 }: MirrorBarProps) {
+  const styles = useThemedStyles(makeStyles);
   const homeW = `${Math.min(100, homeValue)}%` as `${number}%`;
   const awayW = `${Math.min(100, awayValue)}%` as `${number}%`;
 
@@ -44,7 +46,7 @@ export function MirrorBar({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AppTheme) => StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -68,7 +70,7 @@ const styles = StyleSheet.create({
   homeTrack: {
     flex: 1,
     height: 8,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     borderRadius: 4,
     overflow: 'hidden',
     flexDirection: 'row',
@@ -81,7 +83,7 @@ const styles = StyleSheet.create({
   awayTrack: {
     flex: 1,
     height: 8,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     borderRadius: 4,
     overflow: 'hidden',
   },
@@ -94,7 +96,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 11,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textSecondary,
+    color: a.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 0.3,
   },

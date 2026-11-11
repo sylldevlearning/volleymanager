@@ -4,7 +4,7 @@ import { X } from 'lucide-react-native';
 import type { ApplyPlan, BoardCheckResult, TeamLineupPlan } from '../../features/tactical/applyToMatch';
 import type { Player } from '../../models/player';
 import { palette } from '../../theme/tokens';
-import { type AccentTheme, useThemedStyles } from '../../theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../theme/useAppTheme';
 
 type ShownPlan = Exclude<ApplyPlan, { kind: 'none' }>;
 
@@ -25,6 +25,7 @@ const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI'];
 export function ApplyToMatchSheet({
   plan, homeTeamName, awayTeamName, homePlayers, awayPlayers, applying, onCancel, onConfirm,
 }: ApplyToMatchSheetProps) {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const canConfirm = plan?.ok === true && !applying;
@@ -36,7 +37,7 @@ export function ApplyToMatchSheet({
         <View style={styles.header}>
           <Text style={styles.title}>{t('tactical.apply.title')}</Text>
           <Pressable onPress={onCancel} accessibilityRole="button" accessibilityLabel={t('common.cancel')}>
-            <X size={20} color={palette.textSecondary} />
+            <X size={20} color={colors.textSecondary} />
           </Pressable>
         </View>
 
@@ -123,10 +124,10 @@ function TeamLineup({ name, plan, players }: { name: string; plan: TeamLineupPla
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
+const makeStyles = (a: AppTheme) => StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
   sheet: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: '80%',
@@ -135,24 +136,24 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 20, paddingVertical: 16,
-    borderBottomWidth: 1, borderBottomColor: palette.backgroundElevated,
+    borderBottomWidth: 1, borderBottomColor: a.backgroundElevated,
   },
-  title: { fontSize: 17, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
+  title: { fontSize: 17, fontFamily: 'Inter_700Bold', color: a.textPrimary },
   body: { padding: 16, gap: 12 },
-  sectionTitle: { fontSize: 13, fontFamily: 'Inter_700Bold', color: palette.textPrimary, textTransform: 'uppercase', letterSpacing: 0.5 },
-  teamBlock: { backgroundColor: palette.backgroundElevated, borderRadius: 14, padding: 14, gap: 6 },
-  teamName: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary },
+  sectionTitle: { fontSize: 13, fontFamily: 'Inter_700Bold', color: a.textPrimary, textTransform: 'uppercase', letterSpacing: 0.5 },
+  teamBlock: { backgroundColor: a.backgroundElevated, borderRadius: 14, padding: 14, gap: 6 },
+  teamName: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: a.textSecondary },
   row: { gap: 2 },
-  rowText: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },
+  rowText: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: a.textPrimary },
   liberoText: { color: palette.libero },
-  error: { fontSize: 13, fontFamily: 'Inter_500Medium', color: palette.error },
+  error: { fontSize: 13, fontFamily: 'Inter_500Medium', color: a.error },
   zones: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  zoneText: { fontSize: 14, fontFamily: 'Inter_500Medium', color: palette.textPrimary, minWidth: 64 },
-  refused: { fontSize: 13, fontFamily: 'Inter_500Medium', color: palette.textMuted, textAlign: 'center' },
+  zoneText: { fontSize: 14, fontFamily: 'Inter_500Medium', color: a.textPrimary, minWidth: 64 },
+  refused: { fontSize: 13, fontFamily: 'Inter_500Medium', color: a.textMuted, textAlign: 'center' },
   actions: { flexDirection: 'row', gap: 12, paddingHorizontal: 16, paddingTop: 8 },
   btn: { flex: 1, minHeight: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  btnSecondary: { backgroundColor: palette.backgroundElevated },
-  btnSecondaryText: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },
+  btnSecondary: { backgroundColor: a.backgroundElevated },
+  btnSecondaryText: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: a.textPrimary },
   btnPrimary: { backgroundColor: a.fill },
   btnPrimaryText: { fontSize: 15, fontFamily: 'Inter_700Bold', color: a.onFill },
   btnDisabled: { opacity: 0.4 },

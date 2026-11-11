@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { palette } from '../../theme/tokens';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../theme/useAppTheme';
 
 interface StatCardProps {
   label: string;
@@ -9,10 +9,12 @@ interface StatCardProps {
   accent?: string;
 }
 
-export function StatCard({ label, value, suffix = '', accent = palette.textPrimary }: StatCardProps) {
+export function StatCard({ label, value, suffix = '', accent }: StatCardProps) {
+  const colors = useAppTheme();
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.card}>
-      <Text style={[styles.value, { color: accent }]}>
+      <Text style={[styles.value, { color: accent ?? colors.textPrimary }]}>
         {value}{suffix}
       </Text>
       <Text style={styles.label}>{label}</Text>
@@ -20,10 +22,10 @@ export function StatCard({ label, value, suffix = '', accent = palette.textPrima
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AppTheme) => StyleSheet.create({
   card: {
     flex: 1,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     borderRadius: 12,
     padding: 12,
     alignItems: 'center',
@@ -37,7 +39,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 10,
     fontFamily: 'Inter_500Medium',
-    color: palette.textMuted,
+    color: a.textMuted,
     textAlign: 'center',
     textTransform: 'uppercase',
     letterSpacing: 0.3,

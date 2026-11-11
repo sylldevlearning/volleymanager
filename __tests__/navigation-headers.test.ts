@@ -2,8 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import fr from '../src/i18n/fr.json';
 import en from '../src/i18n/en.json';
-import { SCREEN_HEADERS, darkHeaderOptions } from '../src/navigation/screenHeaders';
-import { palette } from '../src/theme/tokens';
+import { SCREEN_HEADERS, headerOptions } from '../src/navigation/screenHeaders';
+import { THEMES } from '../src/theme/colors';
 
 const ROOT = path.join(__dirname, '..');
 const APP = path.join(ROOT, 'app');
@@ -49,16 +49,18 @@ describe('navigation headers', () => {
     expect(typeof dict(en, titleKey!)).toBe('string');
   });
 
-  it('uses the dark theme of the app, back arrow without text', () => {
-    expect(darkHeaderOptions.headerStyle).toEqual({ backgroundColor: palette.background });
-    expect(darkHeaderOptions.headerTintColor).toBe(palette.textPrimary);
-    expect(darkHeaderOptions.headerBackButtonDisplayMode).toBe('minimal');
-    expect(darkHeaderOptions.contentStyle).toEqual({ backgroundColor: palette.background });
+  it.each(['dark', 'light'] as const)('bars follow the %s mode, back arrow without text', (scheme) => {
+    const c = THEMES[scheme];
+    const options = headerOptions(c);
+    expect(options.headerStyle).toEqual({ backgroundColor: c.background });
+    expect(options.headerTintColor).toBe(c.textPrimary);
+    expect(options.headerBackButtonDisplayMode).toBe('minimal');
+    expect(options.contentStyle).toEqual({ backgroundColor: c.background });
   });
 
   it('the root stack is built from that table', () => {
     const layout = read('app/_layout.tsx');
-    expect(layout).toContain('screenOptions={darkHeaderOptions}');
+    expect(layout).toContain('screenOptions={headerOptions(colors)}');
     expect(layout).toContain('SCREEN_HEADERS');
   });
 

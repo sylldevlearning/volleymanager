@@ -15,12 +15,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import * as ImagePicker from 'expo-image-picker';
 import { Camera, Images, Plus, X } from 'lucide-react-native';
-import { palette } from '../../theme/tokens';
 import { isOcrAvailable, recognizeText } from './ocrService';
 import { parseNames, type DetectedPlayer } from './ocrParser';
 import { createPlayer } from '../../services/playerService';
 import type { Player } from '../../models/player';
-import { type AccentTheme, useAccent, useThemedStyles } from '../../theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../theme/useAppTheme';
 
 interface ScannerSheetProps {
   visible: boolean;
@@ -37,7 +36,7 @@ export function ScannerSheet({
   onClose,
   onImported,
 }: ScannerSheetProps) {
-  const accent = useAccent();
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const [photos, setPhotos] = useState<string[]>([]);
@@ -191,7 +190,7 @@ export function ScannerSheet({
         <View style={styles.header}>
           <Text style={styles.title}>{t('scanner.title')}</Text>
           <Pressable onPress={handleClose} style={styles.closeBtn} accessibilityRole="button">
-            <X size={20} color={palette.textSecondary} />
+            <X size={20} color={colors.textSecondary} />
           </Pressable>
         </View>
 
@@ -230,7 +229,7 @@ export function ScannerSheet({
                 disabled={!ocrAvailable}
                 accessibilityRole="button"
               >
-                <Camera size={20} color={ocrAvailable ? accent.color : palette.textMuted} />
+                <Camera size={20} color={ocrAvailable ? colors.color : colors.textMuted} />
                 <Text style={[styles.photoBtnText, !ocrAvailable && styles.photoBtnTextDisabled]}>
                   {photos.length === 0 ? t('scanner.takePhoto') : t('scanner.addPage')}
                 </Text>
@@ -242,7 +241,7 @@ export function ScannerSheet({
                 disabled={!ocrAvailable}
                 accessibilityRole="button"
               >
-                <Images size={20} color={ocrAvailable ? accent.color : palette.textMuted} />
+                <Images size={20} color={ocrAvailable ? colors.color : colors.textMuted} />
                 <Text style={[styles.photoBtnText, !ocrAvailable && styles.photoBtnTextDisabled]}>
                   {t('scanner.choosePhoto')}
                 </Text>
@@ -258,7 +257,7 @@ export function ScannerSheet({
               accessibilityRole="button"
             >
               {analyzing ? (
-                <ActivityIndicator color={accent.onFill} size="small" />
+                <ActivityIndicator color={colors.onFill} size="small" />
               ) : (
                 <Text style={styles.analyzeBtnText}>{t('scanner.analyze')}</Text>
               )}
@@ -290,7 +289,7 @@ export function ScannerSheet({
                   onPress={addManually}
                   accessibilityRole="button"
                 >
-                  <Plus size={16} color={accent.color} />
+                  <Plus size={16} color={colors.color} />
                   <Text style={styles.addManuallyText}>{t('scanner.addManually')}</Text>
                 </Pressable>
               }
@@ -324,6 +323,7 @@ function PlayerResultRow({
   onLastNameChange: (v: string) => void;
   onFirstNameChange: (v: string) => void;
 }) {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   return (
@@ -343,7 +343,7 @@ function PlayerResultRow({
             value={player.lastName}
             onChangeText={onLastNameChange}
             placeholder={t('player.lastName')}
-            placeholderTextColor={palette.textMuted}
+            placeholderTextColor={colors.textMuted}
             accessibilityLabel={t('player.lastName')}
             autoCapitalize="words"
             editable={player.isSelected}
@@ -353,7 +353,7 @@ function PlayerResultRow({
             value={player.firstName}
             onChangeText={onFirstNameChange}
             placeholder={t('player.firstName')}
-            placeholderTextColor={palette.textMuted}
+            placeholderTextColor={colors.textMuted}
             accessibilityLabel={t('player.firstName')}
             autoCapitalize="words"
             editable={player.isSelected}
@@ -368,7 +368,7 @@ function PlayerResultRow({
       <TextInput
         style={[styles.numberInput, !player.isSelected && styles.numberInputDimmed]}
         placeholder="#"
-        placeholderTextColor={palette.textMuted}
+        placeholderTextColor={colors.textMuted}
         keyboardType="number-pad"
         maxLength={2}
         value={player.number !== null ? String(player.number) : ''}
@@ -379,21 +379,21 @@ function PlayerResultRow({
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
+    borderBottomColor: a.backgroundElevated,
   },
   title: {
     flex: 1,
     fontSize: 17,
     fontFamily: 'Inter_700Bold',
-    color: palette.textPrimary,
+    color: a.textPrimary,
   },
   closeBtn: { padding: 4 },
 
@@ -401,14 +401,14 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     margin: 16,
     padding: 12,
     borderRadius: 10,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderWidth: 1,
-    borderColor: palette.warning + '40',
+    borderColor: a.warning + '40',
   },
   notAvailableText: {
     fontSize: 13,
     fontFamily: 'Inter_500Medium',
-    color: palette.warning,
+    color: a.warning,
     textAlign: 'center',
   },
 
@@ -428,7 +428,7 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: palette.error,
+    backgroundColor: a.error,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -440,9 +440,9 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     gap: 10,
     padding: 14,
     borderRadius: 12,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
   },
   photoBtnDisabled: { opacity: 0.4 },
   photoBtnText: {
@@ -450,7 +450,7 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     fontFamily: 'Inter_500Medium',
     color: a.color,
   },
-  photoBtnTextDisabled: { color: palette.textMuted },
+  photoBtnTextDisabled: { color: a.textMuted },
 
   spacer: { flex: 1 },
 
@@ -471,7 +471,7 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   detectedCount: {
     fontSize: 13,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textMuted,
+    color: a.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.6,
     paddingHorizontal: 20,
@@ -487,14 +487,14 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     gap: 10,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
+    borderBottomColor: a.backgroundElevated,
   },
   checkbox: {
     width: 22,
     height: 22,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: palette.textMuted,
+    borderColor: a.textMuted,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -510,33 +510,33 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     minHeight: 36,
     paddingHorizontal: 8,
     borderRadius: 8,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
-    color: palette.textPrimary,
+    borderColor: a.backgroundElevated,
+    color: a.textPrimary,
     fontFamily: 'Inter_500Medium',
     fontSize: 14,
   },
   playerName: {
     fontSize: 15,
     fontFamily: 'Inter_500Medium',
-    color: palette.textPrimary,
+    color: a.textPrimary,
   },
   licenseText: {
     fontSize: 11,
     fontFamily: 'Inter_400Regular',
-    color: palette.textMuted,
+    color: a.textMuted,
     marginTop: 1,
   },
-  playerNameDimmed: { color: palette.textMuted },
+  playerNameDimmed: { color: a.textMuted },
   numberInput: {
     width: 44,
     height: 36,
     borderRadius: 8,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
-    color: palette.textPrimary,
+    borderColor: a.backgroundElevated,
+    color: a.textPrimary,
     fontFamily: 'Inter_600SemiBold',
     fontSize: 14,
     textAlign: 'center',
@@ -561,19 +561,19 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     gap: 12,
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: palette.backgroundElevated,
+    borderTopColor: a.backgroundElevated,
   },
   cancelBtn: {
     flex: 1,
     padding: 14,
     borderRadius: 12,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     alignItems: 'center',
   },
   cancelBtnText: {
     fontSize: 15,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textSecondary,
+    color: a.textSecondary,
   },
   importBtn: {
     flex: 2,

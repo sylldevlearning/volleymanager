@@ -587,16 +587,11 @@
     "replayHelp": "Hilfe erneut zeigen",
     "privacyOptions": "Datenschutzeinstellungen",
     "languageSystem": "Sprache des Handys ({{name}})",
-    "accentTitle": "Hauptfarbe",
-    "accentColors": {
-      "red": "Rot",
-      "blue": "Blau",
-      "violet": "Violett",
-      "pink": "Pink",
-      "green": "Grün",
-      "teal": "Petrol",
-      "orange": "Orange",
-      "gold": "Gold"
+    "appearance": {
+      "title": "Erscheinungsbild",
+      "system": "Automatisch (wie das Handy)",
+      "light": "Hell",
+      "dark": "Dunkel"
     }
   },
   "scoring": {

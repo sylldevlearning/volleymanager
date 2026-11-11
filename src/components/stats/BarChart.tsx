@@ -1,5 +1,6 @@
 import React from 'react';
 import Svg, { Rect, Text as SvgText, G } from 'react-native-svg';
+import { useAppTheme } from '../../theme/useAppTheme';
 
 interface BarItem {
   label: string;
@@ -15,6 +16,7 @@ interface BarChartProps {
 }
 
 export function BarChart({ data, height = 110, defaultColor = '#1D4ED8', maxValue }: BarChartProps) {
+  const colors = useAppTheme();
   const svgW = 280;
   const svgH = height;
   const padH = 4;
@@ -72,7 +74,7 @@ export function BarChart({ data, height = 110, defaultColor = '#1D4ED8', maxValu
               y={padTop + chartH + 14}
               textAnchor="middle"
               fontSize={9}
-              fill="rgba(139,148,158,0.8)"
+              fill={colors.textSecondary}
             >
               {item.label}
             </SvgText>

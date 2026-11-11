@@ -4,7 +4,6 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CircleAlert, TriangleAlert } from 'lucide-react-native';
-import { palette } from '../../../src/theme/tokens';
 import { QrScanner } from '../../../src/components/qr/QrScanner';
 import { getTournamentBundle, recordTournamentResult, type TournamentBundle } from '../../../src/services/tournamentService';
 import { checkResultQr, decodeResultQr, type ResultCheckError, type ResultQr, type ResultQrError } from '../../../src/features/tournament/matchQr';
@@ -12,10 +11,11 @@ import { evaluateScore, rulesForStage } from '../../../src/features/tournament/e
 import { matchTitle, scoreErrorText, scoreText } from '../../../src/features/tournament/display';
 import { justFinished, resultRoute } from '../../../src/features/tournament/phases';
 import { showFinished } from '../../../src/components/tournament/showFinished';
-import { type AccentTheme, useThemedStyles } from '../../../src/theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../../src/theme/useAppTheme';
 
 /** Organiser: scans the referee's result QR, checks it, then records it like a typed score. */
 export default function ScanResultScreen() {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
@@ -112,7 +112,7 @@ export default function ScanResultScreen() {
       <ScrollView contentContainerStyle={styles.scroll}>
         {shownError && (
           <View style={styles.errorBox}>
-            <CircleAlert size={22} color={palette.error} />
+            <CircleAlert size={22} color={colors.error} />
             <Text style={styles.errorText}>{t(`scanResult.errors.${shownError}`)}</Text>
           </View>
         )}
@@ -147,7 +147,7 @@ export default function ScanResultScreen() {
           <Text style={styles.info}>{t('scanResult.same')}</Text>
         ) : (
           <View style={styles.warning}>
-            <TriangleAlert size={20} color={palette.warning} />
+            <TriangleAlert size={20} color={colors.warning} />
             <Text style={styles.warningText}>
               {t('scanResult.checkWarning')}
               {ready.alreadyPlayed ? `\n${t('scanResult.alreadyPlayed', { score: scoreText(ready.match, t) ?? '' })}` : ''}
@@ -177,39 +177,39 @@ export default function ScanResultScreen() {
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
   scroll: { padding: 16, gap: 16 },
   errorBox: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 10, padding: 14, borderRadius: 12,
     backgroundColor: a.muted,
   },
-  errorText: { flex: 1, fontSize: 15, fontFamily: 'Inter_500Medium', color: palette.textPrimary, lineHeight: 21 },
+  errorText: { flex: 1, fontSize: 15, fontFamily: 'Inter_500Medium', color: a.textPrimary, lineHeight: 21 },
   card: {
     padding: 16, borderRadius: 16,
-    backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundSurface, borderWidth: 1, borderColor: a.backgroundElevated,
   },
-  title: { fontSize: 18, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
+  title: { fontSize: 18, fontFamily: 'Inter_700Bold', color: a.textPrimary },
   headerRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 12, marginTop: 16, marginBottom: 8 },
   teamHead: { flex: 1, alignItems: 'center', gap: 6 },
   dot: { width: 14, height: 14, borderRadius: 7 },
-  teamName: { fontSize: 15, fontFamily: 'Inter_700Bold', color: palette.textPrimary, textAlign: 'center' },
+  teamName: { fontSize: 15, fontFamily: 'Inter_700Bold', color: a.textPrimary, textAlign: 'center' },
   setRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 6 },
-  setLabel: { width: 52, fontSize: 14, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary },
-  setScore: { flex: 1, fontSize: 22, fontFamily: 'Inter_700Bold', color: palette.textPrimary, textAlign: 'center' },
-  winner: { fontSize: 16, fontFamily: 'Inter_700Bold', color: palette.success, marginTop: 12 },
-  error: { fontSize: 14, fontFamily: 'Inter_500Medium', color: palette.error, marginTop: 8, lineHeight: 20 },
+  setLabel: { width: 52, fontSize: 14, fontFamily: 'Inter_600SemiBold', color: a.textSecondary },
+  setScore: { flex: 1, fontSize: 22, fontFamily: 'Inter_700Bold', color: a.textPrimary, textAlign: 'center' },
+  winner: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.success, marginTop: 12 },
+  error: { fontSize: 14, fontFamily: 'Inter_500Medium', color: a.error, marginTop: 8, lineHeight: 20 },
   warning: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 10, padding: 14, borderRadius: 12,
     backgroundColor: 'rgba(245, 158, 11, 0.12)',
   },
-  warningText: { flex: 1, fontSize: 15, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary, lineHeight: 21 },
-  info: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: palette.success, textAlign: 'center' },
-  footer: { padding: 16, gap: 10, borderTopWidth: 1, borderTopColor: palette.backgroundElevated },
+  warningText: { flex: 1, fontSize: 15, fontFamily: 'Inter_600SemiBold', color: a.textPrimary, lineHeight: 21 },
+  info: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: a.success, textAlign: 'center' },
+  footer: { padding: 16, gap: 10, borderTopWidth: 1, borderTopColor: a.backgroundElevated },
   primary: { backgroundColor: a.fill, paddingVertical: 16, borderRadius: 14, alignItems: 'center' },
   primaryText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.onFill },
-  secondary: { paddingVertical: 14, borderRadius: 14, alignItems: 'center', borderWidth: 1, borderColor: palette.backgroundElevated },
-  secondaryText: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },
+  secondary: { paddingVertical: 14, borderRadius: 14, alignItems: 'center', borderWidth: 1, borderColor: a.backgroundElevated },
+  secondaryText: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: a.textPrimary },
   pressed: { opacity: 0.85 },
   disabled: { opacity: 0.5 },
 });

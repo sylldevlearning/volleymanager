@@ -3,7 +3,6 @@ import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleShee
 import { Stack, useNavigation, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { palette } from '../../src/theme/tokens';
 import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
 import { DetailsStep, FormatStep, SummaryStep, TeamsStep } from '../../src/components/tournament/WizardSteps';
 import {
@@ -26,7 +25,7 @@ import {
   saveTemplate,
 } from '../../src/services/tournamentService';
 import type { TournamentTemplate } from '../../src/models/tournament';
-import { type AccentTheme, useThemedStyles } from '../../src/theme/useAccent';
+import { useThemedStyles, type AppTheme } from '../../src/theme/useAppTheme';
 
 const newSeed = () => Math.floor(Math.random() * 2 ** 31);
 
@@ -208,31 +207,31 @@ export default function NewTournamentScreen() {
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
   flex: { flex: 1 },
   progress: { paddingHorizontal: 16, paddingBottom: 8, gap: 8 },
   progressBar: { flexDirection: 'row', gap: 6 },
-  progressSegment: { flex: 1, height: 4, borderRadius: 2, backgroundColor: palette.backgroundElevated },
+  progressSegment: { flex: 1, height: 4, borderRadius: 2, backgroundColor: a.backgroundElevated },
   progressSegmentDone: { backgroundColor: a.fill },
-  progressText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary },
+  progressText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: a.textSecondary },
   scroll: { padding: 16, paddingBottom: 32 },
   errors: { paddingHorizontal: 16, paddingVertical: 10, gap: 2, backgroundColor: 'rgba(248, 81, 73, 0.12)' },
-  errorsTitle: { fontSize: 13, fontFamily: 'Inter_700Bold', color: palette.error, marginBottom: 2 },
-  errorText: { fontSize: 14, fontFamily: 'Inter_500Medium', color: palette.textPrimary, lineHeight: 20 },
-  footer: { flexDirection: 'row', gap: 10, padding: 16, borderTopWidth: 1, borderTopColor: palette.backgroundElevated },
+  errorsTitle: { fontSize: 13, fontFamily: 'Inter_700Bold', color: a.error, marginBottom: 2 },
+  errorText: { fontSize: 14, fontFamily: 'Inter_500Medium', color: a.textPrimary, lineHeight: 20 },
+  footer: { flexDirection: 'row', gap: 10, padding: 16, borderTopWidth: 1, borderTopColor: a.backgroundElevated },
   backButton: {
     paddingVertical: 16, paddingHorizontal: 20, borderRadius: 14, alignItems: 'center',
-    backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundSurface, borderWidth: 1, borderColor: a.backgroundElevated,
   },
-  backText: { fontSize: 16, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },
+  backText: { fontSize: 16, fontFamily: 'Inter_600SemiBold', color: a.textPrimary },
   nextButton: { flex: 1, paddingVertical: 16, borderRadius: 14, alignItems: 'center', backgroundColor: a.fill },
   nextText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.onFill },
   laterButton: {
     flex: 1, paddingVertical: 16, paddingHorizontal: 12, borderRadius: 14, alignItems: 'center', justifyContent: 'center',
-    backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: a.color,
+    backgroundColor: a.backgroundSurface, borderWidth: 1, borderColor: a.color,
   },
-  laterText: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary, textAlign: 'center' },
+  laterText: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: a.textPrimary, textAlign: 'center' },
   launchRow: { flexDirection: 'row', paddingHorizontal: 16, paddingBottom: 16 },
   pressed: { opacity: 0.85 },
   disabled: { opacity: 0.5 },

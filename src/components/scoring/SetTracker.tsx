@@ -1,6 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { palette } from '../../theme/tokens';
-import { type AccentTheme, useThemedStyles } from '../../theme/useAccent';
+import { useThemedStyles, type AppTheme } from '../../theme/useAppTheme';
 
 interface SetScore {
   home: number;
@@ -48,7 +47,7 @@ export function SetTracker({ setScores, currentSetNumber, maxSets }: SetTrackerP
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
+const makeStyles = (a: AppTheme) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     gap: 8,
@@ -60,9 +59,9 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 8,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
     minWidth: 52,
   },
   setSlotActive: {
@@ -70,12 +69,12 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     backgroundColor: a.muted,
   },
   setSlotFinished: {
-    borderColor: palette.backgroundHover,
+    borderColor: a.backgroundHover,
   },
   setLabel: {
     fontSize: 10,
     fontFamily: 'Inter_700Bold',
-    color: palette.textMuted,
+    color: a.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 2,
@@ -83,7 +82,7 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   setScore: {
     fontSize: 11,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textSecondary,
+    color: a.textSecondary,
   },
   dot: {
     width: 6,
@@ -94,6 +93,6 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   },
   dash: {
     fontSize: 12,
-    color: palette.textMuted,
+    color: a.textMuted,
   },
 });

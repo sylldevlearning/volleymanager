@@ -1,5 +1,6 @@
 import React from 'react';
 import Svg, { Polygon, Circle, Line, Text as SvgText } from 'react-native-svg';
+import { useAppTheme } from '../../theme/useAppTheme';
 
 interface RadarMetric {
   label: string;
@@ -13,6 +14,7 @@ interface RadarChartProps {
 }
 
 export function RadarChart({ metrics, size = 160, color = '#1D4ED8' }: RadarChartProps) {
+  const colors = useAppTheme();
   const n = metrics.length;
   if (n < 3) return null;
 
@@ -51,7 +53,7 @@ export function RadarChart({ metrics, size = 160, color = '#1D4ED8' }: RadarChar
           key={level}
           points={polygonPoints(level)}
           fill="none"
-          stroke={level === 1 ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.06)'}
+          stroke={level === 1 ? colors.textPrimary + '26' : colors.textPrimary + '10'}
           strokeWidth={level === 1 ? 1.5 : 1}
         />
       ))}
@@ -63,7 +65,7 @@ export function RadarChart({ metrics, size = 160, color = '#1D4ED8' }: RadarChar
             key={i}
             x1={cx} y1={cy}
             x2={p.x} y2={p.y}
-            stroke="rgba(255,255,255,0.08)"
+            stroke={colors.textPrimary + '14'}
             strokeWidth={1}
           />
         );
@@ -89,7 +91,7 @@ export function RadarChart({ metrics, size = 160, color = '#1D4ED8' }: RadarChar
             y={p.y}
             textAnchor={anchor}
             fontSize={9}
-            fill="rgba(139,148,158,0.9)"
+            fill={colors.textSecondary}
           >
             {m.label}
           </SvgText>

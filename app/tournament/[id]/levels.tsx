@@ -3,9 +3,9 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { palette } from '../../../src/theme/tokens';
 import { getTournamentBundle, type TournamentBundle } from '../../../src/services/tournamentService';
 import { levelsSummary } from '../../../src/features/tournament/phases';
+import { useThemedStyles, type AppTheme } from '../../../src/theme/useAppTheme';
 
 /**
  * "Répartition des niveaux" at the end of the mixing: one colour per level
@@ -13,6 +13,7 @@ import { levelsSummary } from '../../../src/features/tournament/phases';
  * results each time it is shown, so a correction is reflected.
  */
 export default function TournamentLevelsScreen() {
+  const styles = useThemedStyles(makeStyles);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
   const [bundle, setBundle] = useState<TournamentBundle | null>(null);
@@ -50,18 +51,18 @@ export default function TournamentLevelsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
   scroll: { padding: 16, gap: 16, paddingBottom: 32 },
-  hint: { fontSize: 16, fontFamily: 'Inter_400Regular', color: palette.textSecondary, lineHeight: 24, textAlign: 'center', paddingVertical: 40 },
-  card: { borderRadius: 16, borderWidth: 2, overflow: 'hidden', backgroundColor: palette.backgroundSurface },
+  hint: { fontSize: 16, fontFamily: 'Inter_400Regular', color: a.textSecondary, lineHeight: 24, textAlign: 'center', paddingVertical: 40 },
+  card: { borderRadius: 16, borderWidth: 2, overflow: 'hidden', backgroundColor: a.backgroundSurface },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 },
   levelName: { fontSize: 24, fontFamily: 'Inter_900Black', color: '#0D1117' },
   count: { fontSize: 14, fontFamily: 'Inter_700Bold', color: '#0D1117' },
   row: {
     flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 16, paddingVertical: 10,
-    borderTopWidth: 1, borderTopColor: palette.backgroundElevated,
+    borderTopWidth: 1, borderTopColor: a.backgroundElevated,
   },
   place: { width: 30, fontSize: 20, fontFamily: 'Inter_900Black', textAlign: 'center' },
-  team: { flex: 1, fontSize: 22, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
+  team: { flex: 1, fontSize: 22, fontFamily: 'Inter_700Bold', color: a.textPrimary },
 });

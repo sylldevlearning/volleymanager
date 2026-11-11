@@ -4,7 +4,7 @@ import { palette } from '../../theme/tokens';
 import type { PlayerInPosition } from './IndoorCourt';
 import type { MatchFormat } from '../../models/match';
 import { courtSize } from '../../features/match/formatProfile';
-import { useAccent } from '../../theme/useAccent';
+import { useAppTheme } from '../../theme/useAppTheme';
 
 export interface FullCourtSide {
   players: PlayerInPosition[];
@@ -90,7 +90,7 @@ export function smallCourtSlot(size: number, position: number, isLeft: boolean):
 const CIRCLE_RADIUS = 20;
 
 export function FullCourt({ left, right, leftColor, rightColor, width, height, format = 'indoor_6v6' }: FullCourtProps) {
-  const accent = useAccent();
+  const colors = useAppTheme();
   const pad = 10;
   const courtW = width - pad * 2;
   const courtH = height - pad * 2;
@@ -131,18 +131,18 @@ export function FullCourt({ left, right, leftColor, rightColor, width, height, f
             cx={cx}
             cy={cy}
             r={r}
-            fill={player ? (player.isLibero ? liberoColor + '40' : color + '30') : palette.backgroundHover}
-            stroke={isServing ? accent.color : player ? (player.isLibero ? liberoColor : color) : palette.backgroundHover}
+            fill={player ? (player.isLibero ? liberoColor + '40' : color + '30') : colors.backgroundHover}
+            stroke={isServing ? colors.color : player ? (player.isLibero ? liberoColor : color) : colors.backgroundHover}
             strokeWidth={isServing ? 2.5 : 1.5}
             strokeDasharray={player?.isLibero ? '4 2' : undefined}
           />
           <SvgText
             x={cx} y={cy + 1} textAnchor="middle" alignmentBaseline="middle"
-            fontSize={12} fontWeight="700" fill={player ? palette.textPrimary : palette.textMuted}
+            fontSize={12} fontWeight="700" fill={player ? colors.textPrimary : colors.textMuted}
           >
             {player ? player.number : `P${pos}`}
           </SvgText>
-          {isServing && <Circle cx={cx} cy={cy - r - 7} r={4} fill={accent.color} />}
+          {isServing && <Circle cx={cx} cy={cy - r - 7} r={4} fill={colors.color} />}
           {player?.isLibero && (
             <G>
               <Circle cx={cx + r - 4} cy={cy - r + 4} r={6} fill="#E63946" />
@@ -151,7 +151,7 @@ export function FullCourt({ left, right, leftColor, rightColor, width, height, f
           )}
           {player?.isCaptain && (
             <G>
-              <Circle cx={cx - r + 4} cy={cy - r + 4} r={6} fill={palette.warning} />
+              <Circle cx={cx - r + 4} cy={cy - r + 4} r={6} fill={colors.warning} />
               <SvgText x={cx - r + 4} y={cy - r + 5} textAnchor="middle" alignmentBaseline="middle" fontSize={7} fontWeight="700" fill="#0D1117">C</SvgText>
             </G>
           )}
@@ -163,9 +163,9 @@ export function FullCourt({ left, right, leftColor, rightColor, width, height, f
   return (
     <View style={[styles.container, { width, height }]}>
       <Svg width={width} height={height}>
-        <Rect x={pad} y={pad} width={courtW} height={courtH} fill={palette.backgroundElevated} rx={8} />
+        <Rect x={pad} y={pad} width={courtW} height={courtH} fill={colors.backgroundElevated} rx={8} />
         {/* Net — vertical line down the middle */}
-        <Line x1={pad + halfW} y1={pad} x2={pad + halfW} y2={pad + courtH} stroke={palette.textSecondary} strokeWidth={2} />
+        <Line x1={pad + halfW} y1={pad} x2={pad + halfW} y2={pad + courtH} stroke={colors.textSecondary} strokeWidth={2} />
         {renderSide(left, true, leftColor)}
         {renderSide(right, false, rightColor)}
       </Svg>

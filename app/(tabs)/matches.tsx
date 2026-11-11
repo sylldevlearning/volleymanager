@@ -11,10 +11,9 @@ import { getAllTeams } from '../../src/services/teamService';
 import type { Match } from '../../src/models/match';
 import type { Team } from '../../src/models/team';
 import { useResponsive } from '../../src/hooks/useResponsive';
-import { palette } from '../../src/theme/tokens';
 import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
 import { AdBanner } from '../../src/components/ads/AdBanner';
-import { type AccentTheme, useAccent, useThemedStyles } from '../../src/theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../src/theme/useAppTheme';
 
 type StatusFilter = 'all' | 'live' | 'finished';
 
@@ -26,7 +25,7 @@ const FORMAT_LABELS: Record<Match['format'], string> = {
 };
 
 export default function MatchesScreen() {
-  const accent = useAccent();
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const router = useRouter();
@@ -159,12 +158,12 @@ export default function MatchesScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={refresh}
-            tintColor={accent.color}
+            tintColor={colors.color}
           />
         }
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Calendar size={48} color={palette.textMuted} strokeWidth={1} />
+            <Calendar size={48} color={colors.textMuted} strokeWidth={1} />
             <Text style={styles.emptyTitle}>{t('history.noMatches')}</Text>
             <Text style={styles.emptyDesc}>{t('history.noMatchesDesc')}</Text>
           </View>
@@ -194,7 +193,7 @@ export default function MatchesScreen() {
         accessibilityLabel={t('match.new')}
         accessibilityRole="button"
       >
-        <Plus size={26} color={accent.onFill} />
+        <Plus size={26} color={colors.onFill} />
       </Pressable>
     </SafeAreaView>
   );
@@ -289,15 +288,15 @@ function MatchCard({
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
 
   filterBarRow: {
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
-    backgroundColor: palette.backgroundSurface,
+    borderBottomColor: a.backgroundElevated,
+    backgroundColor: a.backgroundSurface,
     paddingRight: 12,
   },
   filterBar: {
@@ -317,7 +316,7 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     borderWidth: 1,
     borderColor: 'transparent',
   },
@@ -326,19 +325,19 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     borderColor: a.color + '60',
   },
   chipTeamActive: {
-    backgroundColor: palette.backgroundHover,
-    borderColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundHover,
+    borderColor: a.backgroundElevated,
   },
   chipText: {
     fontSize: 12,
     fontFamily: 'Inter_500Medium',
-    color: palette.textSecondary,
+    color: a.textSecondary,
   },
   chipTextActive: { color: a.color },
   chipDivider: {
     width: 1,
     height: 20,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     marginHorizontal: 2,
   },
   teamDot: { width: 7, height: 7, borderRadius: 3.5 },
@@ -352,19 +351,19 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     paddingTop: 80,
     gap: 12,
   },
-  emptyTitle: { fontSize: 18, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary },
-  emptyDesc: { fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textMuted },
+  emptyTitle: { fontSize: 18, fontFamily: 'Inter_600SemiBold', color: a.textSecondary },
+  emptyDesc: { fontSize: 14, fontFamily: 'Inter_400Regular', color: a.textMuted },
   card: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
   },
   cardPressed: { opacity: 0.8 },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
-  cardDate: { fontSize: 12, fontFamily: 'Inter_400Regular', color: palette.textMuted, flex: 1 },
-  cardFormat: { fontSize: 11, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
+  cardDate: { fontSize: 12, fontFamily: 'Inter_400Regular', color: a.textMuted, flex: 1 },
+  cardFormat: { fontSize: 11, fontFamily: 'Inter_500Medium', color: a.textSecondary },
   liveBadge: {
     backgroundColor: a.color + '30',
     paddingHorizontal: 6,
@@ -380,30 +379,30 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textPrimary,
+    color: a.textPrimary,
   },
   teamNameAway: { textAlign: 'right' },
-  vs: { fontSize: 12, fontFamily: 'Inter_500Medium', color: palette.textMuted },
+  vs: { fontSize: 12, fontFamily: 'Inter_500Medium', color: a.textMuted },
   cardActions: {
     flexDirection: 'row',
     gap: 8,
     marginTop: 12,
     paddingTop: 10,
     borderTopWidth: 1,
-    borderTopColor: palette.backgroundElevated,
+    borderTopColor: a.backgroundElevated,
   },
   actionBtn: {
     flex: 1,
     paddingVertical: 7,
     borderRadius: 8,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     alignItems: 'center',
     justifyContent: 'center',
   },
   actionBtnText: {
     fontSize: 12,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textSecondary,
+    color: a.textSecondary,
   },
   fab: {
     position: 'absolute',

@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { palette } from '../../theme/tokens';
+import { useThemedStyles, type AppTheme } from '../../theme/useAppTheme';
 
 interface InfoTooltipProps {
   textKey: string;
 }
 
 export function InfoTooltip({ textKey }: InfoTooltipProps) {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
 
@@ -43,19 +44,19 @@ export function InfoTooltip({ textKey }: InfoTooltipProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AppTheme) => StyleSheet.create({
   btn: {
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#21262D',
+    backgroundColor: a.backgroundElevated,
     alignItems: 'center',
     justifyContent: 'center',
   },
   btnText: {
     fontSize: 12,
     fontFamily: 'Inter_700Bold',
-    color: '#8B949E',
+    color: a.textSecondary,
     lineHeight: 14,
   },
   overlay: {
@@ -67,7 +68,7 @@ const styles = StyleSheet.create({
     paddingRight: 16,
   },
   popup: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderRadius: 12,
     padding: 16,
     maxWidth: 280,
@@ -75,7 +76,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
-    color: '#F0F6FC',
+    color: a.textPrimary,
     lineHeight: 20,
   },
 });

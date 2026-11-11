@@ -6,7 +6,6 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Volleyball, Users, History, ChevronRight, Zap, Whistle, Trophy } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { palette } from '../../src/theme/tokens';
 import { COMPANY, ADMOB_IDS } from '../../src/utils/constants';
 import { TacticalBoard } from '../../src/components/tactical/TacticalBoard';
 import { TacticalBoardIcon } from '../../src/components/ui/TacticalBoardIcon';
@@ -14,10 +13,11 @@ import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
 import { AdBanner } from '../../src/components/ads/AdBanner';
 import { getInProgressAdHocMatch, updateMatchStatus } from '../../src/services/matchService';
 import { createQuickMatch } from '../../src/services/quickMatchService';
-import { useAccent } from '../../src/theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../src/theme/useAppTheme';
 
 export default function HomeScreen() {
-  const accent = useAccent();
+  const colors = useAppTheme();
+  const styles = useThemedStyles(makeStyles);
   const router = useRouter();
   const { t } = useTranslation();
   const [showTactical, setShowTactical] = useState(false);
@@ -65,7 +65,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={palette.background} />
+      <StatusBar barStyle={colors.statusBar} backgroundColor={colors.background} />
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
@@ -86,14 +86,14 @@ export default function HomeScreen() {
           accessibilityRole="button"
         >
           {creatingQuickMatch
-            ? <ActivityIndicator color={palette.success} size="small" />
-            : <Zap size={26} color={palette.success} strokeWidth={1.5} />
+            ? <ActivityIndicator color={colors.success} size="small" />
+            : <Zap size={26} color={colors.success} strokeWidth={1.5} />
           }
           <View style={styles.quickMatchContent}>
             <Text style={styles.quickMatchTitle}>{t('home.quickMatch')}</Text>
             <Text style={styles.quickMatchDesc}>{t('home.quickMatchDesc')}</Text>
           </View>
-          {!creatingQuickMatch && <ChevronRight size={20} color={palette.textMuted} />}
+          {!creatingQuickMatch && <ChevronRight size={20} color={colors.textMuted} />}
         </Pressable>
 
         {/* New Match CTA */}
@@ -103,11 +103,11 @@ export default function HomeScreen() {
           accessibilityLabel={t('home.newMatch')}
           accessibilityRole="button"
         >
-          <Volleyball size={26} color={accent.color} strokeWidth={1.5} />
+          <Volleyball size={26} color={colors.color} strokeWidth={1.5} />
           <View style={styles.ctaContent}>
             <Text style={styles.ctaText}>{t('home.newMatch')}</Text>
           </View>
-          <ChevronRight size={20} color={palette.textMuted} />
+          <ChevronRight size={20} color={colors.textMuted} />
         </Pressable>
 
         {/* Arbitrage CTA — standalone match, teams entered freely */}
@@ -117,12 +117,12 @@ export default function HomeScreen() {
           accessibilityLabel={t('home.arbitrage')}
           accessibilityRole="button"
         >
-          <Whistle size={26} color={palette.accentSecondary} strokeWidth={1.5} />
+          <Whistle size={26} color={colors.accentSecondary} strokeWidth={1.5} />
           <View style={styles.arbitrageContent}>
             <Text style={styles.arbitrageTitle}>{t('home.arbitrage')}</Text>
             <Text style={styles.arbitrageDesc}>{t('home.arbitrageDesc')}</Text>
           </View>
-          <ChevronRight size={20} color={palette.textMuted} />
+          <ChevronRight size={20} color={colors.textMuted} />
         </Pressable>
 
         {/* Tournament CTA */}
@@ -132,12 +132,12 @@ export default function HomeScreen() {
           accessibilityLabel={t('home.tournament')}
           accessibilityRole="button"
         >
-          <Trophy size={26} color={palette.warning} strokeWidth={1.5} />
+          <Trophy size={26} color={colors.warning} strokeWidth={1.5} />
           <View style={styles.arbitrageContent}>
             <Text style={styles.arbitrageTitle}>{t('home.tournament')}</Text>
             <Text style={styles.arbitrageDesc}>{t('home.tournamentDesc')}</Text>
           </View>
-          <ChevronRight size={20} color={palette.textMuted} />
+          <ChevronRight size={20} color={colors.textMuted} />
         </Pressable>
 
         {/* Tactical Board CTA */}
@@ -152,19 +152,19 @@ export default function HomeScreen() {
             <Text style={styles.tacticalTitle}>{t('tactical.title')}</Text>
             <Text style={styles.tacticalDesc}>{t('home.tacticalDesc')}</Text>
           </View>
-          <ChevronRight size={20} color={palette.textMuted} />
+          <ChevronRight size={20} color={colors.textMuted} />
         </Pressable>
 
         {/* Quick Links */}
         <View style={styles.quickLinks}>
           <QuickLink
-            icon={<Users size={20} color={palette.textSecondary} />}
+            icon={<Users size={20} color={colors.textSecondary} />}
             label={t('home.myTeams')}
             onPress={() => router.push('/(tabs)/teams')}
           />
           <View style={styles.divider} />
           <QuickLink
-            icon={<History size={20} color={palette.textSecondary} />}
+            icon={<History size={20} color={colors.textSecondary} />}
             label={t('home.history')}
             onPress={() => router.push('/(tabs)/matches')}
           />
@@ -192,6 +192,8 @@ function QuickLink({
   label: string;
   onPress: () => void;
 }) {
+  const colors = useAppTheme();
+  const styles = useThemedStyles(makeStyles);
   return (
     <Pressable
       style={({ pressed }) => [styles.quickLink, pressed && styles.quickLinkPressed]}
@@ -200,15 +202,15 @@ function QuickLink({
     >
       {icon}
       <Text style={styles.quickLinkLabel}>{label}</Text>
-      <ChevronRight size={16} color={palette.textMuted} />
+      <ChevronRight size={16} color={colors.textMuted} />
     </Pressable>
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AppTheme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: palette.background,
+    backgroundColor: a.background,
   },
   scroll: {
     paddingHorizontal: 20,
@@ -232,81 +234,81 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontFamily: 'Inter_900Black',
-    color: palette.textPrimary,
+    color: a.textPrimary,
     letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 15,
     fontFamily: 'Inter_400Regular',
-    color: palette.textSecondary,
+    color: a.textSecondary,
     marginTop: 6,
   },
   quickMatchButton: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
     padding: 16,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
     marginBottom: 12,
   },
   quickMatchButtonPressed: {
     opacity: 0.8,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
   },
   quickMatchContent: {
     flex: 1,
   },
   quickMatchTitle: {
-    color: palette.textPrimary,
+    color: a.textPrimary,
     fontSize: 15,
     fontFamily: 'Inter_600SemiBold',
     marginBottom: 3,
   },
   quickMatchDesc: {
-    color: palette.textSecondary,
+    color: a.textSecondary,
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
   },
   ctaButton: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
     padding: 16,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
     marginBottom: 16,
   },
   ctaButtonPressed: {
     opacity: 0.8,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
   },
   ctaContent: {
     flex: 1,
   },
   ctaText: {
-    color: palette.textPrimary,
+    color: a.textPrimary,
     fontSize: 15,
     fontFamily: 'Inter_600SemiBold',
   },
   arbitrageButton: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
     padding: 16,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
     marginBottom: 16,
   },
   arbitrageButtonPressed: {
     opacity: 0.8,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
   },
   arbitrageContent: {
     flex: 1,
@@ -314,28 +316,28 @@ const styles = StyleSheet.create({
   arbitrageTitle: {
     fontSize: 15,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textPrimary,
+    color: a.textPrimary,
     marginBottom: 3,
   },
   arbitrageDesc: {
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
-    color: palette.textSecondary,
+    color: a.textSecondary,
   },
   tacticalButton: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
     padding: 16,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#2A3F2A',
+    borderColor: a.success + '40',
     marginBottom: 16,
   },
   tacticalButtonPressed: {
     opacity: 0.8,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
   },
   tacticalContent: {
     flex: 1,
@@ -343,19 +345,19 @@ const styles = StyleSheet.create({
   tacticalTitle: {
     fontSize: 15,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textPrimary,
+    color: a.textPrimary,
     marginBottom: 3,
   },
   tacticalDesc: {
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
-    color: palette.textSecondary,
+    color: a.textSecondary,
   },
   quickLinks: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
     overflow: 'hidden',
   },
   quickLink: {
@@ -366,24 +368,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   quickLinkPressed: {
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
   },
   quickLinkLabel: {
     flex: 1,
     fontSize: 15,
     fontFamily: 'Inter_500Medium',
-    color: palette.textPrimary,
+    color: a.textPrimary,
   },
   divider: {
     height: 1,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     marginLeft: 16,
   },
   footer: {
     marginTop: 24,
     fontSize: 12,
     fontFamily: 'Inter_400Regular',
-    color: palette.textMuted,
+    color: a.textMuted,
     textAlign: 'center',
   },
 });

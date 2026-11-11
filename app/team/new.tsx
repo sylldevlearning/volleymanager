@@ -12,8 +12,7 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { createTeam } from '../../src/services/teamService';
-import { palette } from '../../src/theme/tokens';
-import { type AccentTheme, useThemedStyles } from '../../src/theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../src/theme/useAppTheme';
 
 const PRESET_COLORS = [
   '#1D4ED8', '#E63946', '#2EA043', '#F59E0B',
@@ -21,6 +20,7 @@ const PRESET_COLORS = [
 ];
 
 export default function NewTeamScreen() {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const router = useRouter();
@@ -59,7 +59,7 @@ export default function NewTeamScreen() {
             value={name}
             onChangeText={setName}
             placeholder="Ex: Volley Club Paris"
-            placeholderTextColor={palette.textMuted}
+            placeholderTextColor={colors.textMuted}
             maxLength={60}
             autoFocus
             accessibilityLabel={t('team.name')}
@@ -72,7 +72,7 @@ export default function NewTeamScreen() {
             value={shortName}
             onChangeText={setShortName}
             placeholder="Ex: VCP"
-            placeholderTextColor={palette.textMuted}
+            placeholderTextColor={colors.textMuted}
             maxLength={6}
             autoCapitalize="characters"
             accessibilityLabel={t('team.shortName')}
@@ -131,29 +131,29 @@ function FormField({
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
   scroll: { padding: 20, gap: 0, paddingBottom: 40 },
   field: { marginBottom: 20 },
   fieldLabel: {
     fontSize: 13,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textSecondary,
+    color: a.textSecondary,
     marginBottom: 8,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   required: { color: a.color },
   input: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 13,
     fontSize: 15,
     fontFamily: 'Inter_400Regular',
-    color: palette.textPrimary,
+    color: a.textPrimary,
   },
   colorGrid: { flexDirection: 'row', gap: 12, flexWrap: 'wrap' },
   colorSwatch: {
@@ -164,7 +164,7 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     borderColor: 'transparent',
   },
   colorSwatchActive: {
-    borderColor: palette.textPrimary,
+    borderColor: a.textPrimary,
     transform: [{ scale: 1.1 }],
   },
   saveButton: {

@@ -1,7 +1,7 @@
 import { StyleSheet, Text, Pressable } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useSettingsStore } from '../../stores/settingsStore';
-import { palette } from '../../theme/tokens';
+import { useAppTheme } from '../../theme/useAppTheme';
 
 type StatVariant = 'success' | 'error' | 'warning' | 'neutral';
 
@@ -13,30 +13,14 @@ interface StatButtonProps {
   onPress: () => void;
 }
 
-const VARIANT_COLORS: Record<StatVariant, string> = {
-  success: palette.success,
-  error: palette.error,
-  warning: palette.warning,
-  neutral: palette.info,
-};
-
-const VARIANT_BG: Record<StatVariant, string> = {
-  success: palette.success + '18',
-  error: palette.error + '28',
-  warning: palette.warning + '18',
-  neutral: palette.info + '18',
-};
-
-const VARIANT_BORDER: Record<StatVariant, string> = {
-  success: palette.success + '50',
-  error: palette.error + '80',
-  warning: palette.warning + '50',
-  neutral: palette.info + '50',
-};
+const variantKey = { success: 'success', error: 'error', warning: 'warning', neutral: 'info' } as const;
 
 export function StatButton({ label, emoji, variant = 'neutral', count = 0, onPress }: StatButtonProps) {
   const hapticsEnabled = useSettingsStore((s) => s.hapticsEnabled);
-  const color = VARIANT_COLORS[variant];
+  const color = useAppTheme()[variantKey[variant]];
+  // Tint and border from the same colour (error a bit stronger)
+  const bg = color + (variant === 'error' ? '28' : '18');
+  const border = color + (variant === 'error' ? '80' : '50');
 
   const handlePress = () => {
     if (hapticsEnabled) Haptics.selectionAsync();
@@ -47,7 +31,7 @@ export function StatButton({ label, emoji, variant = 'neutral', count = 0, onPre
     <Pressable
       style={({ pressed }) => [
         styles.button,
-        { borderColor: VARIANT_BORDER[variant], backgroundColor: VARIANT_BG[variant] },
+        { borderColor: border, backgroundColor: bg },
         pressed && styles.buttonPressed,
       ]}
       onPress={handlePress}

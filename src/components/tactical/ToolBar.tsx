@@ -2,8 +2,7 @@ import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { TacticalTool, ArrowThickness } from '../../models/tactical';
-import { palette } from '../../theme/tokens';
-import { type AccentTheme, useThemedStyles } from '../../theme/useAccent';
+import { useThemedStyles, type AppTheme } from '../../theme/useAppTheme';
 
 interface ToolBarProps {
   selectedTool: TacticalTool;
@@ -150,13 +149,13 @@ export function ToolBar({
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
+const makeStyles = (a: AppTheme) => StyleSheet.create({
   container: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderTopWidth: 1,
-    borderTopColor: palette.backgroundElevated,
+    borderTopColor: a.backgroundElevated,
   },
   toolsRow: {
     flexDirection: 'row',
@@ -170,7 +169,7 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 6,
     borderRadius: 10,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     minWidth: 44,
   },
   toolBtnActive: {
@@ -185,7 +184,7 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   toolLabel: {
     fontSize: 9,
     fontFamily: 'Inter_500Medium',
-    color: palette.textMuted,
+    color: a.textMuted,
     marginTop: 2,
   },
   toolLabelActive: {
@@ -195,7 +194,7 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 9,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -204,10 +203,10 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   },
   undoIcon: {
     fontSize: 18,
-    color: '#8B949E',
+    color: a.textMuted,
   },
   undoIconActive: {
-    color: '#FFFFFF',
+    color: a.textPrimary,
   },
   groupBtn: {
     height: 36,
@@ -232,15 +231,15 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 6,
     borderRadius: 10,
-    backgroundColor: palette.accentSecondary + '20',
+    backgroundColor: a.accentSecondary + '20',
     borderWidth: 1,
-    borderColor: palette.accentSecondary + '50',
+    borderColor: a.accentSecondary + '50',
   },
   syncBtnIcon: { fontSize: 16 },
   syncBtnText: {
     fontSize: 9,
     fontFamily: 'Inter_500Medium',
-    color: palette.accentSecondary,
+    color: a.accentSecondary,
     marginTop: 2,
   },
   applyBtn: {
@@ -249,14 +248,14 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 6,
     borderRadius: 10,
-    backgroundColor: palette.success + '20',
+    backgroundColor: a.success + '20',
     borderWidth: 1,
-    borderColor: palette.success + '50',
+    borderColor: a.success + '50',
   },
   applyBtnText: {
     fontSize: 9,
     fontFamily: 'Inter_500Medium',
-    color: palette.success,
+    color: a.success,
     marginTop: 2,
   },
   clearBtn: {
@@ -265,15 +264,15 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 6,
     borderRadius: 10,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     borderWidth: 1,
-    borderColor: palette.error + '30',
+    borderColor: a.error + '30',
   },
   clearBtnIcon: { fontSize: 16 },
   clearBtnText: {
     fontSize: 9,
     fontFamily: 'Inter_500Medium',
-    color: palette.error,
+    color: a.error,
     marginTop: 2,
   },
 });

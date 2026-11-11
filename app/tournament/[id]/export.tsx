@@ -8,7 +8,6 @@ import * as Sharing from 'expo-sharing';
 import { File, Paths } from 'expo-file-system';
 import { captureRef } from 'react-native-view-shot';
 import { Share2 } from 'lucide-react-native';
-import { palette } from '../../../src/theme/tokens';
 import { Chip } from '../../../src/components/tournament/WizardSteps';
 import { ExportView } from '../../../src/components/tournament/ExportView';
 import { getTournamentBundle, type TournamentBundle } from '../../../src/services/tournamentService';
@@ -21,7 +20,7 @@ import {
   type ExportContent,
   type ExportFormat,
 } from '../../../src/features/tournament/exportDoc';
-import { type AccentTheme, useAccent, useThemedStyles } from '../../../src/theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../../src/theme/useAppTheme';
 
 /** Gives the shared file a readable name (mail attachment, Drive…). */
 async function renamed(uri: string, name: string): Promise<string> {
@@ -33,8 +32,8 @@ async function renamed(uri: string, name: string): Promise<string> {
 
 /** Export of the tournament: content and format, then the phone's share sheet. */
 export default function TournamentExportScreen() {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
-  const accent = useAccent();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t, i18n } = useTranslation();
   const lang = i18n.language;
@@ -127,12 +126,12 @@ export default function TournamentExportScreen() {
         >
           {busy ? (
             <>
-              <ActivityIndicator color={accent.onFill} />
+              <ActivityIndicator color={colors.onFill} />
               <Text style={styles.primaryText}>{t('tournament.export.preparing')}</Text>
             </>
           ) : (
             <>
-              <Share2 size={18} color={accent.onFill} />
+              <Share2 size={18} color={colors.onFill} />
               <Text style={styles.primaryText}>{t('tournament.export.share')}</Text>
             </>
           )}
@@ -142,16 +141,16 @@ export default function TournamentExportScreen() {
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
   choices: { padding: 16, paddingBottom: 8, gap: 8 },
-  label: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary },
+  label: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: a.textSecondary },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  hint: { fontSize: 13, fontFamily: 'Inter_400Regular', color: palette.textSecondary, lineHeight: 18 },
-  warning: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: palette.warning, lineHeight: 18 },
+  hint: { fontSize: 13, fontFamily: 'Inter_400Regular', color: a.textSecondary, lineHeight: 18 },
+  warning: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: a.warning, lineHeight: 18 },
   preview: { flex: 1, marginHorizontal: 16, borderRadius: 12, backgroundColor: '#FFFFFF' },
   previewContent: { backgroundColor: '#FFFFFF' },
-  footer: { padding: 16, borderTopWidth: 1, borderTopColor: palette.backgroundElevated },
+  footer: { padding: 16, borderTopWidth: 1, borderTopColor: a.backgroundElevated },
   primary: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     backgroundColor: a.fill, paddingVertical: 16, borderRadius: 14,

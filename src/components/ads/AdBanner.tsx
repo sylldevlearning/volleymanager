@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native';
-import { palette } from '../../theme/tokens';
 import { getAdsModule, useAdsStore } from '../../features/ads/adsService';
 import { IS_PRODUCTION_BUILD, resolveBannerUnitId } from '../../features/ads/adUnit';
+import { useThemedStyles, type AppTheme } from '../../theme/useAppTheme';
 
 // Real unit IDs come from EAS env vars (see ADMOB_IDS in src/utils/constants.ts).
 interface AdBannerProps {
@@ -10,6 +10,7 @@ interface AdBannerProps {
 
 /** AdMob banner. Renders nothing until consent allows ads, nor in Expo Go. */
 export function AdBanner({ unitId }: AdBannerProps) {
+  const styles = useThemedStyles(makeStyles);
   const canShowAds = useAdsStore((s) => s.canShowAds);
   const ads = getAdsModule();
   if (!canShowAds || !ads) return null;
@@ -24,11 +25,11 @@ export function AdBanner({ unitId }: AdBannerProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AppTheme) => StyleSheet.create({
   container: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderTopWidth: 1,
-    borderTopColor: palette.backgroundElevated,
+    borderTopColor: a.backgroundElevated,
     alignItems: 'center',
   },
 });

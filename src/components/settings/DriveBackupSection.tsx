@@ -1,15 +1,14 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { CloudUpload, Cloud, History, LogOut, Trash2 } from 'lucide-react-native';
-import { palette } from '../../theme/tokens';
-import { useThemedStyles, useAccent, type AccentTheme } from '../../theme/useAccent';
 import { useDriveBackup } from '../../features/backup/useDriveBackup';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../theme/useAppTheme';
 
 /** Settings › Google Drive backup (Android only, optional). */
 export function DriveBackupSection() {
-  const { t } = useTranslation();
-  const accent = useAccent();
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
+  const { t } = useTranslation();
   const drive = useDriveBackup();
 
   return (
@@ -26,8 +25,8 @@ export function DriveBackupSection() {
               accessibilityRole="button"
             >
               {drive.busy
-                ? <ActivityIndicator color={accent.onFill} size="small" />
-                : <Cloud size={18} color={accent.onFill} />}
+                ? <ActivityIndicator color={colors.onFill} size="small" />
+                : <Cloud size={18} color={colors.onFill} />}
               <Text style={styles.primaryText}>{t('backup.connect')}</Text>
             </Pressable>
           </View>
@@ -49,8 +48,8 @@ export function DriveBackupSection() {
                 accessibilityRole="button"
               >
                 {drive.busy
-                  ? <ActivityIndicator color={accent.onFill} size="small" />
-                  : <CloudUpload size={18} color={accent.onFill} />}
+                  ? <ActivityIndicator color={colors.onFill} size="small" />
+                  : <CloudUpload size={18} color={colors.onFill} />}
                 <Text style={styles.primaryText}>{t('backup.backupNow')}</Text>
               </Pressable>
               <Text style={styles.note}>{t('backup.notIncluded')}</Text>
@@ -58,19 +57,19 @@ export function DriveBackupSection() {
             {!!drive.backup && (
               <>
                 <View style={styles.divider} />
-                <Row icon={<History size={20} color={accent.color} />} label={t('backup.restore')} onPress={drive.restore} disabled={drive.busy} />
+                <Row icon={<History size={20} color={colors.color} />} label={t('backup.restore')} onPress={drive.restore} disabled={drive.busy} />
                 <View style={styles.divider} />
                 <Row
-                  icon={<Trash2 size={20} color={palette.error} />}
+                  icon={<Trash2 size={20} color={colors.error} />}
                   label={t('backup.deleteOnline')}
-                  labelColor={palette.error}
+                  labelColor={colors.error}
                   onPress={drive.deleteOnline}
                   disabled={drive.busy}
                 />
               </>
             )}
             <View style={styles.divider} />
-            <Row icon={<LogOut size={20} color={palette.textMuted} />} label={t('backup.disconnect')} onPress={drive.disconnect} disabled={drive.busy} />
+            <Row icon={<LogOut size={20} color={colors.textMuted} />} label={t('backup.disconnect')} onPress={drive.disconnect} disabled={drive.busy} />
           </>
         )}
       </View>
@@ -99,28 +98,28 @@ function Row({ icon, label, labelColor, onPress, disabled }: {
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
+const makeStyles = (a: AppTheme) => StyleSheet.create({
   section: { marginBottom: 20 },
   sectionTitle: {
     fontSize: 12,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textMuted,
+    color: a.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
     marginBottom: 8,
     marginLeft: 4,
   },
   card: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
     overflow: 'hidden',
   },
   body: { padding: 14, gap: 10 },
-  text: { fontSize: 15, fontFamily: 'Inter_400Regular', color: palette.textPrimary },
-  muted: { fontSize: 13, fontFamily: 'Inter_400Regular', color: palette.textSecondary },
-  note: { fontSize: 12, fontFamily: 'Inter_400Regular', color: palette.textSecondary },
+  text: { fontSize: 15, fontFamily: 'Inter_400Regular', color: a.textPrimary },
+  muted: { fontSize: 13, fontFamily: 'Inter_400Regular', color: a.textSecondary },
+  note: { fontSize: 12, fontFamily: 'Inter_400Regular', color: a.textSecondary },
   primary: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -133,8 +132,8 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   },
   primaryText: { fontSize: 15, fontFamily: 'Inter_700Bold', color: a.onFill },
   dimmed: { opacity: 0.6 },
-  divider: { height: 1, backgroundColor: palette.backgroundElevated, marginLeft: 14 },
+  divider: { height: 1, backgroundColor: a.backgroundElevated, marginLeft: 14 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 },
-  rowPressed: { backgroundColor: palette.backgroundElevated },
-  rowLabel: { flex: 1, fontSize: 15, fontFamily: 'Inter_400Regular', color: palette.textPrimary },
+  rowPressed: { backgroundColor: a.backgroundElevated },
+  rowLabel: { flex: 1, fontSize: 15, fontFamily: 'Inter_400Regular', color: a.textPrimary },
 });

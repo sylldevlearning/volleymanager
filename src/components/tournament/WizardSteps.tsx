@@ -4,7 +4,6 @@ import DateTimePicker, { type DateTimePickerEvent } from '@react-native-communit
 import { useTranslation } from 'react-i18next';
 import { formatClock, formatDate, uses12HourClock } from '../../i18n/format';
 import { CalendarDays, ChevronDown, ChevronUp, Clock, Save, Shuffle, Users, X } from 'lucide-react-native';
-import { palette } from '../../theme/tokens';
 import { FormField, Stepper, ToggleRow } from '../ui/FormControls';
 import { TeamLibrarySheet } from './TeamLibrarySheet';
 import { poolName } from '../../features/tournament/engine/pools';
@@ -40,7 +39,7 @@ import type {
   TournamentGameType,
   TournamentTemplate,
 } from '../../models/tournament';
-import { type AccentTheme, useAccent, useThemedStyles } from '../../theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../theme/useAppTheme';
 
 const GAME_TYPES: TournamentGameType[] = ['indoor_6v6', 'indoor_4v4', 'indoor_3v3', 'beach_2v2'];
 const FORMATS: TournamentFormat[] = ['round_robin', 'pools_knockout', 'knockout', 'brassage_levels'];
@@ -121,6 +120,7 @@ function SecondaryButton({ icon, label, onPress, disabled }: { icon: ReactNode; 
  * compact picker in place.
  */
 export function PickerField({ mode, value, label, onPick }: { mode: 'date' | 'time'; value: Date; label: string; onPick: (date: Date) => void }) {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
   const [open, setOpen] = useState(false);
   const Icon = mode === 'date' ? CalendarDays : Clock;
@@ -141,7 +141,7 @@ export function PickerField({ mode, value, label, onPick }: { mode: 'date' | 'ti
     <>
       <Pressable style={[styles.input, styles.pickerButton]} onPress={() => setOpen(true)} accessibilityRole="button" accessibilityLabel={label}>
         <Text style={styles.pickerText}>{mode === 'date' ? formatDate(value, i18n.language) : formatClock(timeFromDate(value), i18n.language)}</Text>
-        <Icon size={18} color={palette.textSecondary} />
+        <Icon size={18} color={colors.textSecondary} />
       </Pressable>
       {open && <DateTimePicker value={value} mode={mode} is24Hour={!uses12HourClock(i18n.language)} onChange={handleChange} />}
     </>
@@ -157,6 +157,7 @@ export function DetailsStep({
   onApplyTemplate: (template: TournamentTemplate) => void;
   onDeleteTemplate: (template: TournamentTemplate) => void;
 }) {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
   const { t, i18n } = useTranslation();
 
@@ -178,7 +179,7 @@ export function DetailsStep({
           value={state.name}
           onChangeText={(name) => onChange({ ...state, name })}
           placeholder={t('tournament.wizard.namePlaceholder')}
-          placeholderTextColor={palette.textMuted}
+          placeholderTextColor={colors.textMuted}
           maxLength={60}
         />
       </FormField>
@@ -194,7 +195,7 @@ export function DetailsStep({
           value={state.location}
           onChangeText={(location) => onChange({ ...state, location })}
           placeholder={t('tournament.wizard.locationPlaceholder')}
-          placeholderTextColor={palette.textMuted}
+          placeholderTextColor={colors.textMuted}
           maxLength={80}
         />
       </FormField>
@@ -238,6 +239,7 @@ const POINT_ROWS: (keyof PointsScale)[] = ['winClear', 'winTight', 'lossTight', 
 const samePoints = (a: PointsScale, b: PointsScale) => POINT_ROWS.every((k) => a[k] === b[k]);
 
 export function FormatStep({ state, onChange }: StepProps) {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
   const { t, i18n } = useTranslation();
   const [advanced, setAdvanced] = useState(false);
@@ -273,7 +275,7 @@ export function FormatStep({ state, onChange }: StepProps) {
 
       <Pressable style={styles.advancedToggle} onPress={() => setAdvanced((v) => !v)} accessibilityRole="button">
         <Text style={styles.advancedText}>{advanced ? t('tournament.wizard.hideAdvanced') : t('tournament.wizard.showAdvanced')}</Text>
-        {advanced ? <ChevronUp size={18} color={palette.info} /> : <ChevronDown size={18} color={palette.info} />}
+        {advanced ? <ChevronUp size={18} color={colors.info} /> : <ChevronDown size={18} color={colors.info} />}
       </Pressable>
 
       {advanced && (
@@ -315,9 +317,9 @@ export function FormatStep({ state, onChange }: StepProps) {
                   <View key={rule} style={styles.orderRow}>
                     <Text style={styles.orderIndex}>{i + 1}</Text>
                     <Text style={styles.orderLabel}>{t(`tournament.tiebreaker.${rule}`)}</Text>
-                    <IconButton icon={<ChevronUp size={18} color={palette.textPrimary} />} label={t('tournament.wizard.moveUp')}
+                    <IconButton icon={<ChevronUp size={18} color={colors.textPrimary} />} label={t('tournament.wizard.moveUp')}
                       onPress={() => moveTiebreaker(rule, -1)} disabled={i === 0} />
-                    <IconButton icon={<ChevronDown size={18} color={palette.textPrimary} />} label={t('tournament.wizard.moveDown')}
+                    <IconButton icon={<ChevronDown size={18} color={colors.textPrimary} />} label={t('tournament.wizard.moveDown')}
                       onPress={() => moveTiebreaker(rule, 1)} disabled={i === state.tiebreakers.length - 1} />
                   </View>
                 ))}
@@ -350,6 +352,7 @@ function durationText(minutes: number, t: (key: string, opts?: Record<string, un
 }
 
 export function TeamsStep({ state, onChange }: StepProps) {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
   const { t, i18n } = useTranslation();
   const [libraryOpen, setLibraryOpen] = useState(false);
@@ -409,7 +412,7 @@ export function TeamsStep({ state, onChange }: StepProps) {
       )}
 
       <FormField label={t('tournament.wizard.teams', { count: n })}>
-        <SecondaryButton icon={<Users size={18} color={palette.textPrimary} />} label={t('tournament.wizard.fromLibrary')}
+        <SecondaryButton icon={<Users size={18} color={colors.textPrimary} />} label={t('tournament.wizard.fromLibrary')}
           onPress={() => setLibraryOpen(true)} />
 
         <ToggleRow label={t('tournament.wizard.seeding')} value={seeded}
@@ -428,20 +431,20 @@ export function TeamsStep({ state, onChange }: StepProps) {
                   value={team.name}
                   onChangeText={(name) => onChange(renameTeam(state, team.key, name))}
                   placeholder={team.fallbackName}
-                  placeholderTextColor={palette.textMuted}
+                  placeholderTextColor={colors.textMuted}
                   accessibilityLabel={t('tournament.wizard.teamNameLabel', { n: i + 1 })}
                   selectTextOnFocus
                   maxLength={40}
                 />
                 {seeded && (
                   <>
-                    <IconButton icon={<ChevronUp size={18} color={palette.textPrimary} />} label={t('tournament.wizard.moveUp')}
+                    <IconButton icon={<ChevronUp size={18} color={colors.textPrimary} />} label={t('tournament.wizard.moveUp')}
                       onPress={() => onChange(moveTeam(state, team.key, -1))} disabled={i === 0} />
-                    <IconButton icon={<ChevronDown size={18} color={palette.textPrimary} />} label={t('tournament.wizard.moveDown')}
+                    <IconButton icon={<ChevronDown size={18} color={colors.textPrimary} />} label={t('tournament.wizard.moveDown')}
                       onPress={() => onChange(moveTeam(state, team.key, 1))} disabled={i === n - 1} />
                   </>
                 )}
-                <IconButton icon={<X size={18} color={palette.textSecondary} />} label={t('tournament.wizard.removeTeam', { name: displayName(team) })}
+                <IconButton icon={<X size={18} color={colors.textSecondary} />} label={t('tournament.wizard.removeTeam', { name: displayName(team) })}
                   onPress={() => onChange(removeTeam(state, team.key))} disabled={n <= 2} />
               </View>
               {duplicate && <Text style={styles.duplicateText}>{t('tournament.wizard.duplicateName')}</Text>}
@@ -516,8 +519,8 @@ export function SummaryStep({
   onRedraw: () => void;
   onSaveTemplate: (name: string) => Promise<void>;
 }) {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
-  const accent = useAccent();
   const { t, i18n } = useTranslation();
   const [templateName, setTemplateName] = useState('');
   const [saved, setSaved] = useState(false);
@@ -572,7 +575,7 @@ export function SummaryStep({
       )}
 
       {state.format !== 'round_robin' && preview.errors.length === 0 && (
-        <SecondaryButton icon={<Shuffle size={18} color={palette.textPrimary} />} label={t('tournament.wizard.redraw')} onPress={onRedraw} />
+        <SecondaryButton icon={<Shuffle size={18} color={colors.textPrimary} />} label={t('tournament.wizard.redraw')} onPress={onRedraw} />
       )}
 
       <FormField label={t('tournament.wizard.saveTemplate')}>
@@ -582,13 +585,13 @@ export function SummaryStep({
             value={templateName}
             onChangeText={(text) => { setTemplateName(text); setSaved(false); }}
             placeholder={t('tournament.wizard.templateNamePlaceholder')}
-            placeholderTextColor={palette.textMuted}
+            placeholderTextColor={colors.textMuted}
             accessibilityLabel={t('tournament.wizard.templateName')}
             maxLength={40}
           />
           <Pressable style={[styles.addButton, !templateName.trim() && styles.disabled]} onPress={save}
             disabled={!templateName.trim()} accessibilityRole="button" accessibilityLabel={t('tournament.wizard.saveTemplate')}>
-            <Save size={20} color={accent.onFill} />
+            <Save size={20} color={colors.onFill} />
           </Pressable>
         </View>
         {saved && <Text style={styles.success}>{t('tournament.wizard.templateSaved')}</Text>}
@@ -597,56 +600,56 @@ export function SummaryStep({
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
+const makeStyles = (a: AppTheme) => StyleSheet.create({
   input: {
-    backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundSurface, borderWidth: 1, borderColor: a.backgroundElevated,
     borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13,
-    fontSize: 15, fontFamily: 'Inter_400Regular', color: palette.textPrimary,
+    fontSize: 15, fontFamily: 'Inter_400Regular', color: a.textPrimary,
   },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: {
     paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10,
-    backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundSurface, borderWidth: 1, borderColor: a.backgroundElevated,
   },
   chipActive: { backgroundColor: a.fill, borderColor: a.fill },
-  chipText: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary },
+  chipText: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: a.textSecondary },
   chipTextActive: { color: a.onFill },
-  hint: { fontSize: 13, fontFamily: 'Inter_400Regular', color: palette.textSecondary, lineHeight: 18, paddingVertical: 8 },
+  hint: { fontSize: 13, fontFamily: 'Inter_400Regular', color: a.textSecondary, lineHeight: 18, paddingVertical: 8 },
   choices: { gap: 8 },
   choice: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 12, padding: 14, borderRadius: 12,
-    backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundSurface, borderWidth: 1, borderColor: a.backgroundElevated,
   },
   choiceActive: { borderColor: a.color },
   radio: {
-    width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: palette.textMuted,
+    width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: a.textMuted,
     alignItems: 'center', justifyContent: 'center', marginTop: 1,
   },
   radioActive: { borderColor: a.color },
   radioDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: a.fill },
   choiceText: { flex: 1, gap: 3 },
-  choiceTitle: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },
-  choiceDesc: { fontSize: 13, fontFamily: 'Inter_400Regular', color: palette.textSecondary, lineHeight: 18 },
+  choiceTitle: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: a.textPrimary },
+  choiceDesc: { fontSize: 13, fontFamily: 'Inter_400Regular', color: a.textSecondary, lineHeight: 18 },
   advancedToggle: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 8, marginBottom: 12 },
-  advancedText: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: palette.info },
+  advancedText: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: a.info },
   orderRow: {
     flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8,
-    borderBottomWidth: 1, borderBottomColor: palette.backgroundElevated,
+    borderBottomWidth: 1, borderBottomColor: a.backgroundElevated,
   },
-  orderIndex: { width: 22, fontSize: 14, fontFamily: 'Inter_700Bold', color: palette.textSecondary, textAlign: 'center' },
-  orderLabel: { flex: 1, fontSize: 14, fontFamily: 'Inter_500Medium', color: palette.textPrimary },
+  orderIndex: { width: 22, fontSize: 14, fontFamily: 'Inter_700Bold', color: a.textSecondary, textAlign: 'center' },
+  orderLabel: { flex: 1, fontSize: 14, fontFamily: 'Inter_500Medium', color: a.textPrimary },
   iconButton: {
     width: 36, height: 36, borderRadius: 8, alignItems: 'center', justifyContent: 'center',
-    backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundSurface, borderWidth: 1, borderColor: a.backgroundElevated,
   },
   disabled: { opacity: 0.35 },
   pressed: { opacity: 0.8 },
   secondary: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     paddingVertical: 12, borderRadius: 12, marginVertical: 8,
-    backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundSurface, borderWidth: 1, borderColor: a.backgroundElevated,
   },
-  secondaryText: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },
+  secondaryText: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: a.textPrimary },
   addRow: { flexDirection: 'row', gap: 8, alignItems: 'center' },
   addInput: { flex: 1 },
   addButton: {
@@ -657,50 +660,50 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     paddingVertical: 6, paddingHorizontal: 6, gap: 4, borderRadius: 10,
     borderWidth: 1, borderColor: 'transparent', marginBottom: 4,
   },
-  teamRowDuplicate: { borderColor: palette.error, backgroundColor: 'rgba(248, 81, 73, 0.08)' },
+  teamRowDuplicate: { borderColor: a.error, backgroundColor: 'rgba(248, 81, 73, 0.08)' },
   teamLine: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   teamNameInput: {
-    flex: 1, fontSize: 15, fontFamily: 'Inter_500Medium', color: palette.textPrimary,
-    paddingVertical: 8, paddingHorizontal: 10, borderRadius: 8, backgroundColor: palette.backgroundSurface,
+    flex: 1, fontSize: 15, fontFamily: 'Inter_500Medium', color: a.textPrimary,
+    paddingVertical: 8, paddingHorizontal: 10, borderRadius: 8, backgroundColor: a.backgroundSurface,
   },
-  duplicateText: { fontSize: 12, fontFamily: 'Inter_500Medium', color: palette.error, marginLeft: 22 },
+  duplicateText: { fontSize: 12, fontFamily: 'Inter_500Medium', color: a.error, marginLeft: 22 },
   estimate: {
     padding: 14, borderRadius: 12, gap: 4, marginVertical: 16,
-    backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundSurface, borderWidth: 1, borderColor: a.backgroundElevated,
   },
-  estimateStrong: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },
-  estimateText: { fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textSecondary },
+  estimateStrong: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: a.textPrimary },
+  estimateText: { fontSize: 14, fontFamily: 'Inter_400Regular', color: a.textSecondary },
   presetChips: { marginBottom: 8 },
   teamDot: { width: 12, height: 12, borderRadius: 6 },
   hintBox: {
     flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 12, marginBottom: 20,
     backgroundColor: 'rgba(88, 166, 255, 0.12)',
   },
-  hintBoxText: { flex: 1, fontSize: 13, fontFamily: 'Inter_500Medium', color: palette.textPrimary, lineHeight: 18 },
-  hintAction: { fontSize: 14, fontFamily: 'Inter_700Bold', color: palette.info },
+  hintBoxText: { flex: 1, fontSize: 13, fontFamily: 'Inter_500Medium', color: a.textPrimary, lineHeight: 18 },
+  hintAction: { fontSize: 14, fontFamily: 'Inter_700Bold', color: a.info },
   linkRow: { paddingVertical: 12 },
   inlineField: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingVertical: 8,
-    borderBottomWidth: 1, borderBottomColor: palette.backgroundElevated,
+    borderBottomWidth: 1, borderBottomColor: a.backgroundElevated,
   },
-  inlineLabel: { flex: 1, fontSize: 14, fontFamily: 'Inter_500Medium', color: palette.textPrimary },
+  inlineLabel: { flex: 1, fontSize: 14, fontFamily: 'Inter_500Medium', color: a.textPrimary },
   pickerButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, minWidth: 130 },
-  pickerText: { fontSize: 15, fontFamily: 'Inter_500Medium', color: palette.textPrimary },
+  pickerText: { fontSize: 15, fontFamily: 'Inter_500Medium', color: a.textPrimary },
   iosPicker: { alignSelf: 'flex-start' },
   summaryCard: {
     padding: 16, borderRadius: 16, gap: 4, marginBottom: 16,
-    backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundSurface, borderWidth: 1, borderColor: a.backgroundElevated,
   },
-  summaryTitle: { fontSize: 18, fontFamily: 'Inter_700Bold', color: palette.textPrimary, marginBottom: 4 },
-  summaryLine: { fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textSecondary, lineHeight: 20 },
-  summaryStrong: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary, marginTop: 6 },
-  error: { fontSize: 14, fontFamily: 'Inter_500Medium', color: palette.error, lineHeight: 20, marginBottom: 4 },
-  success: { fontSize: 13, fontFamily: 'Inter_500Medium', color: palette.success, marginTop: 8 },
+  summaryTitle: { fontSize: 18, fontFamily: 'Inter_700Bold', color: a.textPrimary, marginBottom: 4 },
+  summaryLine: { fontSize: 14, fontFamily: 'Inter_400Regular', color: a.textSecondary, lineHeight: 20 },
+  summaryStrong: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: a.textPrimary, marginTop: 6 },
+  error: { fontSize: 14, fontFamily: 'Inter_500Medium', color: a.error, lineHeight: 20, marginBottom: 4 },
+  success: { fontSize: 13, fontFamily: 'Inter_500Medium', color: a.success, marginTop: 8 },
   pools: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 8 },
   poolCard: {
     flexBasis: '47%', flexGrow: 1, padding: 12, borderRadius: 12, gap: 4,
-    backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundSurface, borderWidth: 1, borderColor: a.backgroundElevated,
   },
-  poolTitle: { fontSize: 13, fontFamily: 'Inter_700Bold', color: palette.textSecondary, textTransform: 'uppercase', marginBottom: 2 },
-  poolTeam: { fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textPrimary },
+  poolTitle: { fontSize: 13, fontFamily: 'Inter_700Bold', color: a.textSecondary, textTransform: 'uppercase', marginBottom: 2 },
+  poolTeam: { fontSize: 14, fontFamily: 'Inter_400Regular', color: a.textPrimary },
 });

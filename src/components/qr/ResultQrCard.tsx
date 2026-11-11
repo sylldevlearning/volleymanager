@@ -1,11 +1,12 @@
 import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import QRCode from 'react-native-qrcode-svg';
-import { palette } from '../../theme/tokens';
 import type { ResultQr } from '../../features/tournament/matchQr';
+import { useThemedStyles, type AppTheme } from '../../theme/useAppTheme';
 
 /** Referee: the result of a quick match started from a tournament QR, scanned by the organiser. */
 export function ResultQrCard({ value, result }: { value: string; result: ResultQr }) {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
   const size = Math.min(width - 112, 280);
@@ -24,14 +25,14 @@ export function ResultQrCard({ value, result }: { value: string; result: ResultQ
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AppTheme) => StyleSheet.create({
   card: {
     alignItems: 'center', gap: 8, padding: 16, borderRadius: 16, marginBottom: 16,
-    backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundSurface, borderWidth: 1, borderColor: a.backgroundElevated,
   },
-  title: { fontSize: 18, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
-  teams: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary, textAlign: 'center' },
-  sets: { fontSize: 15, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
+  title: { fontSize: 18, fontFamily: 'Inter_700Bold', color: a.textPrimary },
+  teams: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: a.textPrimary, textAlign: 'center' },
+  sets: { fontSize: 15, fontFamily: 'Inter_500Medium', color: a.textSecondary },
   qrBox: { marginTop: 8, padding: 16, borderRadius: 12, backgroundColor: '#FFFFFF' },
-  hint: { fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textSecondary, lineHeight: 20, textAlign: 'center' },
+  hint: { fontSize: 14, fontFamily: 'Inter_400Regular', color: a.textSecondary, lineHeight: 20, textAlign: 'center' },
 });

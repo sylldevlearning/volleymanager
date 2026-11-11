@@ -22,7 +22,7 @@ import {
 } from '../../utils/rulesValidator';
 import { InfoTooltip } from '../ui/InfoTooltip';
 import { courtSize, substitutionsAllowed } from '../../features/match/formatProfile';
-import { useThemedStyles, type AccentTheme } from '../../theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../theme/useAppTheme';
 
 const LIBERO_COLOR = palette.libero;
 
@@ -73,6 +73,7 @@ export function SubstitutionSheet({
   sanctionEventsForSet = [], sanctionEventsForMatch = [],
   initialOutId = null, initialOutPosition = null,
 }: SubstitutionSheetProps) {
+  const colors = useAppTheme();
   const subStyles = useThemedStyles(makeSubStyles);
   const { t } = useTranslation();
   const [playerOutId, setPlayerOutId] = useState<string | null>(null);
@@ -251,7 +252,7 @@ export function SubstitutionSheet({
             </Text>
             <InfoTooltip textKey="help.substitution" />
             <Pressable onPress={handleClose} style={subStyles.closeBtn} accessibilityRole="button">
-              <X size={20} color={palette.textSecondary} />
+              <X size={20} color={colors.textSecondary} />
             </Pressable>
           </View>
         </View>
@@ -280,7 +281,7 @@ export function SubstitutionSheet({
                 const isOut = playerOutId === playerId;
                 const isLib = libero?.liberoId === playerId;
                 const bgColor = isLib ? LIBERO_COLOR + '30' : teamColor + '20';
-                const borderColor = isOut ? palette.error : isLib ? LIBERO_COLOR : teamColor;
+                const borderColor = isOut ? colors.error : isLib ? LIBERO_COLOR : teamColor;
                 return (
                   <Pressable
                     key={pos}
@@ -406,6 +407,7 @@ function BenchRow({
   exceptional?: boolean;
   onPress?: () => void;
 }) {
+  const colors = useAppTheme();
   const subStyles = useThemedStyles(makeSubStyles);
   const { t } = useTranslation();
   const blocked = !!error && !exceptional;
@@ -419,12 +421,12 @@ function BenchRow({
       accessibilityRole="radio"
       accessibilityState={{ selected: isSelected, disabled: blocked }}
     >
-      <Text style={[subStyles.benchNum, { color: isSelected ? teamColor : palette.textSecondary }]}>
+      <Text style={[subStyles.benchNum, { color: isSelected ? teamColor : colors.textSecondary }]}>
         #{player.number}
       </Text>
       {/* Name + full rule message under it, wrapped on several lines if needed */}
       <View style={subStyles.benchInfo}>
-        <Text style={[subStyles.benchName, blocked && { color: palette.textMuted }]} numberOfLines={1}>
+        <Text style={[subStyles.benchName, blocked && { color: colors.textMuted }]} numberOfLines={1}>
           {player.lastName ?? player.firstName ?? `#${player.number}`}
           {player.position === 'libero' ? ' ⚡' : ''}
         </Text>
@@ -438,10 +440,10 @@ function BenchRow({
   );
 }
 
-const makeSubStyles = (a: AccentTheme) => StyleSheet.create({
+const makeSubStyles = (a: AppTheme) => StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
   sheet: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: '85%',
@@ -455,20 +457,20 @@ const makeSubStyles = (a: AccentTheme) => StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
+    borderBottomColor: a.backgroundElevated,
   },
-  title: { fontSize: 18, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
-  teamName: { fontSize: 13, fontFamily: 'Inter_400Regular', color: palette.textSecondary, marginTop: 2 },
+  title: { fontSize: 18, fontFamily: 'Inter_700Bold', color: a.textPrimary },
+  teamName: { fontSize: 13, fontFamily: 'Inter_400Regular', color: a.textSecondary, marginTop: 2 },
   headerRight: { alignItems: 'flex-end', gap: 6 },
-  counter: { fontSize: 12, fontFamily: 'Inter_500Medium', color: palette.textMuted },
+  counter: { fontSize: 12, fontFamily: 'Inter_500Medium', color: a.textMuted },
   closeBtn: { padding: 4 },
   beachMsg: { padding: 24, alignItems: 'center' },
-  beachMsgText: { fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textMuted, textAlign: 'center' },
+  beachMsgText: { fontSize: 14, fontFamily: 'Inter_400Regular', color: a.textMuted, textAlign: 'center' },
   body: { padding: 16, gap: 8 },
   stepHint: {
     fontSize: 12,
     fontFamily: 'Inter_500Medium',
-    color: palette.textMuted,
+    color: a.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 4,
@@ -476,7 +478,7 @@ const makeSubStyles = (a: AccentTheme) => StyleSheet.create({
   sectionTitle: {
     fontSize: 11,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textMuted,
+    color: a.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 8,
@@ -498,8 +500,8 @@ const makeSubStyles = (a: AccentTheme) => StyleSheet.create({
     justifyContent: 'center',
   },
   slotEmpty: {
-    borderColor: palette.backgroundElevated,
-    backgroundColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
   },
   slotLibero: {
     borderStyle: 'dashed',
@@ -516,19 +518,19 @@ const makeSubStyles = (a: AccentTheme) => StyleSheet.create({
     justifyContent: 'center',
   },
   liberoBadgeText: { fontSize: 8, fontFamily: 'Inter_700Bold', color: '#fff' },
-  slotPosLabel: { fontSize: 9, fontFamily: 'Inter_600SemiBold', color: palette.textMuted, letterSpacing: 0.5 },
+  slotPosLabel: { fontSize: 9, fontFamily: 'Inter_600SemiBold', color: a.textMuted, letterSpacing: 0.5 },
   slotNum: { fontSize: 18, fontFamily: 'Inter_700Bold' },
-  slotName: { fontSize: 10, fontFamily: 'Inter_400Regular', color: palette.textSecondary, maxWidth: 80 },
+  slotName: { fontSize: 10, fontFamily: 'Inter_400Regular', color: a.textSecondary, maxWidth: 80 },
   outBadge: {
     position: 'absolute',
     top: 4,
     right: 4,
-    backgroundColor: palette.error + '30',
+    backgroundColor: a.error + '30',
     paddingHorizontal: 4,
     paddingVertical: 1,
     borderRadius: 4,
   },
-  outBadgeText: { fontSize: 8, fontFamily: 'Inter_700Bold', color: palette.error },
+  outBadgeText: { fontSize: 8, fontFamily: 'Inter_700Bold', color: a.error },
   benchRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -536,19 +538,19 @@ const makeSubStyles = (a: AccentTheme) => StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     borderRadius: 12,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     borderWidth: 1.5,
     borderColor: 'transparent',
     marginBottom: 6,
   },
   benchRowSelected: { backgroundColor: a.muted },
   benchRowDisabled: { opacity: 0.4 },
-  benchRowExceptional: { borderColor: palette.warning, borderStyle: 'dashed' },
+  benchRowExceptional: { borderColor: a.warning, borderStyle: 'dashed' },
   benchNum: { fontSize: 16, fontFamily: 'Inter_700Bold', width: 36 },
   benchInfo: { flex: 1, minWidth: 0, gap: 2 },
-  benchName: { fontSize: 14, fontFamily: 'Inter_500Medium', color: palette.textPrimary },
-  benchError: { fontSize: 12, lineHeight: 16, fontFamily: 'Inter_400Regular', color: palette.error, flexShrink: 1 },
-  benchErrorExceptional: { color: palette.warning, fontFamily: 'Inter_600SemiBold' },
+  benchName: { fontSize: 14, fontFamily: 'Inter_500Medium', color: a.textPrimary },
+  benchError: { fontSize: 12, lineHeight: 16, fontFamily: 'Inter_400Regular', color: a.error, flexShrink: 1 },
+  benchErrorExceptional: { color: a.warning, fontFamily: 'Inter_600SemiBold' },
   liberoTag: {
     backgroundColor: LIBERO_COLOR + '30',
     paddingHorizontal: 6,
@@ -556,7 +558,7 @@ const makeSubStyles = (a: AccentTheme) => StyleSheet.create({
     borderRadius: 6,
   },
   liberoTagText: { fontSize: 11, fontFamily: 'Inter_700Bold', color: LIBERO_COLOR },
-  emptyBench: { fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textMuted, textAlign: 'center', paddingVertical: 16 },
+  emptyBench: { fontSize: 14, fontFamily: 'Inter_400Regular', color: a.textMuted, textAlign: 'center', paddingVertical: 16 },
   confirmBtn: {
     marginHorizontal: 20,
     marginTop: 12,
@@ -565,6 +567,6 @@ const makeSubStyles = (a: AccentTheme) => StyleSheet.create({
     paddingVertical: 16,
     alignItems: 'center',
   },
-  confirmBtnExceptional: { backgroundColor: palette.warning },
+  confirmBtnExceptional: { backgroundColor: a.warning },
   confirmText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.onFill },
 });

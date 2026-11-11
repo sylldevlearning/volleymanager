@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { formatClock } from '../../../../src/i18n/format';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CircleCheck, Flag, Minus, Plus, QrCode } from 'lucide-react-native';
-import { palette } from '../../../../src/theme/tokens';
 import {
   getTournamentBundle,
   recordTournamentResult,
@@ -18,7 +17,7 @@ import { justFinished, resultRoute } from '../../../../src/features/tournament/p
 import { showFinished } from '../../../../src/components/tournament/showFinished';
 import { matchQrOf } from '../../../../src/features/tournament/matchQr';
 import type { SetScore, TournamentTeam } from '../../../../src/models/tournament';
-import { type AccentTheme, useThemedStyles } from '../../../../src/theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../../../src/theme/useAppTheme';
 
 type Row = [string, string];
 
@@ -30,6 +29,7 @@ function parseRows(rows: Row[]): SetScore[] {
 }
 
 export default function TournamentMatchScreen() {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
   const { id, matchId } = useLocalSearchParams<{ id: string; matchId: string }>();
   const { t, i18n } = useTranslation();
@@ -152,14 +152,14 @@ export default function TournamentMatchScreen() {
               onPress={() => router.push(`/tournament/${id}/qr/${matchId}`)}
               accessibilityRole="button"
             >
-              <QrCode size={18} color={palette.textPrimary} />
+              <QrCode size={18} color={colors.textPrimary} />
               <Text style={styles.smallButtonText}>{t('tournament.qr.button')}</Text>
             </Pressable>
           )}
 
           {isCorrection && (
             <View style={styles.validated}>
-              <CircleCheck size={18} color={palette.success} />
+              <CircleCheck size={18} color={colors.success} />
               <Text style={styles.validatedText}>
                 {forfeitTeam ? t('tournament.score.forfeitResult', { team: forfeitTeam.name }) : t('tournament.score.validated')}
               </Text>
@@ -197,7 +197,7 @@ export default function TournamentMatchScreen() {
                       keyboardType="number-pad"
                       maxLength={2}
                       placeholder="0"
-                      placeholderTextColor={palette.textMuted}
+                      placeholderTextColor={colors.textMuted}
                       accessibilityLabel={`${t('tournament.score.set', { n: i + 1 })} ${side === 0 ? home.name : away.name}`}
                     />
                   ))}
@@ -207,13 +207,13 @@ export default function TournamentMatchScreen() {
               <View style={styles.setActions}>
                 {rows.length < maxSets && (
                   <Pressable style={styles.smallButton} onPress={() => setRows((r) => [...r, ['', '']])} accessibilityRole="button">
-                    <Plus size={16} color={palette.textPrimary} />
+                    <Plus size={16} color={colors.textPrimary} />
                     <Text style={styles.smallButtonText}>{t('tournament.score.addSet')}</Text>
                   </Pressable>
                 )}
                 {rows.length > 1 && (
                   <Pressable style={styles.smallButton} onPress={() => setRows((r) => r.slice(0, -1))} accessibilityRole="button">
-                    <Minus size={16} color={palette.textPrimary} />
+                    <Minus size={16} color={colors.textPrimary} />
                     <Text style={styles.smallButtonText}>{t('tournament.score.removeSet')}</Text>
                   </Pressable>
                 )}
@@ -225,7 +225,7 @@ export default function TournamentMatchScreen() {
               <View style={styles.forfeits}>
                 {[home, away].map((team) => (
                   <Pressable key={team.id} style={styles.forfeitButton} onPress={() => handleForfeit(team)} accessibilityRole="button">
-                    <Flag size={16} color={palette.warning} />
+                    <Flag size={16} color={colors.warning} />
                     <Text style={styles.forfeitText} numberOfLines={1}>{t('tournament.score.forfeitOf', { team: team.name })}</Text>
                   </Pressable>
                 ))}
@@ -251,51 +251,51 @@ export default function TournamentMatchScreen() {
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
   flex: { flex: 1 },
   scroll: { padding: 16, paddingBottom: 32 },
-  title: { fontSize: 20, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
-  meta: { fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textSecondary, marginTop: 4 },
+  title: { fontSize: 20, fontFamily: 'Inter_700Bold', color: a.textPrimary },
+  meta: { fontSize: 14, fontFamily: 'Inter_400Regular', color: a.textSecondary, marginTop: 4 },
   validated: {
     flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12, padding: 10, borderRadius: 10,
     backgroundColor: 'rgba(46, 160, 67, 0.12)',
   },
-  validatedText: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: palette.success },
+  validatedText: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: a.success },
   unknownBox: { marginTop: 20, gap: 8 },
-  teamsLine: { fontSize: 16, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },
-  hint: { fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textSecondary, lineHeight: 20 },
+  teamsLine: { fontSize: 16, fontFamily: 'Inter_600SemiBold', color: a.textPrimary },
+  hint: { fontSize: 14, fontFamily: 'Inter_400Regular', color: a.textSecondary, lineHeight: 20 },
   headerRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 12, marginTop: 24, marginBottom: 8 },
   teamHead: { flex: 1, alignItems: 'center', gap: 6 },
   dot: { width: 14, height: 14, borderRadius: 7 },
-  teamName: { fontSize: 15, fontFamily: 'Inter_700Bold', color: palette.textPrimary, textAlign: 'center' },
+  teamName: { fontSize: 15, fontFamily: 'Inter_700Bold', color: a.textPrimary, textAlign: 'center' },
   setRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 10 },
-  setLabel: { width: 52, fontSize: 14, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary },
+  setLabel: { width: 52, fontSize: 14, fontFamily: 'Inter_600SemiBold', color: a.textSecondary },
   scoreInput: {
     flex: 1, height: 56, borderRadius: 12, textAlign: 'center',
-    fontSize: 24, fontFamily: 'Inter_700Bold', color: palette.textPrimary,
-    backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
+    fontSize: 24, fontFamily: 'Inter_700Bold', color: a.textPrimary,
+    backgroundColor: a.backgroundSurface, borderWidth: 1, borderColor: a.backgroundElevated,
   },
   setActions: { flexDirection: 'row', gap: 8, marginTop: 4, marginLeft: 64 },
   smallButton: {
     flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 10,
-    backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundSurface, borderWidth: 1, borderColor: a.backgroundElevated,
   },
   qrButton: {
     flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 8, marginTop: 12,
     paddingVertical: 10, paddingHorizontal: 14, borderRadius: 10,
-    backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundSurface, borderWidth: 1, borderColor: a.backgroundElevated,
   },
-  smallButtonText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },
-  winner: { fontSize: 16, fontFamily: 'Inter_700Bold', color: palette.success, marginTop: 16 },
-  error: { fontSize: 14, fontFamily: 'Inter_500Medium', color: palette.error, marginTop: 8, lineHeight: 20 },
+  smallButtonText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: a.textPrimary },
+  winner: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.success, marginTop: 16 },
+  error: { fontSize: 14, fontFamily: 'Inter_500Medium', color: a.error, marginTop: 8, lineHeight: 20 },
   forfeits: { flexDirection: 'row', gap: 8, marginTop: 28 },
   forfeitButton: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
-    paddingVertical: 12, paddingHorizontal: 8, borderRadius: 12, borderWidth: 1, borderColor: palette.backgroundElevated,
+    paddingVertical: 12, paddingHorizontal: 8, borderRadius: 12, borderWidth: 1, borderColor: a.backgroundElevated,
   },
-  forfeitText: { flexShrink: 1, fontSize: 13, fontFamily: 'Inter_600SemiBold', color: palette.warning },
-  footer: { padding: 16, borderTopWidth: 1, borderTopColor: palette.backgroundElevated },
+  forfeitText: { flexShrink: 1, fontSize: 13, fontFamily: 'Inter_600SemiBold', color: a.warning },
+  footer: { padding: 16, borderTopWidth: 1, borderTopColor: a.backgroundElevated },
   validate: { backgroundColor: a.fill, paddingVertical: 16, borderRadius: 14, alignItems: 'center' },
   validateText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.onFill },
   pressed: { opacity: 0.85 },

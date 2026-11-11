@@ -3,13 +3,12 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { palette } from '../../../src/theme/tokens';
 import { Stepper } from '../../../src/components/ui/FormControls';
 import { PickerField } from '../../../src/components/tournament/WizardSteps';
 import { getTournamentBundle, rescheduleTournament } from '../../../src/services/tournamentService';
 import { dateFromTime, timeFromDate } from '../../../src/features/tournament/wizard';
 import type { TournamentSchedule } from '../../../src/models/tournament';
-import { type AccentTheme, useThemedStyles } from '../../../src/theme/useAccent';
+import { useThemedStyles, type AppTheme } from '../../../src/theme/useAppTheme';
 
 /** Courts and times changed during the day: matches still to play are placed again. */
 export default function TournamentScheduleScreen() {
@@ -65,16 +64,16 @@ export default function TournamentScheduleScreen() {
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
   scroll: { padding: 16 },
-  hint: { fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textSecondary, lineHeight: 20, marginBottom: 12 },
+  hint: { fontSize: 14, fontFamily: 'Inter_400Regular', color: a.textSecondary, lineHeight: 20, marginBottom: 12 },
   inline: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingVertical: 8,
-    borderBottomWidth: 1, borderBottomColor: palette.backgroundElevated,
+    borderBottomWidth: 1, borderBottomColor: a.backgroundElevated,
   },
-  label: { flex: 1, fontSize: 14, fontFamily: 'Inter_500Medium', color: palette.textPrimary },
-  footer: { padding: 16, borderTopWidth: 1, borderTopColor: palette.backgroundElevated },
+  label: { flex: 1, fontSize: 14, fontFamily: 'Inter_500Medium', color: a.textPrimary },
+  footer: { padding: 16, borderTopWidth: 1, borderTopColor: a.backgroundElevated },
   button: { backgroundColor: a.fill, paddingVertical: 16, borderRadius: 14, alignItems: 'center' },
   buttonText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.onFill },
   pressed: { opacity: 0.85 },

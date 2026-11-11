@@ -21,12 +21,12 @@ import { RadarChart } from '../../../../src/components/stats/RadarChart';
 import { ProgressBar } from '../../../../src/components/charts/ProgressBar';
 import { LineChart } from '../../../../src/components/charts/LineChart';
 import { StatCard } from '../../../../src/components/charts/StatCard';
-import { palette } from '../../../../src/theme/tokens';
 import { getPlayerDisplayName } from '../../../../src/features/players/player-helpers';
-import { useAccent } from '../../../../src/theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../../../src/theme/useAppTheme';
 
 export default function PlayerStatsScreen() {
-  const accent = useAccent();
+  const colors = useAppTheme();
+  const styles = useThemedStyles(makeStyles);
   const { id: matchId, playerId } = useLocalSearchParams<{ id: string; playerId: string }>();
   const { t, i18n } = useTranslation();
   const router = useRouter();
@@ -68,7 +68,7 @@ export default function PlayerStatsScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator color={accent.color} />
+        <ActivityIndicator color={colors.color} />
       </View>
     );
   }
@@ -81,7 +81,7 @@ export default function PlayerStatsScreen() {
     );
   }
 
-  const teamColor = team?.color ?? palette.accentSecondary;
+  const teamColor = team?.color ?? colors.accentSecondary;
   const displayName = getPlayerDisplayName(player);
   const position = player.position ? t(`player.positions.${player.position}`) : '';
 
@@ -106,7 +106,7 @@ export default function PlayerStatsScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backBtn} accessibilityRole="button">
-          <ArrowLeft size={22} color={palette.textSecondary} />
+          <ArrowLeft size={22} color={colors.textSecondary} />
         </Pressable>
         <View style={styles.headerInfo}>
           <Text style={styles.playerName}>#{player.number} {displayName}</Text>
@@ -122,17 +122,17 @@ export default function PlayerStatsScreen() {
           <StatCard
             label={t('stats.summary.points')}
             value={stats.totalPoints}
-            accent={palette.success}
+            accent={colors.success}
           />
           <StatCard
             label={t('stats.summary.faults')}
             value={stats.totalFaults}
-            accent={palette.error}
+            accent={colors.error}
           />
           <StatCard
             label={t('stats.summary.plusMinus')}
             value={stats.plusMinus >= 0 ? `+${stats.plusMinus}` : `${stats.plusMinus}`}
-            accent={stats.plusMinus >= 0 ? palette.success : palette.error}
+            accent={stats.plusMinus >= 0 ? colors.success : colors.error}
           />
         </View>
 
@@ -251,6 +251,7 @@ export default function PlayerStatsScreen() {
 }
 
 function SectionTitle({ title, extra }: { title: string; extra?: string }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.sectionHeader}>
       <Text style={styles.sectionTitle}>{title}</Text>
@@ -260,6 +261,7 @@ function SectionTitle({ title, extra }: { title: string; extra?: string }) {
 }
 
 function DetailStat({ label, value }: { label: string; value: number }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.detailStat}>
       <Text style={styles.detailValue}>{value}</Text>
@@ -268,9 +270,9 @@ function DetailStat({ label, value }: { label: string; value: number }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: palette.background },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: a.background },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -278,19 +280,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
+    borderBottomColor: a.backgroundElevated,
   },
   backBtn: { padding: 4 },
   headerInfo: { flex: 1 },
-  playerName: { fontSize: 17, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
-  playerMeta: { fontSize: 12, fontFamily: 'Inter_400Regular', color: palette.textSecondary, marginTop: 2 },
+  playerName: { fontSize: 17, fontFamily: 'Inter_700Bold', color: a.textPrimary },
+  playerMeta: { fontSize: 12, fontFamily: 'Inter_400Regular', color: a.textSecondary, marginTop: 2 },
   scroll: { padding: 16, gap: 12, paddingBottom: 40 },
   summaryRow: { flexDirection: 'row', gap: 10 },
   section: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
     overflow: 'hidden',
   },
   sectionHeader: {
@@ -300,26 +302,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
+    borderBottomColor: a.backgroundElevated,
   },
   sectionTitle: {
     fontSize: 11,
     fontFamily: 'Inter_700Bold',
-    color: palette.textSecondary,
+    color: a.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 0.6,
   },
   sectionExtra: {
     fontSize: 13,
     fontFamily: 'Inter_700Bold',
-    color: palette.textPrimary,
+    color: a.textPrimary,
   },
   catBody: { padding: 14 },
   detailRow: { flexDirection: 'row', gap: 16, marginTop: 10, flexWrap: 'wrap' },
   detailStat: { alignItems: 'center', minWidth: 44 },
-  detailValue: { fontSize: 18, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
-  detailLabel: { fontSize: 10, fontFamily: 'Inter_500Medium', color: palette.textMuted, marginTop: 2 },
+  detailValue: { fontSize: 18, fontFamily: 'Inter_700Bold', color: a.textPrimary },
+  detailLabel: { fontSize: 10, fontFamily: 'Inter_500Medium', color: a.textMuted, marginTop: 2 },
   radarWrap: { alignItems: 'center', paddingVertical: 12 },
   lineChartWrap: { paddingHorizontal: 4, paddingVertical: 8 },
-  emptyText: { color: palette.textMuted, fontFamily: 'Inter_400Regular', textAlign: 'center', padding: 20 },
+  emptyText: { color: a.textMuted, fontFamily: 'Inter_400Regular', textAlign: 'center', padding: 20 },
 });

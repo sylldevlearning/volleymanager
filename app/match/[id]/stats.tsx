@@ -14,10 +14,11 @@ import { TopPerformerCard } from '../../../src/components/charts/TopPerformerCar
 import { StatCard } from '../../../src/components/charts/StatCard';
 import { palette } from '../../../src/theme/tokens';
 import { InfoTooltip } from '../../../src/components/ui/InfoTooltip';
-import { useAccent } from '../../../src/theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../../src/theme/useAppTheme';
 
 export default function MatchStatsScreen() {
-  const accent = useAccent();
+  const colors = useAppTheme();
+  const styles = useThemedStyles(makeStyles);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t, i18n } = useTranslation();
   const router = useRouter();
@@ -49,7 +50,7 @@ export default function MatchStatsScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator color={accent.color} />
+        <ActivityIndicator color={colors.color} />
       </View>
     );
   }
@@ -75,7 +76,7 @@ export default function MatchStatsScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backBtn} accessibilityRole="button">
-          <ArrowLeft size={22} color={palette.textSecondary} />
+          <ArrowLeft size={22} color={colors.textSecondary} />
         </Pressable>
         <View style={styles.headerInfo}>
           <Text style={styles.headerTitle}>{t('stats.matchDashboard')}</Text>
@@ -159,9 +160,9 @@ export default function MatchStatsScreen() {
             <View style={styles.pointTypeLegend}>
               {[
                 { label: t('stats.pointTypes.attack'), color: palette.statAttack },
-                { label: t('stats.pointTypes.block'), color: palette.info },
-                { label: t('stats.pointTypes.ace'), color: palette.success },
-                { label: t('stats.pointTypes.opponentFault'), color: palette.textMuted },
+                { label: t('stats.pointTypes.block'), color: colors.info },
+                { label: t('stats.pointTypes.ace'), color: colors.success },
+                { label: t('stats.pointTypes.opponentFault'), color: colors.textMuted },
               ].map(({ label, color }) => (
                 <View key={label} style={styles.legendItem}>
                   <View style={[styles.dot, { backgroundColor: color }]} />
@@ -250,6 +251,8 @@ function SetPointsRow({
   homeColor: string;
   awayColor: string;
 }) {
+  const colors = useAppTheme();
+  const styles = useThemedStyles(makeStyles);
   const hp = setBreakdown.homePoints;
   const ap = setBreakdown.awayPoints;
   const homeTotal = hp.attack + hp.block + hp.ace + hp.opponentFault;
@@ -264,9 +267,9 @@ function SetPointsRow({
         <SegmentedBar
           segments={[
             { value: hp.attack, color: palette.statAttack },
-            { value: hp.block, color: palette.info },
-            { value: hp.ace, color: palette.success },
-            { value: hp.opponentFault, color: palette.textMuted },
+            { value: hp.block, color: colors.info },
+            { value: hp.ace, color: colors.success },
+            { value: hp.opponentFault, color: colors.textMuted },
           ]}
           total={Math.max(homeTotal, awayTotal, 1)}
           side="home"
@@ -277,9 +280,9 @@ function SetPointsRow({
         <SegmentedBar
           segments={[
             { value: ap.attack, color: palette.statAttack },
-            { value: ap.block, color: palette.info },
-            { value: ap.ace, color: palette.success },
-            { value: ap.opponentFault, color: palette.textMuted },
+            { value: ap.block, color: colors.info },
+            { value: ap.ace, color: colors.success },
+            { value: ap.opponentFault, color: colors.textMuted },
           ]}
           total={Math.max(homeTotal, awayTotal, 1)}
           side="away"
@@ -300,6 +303,7 @@ function SegmentedBar({
   side: 'home' | 'away';
   teamColor: string;
 }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={[styles.segBar, side === 'home' ? styles.segBarHome : styles.segBarAway]}>
       {segments.map((seg, i) => {
@@ -325,6 +329,7 @@ function PlayerRow({
   teamColor: string;
   onPress: () => void;
 }) {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   return (
     <Pressable
@@ -349,6 +354,7 @@ function PlayerRow({
 }
 
 function StatCell({ label, value, suffix = '' }: { label: string; value: number; suffix?: string }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.statCell}>
       <Text style={styles.statValue}>{value}{suffix}</Text>
@@ -359,9 +365,9 @@ function StatCell({ label, value, suffix = '' }: { label: string; value: number;
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: palette.background },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: a.background },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -369,18 +375,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
+    borderBottomColor: a.backgroundElevated,
   },
   backBtn: { padding: 4 },
   headerInfo: { flex: 1 },
-  headerTitle: { fontSize: 16, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
-  headerSubtitle: { fontSize: 12, fontFamily: 'Inter_400Regular', color: palette.textSecondary, marginTop: 2 },
+  headerTitle: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.textPrimary },
+  headerSubtitle: { fontSize: 12, fontFamily: 'Inter_400Regular', color: a.textSecondary, marginTop: 2 },
   scroll: { padding: 16, gap: 16, paddingBottom: 40 },
   section: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
     overflow: 'hidden',
   },
   sectionHeader: {
@@ -390,22 +396,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
+    borderBottomColor: a.backgroundElevated,
   },
   sectionTitle: {
     fontSize: 11,
     fontFamily: 'Inter_700Bold',
-    color: palette.textMuted,
+    color: a.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
     padding: 14,
   },
   legendRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  legendText: { fontSize: 10, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
+  legendText: { fontSize: 10, fontFamily: 'Inter_500Medium', color: a.textSecondary },
   dot: { width: 8, height: 8, borderRadius: 4 },
   emptyText: {
-    color: palette.textMuted,
+    color: a.textMuted,
     fontFamily: 'Inter_400Regular',
     textAlign: 'center',
     padding: 20,
@@ -418,23 +424,23 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     gap: 8,
     borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
+    borderBottomColor: a.backgroundElevated,
   },
   setLabel: {
     width: 20,
     fontSize: 12,
     fontFamily: 'Inter_700Bold',
-    color: palette.textSecondary,
+    color: a.textSecondary,
   },
   setBarWrap: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 4 },
-  setTotal: { fontSize: 12, fontFamily: 'Inter_700Bold', color: palette.textPrimary, width: 20, textAlign: 'center' },
+  setTotal: { fontSize: 12, fontFamily: 'Inter_700Bold', color: a.textPrimary, width: 20, textAlign: 'center' },
   segBar: {
     flex: 1,
     height: 16,
     borderRadius: 4,
     overflow: 'hidden',
     flexDirection: 'row',
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
   },
   segBarHome: { flexDirection: 'row-reverse' },
   segBarAway: { flexDirection: 'row' },
@@ -453,7 +459,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     gap: 10,
     borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
+    borderBottomColor: a.backgroundElevated,
   },
   playerRowPressed: { opacity: 0.7 },
   teamStripe: { width: 3, height: 20, borderRadius: 2 },
@@ -461,14 +467,14 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  playerNumText: { fontSize: 12, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
-  playerName: { flex: 1, fontSize: 14, fontFamily: 'Inter_500Medium', color: palette.textPrimary },
+  playerNumText: { fontSize: 12, fontFamily: 'Inter_700Bold', color: a.textPrimary },
+  playerName: { flex: 1, fontSize: 14, fontFamily: 'Inter_500Medium', color: a.textPrimary },
   playerStats: { flexDirection: 'row', gap: 8 },
   statCell: { alignItems: 'center', minWidth: 36 },
-  statValue: { fontSize: 15, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
-  statLabel: { fontSize: 9, fontFamily: 'Inter_400Regular', color: palette.textMuted, textTransform: 'uppercase' },
+  statValue: { fontSize: 15, fontFamily: 'Inter_700Bold', color: a.textPrimary },
+  statLabel: { fontSize: 9, fontFamily: 'Inter_400Regular', color: a.textMuted, textTransform: 'uppercase' },
 });

@@ -5,15 +5,14 @@ import { useTranslation } from 'react-i18next';
 import { formatDate } from '../../src/i18n/format';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronRight, Plus, ScanQrCode, Trophy } from 'lucide-react-native';
-import { palette } from '../../src/theme/tokens';
 import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
 import { getTournaments } from '../../src/services/tournamentService';
 import type { Tournament } from '../../src/models/tournament';
-import { type AccentTheme, useAccent, useThemedStyles } from '../../src/theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../src/theme/useAppTheme';
 
 export default function TournamentListScreen() {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
-  const accent = useAccent();
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const [tournaments, setTournaments] = useState<Tournament[] | null>(null);
@@ -36,12 +35,12 @@ export default function TournamentListScreen() {
         accessibilityLabel={t('tournament.list.scanMatchQr')}
         accessibilityRole="button"
       >
-        <ScanQrCode size={26} color={palette.success} strokeWidth={1.5} />
+        <ScanQrCode size={26} color={colors.success} strokeWidth={1.5} />
         <View style={styles.scanContent}>
           <Text style={styles.scanTitle}>{t('tournament.list.scanMatchQr')}</Text>
           <Text style={styles.scanDesc}>{t('tournament.list.scanMatchQrDesc')}</Text>
         </View>
-        <ChevronRight size={20} color={palette.textMuted} />
+        <ChevronRight size={20} color={colors.textMuted} />
       </Pressable>
       <FlatList
         data={tournaments ?? []}
@@ -49,7 +48,7 @@ export default function TournamentListScreen() {
         contentContainerStyle={styles.list}
         ListEmptyComponent={tournaments ? (
           <View style={styles.empty}>
-            <Trophy size={40} color={palette.textMuted} strokeWidth={1.5} />
+            <Trophy size={40} color={colors.textMuted} strokeWidth={1.5} />
             <Text style={styles.emptyTitle}>{t('tournament.list.empty')}</Text>
             <Text style={styles.emptyHint}>{t('tournament.list.emptyHint')}</Text>
           </View>
@@ -83,7 +82,7 @@ export default function TournamentListScreen() {
           onPress={() => router.push('/tournament/new')}
           accessibilityRole="button"
         >
-          <Plus size={20} color={accent.onFill} />
+          <Plus size={20} color={colors.onFill} />
           <Text style={styles.newButtonText}>{t('tournament.list.new')}</Text>
         </Pressable>
       </View>
@@ -91,8 +90,8 @@ export default function TournamentListScreen() {
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
   list: { padding: 16, gap: 12, flexGrow: 1 },
   scanButton: {
     flexDirection: 'row', alignItems: 'center', gap: 14, marginHorizontal: 16, marginTop: 16,
@@ -100,24 +99,24 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     borderWidth: 1, borderColor: 'rgba(46, 160, 67, 0.35)',
   },
   scanContent: { flex: 1, gap: 2 },
-  scanTitle: { fontSize: 16, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
-  scanDesc: { fontSize: 13, fontFamily: 'Inter_400Regular', color: palette.textSecondary },
+  scanTitle: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.textPrimary },
+  scanDesc: { fontSize: 13, fontFamily: 'Inter_400Regular', color: a.textSecondary },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10, paddingHorizontal: 24, paddingVertical: 48 },
-  emptyTitle: { fontSize: 16, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary, textAlign: 'center' },
-  emptyHint: { fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textSecondary, textAlign: 'center', lineHeight: 20 },
+  emptyTitle: { fontSize: 16, fontFamily: 'Inter_600SemiBold', color: a.textPrimary, textAlign: 'center' },
+  emptyHint: { fontSize: 14, fontFamily: 'Inter_400Regular', color: a.textSecondary, textAlign: 'center', lineHeight: 20 },
   card: {
-    backgroundColor: palette.backgroundSurface, borderRadius: 16, borderWidth: 1,
-    borderColor: palette.backgroundElevated, padding: 16, gap: 4,
+    backgroundColor: a.backgroundSurface, borderRadius: 16, borderWidth: 1,
+    borderColor: a.backgroundElevated, padding: 16, gap: 4,
   },
   cardPressed: { opacity: 0.85 },
   cardHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 2 },
-  cardTitle: { flex: 1, fontSize: 16, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
-  cardLine: { fontSize: 13, fontFamily: 'Inter_400Regular', color: palette.textSecondary },
+  cardTitle: { flex: 1, fontSize: 16, fontFamily: 'Inter_700Bold', color: a.textPrimary },
+  cardLine: { fontSize: 13, fontFamily: 'Inter_400Regular', color: a.textSecondary },
   status: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, backgroundColor: 'rgba(46, 160, 67, 0.15)' },
-  statusFinished: { backgroundColor: palette.backgroundElevated },
-  statusText: { fontSize: 12, fontFamily: 'Inter_600SemiBold', color: palette.success },
-  statusTextFinished: { color: palette.textSecondary },
-  footer: { padding: 16, borderTopWidth: 1, borderTopColor: palette.backgroundElevated },
+  statusFinished: { backgroundColor: a.backgroundElevated },
+  statusText: { fontSize: 12, fontFamily: 'Inter_600SemiBold', color: a.success },
+  statusTextFinished: { color: a.textSecondary },
+  footer: { padding: 16, borderTopWidth: 1, borderTopColor: a.backgroundElevated },
   newButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     backgroundColor: a.fill, paddingVertical: 16, borderRadius: 14,

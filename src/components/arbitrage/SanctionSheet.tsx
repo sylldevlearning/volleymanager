@@ -4,8 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react-native';
 import type { Player } from '../../models/player';
 import type { SanctionType } from '../../utils/sanctionRules';
-import { palette } from '../../theme/tokens';
-import { type AccentTheme, useThemedStyles } from '../../theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../theme/useAppTheme';
 
 interface SanctionSheetProps {
   visible: boolean;
@@ -26,6 +25,7 @@ const SANCTION_TYPES: { type: SanctionType; color: string }[] = [
 ];
 
 export function SanctionSheet({ visible, onClose, teamName, teamColor, players, onConfirm }: SanctionSheetProps) {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const [playerId, setPlayerId] = useState<string | null | undefined>(undefined);
@@ -60,7 +60,7 @@ export function SanctionSheet({ visible, onClose, teamName, teamColor, players, 
             <Text style={styles.teamName}>{teamName}</Text>
           </View>
           <Pressable onPress={handleClose} style={styles.closeBtn} accessibilityRole="button">
-            <X size={20} color={palette.textSecondary} />
+            <X size={20} color={colors.textSecondary} />
           </Pressable>
         </View>
 
@@ -124,10 +124,10 @@ export function SanctionSheet({ visible, onClose, teamName, teamColor, players, 
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
+const makeStyles = (a: AppTheme) => StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
   sheet: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: '85%',
@@ -141,16 +141,16 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
+    borderBottomColor: a.backgroundElevated,
   },
-  title: { fontSize: 18, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
-  teamName: { fontSize: 13, fontFamily: 'Inter_400Regular', color: palette.textSecondary, marginTop: 2 },
+  title: { fontSize: 18, fontFamily: 'Inter_700Bold', color: a.textPrimary },
+  teamName: { fontSize: 13, fontFamily: 'Inter_400Regular', color: a.textSecondary, marginTop: 2 },
   closeBtn: { padding: 4 },
   body: { padding: 16, gap: 8 },
   sectionTitle: {
     fontSize: 11,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textMuted,
+    color: a.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 8,
@@ -163,13 +163,13 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     borderRadius: 12,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     borderWidth: 1.5,
     borderColor: 'transparent',
   },
   targetRowSelected: {},
   targetNum: { fontSize: 15, fontFamily: 'Inter_700Bold', width: 36 },
-  targetName: { flex: 1, fontSize: 14, fontFamily: 'Inter_500Medium', color: palette.textPrimary },
+  targetName: { flex: 1, fontSize: 14, fontFamily: 'Inter_500Medium', color: a.textPrimary },
   typeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   typeChip: {
     flexDirection: 'row',
@@ -179,10 +179,10 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 10,
     borderWidth: 1.5,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
   },
   typeDot: { width: 10, height: 10, borderRadius: 5 },
-  typeLabel: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },
+  typeLabel: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: a.textPrimary },
   confirmBtn: {
     marginHorizontal: 20,
     marginTop: 12,

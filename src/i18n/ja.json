@@ -587,16 +587,11 @@
     "replayHelp": "ヘルプをもう一度見る",
     "privacyOptions": "プライバシー設定",
     "languageSystem": "端末の言語（{{name}}）",
-    "accentTitle": "メインカラー",
-    "accentColors": {
-      "red": "レッド",
-      "blue": "ブルー",
-      "violet": "バイオレット",
-      "pink": "ピンク",
-      "green": "グリーン",
-      "teal": "ティール",
-      "orange": "オレンジ",
-      "gold": "ゴールド"
+    "appearance": {
+      "title": "外観",
+      "system": "自動（端末の設定に合わせる）",
+      "light": "ライト",
+      "dark": "ダーク"
     }
   },
   "scoring": {

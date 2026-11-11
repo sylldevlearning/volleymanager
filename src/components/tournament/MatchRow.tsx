@@ -2,10 +2,10 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { formatClock } from '../../i18n/format';
 import { ChevronRight } from 'lucide-react-native';
-import { palette } from '../../theme/tokens';
 import { matchTitle, sideName } from '../../features/tournament/display';
 import type { TournamentBundle } from '../../features/tournament/bundle';
 import type { TournamentMatch } from '../../models/tournament';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../theme/useAppTheme';
 
 interface Props {
   match: TournamentMatch;
@@ -17,6 +17,8 @@ interface Props {
 
 /** One tournament match: court, phase, teams, score or status. */
 export function MatchRow({ match, bundle, onPress, showTime = true }: Props) {
+  const colors = useAppTheme();
+  const styles = useThemedStyles(makeStyles);
   const { t, i18n } = useTranslation();
   const home = sideName(match, 'home', bundle, t, i18n.language);
   const away = sideName(match, 'away', bundle, t, i18n.language);
@@ -46,27 +48,27 @@ export function MatchRow({ match, bundle, onPress, showTime = true }: Props) {
           {match.status === 'live' ? t('tournament.view.statusLive') : known ? t('tournament.view.statusScheduled') : t('tournament.view.waiting')}
         </Text>
       )}
-      <ChevronRight size={16} color={palette.textMuted} />
+      <ChevronRight size={16} color={colors.textMuted} />
     </Pressable>
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AppTheme) => StyleSheet.create({
   row: {
     flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10, paddingHorizontal: 12,
-    backgroundColor: palette.backgroundSurface, borderRadius: 12, borderWidth: 1, borderColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundSurface, borderRadius: 12, borderWidth: 1, borderColor: a.backgroundElevated,
   },
   pressed: { opacity: 0.8 },
   when: { width: 44, alignItems: 'center', gap: 2 },
-  time: { fontSize: 13, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
-  court: { fontSize: 12, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary },
+  time: { fontSize: 13, fontFamily: 'Inter_700Bold', color: a.textPrimary },
+  court: { fontSize: 12, fontFamily: 'Inter_600SemiBold', color: a.textSecondary },
   body: { flex: 1, gap: 2 },
-  title: { fontSize: 12, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
-  team: { fontSize: 15, fontFamily: 'Inter_500Medium', color: palette.textPrimary },
-  unknown: { color: palette.textSecondary, fontFamily: 'Inter_400Regular', fontStyle: 'italic' },
-  winner: { fontFamily: 'Inter_700Bold', color: palette.textPrimary },
+  title: { fontSize: 12, fontFamily: 'Inter_500Medium', color: a.textSecondary },
+  team: { fontSize: 15, fontFamily: 'Inter_500Medium', color: a.textPrimary },
+  unknown: { color: a.textSecondary, fontFamily: 'Inter_400Regular', fontStyle: 'italic' },
+  winner: { fontFamily: 'Inter_700Bold', color: a.textPrimary },
   score: { alignItems: 'center', gap: 2, minWidth: 20 },
-  scoreText: { fontSize: 15, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
-  status: { fontSize: 12, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary },
-  statusLive: { color: palette.success },
+  scoreText: { fontSize: 15, fontFamily: 'Inter_500Medium', color: a.textSecondary },
+  status: { fontSize: 12, fontFamily: 'Inter_600SemiBold', color: a.textSecondary },
+  statusLive: { color: a.success },
 });

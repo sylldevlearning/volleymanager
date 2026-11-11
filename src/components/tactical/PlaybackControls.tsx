@@ -1,8 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { palette } from '../../theme/tokens';
-import { type AccentTheme, useThemedStyles } from '../../theme/useAccent';
+import { useThemedStyles, type AppTheme } from '../../theme/useAppTheme';
 
 type StepPhase = 'idle' | 'showing' | 'animating' | 'done';
 
@@ -94,22 +93,22 @@ export function PlaybackControls({
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
+const makeStyles = (a: AppTheme) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     paddingVertical: 8,
     paddingHorizontal: 12,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderTopWidth: 1,
-    borderTopColor: palette.backgroundElevated,
+    borderTopColor: a.backgroundElevated,
   },
   btn: {
     width: 40,
     height: 40,
     borderRadius: 10,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -121,11 +120,11 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   },
   btnIcon: {
     fontSize: 16,
-    color: palette.textPrimary,
+    color: a.textPrimary,
   },
   btnPrimaryIcon: { color: a.onFill },
   btnIconDisabled: {
-    color: palette.textMuted,
+    color: a.textMuted,
   },
   indicator: {
     flex: 1,
@@ -135,13 +134,13 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   indicatorText: {
     fontSize: 13,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textPrimary,
+    color: a.textPrimary,
     textAlign: 'center',
   },
   indicatorTextMuted: {
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
-    color: palette.textMuted,
+    color: a.textMuted,
     textAlign: 'center',
   },
 });

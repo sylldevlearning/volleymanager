@@ -13,7 +13,7 @@ import { X } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { palette } from '../../theme/tokens';
 import type { PlayerPosition } from '../../models/tactical';
-import { type AccentTheme, useThemedStyles } from '../../theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../theme/useAppTheme';
 
 const JERSEY_COLORS = [
   '#1D4ED8',
@@ -37,6 +37,7 @@ interface PlayerEditSheetProps {
 }
 
 export function PlayerEditSheet({ visible, player, onClose, onSave }: PlayerEditSheetProps) {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const [numberStr, setNumberStr] = useState('');
@@ -95,7 +96,7 @@ export function PlayerEditSheet({ visible, player, onClose, onSave }: PlayerEdit
               <View style={[styles.headerDot, { backgroundColor: headerColor }]} />
               <Text style={styles.title}>{t('player.quickEdit')}</Text>
               <Pressable onPress={onClose} style={styles.closeBtn} accessibilityRole="button">
-                <X size={18} color={palette.textSecondary} />
+                <X size={18} color={colors.textSecondary} />
               </Pressable>
             </View>
 
@@ -110,7 +111,7 @@ export function PlayerEditSheet({ visible, player, onClose, onSave }: PlayerEdit
                   maxLength={2}
                   autoFocus
                   selectTextOnFocus
-                  placeholderTextColor={palette.textMuted}
+                  placeholderTextColor={colors.textMuted}
                   accessibilityLabel={t('player.numberOnly')}
                 />
               </View>
@@ -121,7 +122,7 @@ export function PlayerEditSheet({ visible, player, onClose, onSave }: PlayerEdit
                   value={lastName}
                   onChangeText={setLastName}
                   placeholder={t('player.namePlaceholder')}
-                  placeholderTextColor={palette.textMuted}
+                  placeholderTextColor={colors.textMuted}
                   autoCapitalize="words"
                   returnKeyType="done"
                   onSubmitEditing={handleSave}
@@ -191,7 +192,7 @@ export function PlayerEditSheet({ visible, player, onClose, onSave }: PlayerEdit
 
 const SWATCH_SIZE = 32;
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
+const makeStyles = (a: AppTheme) => StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',
@@ -199,18 +200,18 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   },
   kav: { width: '100%' },
   sheet: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingBottom: Platform.OS === 'ios' ? 32 : 20,
     borderTopWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
   },
   handle: {
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: palette.backgroundHover,
+    backgroundColor: a.backgroundHover,
     alignSelf: 'center',
     marginTop: 10,
     marginBottom: 4,
@@ -222,10 +223,10 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     paddingVertical: 12,
     gap: 10,
     borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
+    borderBottomColor: a.backgroundElevated,
   },
   headerDot: { width: 10, height: 10, borderRadius: 5 },
-  title: { flex: 1, fontSize: 16, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
+  title: { flex: 1, fontSize: 16, fontFamily: 'Inter_700Bold', color: a.textPrimary },
   closeBtn: { padding: 4 },
   fields: {
     flexDirection: 'row',
@@ -239,21 +240,21 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   fieldLabel: {
     fontSize: 11,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textSecondary,
+    color: a.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 6,
   },
   input: {
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     borderWidth: 1,
-    borderColor: palette.backgroundHover,
+    borderColor: a.backgroundHover,
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 11,
     fontSize: 15,
     fontFamily: 'Inter_400Regular',
-    color: palette.textPrimary,
+    color: a.textPrimary,
   },
   inputNumber: {
     textAlign: 'center',
@@ -283,10 +284,10 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     borderColor: '#fff',
   },
   colorSwatchWhiteBorder: {
-    borderColor: palette.backgroundHover,
+    borderColor: a.backgroundHover,
   },
   colorSwatchReset: {
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     overflow: 'hidden',
   },
   colorSwatchInner: {
@@ -301,13 +302,13 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     width: 13,
     height: 13,
     borderRadius: 6,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     alignItems: 'center',
     justifyContent: 'center',
   },
   resetXText: {
     fontSize: 8,
-    color: palette.textSecondary,
+    color: a.textSecondary,
     lineHeight: 10,
   },
   checkmark: {
@@ -317,7 +318,7 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   error: {
     fontSize: 12,
     fontFamily: 'Inter_400Regular',
-    color: palette.error,
+    color: a.error,
     paddingHorizontal: 20,
     marginBottom: 4,
   },

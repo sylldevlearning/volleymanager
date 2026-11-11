@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { formatClock } from '../../../src/i18n/format';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CalendarClock, ChevronRight, Ellipsis, Pencil, ScanQrCode, Share2, Shuffle, Trash2 } from 'lucide-react-native';
-import { palette } from '../../../src/theme/tokens';
 import { InfoTooltip } from '../../../src/components/ui/InfoTooltip';
 import { CoachMarks } from '../../../src/components/ui/CoachMarks';
 import { MatchRow } from '../../../src/components/tournament/MatchRow';
@@ -21,6 +20,7 @@ import {
   standingsTables,
 } from '../../../src/features/tournament/display';
 import { finishedTeamIds, phaseStatuses, type PhaseInfo, type PhaseStatus } from '../../../src/features/tournament/phases';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../../src/theme/useAppTheme';
 
 type Tab = 'planning' | 'matches' | 'standings';
 type StatusFilter = 'all' | 'toPlay' | 'done';
@@ -33,6 +33,8 @@ const TAB_HELP: Record<Tab, string> = {
 };
 
 export default function TournamentScreen() {
+  const colors = useAppTheme();
+  const styles = useThemedStyles(makeStyles);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t, i18n } = useTranslation();
   const router = useRouter();
@@ -116,7 +118,7 @@ export default function TournamentScreen() {
             <View style={styles.headerActions}>
               <InfoTooltip textKey={TAB_HELP[tab]} />
               <Pressable ref={menuRef} onPress={() => setMenuOpen(true)} hitSlop={10} accessibilityRole="button" accessibilityLabel={t('tournament.view.menu')}>
-                <Ellipsis size={22} color={palette.textPrimary} />
+                <Ellipsis size={22} color={colors.textPrimary} />
               </Pressable>
             </View>
           ),
@@ -133,10 +135,10 @@ export default function TournamentScreen() {
           {phases.map((ph) => (
             <Pressable key={ph.key} style={[styles.phaseChip, ph.status === 'live' && styles.phaseChipLive]} onPress={() => openPhase(ph)}
               accessibilityRole="button" accessibilityLabel={`${ph.label} · ${statusText(ph.status)}`}>
-              <View style={[styles.statusDot, { backgroundColor: STATUS_COLORS[ph.status] }]} />
+              <View style={[styles.statusDot, { backgroundColor: statusColors(colors)[ph.status] }]} />
               <View>
                 <Text style={styles.phaseLabel}>{ph.label}</Text>
-                <Text style={[styles.phaseStatus, { color: STATUS_COLORS[ph.status] }]}>{statusText(ph.status)}</Text>
+                <Text style={[styles.phaseStatus, { color: statusColors(colors)[ph.status] }]}>{statusText(ph.status)}</Text>
               </View>
             </Pressable>
           ))}
@@ -214,21 +216,21 @@ export default function TournamentScreen() {
               <Text style={styles.rankingTitle}>{t('tournament.view.phases')}</Text>
               {phases.map((ph) => (
                 <Pressable key={ph.key} style={styles.phaseRow} onPress={() => openPhase(ph)} accessibilityRole="button">
-                  <View style={[styles.statusDot, { backgroundColor: STATUS_COLORS[ph.status] }]} />
+                  <View style={[styles.statusDot, { backgroundColor: statusColors(colors)[ph.status] }]} />
                   <Text style={styles.phaseRowLabel}>
                     {ph.screen?.kind === 'round' && ph.status === 'done' ? t('tournament.round.titleDone', { n: ph.screen.round }) : ph.label}
                   </Text>
-                  <Text style={[styles.phaseStatus, { color: STATUS_COLORS[ph.status] }]}>
+                  <Text style={[styles.phaseStatus, { color: statusColors(colors)[ph.status] }]}>
                     {statusText(ph.status)} · {ph.done}/{ph.total}
                   </Text>
-                  {ph.screen && <ChevronRight size={16} color={palette.textMuted} />}
+                  {ph.screen && <ChevronRight size={16} color={colors.textMuted} />}
                 </Pressable>
               ))}
               {phases.some((ph) => ph.screen?.kind === 'levels') && (
                 <Pressable style={styles.phaseRow} onPress={() => router.push(`/tournament/${id}/levels`)} accessibilityRole="button">
                   <View style={[styles.statusDot, { backgroundColor: '#D4AF37' }]} />
                   <Text style={styles.phaseRowLabel}>{t('tournament.levels.title')}</Text>
-                  <ChevronRight size={16} color={palette.textMuted} />
+                  <ChevronRight size={16} color={colors.textMuted} />
                 </Pressable>
               )}
             </View>
@@ -265,17 +267,17 @@ export default function TournamentScreen() {
         <Pressable style={styles.backdrop} onPress={() => setMenuOpen(false)}>
           <View style={styles.sheet}>
             <Text style={styles.sheetTitle}>{t('tournament.view.menu')}</Text>
-            <MenuItem icon={<ScanQrCode size={20} color={palette.textPrimary} />} label={t('tournament.view.menuScanResult')}
+            <MenuItem icon={<ScanQrCode size={20} color={colors.textPrimary} />} label={t('tournament.view.menuScanResult')}
               onPress={() => { setMenuOpen(false); router.push(`/tournament/${id}/scan-result`); }} />
-            <MenuItem icon={<Share2 size={20} color={palette.textPrimary} />} label={t('tournament.view.menuExport')}
+            <MenuItem icon={<Share2 size={20} color={colors.textPrimary} />} label={t('tournament.view.menuExport')}
               onPress={() => { setMenuOpen(false); router.push(`/tournament/${id}/export`); }} />
-            <MenuItem icon={<Pencil size={20} color={palette.textPrimary} />} label={t('tournament.view.menuTeams')}
+            <MenuItem icon={<Pencil size={20} color={colors.textPrimary} />} label={t('tournament.view.menuTeams')}
               onPress={() => { setMenuOpen(false); router.push(`/tournament/${id}/teams`); }} />
-            <MenuItem icon={<CalendarClock size={20} color={palette.textPrimary} />} label={t('tournament.view.menuSchedule')}
+            <MenuItem icon={<CalendarClock size={20} color={colors.textPrimary} />} label={t('tournament.view.menuSchedule')}
               onPress={() => { setMenuOpen(false); router.push(`/tournament/${id}/schedule`); }} />
             {__DEV__ && (
               <MenuItem
-                icon={<Shuffle size={20} color={palette.warning} />}
+                icon={<Shuffle size={20} color={colors.warning} />}
                 label={t('tournament.view.menuDevFill')}
                 onPress={async () => {
                   setMenuOpen(false);
@@ -285,7 +287,7 @@ export default function TournamentScreen() {
                 }}
               />
             )}
-            <MenuItem icon={<Trash2 size={20} color={palette.error} />} label={t('tournament.view.menuDelete')} danger onPress={confirmDelete} />
+            <MenuItem icon={<Trash2 size={20} color={colors.error} />} label={t('tournament.view.menuDelete')} danger onPress={confirmDelete} />
           </View>
         </Pressable>
       </Modal>
@@ -309,9 +311,10 @@ const STATUS_KEYS: Record<PhaseStatus, string> = {
   live: 'tournament.view.statusLive',
   upcoming: 'tournament.view.statusUpcoming',
 };
-const STATUS_COLORS: Record<PhaseStatus, string> = { done: palette.success, live: palette.info, upcoming: palette.textMuted };
+const statusColors = (c: AppTheme): Record<PhaseStatus, string> => ({ done: c.success, live: c.info, upcoming: c.textMuted });
 
 function MenuItem({ icon, label, onPress, danger }: { icon: ReactNode; label: string; onPress: () => void; danger?: boolean }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <Pressable style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]} onPress={onPress} accessibilityRole="button">
       {icon}
@@ -320,63 +323,63 @@ function MenuItem({ icon, label, onPress, danger }: { icon: ReactNode; label: st
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   content: { flex: 1 },
   finishedBadge: {
-    fontSize: 11, fontFamily: 'Inter_600SemiBold', color: palette.success, overflow: 'hidden',
+    fontSize: 11, fontFamily: 'Inter_600SemiBold', color: a.success, overflow: 'hidden',
     paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, backgroundColor: 'rgba(46, 160, 67, 0.15)',
   },
-  progress: { fontSize: 13, fontFamily: 'Inter_500Medium', color: palette.textSecondary, paddingHorizontal: 16, paddingBottom: 8 },
+  progress: { fontSize: 13, fontFamily: 'Inter_500Medium', color: a.textSecondary, paddingHorizontal: 16, paddingBottom: 8 },
   phaseStrip: { flexGrow: 0, marginBottom: 8 },
   phaseStripContent: { paddingHorizontal: 16, gap: 8 },
   phaseChip: {
     flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 12,
-    backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundSurface, borderWidth: 1, borderColor: a.backgroundElevated,
   },
-  phaseChipLive: { borderColor: palette.info },
+  phaseChipLive: { borderColor: a.info },
   statusDot: { width: 10, height: 10, borderRadius: 5 },
-  phaseLabel: { fontSize: 13, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
+  phaseLabel: { fontSize: 13, fontFamily: 'Inter_700Bold', color: a.textPrimary },
   phaseStatus: { fontSize: 12, fontFamily: 'Inter_600SemiBold' },
   phaseCard: {
-    backgroundColor: palette.backgroundSurface, borderRadius: 14, borderWidth: 1,
-    borderColor: palette.backgroundElevated, padding: 12, gap: 2,
+    backgroundColor: a.backgroundSurface, borderRadius: 14, borderWidth: 1,
+    borderColor: a.backgroundElevated, padding: 12, gap: 2,
   },
-  phaseRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 9, borderTopWidth: 1, borderTopColor: palette.backgroundElevated },
-  phaseRowLabel: { flex: 1, fontSize: 15, fontFamily: 'Inter_500Medium', color: palette.textPrimary },
+  phaseRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 9, borderTopWidth: 1, borderTopColor: a.backgroundElevated },
+  phaseRowLabel: { flex: 1, fontSize: 15, fontFamily: 'Inter_500Medium', color: a.textPrimary },
   tabBar: {
     flexDirection: 'row', marginHorizontal: 16, marginBottom: 8, padding: 4, gap: 4,
-    backgroundColor: palette.backgroundSurface, borderRadius: 12,
+    backgroundColor: a.backgroundSurface, borderRadius: 12,
   },
   tab: { flex: 1, paddingVertical: 10, borderRadius: 8, alignItems: 'center' },
-  tabActive: { backgroundColor: palette.backgroundElevated },
-  tabText: { fontSize: 14, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
-  tabTextActive: { fontFamily: 'Inter_700Bold', color: palette.textPrimary },
+  tabActive: { backgroundColor: a.backgroundElevated },
+  tabText: { fontSize: 14, fontFamily: 'Inter_500Medium', color: a.textSecondary },
+  tabTextActive: { fontFamily: 'Inter_700Bold', color: a.textPrimary },
   list: { paddingHorizontal: 16, paddingBottom: 32 },
-  sectionTitle: { fontSize: 14, fontFamily: 'Inter_700Bold', color: palette.textPrimary, marginTop: 14, marginBottom: 6 },
+  sectionTitle: { fontSize: 14, fontFamily: 'Inter_700Bold', color: a.textPrimary, marginTop: 14, marginBottom: 6 },
   item: { marginBottom: 8 },
   filters: { gap: 8, marginBottom: 10 },
   chipRow: { gap: 8 },
-  empty: { fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textSecondary, textAlign: 'center', paddingVertical: 32 },
+  empty: { fontSize: 14, fontFamily: 'Inter_400Regular', color: a.textSecondary, textAlign: 'center', paddingVertical: 32 },
   standings: { gap: 12 },
   rankingCard: {
-    backgroundColor: palette.backgroundSurface, borderRadius: 14, borderWidth: 1,
-    borderColor: palette.warning, padding: 12, gap: 4,
+    backgroundColor: a.backgroundSurface, borderRadius: 14, borderWidth: 1,
+    borderColor: a.warning, padding: 12, gap: 4,
   },
-  rankingTitle: { fontSize: 14, fontFamily: 'Inter_700Bold', color: palette.warning, marginBottom: 4 },
+  rankingTitle: { fontSize: 14, fontFamily: 'Inter_700Bold', color: a.warning, marginBottom: 4 },
   rankingRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 4 },
-  rankingRank: { width: 26, fontSize: 15, fontFamily: 'Inter_700Bold', color: palette.textPrimary, textAlign: 'center' },
-  rankingName: { flex: 1, fontSize: 15, fontFamily: 'Inter_500Medium', color: palette.textPrimary },
+  rankingRank: { width: 26, fontSize: 15, fontFamily: 'Inter_700Bold', color: a.textPrimary, textAlign: 'center' },
+  rankingName: { flex: 1, fontSize: 15, fontFamily: 'Inter_500Medium', color: a.textPrimary },
   bracketRound: {},
   backdrop: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'flex-end' },
   sheet: {
-    backgroundColor: palette.backgroundSurface, borderTopLeftRadius: 20, borderTopRightRadius: 20,
+    backgroundColor: a.backgroundSurface, borderTopLeftRadius: 20, borderTopRightRadius: 20,
     padding: 16, paddingBottom: 32, gap: 4,
   },
-  sheetTitle: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary, marginBottom: 8, textTransform: 'uppercase' },
+  sheetTitle: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: a.textSecondary, marginBottom: 8, textTransform: 'uppercase' },
   menuItem: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 8, borderRadius: 10 },
-  menuItemPressed: { backgroundColor: palette.backgroundElevated },
-  menuText: { fontSize: 16, fontFamily: 'Inter_500Medium', color: palette.textPrimary },
-  menuDanger: { color: palette.error },
+  menuItemPressed: { backgroundColor: a.backgroundElevated },
+  menuText: { fontSize: 16, fontFamily: 'Inter_500Medium', color: a.textPrimary },
+  menuDanger: { color: a.error },
 });

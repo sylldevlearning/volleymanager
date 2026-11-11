@@ -4,13 +4,14 @@ import { useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import QRCode from 'react-native-qrcode-svg';
-import { palette } from '../../../../src/theme/tokens';
 import { getTournamentBundle, type TournamentBundle } from '../../../../src/services/tournamentService';
 import { matchTitle } from '../../../../src/features/tournament/display';
 import { encodeMatchQr, matchQrOf } from '../../../../src/features/tournament/matchQr';
+import { useThemedStyles, type AppTheme } from '../../../../src/theme/useAppTheme';
 
 /** Organiser: QR of an upcoming match, scanned by the referee to open a filled quick match. */
 export default function TournamentMatchQrScreen() {
+  const styles = useThemedStyles(makeStyles);
   const { id, matchId } = useLocalSearchParams<{ id: string; matchId: string }>();
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
@@ -56,16 +57,16 @@ export default function TournamentMatchQrScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
   scroll: { padding: 16, paddingBottom: 32, alignItems: 'center' },
-  title: { fontSize: 20, fontFamily: 'Inter_700Bold', color: palette.textPrimary, textAlign: 'center' },
+  title: { fontSize: 20, fontFamily: 'Inter_700Bold', color: a.textPrimary, textAlign: 'center' },
   teams: { marginTop: 12, gap: 6, alignSelf: 'stretch' },
   teamRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
   dot: { width: 14, height: 14, borderRadius: 7 },
-  teamName: { flexShrink: 1, fontSize: 16, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },
-  meta: { fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textSecondary, marginTop: 8, textAlign: 'center' },
+  teamName: { flexShrink: 1, fontSize: 16, fontFamily: 'Inter_600SemiBold', color: a.textPrimary },
+  meta: { fontSize: 14, fontFamily: 'Inter_400Regular', color: a.textSecondary, marginTop: 8, textAlign: 'center' },
   qrBox: { marginTop: 20, padding: 20, borderRadius: 16, backgroundColor: '#FFFFFF' },
-  scanWith: { fontSize: 16, fontFamily: 'Inter_700Bold', color: palette.textPrimary, marginTop: 16, textAlign: 'center' },
-  hint: { fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textSecondary, marginTop: 8, lineHeight: 20, textAlign: 'center' },
+  scanWith: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.textPrimary, marginTop: 16, textAlign: 'center' },
+  hint: { fontSize: 14, fontFamily: 'Inter_400Regular', color: a.textSecondary, marginTop: 8, lineHeight: 20, textAlign: 'center' },
 });

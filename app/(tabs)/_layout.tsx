@@ -1,21 +1,20 @@
 import { Tabs } from 'expo-router';
 import { Home, List, Users, Settings } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { palette } from '../../src/theme/tokens';
-import { useAccent } from '../../src/theme/useAccent';
+import { useAppTheme } from '../../src/theme/useAppTheme';
 
 export default function TabLayout() {
-  const accent = useAccent();
+  const colors = useAppTheme();
   const { t } = useTranslation();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: accent.color,
-        tabBarInactiveTintColor: palette.textMuted,
+        tabBarActiveTintColor: colors.color,
+        tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: {
-          backgroundColor: palette.background,
-          borderTopColor: palette.backgroundElevated,
+          backgroundColor: colors.background,
+          borderTopColor: colors.backgroundElevated,
           borderTopWidth: 1,
         },
         tabBarLabelStyle: {
@@ -23,12 +22,12 @@ export default function TabLayout() {
           fontFamily: 'Inter_500Medium',
         },
         headerStyle: {
-          backgroundColor: palette.background,
+          backgroundColor: colors.background,
         },
-        headerTintColor: palette.textPrimary,
+        headerTintColor: colors.textPrimary,
         headerTitleStyle: {
           fontFamily: 'Inter_700Bold',
-          color: palette.textPrimary,
+          color: colors.textPrimary,
         },
       }}
     >

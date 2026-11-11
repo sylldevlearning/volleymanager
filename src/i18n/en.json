@@ -587,16 +587,11 @@
     "replayHelp": "Show help again",
     "privacyOptions": "Privacy settings",
     "languageSystem": "Phone language ({{name}})",
-    "accentTitle": "Main colour",
-    "accentColors": {
-      "red": "Red",
-      "blue": "Blue",
-      "violet": "Violet",
-      "pink": "Pink",
-      "green": "Green",
-      "teal": "Teal",
-      "orange": "Orange",
-      "gold": "Gold"
+    "appearance": {
+      "title": "Appearance",
+      "system": "Automatic (like the phone)",
+      "light": "Light",
+      "dark": "Dark"
     }
   },
   "scoring": {

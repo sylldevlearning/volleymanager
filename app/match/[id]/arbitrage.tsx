@@ -45,7 +45,7 @@ import { CoachMarks } from '../../../src/components/ui/CoachMarks';
 import { InfoTooltip } from '../../../src/components/ui/InfoTooltip';
 import { WarningBanner } from '../../../src/components/ui/WarningBanner';
 import { timeoutWarning, substitutionWarning } from '../../../src/features/match/quotaWarnings';
-import { type AccentTheme, useThemedStyles } from '../../../src/theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../../src/theme/useAppTheme';
 
 type SetupPhase = 'serveChoice' | null;
 
@@ -84,6 +84,7 @@ function courtPlayers(
 }
 
 export default function ArbitrageScreen() {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
@@ -787,7 +788,7 @@ export default function ArbitrageScreen() {
           accessibilityRole="button"
           accessibilityLabel={t('match.changeEnds')}
         >
-          <ArrowLeftRight size={18} color={palette.textSecondary} />
+          <ArrowLeftRight size={18} color={colors.textSecondary} />
         </Pressable>
         <View style={[styles.courtLabel, styles.courtLabelRight]}>
           <Text style={[styles.courtLabelText, styles.courtLabelTextRight]} numberOfLines={1}>{rightData.team.name}</Text>
@@ -885,7 +886,7 @@ export default function ArbitrageScreen() {
                 onPress={() => { setSanctionSide(leftData.side); setShowSanctionSheet(true); }}
                 accessibilityRole="button"
               >
-                <AlertTriangle size={14} color={palette.warning} />
+                <AlertTriangle size={14} color={colors.warning} />
                 <Text style={styles.sanctionBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{t('sanction.button')}</Text>
               </Pressable>
               <Pressable
@@ -893,7 +894,7 @@ export default function ArbitrageScreen() {
                 onPress={() => { setSanctionSide(rightData.side); setShowSanctionSheet(true); }}
                 accessibilityRole="button"
               >
-                <AlertTriangle size={14} color={palette.warning} />
+                <AlertTriangle size={14} color={colors.warning} />
                 <Text style={styles.sanctionBtnText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{t('sanction.button')}</Text>
               </Pressable>
               <TimeoutButton
@@ -907,7 +908,7 @@ export default function ArbitrageScreen() {
           {/* Fixed 4-column bar — the former horizontal scroll pushed "End match" off-screen */}
           <View style={styles.actionsRow}>
             <ActionButton
-              icon={<ArrowLeft size={18} color={palette.textSecondary} />}
+              icon={<ArrowLeft size={18} color={colors.textSecondary} />}
               label={t('arbitrage.actionMenu')}
               accessibilityLabel={t('home.backToMenu')}
               onPress={() => {
@@ -919,19 +920,19 @@ export default function ArbitrageScreen() {
             />
             <ActionButton
               ref={undoRef}
-              icon={<RotateCcw size={18} color={setIsOver ? palette.textMuted : palette.textSecondary} />}
+              icon={<RotateCcw size={18} color={setIsOver ? colors.textMuted : colors.textSecondary} />}
               label={t('match.undo')}
               onPress={handleUndo}
               disabled={setIsOver}
             />
             <ActionButton
-              icon={<ListChecks size={18} color={palette.textSecondary} />}
+              icon={<ListChecks size={18} color={colors.textSecondary} />}
               label={t('arbitrage.actionRecap')}
               accessibilityLabel={t('arbitrage.recapButton')}
               onPress={() => setShowRecap(true)}
             />
             <ActionButton
-              icon={<Flag size={18} color={palette.error} />}
+              icon={<Flag size={18} color={colors.error} />}
               label={t('arbitrage.actionEnd')}
               accessibilityLabel={t('match.endMatch')}
               onPress={handleEndMatch}
@@ -1007,7 +1008,7 @@ export default function ArbitrageScreen() {
           <View style={styles.pickerHeader}>
             <Text style={styles.pickerTitle}>{t('arbitrage.choosePlayer')}</Text>
             <Pressable onPress={() => setLineupPickerTarget(null)} accessibilityRole="button">
-              <X size={20} color={palette.textSecondary} />
+              <X size={20} color={colors.textSecondary} />
             </Pressable>
           </View>
           <ScrollView contentContainerStyle={styles.pickerList}>
@@ -1165,6 +1166,7 @@ function ActionButton({
   disabled?: boolean;
   danger?: boolean;
 }) {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
   return (
     <Pressable
@@ -1182,7 +1184,7 @@ function ActionButton({
     >
       {icon}
       <Text
-        style={[styles.actionText, danger && { color: palette.error }]}
+        style={[styles.actionText, danger && { color: colors.error }]}
         numberOfLines={1}
         adjustsFontSizeToFit
         minimumFontScale={0.8}
@@ -1193,10 +1195,10 @@ function ActionButton({
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
-  loading: { flex: 1, backgroundColor: palette.background, alignItems: 'center', justifyContent: 'center' },
-  loadingText: { color: palette.textSecondary, fontFamily: 'Inter_400Regular' },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
+  loading: { flex: 1, backgroundColor: a.background, alignItems: 'center', justifyContent: 'center' },
+  loadingText: { color: a.textSecondary, fontFamily: 'Inter_400Regular' },
   setsRow: { paddingTop: 12, paddingBottom: 8, alignItems: 'center' },
   helpBtn: { position: 'absolute', top: 12, right: 12 },
   scoreArea: {
@@ -1207,8 +1209,8 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     marginBottom: 4,
   },
   scoreSeparator: { alignItems: 'center', gap: 4, width: 56, position: 'relative', overflow: 'visible' },
-  setsScore: { fontSize: 20, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
-  setLabel: { fontSize: 9, fontFamily: 'Inter_600SemiBold', color: palette.textMuted, letterSpacing: 1 },
+  setsScore: { fontSize: 20, fontFamily: 'Inter_700Bold', color: a.textPrimary },
+  setLabel: { fontSize: 9, fontFamily: 'Inter_600SemiBold', color: a.textMuted, letterSpacing: 1 },
   serveBall: { position: 'absolute', top: '50%', marginTop: -11, left: '50%', marginLeft: -11, width: 22, height: 22 },
 
   courtLabelsRow: {
@@ -1221,19 +1223,19 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   courtLabel: { flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 },
   courtLabelRight: { flexDirection: 'row-reverse' },
   teamDot: { width: 10, height: 10, borderRadius: 5 },
-  courtLabelText: { fontSize: 13, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
+  courtLabelText: { fontSize: 13, fontFamily: 'Inter_700Bold', color: a.textPrimary },
   courtLabelTextRight: { textAlign: 'right' },
   swapBtn: {
     width: 36, height: 36, borderRadius: 10,
     alignItems: 'center', justifyContent: 'center',
-    backgroundColor: palette.backgroundSurface,
-    borderWidth: 1, borderColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundSurface,
+    borderWidth: 1, borderColor: a.backgroundElevated,
     marginHorizontal: 8,
   },
   swapBtnPressed: { opacity: 0.7 },
   courtWrap: { alignItems: 'center', marginBottom: 4 },
   lineupHint: {
-    fontSize: 12, fontFamily: 'Inter_500Medium', color: palette.textSecondary,
+    fontSize: 12, fontFamily: 'Inter_500Medium', color: a.textSecondary,
     textAlign: 'center', marginBottom: 6, paddingHorizontal: 16,
   },
 
@@ -1260,12 +1262,12 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     flex: 1,
     paddingVertical: 8,
     borderRadius: 10,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
     alignItems: 'center',
   },
-  subBtnText: { fontSize: 12, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary },
+  subBtnText: { fontSize: 12, fontFamily: 'Inter_600SemiBold', color: a.textSecondary },
 
   sanctionRow: {
     flexDirection: 'row',
@@ -1281,11 +1283,11 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     gap: 6,
     paddingVertical: 6,
     borderRadius: 10,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderWidth: 1,
-    borderColor: palette.warning + '40',
+    borderColor: a.warning + '40',
   },
-  sanctionBtnText: { fontSize: 11, fontFamily: 'Inter_600SemiBold', color: palette.warning },
+  sanctionBtnText: { fontSize: 11, fontFamily: 'Inter_600SemiBold', color: a.warning },
   bannerAnchor: { height: 0, zIndex: 50, elevation: 6 },
   timeoutBtn: {
     flex: 1,
@@ -1295,7 +1297,7 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     gap: 6,
     paddingVertical: 6,
     borderRadius: 10,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderWidth: 1,
   },
   timeoutBtnPressed: { opacity: 0.7 },
@@ -1306,7 +1308,7 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   pillLabel: { fontSize: 12, fontFamily: 'Inter_700Bold' },
   pillDots: { flexDirection: 'row', gap: 3 },
   pillDot: { width: 8, height: 8, borderRadius: 4 },
-  pillInf: { fontSize: 14, color: palette.textMuted, fontFamily: 'Inter_700Bold' },
+  pillInf: { fontSize: 14, color: a.textMuted, fontFamily: 'Inter_700Bold' },
 
   actionsRow: {
     flexDirection: 'row',
@@ -1323,14 +1325,14 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 4,
     borderRadius: 12,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
   },
-  actionBtnDanger: { borderColor: palette.error + '40' },
+  actionBtnDanger: { borderColor: a.error + '40' },
   actionBtnDisabled: { opacity: 0.4 },
   actionBtnPressed: { opacity: 0.7 },
-  actionText: { fontSize: 12, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
+  actionText: { fontSize: 12, fontFamily: 'Inter_500Medium', color: a.textSecondary },
 
   serveChoiceContainer: { flex: 1, justifyContent: 'center', padding: 24, gap: 16 },
   serveChoiceSubtitle: {
@@ -1338,19 +1340,19 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     textAlign: 'center', textTransform: 'uppercase', letterSpacing: 0.5,
   },
   serveChoiceTitle: {
-    fontSize: 20, fontFamily: 'Inter_700Bold', color: palette.textPrimary,
+    fontSize: 20, fontFamily: 'Inter_700Bold', color: a.textPrimary,
     textAlign: 'center', marginBottom: 12,
   },
   serveChoiceBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
     padding: 20, borderRadius: 16, borderWidth: 2,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
   },
-  serveChoiceBtnText: { fontSize: 17, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
+  serveChoiceBtnText: { fontSize: 17, fontFamily: 'Inter_700Bold', color: a.textPrimary },
 
   pickerBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
   pickerSheet: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: '70%',
@@ -1359,17 +1361,17 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   pickerHeader: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 20, paddingVertical: 16,
-    borderBottomWidth: 1, borderBottomColor: palette.backgroundElevated,
+    borderBottomWidth: 1, borderBottomColor: a.backgroundElevated,
   },
-  pickerTitle: { fontSize: 16, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
+  pickerTitle: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.textPrimary },
   pickerList: { padding: 16, gap: 8 },
   pickerRow: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
     paddingVertical: 12, paddingHorizontal: 14,
-    backgroundColor: palette.backgroundElevated, borderRadius: 12,
+    backgroundColor: a.backgroundElevated, borderRadius: 12,
   },
   pickerNumBadge: { width: 34, height: 34, borderRadius: 9, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
-  pickerNumText: { fontSize: 14, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
-  pickerName: { fontSize: 15, fontFamily: 'Inter_500Medium', color: palette.textPrimary },
-  emptyHint: { fontSize: 13, color: palette.textMuted, textAlign: 'center', paddingVertical: 16 },
+  pickerNumText: { fontSize: 14, fontFamily: 'Inter_700Bold', color: a.textPrimary },
+  pickerName: { fontSize: 15, fontFamily: 'Inter_500Medium', color: a.textPrimary },
+  emptyHint: { fontSize: 13, color: a.textMuted, textAlign: 'center', paddingVertical: 16 },
 });

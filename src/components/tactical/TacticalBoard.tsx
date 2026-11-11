@@ -45,7 +45,7 @@ import { palette } from '../../theme/tokens';
 import { InfoTooltip } from '../ui/InfoTooltip';
 import { CoachMarks } from '../ui/CoachMarks';
 import * as Haptics from 'expo-haptics';
-import { type AccentTheme, useThemedStyles } from '../../theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../theme/useAppTheme';
 
 const BENCH_TOKEN_SIZE = 30;
 /** Halo around the token selected for an arrow */
@@ -316,6 +316,7 @@ export function TacticalBoard({
   homePlayers = [],
   awayPlayers = [],
 }: TacticalBoardProps) {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const { width: screenW, height: screenH } = useWindowDimensions();
@@ -1365,7 +1366,7 @@ export function TacticalBoard({
                 onPress={() => { setShowMenu(false); confirmClearDrawings(); }}
               >
                 <Text style={styles.menuItemIcon}>🧺</Text>
-                <Text style={[styles.menuItemText, { color: palette.error }]}>{t('tactical.tools.clearAll')}</Text>
+                <Text style={[styles.menuItemText, { color: colors.error }]}>{t('tactical.tools.clearAll')}</Text>
               </Pressable>
             </View>
           </Pressable>
@@ -1563,10 +1564,10 @@ export function TacticalBoard({
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
+const makeStyles = (a: AppTheme) => StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: palette.background,
+    backgroundColor: a.background,
     overflow: 'visible',
   },
   header: {
@@ -1576,53 +1577,53 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     paddingHorizontal: 8,
     gap: 4,
     borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
+    borderBottomColor: a.backgroundElevated,
   },
   headerBtn: {
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     alignItems: 'center',
     justifyContent: 'center',
   },
   headerBtnText: {
     fontSize: 14,
-    color: palette.textSecondary,
+    color: a.textSecondary,
     fontFamily: 'Inter_700Bold',
   },
   formatChip: {
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 8,
-    backgroundColor: palette.accentSecondary + '25',
+    backgroundColor: a.accentSecondary + '25',
     borderWidth: 1,
-    borderColor: palette.accentSecondary + '50',
+    borderColor: a.accentSecondary + '50',
   },
   formatChipText: {
     fontSize: 11,
     fontFamily: 'Inter_700Bold',
-    color: palette.accentSecondary,
+    color: a.accentSecondary,
   },
   title: {
     flex: 1,
     textAlign: 'center',
     fontSize: 15,
     fontFamily: 'Inter_700Bold',
-    color: palette.textPrimary,
+    color: a.textPrimary,
   },
   scorePill: {
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     borderWidth: 1,
     borderColor: a.color + '40',
   },
   scorePillText: {
     fontSize: 11,
     fontFamily: 'Inter_700Bold',
-    color: palette.textPrimary,
+    color: a.textPrimary,
   },
   menuBackdrop: {
     position: 'absolute',
@@ -1637,10 +1638,10 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     top: 52,
     right: 8,
     minWidth: 200,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
@@ -1659,11 +1660,11 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   menuItemText: {
     fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textPrimary,
+    color: a.textPrimary,
   },
   menuDivider: {
     height: 1,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     marginHorizontal: 12,
   },
   courtContainer: {
@@ -1679,7 +1680,7 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     marginHorizontal: 16,
     paddingVertical: 6,
     borderTopWidth: 1,
-    borderTopColor: palette.backgroundElevated,
+    borderTopColor: a.backgroundElevated,
     overflow: 'visible',
   },
   benchHalf: {
@@ -1689,12 +1690,12 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   },
   benchDivider: {
     width: 1,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
   },
   benchTitle: {
     fontSize: 11,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textSecondary,
+    color: a.textSecondary,
     marginBottom: 4,
   },
   benchTokens: {
@@ -1705,7 +1706,7 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   },
   benchEmptyLabel: {
     fontSize: 16,
-    color: palette.textMuted,
+    color: a.textMuted,
     fontFamily: 'Inter_400Regular',
   },
   court: {

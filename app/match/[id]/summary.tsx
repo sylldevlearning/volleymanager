@@ -31,8 +31,11 @@ import { useInterstitialAd } from '../../../src/components/ads/useInterstitialAd
 import { maybeRequestReview } from '../../../src/features/review/reviewPrompt';
 import { encodeResultQr, resultQrOf } from '../../../src/features/tournament/matchQr';
 import { ResultQrCard } from '../../../src/components/qr/ResultQrCard';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../../src/theme/useAppTheme';
 
 export default function SummaryScreen() {
+  const colors = useAppTheme();
+  const styles = useThemedStyles(makeStyles);
   const { id, justFinished } = useLocalSearchParams<{ id: string; justFinished?: string }>();
   const { t } = useTranslation();
   const router = useRouter();
@@ -129,7 +132,7 @@ export default function SummaryScreen() {
       <ScrollView contentContainerStyle={styles.scroll}>
         {winner && (
           <View style={styles.winnerBanner}>
-            <Trophy size={28} color={palette.warning} />
+            <Trophy size={28} color={colors.warning} />
             <Text style={styles.winnerLabel}>{t('match.winner')}</Text>
             <Text style={styles.winnerName}>{winner.name}</Text>
           </View>
@@ -180,7 +183,7 @@ export default function SummaryScreen() {
           onPress={() => router.push(`/match/${id}/stats` as never)}
           accessibilityRole="button"
         >
-          <BarChart2 size={18} color={palette.accentSecondary} />
+          <BarChart2 size={18} color={colors.accentSecondary} />
           <Text style={styles.statsDetailBtnText}>{t('stats.detailed')}</Text>
         </Pressable>
 
@@ -217,6 +220,7 @@ export default function SummaryScreen() {
 }
 
 function TeamScore({ name, color, sets }: { name: string; color: string; sets: number }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.teamScore}>
       <Text style={styles.teamScoreName} numberOfLines={2}>{name}</Text>
@@ -234,6 +238,7 @@ function PlayerStatCard({
   stats: PlayerStats;
   teamColor: string;
 }) {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const serveEff = serveEfficiency(stats);
   const attackEff = attackEfficiency(stats);
@@ -280,6 +285,7 @@ function PlayerStatCard({
 }
 
 function StatCell({ label, value, suffix = '' }: { label: string; value: number; suffix?: string }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.statCell}>
       <Text style={styles.statCellValue}>{value}{suffix}</Text>
@@ -288,20 +294,20 @@ function StatCell({ label, value, suffix = '' }: { label: string; value: number;
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
   loading: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: palette.background,
+    backgroundColor: a.background,
   },
-  loadingText: { color: palette.textSecondary, fontFamily: 'Inter_400Regular' },
+  loadingText: { color: a.textSecondary, fontFamily: 'Inter_400Regular' },
   scroll: { padding: 20, gap: 16 },
   winnerBanner: {
-    backgroundColor: palette.warning + '15',
+    backgroundColor: a.warning + '15',
     borderWidth: 1,
-    borderColor: palette.warning + '40',
+    borderColor: a.warning + '40',
     borderRadius: 16,
     padding: 20,
     alignItems: 'center',
@@ -310,16 +316,16 @@ const styles = StyleSheet.create({
   winnerLabel: {
     fontSize: 12,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textMuted,
+    color: a.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
-  winnerName: { fontSize: 22, fontFamily: 'Inter_700Bold', color: palette.warning },
+  winnerName: { fontSize: 22, fontFamily: 'Inter_700Bold', color: a.warning },
   scoreCard: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
     flexDirection: 'row',
     alignItems: 'center',
     padding: 20,
@@ -328,38 +334,38 @@ const styles = StyleSheet.create({
   teamScoreName: {
     fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textSecondary,
+    color: a.textSecondary,
     textAlign: 'center',
   },
   teamScoreSets: { fontSize: 52, fontFamily: 'Inter_900Black', lineHeight: 56 },
-  vs: { fontSize: 20, fontFamily: 'Inter_500Medium', color: palette.textMuted, marginHorizontal: 8 },
+  vs: { fontSize: 20, fontFamily: 'Inter_500Medium', color: a.textMuted, marginHorizontal: 8 },
   section: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
     overflow: 'hidden',
   },
   sectionTitle: {
     fontSize: 12,
     fontFamily: 'Inter_700Bold',
-    color: palette.textMuted,
+    color: a.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
     padding: 14,
     borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
+    borderBottomColor: a.backgroundElevated,
   },
   sectionHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
+    borderBottomColor: a.backgroundElevated,
     paddingRight: 14,
   },
   legendRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginLeft: 'auto' },
   legendDot: { width: 8, height: 8, borderRadius: 4 },
-  legendText: { fontSize: 11, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
+  legendText: { fontSize: 11, fontFamily: 'Inter_500Medium', color: a.textSecondary },
   barChartWrap: { paddingHorizontal: 8, paddingTop: 8 },
   barLabelRow: {
     flexDirection: 'row',
@@ -370,7 +376,7 @@ const styles = StyleSheet.create({
   barGroupLabel: {
     fontSize: 10,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textMuted,
+    color: a.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
@@ -381,13 +387,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
+    borderBottomColor: a.backgroundElevated,
   },
-  setNum: { fontSize: 14, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
-  setScore: { fontSize: 16, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
+  setNum: { fontSize: 14, fontFamily: 'Inter_500Medium', color: a.textSecondary },
+  setScore: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.textPrimary },
   playerCard: {
     borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
+    borderBottomColor: a.backgroundElevated,
   },
   playerCardHeader: {
     flexDirection: 'row',
@@ -397,7 +403,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   playerTeamBar: { width: 3, height: 20, borderRadius: 2 },
-  playerStatName: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },
+  playerStatName: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: a.textPrimary },
   playerCardBody: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -408,11 +414,11 @@ const styles = StyleSheet.create({
   radarWrap: { alignItems: 'center', justifyContent: 'center' },
   statGrid: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   statCell: { minWidth: 48, alignItems: 'center' },
-  statCellValue: { fontSize: 18, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
+  statCellValue: { fontSize: 18, fontFamily: 'Inter_700Bold', color: a.textPrimary },
   statCellLabel: {
     fontSize: 10,
     fontFamily: 'Inter_500Medium',
-    color: palette.textMuted,
+    color: a.textMuted,
     marginTop: 2,
   },
   statsDetailBtn: {
@@ -420,30 +426,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: palette.accentSecondary + '40',
+    borderColor: a.accentSecondary + '40',
     paddingVertical: 14,
   },
   statsDetailBtnText: {
     fontSize: 15,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.accentSecondary,
+    color: a.accentSecondary,
   },
   backToMenuBtn: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
     paddingVertical: 18,
     marginTop: 8,
   },
   backToMenuText: {
     fontSize: 16,
     fontFamily: 'Inter_700Bold',
-    color: palette.textPrimary,
+    color: a.textPrimary,
   },
 });

@@ -1,18 +1,20 @@
 import type { ComponentProps } from 'react';
 import type { Stack } from 'expo-router';
-import { palette } from '../theme/tokens';
+import type { ThemeColors } from '../theme/colors';
 
 type StackScreenOptions = Exclude<ComponentProps<typeof Stack>['screenOptions'], (...args: never[]) => unknown> & object;
 
-/** Root stack bar, in the app's dark theme — back arrow without "Retour" text on iOS */
-export const darkHeaderOptions = {
-  headerStyle: { backgroundColor: palette.background },
-  headerTintColor: palette.textPrimary,
-  headerTitleStyle: { fontFamily: 'Inter_700Bold', color: palette.textPrimary },
-  headerShadowVisible: false,
-  headerBackButtonDisplayMode: 'minimal',
-  contentStyle: { backgroundColor: palette.background },
-} satisfies StackScreenOptions;
+/** Root stack bar in the current mode (light / dark) — back arrow without "Retour" text on iOS */
+export function headerOptions(c: ThemeColors) {
+  return {
+    headerStyle: { backgroundColor: c.background },
+    headerTintColor: c.textPrimary,
+    headerTitleStyle: { fontFamily: 'Inter_700Bold', color: c.textPrimary },
+    headerShadowVisible: false,
+    headerBackButtonDisplayMode: 'minimal',
+    contentStyle: { backgroundColor: c.background },
+  } satisfies StackScreenOptions;
+}
 
 export interface ScreenHeader {
   /** Immersive screens keep their own buttons */

@@ -3,13 +3,14 @@ import { Alert, FlatList, StyleSheet, Text, TextInput, View } from 'react-native
 import { useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { palette } from '../../../src/theme/tokens';
 import { getTournamentBundle, renameTournamentTeam } from '../../../src/services/tournamentService';
 import type { TournamentTeam } from '../../../src/models/tournament';
 import { finishedTeamIds } from '../../../src/features/tournament/phases';
+import { useThemedStyles, type AppTheme } from '../../../src/theme/useAppTheme';
 
 /** Rename the teams of a tournament — saved when leaving the field. */
 export default function TournamentTeamsScreen() {
+  const styles = useThemedStyles(makeStyles);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
   const [teams, setTeams] = useState<TournamentTeam[]>([]);
@@ -82,19 +83,19 @@ export default function TournamentTeamsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
   list: { padding: 16, gap: 8 },
-  hint: { fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textSecondary, lineHeight: 20, marginBottom: 8 },
-  row: { padding: 8, borderRadius: 12, borderWidth: 1, borderColor: palette.backgroundElevated, backgroundColor: palette.backgroundSurface, gap: 4 },
-  rowError: { borderColor: palette.error },
+  hint: { fontSize: 14, fontFamily: 'Inter_400Regular', color: a.textSecondary, lineHeight: 20, marginBottom: 8 },
+  row: { padding: 8, borderRadius: 12, borderWidth: 1, borderColor: a.backgroundElevated, backgroundColor: a.backgroundSurface, gap: 4 },
+  rowError: { borderColor: a.error },
   line: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   dot: { width: 14, height: 14, borderRadius: 7 },
   badge: {
-    fontSize: 11, fontFamily: 'Inter_600SemiBold', color: palette.success, overflow: 'hidden',
+    fontSize: 11, fontFamily: 'Inter_600SemiBold', color: a.success, overflow: 'hidden',
     paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, backgroundColor: 'rgba(46, 160, 67, 0.15)',
   },
-  input: { flex: 1, fontSize: 15, fontFamily: 'Inter_500Medium', color: palette.textPrimary, paddingVertical: 8 },
-  error: { fontSize: 12, fontFamily: 'Inter_500Medium', color: palette.error, marginLeft: 24 },
-  saved: { fontSize: 12, fontFamily: 'Inter_500Medium', color: palette.success, marginLeft: 24 },
+  input: { flex: 1, fontSize: 15, fontFamily: 'Inter_500Medium', color: a.textPrimary, paddingVertical: 8 },
+  error: { fontSize: 12, fontFamily: 'Inter_500Medium', color: a.error, marginLeft: 24 },
+  saved: { fontSize: 12, fontFamily: 'Inter_500Medium', color: a.success, marginLeft: 24 },
 });

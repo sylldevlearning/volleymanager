@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { palette } from '../../theme/tokens';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../theme/useAppTheme';
 
 interface ProgressBarProps {
   value: number;   // 0-100
@@ -10,14 +10,15 @@ interface ProgressBarProps {
   showLabel?: boolean;
 }
 
-function barColor(value: number): string {
-  if (value <= 30) return palette.error;
-  if (value <= 60) return palette.warning;
-  return palette.success;
+function barColor(value: number, colors: AppTheme): string {
+  if (value <= 30) return colors.error;
+  if (value <= 60) return colors.warning;
+  return colors.success;
 }
 
 export function ProgressBar({ value, total, count, label, showLabel = true }: ProgressBarProps) {
-  const color = barColor(value);
+  const styles = useThemedStyles(makeStyles);
+  const color = barColor(value, useAppTheme());
   const pct = `${Math.min(100, Math.max(0, value))}%` as `${number}%`;
 
   return (
@@ -44,7 +45,7 @@ export function ProgressBar({ value, total, count, label, showLabel = true }: Pr
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AppTheme) => StyleSheet.create({
   container: { marginVertical: 4 },
   header: {
     flexDirection: 'row',
@@ -54,7 +55,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 11,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textSecondary,
+    color: a.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 0.4,
   },
@@ -64,7 +65,7 @@ const styles = StyleSheet.create({
   },
   track: {
     height: 8,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     borderRadius: 4,
     overflow: 'hidden',
   },
@@ -75,7 +76,7 @@ const styles = StyleSheet.create({
   sub: {
     fontSize: 11,
     fontFamily: 'Inter_400Regular',
-    color: palette.textMuted,
+    color: a.textMuted,
     marginTop: 3,
   },
 });

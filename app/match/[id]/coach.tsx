@@ -19,7 +19,7 @@ import { StatButton } from '../../../src/components/stats/StatButton';
 import { useResponsive } from '../../../src/hooks/useResponsive';
 import { palette } from '../../../src/theme/tokens';
 import { InfoTooltip } from '../../../src/components/ui/InfoTooltip';
-import { type AccentTheme, useAccent, useThemedStyles } from '../../../src/theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../../src/theme/useAppTheme';
 
 interface StatAction {
   type: StatEventType;
@@ -86,7 +86,7 @@ const STAT_CATEGORIES: Array<{ title: string; key: string; actions: StatAction[]
 ];
 
 export default function CoachScreen() {
-  const accent = useAccent();
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
@@ -171,7 +171,7 @@ export default function CoachScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backBtn} accessibilityRole="button">
-          <ArrowLeft size={22} color={palette.textSecondary} />
+          <ArrowLeft size={22} color={colors.textSecondary} />
         </Pressable>
         <View style={{ flex: 1 }}>
           <Text style={styles.headerTitle}>{team.name}</Text>
@@ -183,7 +183,7 @@ export default function CoachScreen() {
           accessibilityRole="button"
           accessibilityLabel={t('stats.matchDashboard')}
         >
-          <BarChart2 size={20} color={palette.accentSecondary} />
+          <BarChart2 size={20} color={colors.accentSecondary} />
         </Pressable>
         <InfoTooltip textKey="help.coach" />
       </View>
@@ -198,8 +198,8 @@ export default function CoachScreen() {
         renderItem={({ item }) => {
           const isSelected = selectedPlayer?.id === item.id;
           const isLibero = item.position === 'libero';
-          const chipBorder = isLibero ? palette.libero : (isSelected ? accent.color : 'transparent');
-          const chipBg = isLibero ? palette.libero + '20' : (isSelected ? accent.muted : palette.backgroundSurface);
+          const chipBorder = isLibero ? palette.libero : (isSelected ? colors.color : 'transparent');
+          const chipBg = isLibero ? palette.libero + '20' : (isSelected ? colors.muted : colors.backgroundSurface);
           return (
             <Pressable
               style={[styles.playerChip, { borderColor: chipBorder, backgroundColor: chipBg }]}
@@ -208,7 +208,7 @@ export default function CoachScreen() {
               accessibilityState={{ selected: isSelected }}
               accessibilityLabel={`${item.firstName ?? ''} ${item.lastName ?? ''}`}
             >
-              <Text style={[styles.playerChipNum, { color: isLibero ? palette.libero : isSelected ? accent.color : palette.textMuted }]}>
+              <Text style={[styles.playerChipNum, { color: isLibero ? palette.libero : isSelected ? colors.color : colors.textMuted }]}>
                 {isLibero ? '⚡' : ''}#{item.number}
               </Text>
               <Text style={[styles.playerChipName, isSelected && styles.playerChipNameActive]} numberOfLines={1}>
@@ -251,52 +251,52 @@ export default function CoachScreen() {
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
-  loading: { flex: 1, backgroundColor: palette.background, alignItems: 'center', justifyContent: 'center' },
-  loadingText: { color: palette.textSecondary, fontFamily: 'Inter_400Regular' },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
+  loading: { flex: 1, backgroundColor: a.background, alignItems: 'center', justifyContent: 'center' },
+  loadingText: { color: a.textSecondary, fontFamily: 'Inter_400Regular' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: palette.backgroundElevated,
+    borderBottomColor: a.backgroundElevated,
     gap: 10,
   },
   backBtn: { padding: 4 },
   statsBtn: { padding: 8 },
-  headerTitle: { fontSize: 20, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
-  headerSubtitle: { fontSize: 13, fontFamily: 'Inter_400Regular', color: palette.textSecondary },
+  headerTitle: { fontSize: 20, fontFamily: 'Inter_700Bold', color: a.textPrimary },
+  headerSubtitle: { fontSize: 13, fontFamily: 'Inter_400Regular', color: a.textSecondary },
   playerList: { paddingHorizontal: 12, paddingVertical: 10, gap: 8 },
   playerChip: {
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
     minWidth: 70,
     alignItems: 'center',
   },
   playerChipActive: { borderColor: a.color, backgroundColor: a.muted },
-  playerChipNum: { fontSize: 12, fontFamily: 'Inter_700Bold', color: palette.textMuted },
+  playerChipNum: { fontSize: 12, fontFamily: 'Inter_700Bold', color: a.textMuted },
   playerChipNumActive: { color: a.color },
-  playerChipName: { fontSize: 13, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
-  playerChipNameActive: { color: palette.textPrimary },
+  playerChipName: { fontSize: 13, fontFamily: 'Inter_500Medium', color: a.textSecondary },
+  playerChipNameActive: { color: a.textPrimary },
   statsScroll: { padding: 16, gap: 16 },
   statsScrollTablet: { paddingHorizontal: 32 },
   category: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderRadius: 14,
     padding: 14,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
   },
   categoryTitle: {
     fontSize: 13,
     fontFamily: 'Inter_700Bold',
-    color: palette.textSecondary,
+    color: a.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 10,

@@ -7,9 +7,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { getAllTeams } from '../../src/services/teamService';
 import { getPlayersByTeam } from '../../src/services/playerService';
 import type { Team } from '../../src/models/team';
-import { palette } from '../../src/theme/tokens';
 import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
-import { type AccentTheme, useAccent, useThemedStyles } from '../../src/theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../src/theme/useAppTheme';
 
 interface TeamWithCount {
   team: Team;
@@ -17,8 +16,8 @@ interface TeamWithCount {
 }
 
 export default function TeamsScreen() {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
-  const accent = useAccent();
   const { t } = useTranslation();
   const router = useRouter();
   const [teams, setTeams] = useState<TeamWithCount[]>([]);
@@ -50,7 +49,7 @@ export default function TeamsScreen() {
         contentContainerStyle={styles.list}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Users size={48} color={palette.textMuted} strokeWidth={1} />
+            <Users size={48} color={colors.textMuted} strokeWidth={1} />
             <Text style={styles.emptyTitle}>{t('team.noTeams')}</Text>
             <Text style={styles.emptyDesc}>{t('team.createFirst')}</Text>
           </View>
@@ -69,7 +68,7 @@ export default function TeamsScreen() {
                 {t('team.playerCount', { count: item.playerCount })}
               </Text>
             </View>
-            <ChevronRight size={18} color={palette.textMuted} />
+            <ChevronRight size={18} color={colors.textMuted} />
           </Pressable>
         )}
       />
@@ -79,34 +78,34 @@ export default function TeamsScreen() {
         accessibilityLabel={t('team.new')}
         accessibilityRole="button"
       >
-        <Plus size={26} color={accent.onFill} />
+        <Plus size={26} color={colors.onFill} />
       </Pressable>
     </SafeAreaView>
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
   topBar: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 16, paddingTop: 8 },
   list: { padding: 16, gap: 10, paddingBottom: 80 },
   empty: { alignItems: 'center', paddingTop: 80, gap: 12 },
-  emptyTitle: { fontSize: 18, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary },
-  emptyDesc: { fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textMuted },
+  emptyTitle: { fontSize: 18, fontFamily: 'Inter_600SemiBold', color: a.textSecondary },
+  emptyDesc: { fontSize: 14, fontFamily: 'Inter_400Regular', color: a.textMuted },
   card: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
     padding: 16,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
   },
   cardPressed: { opacity: 0.8 },
   colorDot: { width: 14, height: 14, borderRadius: 7 },
   cardContent: { flex: 1 },
-  teamName: { fontSize: 16, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },
-  playerCount: { fontSize: 13, fontFamily: 'Inter_400Regular', color: palette.textSecondary, marginTop: 2 },
+  teamName: { fontSize: 16, fontFamily: 'Inter_600SemiBold', color: a.textPrimary },
+  playerCount: { fontSize: 13, fontFamily: 'Inter_400Regular', color: a.textSecondary, marginTop: 2 },
   fab: {
     position: 'absolute',
     bottom: 24,

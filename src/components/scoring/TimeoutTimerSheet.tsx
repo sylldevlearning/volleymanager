@@ -3,7 +3,7 @@ import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useAudioPlayer, setAudioModeAsync } from 'expo-audio';
 import { useTranslation } from 'react-i18next';
-import { palette } from '../../theme/tokens';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../theme/useAppTheme';
 
 const TIMEOUT_DURATION = 30;
 
@@ -16,6 +16,8 @@ interface TimeoutTimerSheetProps {
 }
 
 export function TimeoutTimerSheet({ visible, teamName, teamColor, onEnd, onCancel }: TimeoutTimerSheetProps) {
+  const colors = useAppTheme();
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const [seconds, setSeconds] = useState(TIMEOUT_DURATION);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -93,7 +95,7 @@ export function TimeoutTimerSheet({ visible, teamName, teamColor, onEnd, onCance
                   styles.progressFill,
                   {
                     width: `${progress * 100}%` as `${number}%`,
-                    backgroundColor: isUrgent ? palette.error : teamColor,
+                    backgroundColor: isUrgent ? colors.error : teamColor,
                   },
                 ]}
               />
@@ -127,7 +129,7 @@ export function TimeoutTimerSheet({ visible, teamName, teamColor, onEnd, onCance
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AppTheme) => StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.75)',
@@ -135,7 +137,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   card: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderRadius: 24,
     padding: 32,
     alignItems: 'center',
@@ -143,12 +145,12 @@ const styles = StyleSheet.create({
     marginHorizontal: 32,
     width: 300,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
   },
   title: {
     fontSize: 13,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textMuted,
+    color: a.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
@@ -164,17 +166,17 @@ const styles = StyleSheet.create({
   timer: {
     fontSize: 72,
     fontFamily: 'Inter_900Black',
-    color: palette.textPrimary,
+    color: a.textPrimary,
     lineHeight: 80,
     includeFontPadding: false,
   },
   timerUrgent: {
-    color: palette.error,
+    color: a.error,
   },
   progressBar: {
     width: '100%',
     height: 6,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     borderRadius: 3,
     overflow: 'hidden',
   },
@@ -185,11 +187,11 @@ const styles = StyleSheet.create({
   buzzerText: {
     fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.error,
+    color: a.error,
   },
   endBtn: {
     marginTop: 8,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     paddingHorizontal: 32,
     paddingVertical: 14,
     borderRadius: 14,
@@ -200,7 +202,7 @@ const styles = StyleSheet.create({
   endBtnText: {
     fontSize: 15,
     fontFamily: 'Inter_600SemiBold',
-    color: palette.textPrimary,
+    color: a.textPrimary,
   },
   cancelBtn: {
     paddingHorizontal: 32,
@@ -209,11 +211,11 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: palette.error + '50',
+    borderColor: a.error + '50',
   },
   cancelBtnText: {
     fontSize: 13,
     fontFamily: 'Inter_500Medium',
-    color: palette.error,
+    color: a.error,
   },
 });

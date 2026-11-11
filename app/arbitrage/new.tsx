@@ -6,7 +6,6 @@ import { Stack, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Minus, Plus } from 'lucide-react-native';
-import { palette } from '../../src/theme/tokens';
 import { PRESET_TEAM_COLORS } from '../../src/utils/constants';
 import { LIBERO_COLOR_CHOICES, defaultLiberoColor, resolveLiberoColor } from '../../src/features/teams/liberoColor';
 import { COMPACT_MAX_NUMBER, jerseyNumbers } from '../../src/features/teams/jerseyNumbers';
@@ -18,7 +17,7 @@ import { FORMAT_PROFILES, applyPreset, defaultArbitrageConfig, isOfficial, prese
 import { validateAdHocTeam, validateAdHocRules, type AdHocTeamDraft } from '../../src/utils/adHocSetupValidation';
 import { createAdHocMatch } from '../../src/services/adHocMatchService';
 import type { AdHocTeamInput } from '../../src/services/adHocMatchService';
-import { type AccentTheme, useThemedStyles } from '../../src/theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../src/theme/useAppTheme';
 
 type Tab = 'home' | 'away' | 'rules';
 
@@ -196,6 +195,7 @@ function TabButton({
 function TeamTab({
   state, otherColor, onChange, hasLibero, t,
 }: { state: TeamFormState; otherColor: string; onChange: (s: TeamFormState) => void; hasLibero: boolean; t: (key: string, opts?: Record<string, unknown>) => string }) {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
   // 0-20 first; already open when a bigger number is selected
   const [showAllNumbers, setShowAllNumbers] = useState(() => state.selected.some((n) => n > COMPACT_MAX_NUMBER));
@@ -242,7 +242,7 @@ function TeamTab({
           value={state.name}
           onChangeText={(name) => onChange({ ...state, name })}
           placeholder={t('arbitrageSetup.teamNamePlaceholder')}
-          placeholderTextColor={palette.textMuted}
+          placeholderTextColor={colors.textMuted}
           maxLength={40}
         />
       </FormField>
@@ -275,7 +275,7 @@ function TeamTab({
           value={state.coachName}
           onChangeText={(coachName) => onChange({ ...state, coachName })}
           placeholder={t('arbitrageSetup.coachNamePlaceholder')}
-          placeholderTextColor={palette.textMuted}
+          placeholderTextColor={colors.textMuted}
           maxLength={40}
         />
       </FormField>
@@ -303,8 +303,8 @@ function TeamTab({
             accessibilityLabel={showAllNumbers ? t('arbitrageSetup.fewerNumbers') : t('arbitrageSetup.moreNumbers')}
           >
             {showAllNumbers
-              ? <Minus size={18} color={palette.textPrimary} />
-              : <Plus size={18} color={palette.textPrimary} />}
+              ? <Minus size={18} color={colors.textPrimary} />
+              : <Plus size={18} color={colors.textPrimary} />}
           </Pressable>
         </View>
       </FormField>
@@ -327,7 +327,7 @@ function TeamTab({
                   value={state.names[n] ?? ''}
                   onChangeText={(name) => setName(n, name)}
                   placeholder={t('arbitrageSetup.playerNamePlaceholder')}
-                  placeholderTextColor={palette.textMuted}
+                  placeholderTextColor={colors.textMuted}
                   maxLength={30}
                 />
                 <Pressable
@@ -525,30 +525,30 @@ function SmallFormatRules({
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
 
   formatRow: { flexDirection: 'row', gap: 6, marginHorizontal: 16, marginTop: 8, marginBottom: 8 },
   formatChip: {
     flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: 'center',
-    backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundSurface, borderWidth: 1, borderColor: a.backgroundElevated,
   },
   formatChipActive: { backgroundColor: a.fill, borderColor: a.fill },
-  formatChipText: { fontSize: 14, fontFamily: 'Inter_700Bold', color: palette.textSecondary },
+  formatChipText: { fontSize: 14, fontFamily: 'Inter_700Bold', color: a.textSecondary },
   formatChipTextActive: { color: a.onFill },
   presetRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
   presetChip: {
     paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10,
-    backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundSurface, borderWidth: 1, borderColor: a.backgroundElevated,
   },
-  presetChipActive: { backgroundColor: palette.accentSecondary, borderColor: palette.accentSecondary },
-  presetChipText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary },
+  presetChipActive: { backgroundColor: a.secondaryFill, borderColor: a.secondaryFill },
+  presetChipText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: a.textSecondary },
   presetChipTextActive: { color: '#fff' },
   tabBar: {
     flexDirection: 'row',
     marginHorizontal: 16,
     marginBottom: 8,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderRadius: 12,
     padding: 4,
     gap: 4,
@@ -562,43 +562,43 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 8,
   },
-  tabButtonActive: { backgroundColor: palette.backgroundElevated },
-  tabButtonText: { fontSize: 13, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
-  tabButtonTextActive: { color: palette.textPrimary, fontFamily: 'Inter_700Bold' },
+  tabButtonActive: { backgroundColor: a.backgroundElevated },
+  tabButtonText: { fontSize: 13, fontFamily: 'Inter_500Medium', color: a.textSecondary },
+  tabButtonTextActive: { color: a.textPrimary, fontFamily: 'Inter_700Bold' },
   tabDot: { width: 8, height: 8, borderRadius: 4 },
 
   scroll: { padding: 20, paddingBottom: 40 },
   input: {
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 13,
     fontSize: 15,
     fontFamily: 'Inter_400Regular',
-    color: palette.textPrimary,
+    color: a.textPrimary,
   },
   colorGrid: { flexDirection: 'row', gap: 12, flexWrap: 'wrap' },
   colorSwatch: { width: 40, height: 40, borderRadius: 20, borderWidth: 3, borderColor: 'transparent' },
-  colorSwatchActive: { borderColor: palette.textPrimary, transform: [{ scale: 1.1 }] },
+  colorSwatchActive: { borderColor: a.textPrimary, transform: [{ scale: 1.1 }] },
   colorSwatchDisabled: { opacity: 0.25 },
 
   numberGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   numberCell: {
     width: 44, height: 44, borderRadius: 10,
     alignItems: 'center', justifyContent: 'center',
-    backgroundColor: palette.backgroundSurface,
-    borderWidth: 1, borderColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundSurface,
+    borderWidth: 1, borderColor: a.backgroundElevated,
   },
-  numberCellText: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary },
-  numberCellToggle: { borderStyle: 'dashed', borderColor: palette.textMuted },
+  numberCellText: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: a.textSecondary },
+  numberCellToggle: { borderStyle: 'dashed', borderColor: a.textMuted },
   numberCellTextActive: { color: '#fff' },
 
-  emptyHint: { fontSize: 13, fontFamily: 'Inter_400Regular', color: palette.textMuted, paddingVertical: 8 },
+  emptyHint: { fontSize: 13, fontFamily: 'Inter_400Regular', color: a.textMuted, paddingVertical: 8 },
   playerRow: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: palette.backgroundElevated,
+    paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: a.backgroundElevated,
   },
   playerNumBadge: {
     width: 36, height: 36, borderRadius: 10, borderWidth: 1.5,
@@ -606,27 +606,27 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   },
   playerNumText: { fontSize: 14, fontFamily: 'Inter_700Bold' },
   playerNameInput: {
-    flex: 1, fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textPrimary,
+    flex: 1, fontSize: 14, fontFamily: 'Inter_400Regular', color: a.textPrimary,
     paddingVertical: 6, paddingHorizontal: 10,
-    backgroundColor: palette.backgroundSurface, borderRadius: 8,
+    backgroundColor: a.backgroundSurface, borderRadius: 8,
   },
   tagBtn: {
     width: 32, height: 32, borderRadius: 8,
     alignItems: 'center', justifyContent: 'center',
-    backgroundColor: palette.backgroundSurface,
-    borderWidth: 1, borderColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundSurface,
+    borderWidth: 1, borderColor: a.backgroundElevated,
   },
   tagBtnCaptainActive: { backgroundColor: a.fill, borderColor: a.fill },
   tagBtnDisabled: { opacity: 0.35 },
-  tagBtnText: { fontSize: 13, fontFamily: 'Inter_700Bold', color: palette.textSecondary },
+  tagBtnText: { fontSize: 13, fontFamily: 'Inter_700Bold', color: a.textSecondary },
   tagBtnTextActive: { color: a.onFill },
 
   rulesPreset: {
-    fontSize: 12, fontFamily: 'Inter_500Medium', color: palette.textMuted,
+    fontSize: 12, fontFamily: 'Inter_500Medium', color: a.textMuted,
     marginBottom: 16, textTransform: 'uppercase', letterSpacing: 0.5,
   },
 
-  footer: { padding: 16, borderTopWidth: 1, borderTopColor: palette.backgroundElevated },
+  footer: { padding: 16, borderTopWidth: 1, borderTopColor: a.backgroundElevated },
   startButton: { backgroundColor: a.fill, paddingVertical: 16, borderRadius: 14, alignItems: 'center' },
   startButtonPressed: { opacity: 0.85 },
   startButtonDisabled: { opacity: 0.5 },

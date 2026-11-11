@@ -4,8 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useSettingsStore, type HelpTipId } from '../../stores/settingsStore';
 import { useSettingsHydrated } from '../../hooks/useSettingsHydrated';
 import { placeBubble, tipTextKey, type Rect } from '../../features/onboarding/helpTips';
-import { palette } from '../../theme/tokens';
-import { type AccentTheme, useThemedStyles } from '../../theme/useAccent';
+import { useThemedStyles, type AppTheme } from '../../theme/useAppTheme';
 
 export interface CoachMarkStep {
   id: string;
@@ -117,7 +116,7 @@ export function CoachMarks({ tipId, steps, enabled }: CoachMarksProps) {
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
+const makeStyles = (a: AppTheme) => StyleSheet.create({
   dim: {
     position: 'absolute',
     backgroundColor: DIM,
@@ -130,17 +129,17 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   },
   bubble: {
     position: 'absolute',
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: palette.backgroundElevated,
+    borderColor: a.backgroundElevated,
     padding: 16,
     gap: 12,
   },
   text: {
     fontSize: 15,
     fontFamily: 'Inter_400Regular',
-    color: palette.textPrimary,
+    color: a.textPrimary,
     lineHeight: 22,
   },
   footer: {
@@ -151,7 +150,7 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   counter: {
     fontSize: 12,
     fontFamily: 'Inter_500Medium',
-    color: palette.textSecondary,
+    color: a.textSecondary,
   },
   btn: {
     paddingHorizontal: 16,

@@ -3,10 +3,9 @@ import { FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Check, X } from 'lucide-react-native';
-import { palette } from '../../theme/tokens';
 import { getAllTeams } from '../../services/teamService';
 import type { Team } from '../../models/team';
-import { type AccentTheme, useAccent, useThemedStyles } from '../../theme/useAccent';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../theme/useAppTheme';
 
 interface Props {
   visible: boolean;
@@ -18,8 +17,8 @@ interface Props {
 
 /** Picks teams from "Mes équipes" for a tournament. */
 export function TeamLibrarySheet({ visible, alreadyAdded, onClose, onAdd }: Props) {
+  const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
-  const accent = useAccent();
   const { t } = useTranslation();
   const [teams, setTeams] = useState<Team[] | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -44,7 +43,7 @@ export function TeamLibrarySheet({ visible, alreadyAdded, onClose, onAdd }: Prop
         <View style={styles.header}>
           <Text style={styles.title}>{t('tournament.wizard.libraryTitle')}</Text>
           <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button" accessibilityLabel={t('common.close')}>
-            <X size={22} color={palette.textPrimary} />
+            <X size={22} color={colors.textPrimary} />
           </Pressable>
         </View>
         <FlatList
@@ -69,7 +68,7 @@ export function TeamLibrarySheet({ visible, alreadyAdded, onClose, onAdd }: Prop
                   {added && <Text style={styles.added}>{t('tournament.wizard.alreadyAdded')}</Text>}
                 </View>
                 <View style={[styles.check, (isSelected || added) && styles.checkOn]}>
-                  {(isSelected || added) && <Check size={16} color={accent.onFill} />}
+                  {(isSelected || added) && <Check size={16} color={colors.onFill} />}
                 </View>
               </Pressable>
             );
@@ -90,27 +89,27 @@ export function TeamLibrarySheet({ visible, alreadyAdded, onClose, onAdd }: Prop
   );
 }
 
-const makeStyles = (a: AccentTheme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background },
+const makeStyles = (a: AppTheme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: a.background },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14 },
-  title: { fontSize: 18, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
+  title: { fontSize: 18, fontFamily: 'Inter_700Bold', color: a.textPrimary },
   list: { paddingHorizontal: 16, paddingBottom: 16 },
-  empty: { fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textSecondary, textAlign: 'center', paddingVertical: 40 },
+  empty: { fontSize: 14, fontFamily: 'Inter_400Regular', color: a.textSecondary, textAlign: 'center', paddingVertical: 40 },
   row: {
     flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14,
-    borderBottomWidth: 1, borderBottomColor: palette.backgroundElevated,
+    borderBottomWidth: 1, borderBottomColor: a.backgroundElevated,
   },
   rowDisabled: { opacity: 0.5 },
   dot: { width: 14, height: 14, borderRadius: 7 },
   rowText: { flex: 1 },
-  name: { fontSize: 15, fontFamily: 'Inter_500Medium', color: palette.textPrimary },
-  added: { fontSize: 12, fontFamily: 'Inter_400Regular', color: palette.textSecondary, marginTop: 2 },
+  name: { fontSize: 15, fontFamily: 'Inter_500Medium', color: a.textPrimary },
+  added: { fontSize: 12, fontFamily: 'Inter_400Regular', color: a.textSecondary, marginTop: 2 },
   check: {
-    width: 26, height: 26, borderRadius: 8, borderWidth: 1.5, borderColor: palette.textMuted,
+    width: 26, height: 26, borderRadius: 8, borderWidth: 1.5, borderColor: a.textMuted,
     alignItems: 'center', justifyContent: 'center',
   },
   checkOn: { backgroundColor: a.fill, borderColor: a.fill },
-  footer: { padding: 16, borderTopWidth: 1, borderTopColor: palette.backgroundElevated },
+  footer: { padding: 16, borderTopWidth: 1, borderTopColor: a.backgroundElevated },
   addButton: { backgroundColor: a.fill, paddingVertical: 15, borderRadius: 14, alignItems: 'center' },
   addButtonDisabled: { opacity: 0.4 },
   addButtonText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.onFill },

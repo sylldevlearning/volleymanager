@@ -1,11 +1,12 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { palette } from '../../theme/tokens';
 import type { StandingsTable } from '../../features/tournament/display';
+import { useThemedStyles, type AppTheme } from '../../theme/useAppTheme';
 
 /** A pool / league table: place, team, played, won, lost, points, set and point differences. */
 /** `finished`: teams that have finished their tournament, marked "Terminé" */
 export function StandingsTableView({ table, finished }: { table: StandingsTable; finished?: Set<string> }) {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const diff = (n: number) => (n > 0 ? `+${n}` : String(n));
   return (
@@ -43,23 +44,23 @@ export function StandingsTableView({ table, finished }: { table: StandingsTable;
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AppTheme) => StyleSheet.create({
   card: {
-    backgroundColor: palette.backgroundSurface, borderRadius: 14, borderWidth: 1,
-    borderColor: palette.backgroundElevated, padding: 12, gap: 2,
+    backgroundColor: a.backgroundSurface, borderRadius: 14, borderWidth: 1,
+    borderColor: a.backgroundElevated, padding: 12, gap: 2,
   },
-  title: { fontSize: 14, fontFamily: 'Inter_700Bold', color: palette.textPrimary, marginBottom: 6 },
-  progress: { fontSize: 13, fontFamily: 'Inter_400Regular', color: palette.textSecondary },
-  row: { flexDirection: 'row', alignItems: 'center', paddingVertical: 6, borderTopWidth: 1, borderTopColor: palette.backgroundElevated },
+  title: { fontSize: 14, fontFamily: 'Inter_700Bold', color: a.textPrimary, marginBottom: 6 },
+  progress: { fontSize: 13, fontFamily: 'Inter_400Regular', color: a.textSecondary },
+  row: { flexDirection: 'row', alignItems: 'center', paddingVertical: 6, borderTopWidth: 1, borderTopColor: a.backgroundElevated },
   head: { borderTopWidth: 0 },
-  headText: { color: palette.textSecondary, fontFamily: 'Inter_600SemiBold', fontSize: 12 },
-  cell: { fontSize: 13, fontFamily: 'Inter_500Medium', color: palette.textPrimary, textAlign: 'center' },
-  rank: { width: 22, color: palette.textSecondary },
+  headText: { color: a.textSecondary, fontFamily: 'Inter_600SemiBold', fontSize: 12 },
+  cell: { fontSize: 13, fontFamily: 'Inter_500Medium', color: a.textPrimary, textAlign: 'center' },
+  rank: { width: 22, color: a.textSecondary },
   team: { flex: 1, textAlign: 'left', paddingHorizontal: 4 },
   teamCell: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  teamName: { flexShrink: 1, fontSize: 13, fontFamily: 'Inter_500Medium', color: palette.textPrimary },
+  teamName: { flexShrink: 1, fontSize: 13, fontFamily: 'Inter_500Medium', color: a.textPrimary },
   badge: {
-    fontSize: 10, fontFamily: 'Inter_600SemiBold', color: palette.success, overflow: 'hidden',
+    fontSize: 10, fontFamily: 'Inter_600SemiBold', color: a.success, overflow: 'hidden',
     paddingHorizontal: 5, paddingVertical: 1, borderRadius: 6, backgroundColor: 'rgba(46, 160, 67, 0.15)',
   },
   num: { width: 26 },

@@ -12,7 +12,7 @@ import { Pencil } from 'lucide-react-native';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { useResponsive } from '../../hooks/useResponsive';
 import { ANIMATION_DURATION_SHORT } from '../../utils/constants';
-import { palette } from '../../theme/tokens';
+import { useAppTheme, useThemedStyles, type AppTheme } from '../../theme/useAppTheme';
 
 interface ScoreButtonProps {
   teamName: string;
@@ -30,6 +30,8 @@ interface ScoreButtonProps {
 const DEBOUNCE_MS = 400;
 
 export function ScoreButton({ teamName, score, teamColor, onPress, onRemove, disabled, onNamePress, nameHint }: ScoreButtonProps) {
+  const styles = useThemedStyles(makeStyles);
+  const colors = useAppTheme();
   const hapticsEnabled = useSettingsStore((s) => s.hapticsEnabled);
   const { scoreFontSize, scoreButtonSize } = useResponsive();
   const scale = useSharedValue(1);
@@ -78,7 +80,7 @@ export function ScoreButton({ teamName, score, teamColor, onPress, onRemove, dis
           <Text style={styles.teamName} numberOfLines={1}>
             {teamName}
           </Text>
-          <Pencil size={12} color="#8B949E" />
+          <Pencil size={12} color={colors.textSecondary} />
         </Pressable>
       ) : (
         <Text style={styles.teamName} numberOfLines={1}>
@@ -118,7 +120,7 @@ export function ScoreButton({ teamName, score, teamColor, onPress, onRemove, dis
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AppTheme) => StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
@@ -133,7 +135,7 @@ const styles = StyleSheet.create({
   teamName: {
     fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
-    color: '#8B949E',
+    color: a.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 1,
     maxWidth: '90%',
@@ -171,7 +173,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 20,
     borderWidth: 1.5,
-    backgroundColor: palette.backgroundSurface,
+    backgroundColor: a.backgroundSurface,
   },
   minusText: {
     fontSize: 14,

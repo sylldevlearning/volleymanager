@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text } from 'react-native';
 import { AlertTriangle } from 'lucide-react-native';
-import { palette } from '../../theme/tokens';
+import { useThemedStyles, useAppTheme, type AppTheme } from '../../theme/useAppTheme';
 
 const VISIBLE_MS = 3500;
 
@@ -13,6 +13,8 @@ interface WarningBannerProps {
 
 /** Short warning at the top of the screen — never blocks the touches underneath. */
 export function WarningBanner({ message, onHidden }: WarningBannerProps) {
+  const colors = useAppTheme();
+  const styles = useThemedStyles(makeStyles);
   const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -33,13 +35,13 @@ export function WarningBanner({ message, onHidden }: WarningBannerProps) {
       accessibilityRole="alert"
       accessibilityLiveRegion="polite"
     >
-      <AlertTriangle size={16} color={palette.warning} />
+      <AlertTriangle size={16} color={colors.warning} />
       <Text style={styles.text}>{message.text}</Text>
     </Animated.View>
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AppTheme) => StyleSheet.create({
   banner: {
     position: 'absolute',
     top: 8,
@@ -53,9 +55,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 12,
-    backgroundColor: palette.backgroundElevated,
+    backgroundColor: a.backgroundElevated,
     borderWidth: 1,
-    borderColor: palette.warning + '60',
+    borderColor: a.warning + '60',
   },
-  text: { flex: 1, fontSize: 14, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },
+  text: { flex: 1, fontSize: 14, fontFamily: 'Inter_600SemiBold', color: a.textPrimary },
 });

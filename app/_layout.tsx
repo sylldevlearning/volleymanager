@@ -21,7 +21,9 @@ import { initAds } from '../src/features/ads/adsService';
 import i18n from '../src/i18n';
 import { useLocales } from 'expo-localization';
 import { resolveLanguage } from '../src/i18n/languages';
-import { SCREEN_HEADERS, darkHeaderOptions } from '../src/navigation/screenHeaders';
+import { SCREEN_HEADERS, headerOptions } from '../src/navigation/screenHeaders';
+import { StatusBar } from 'expo-status-bar';
+import { useAppTheme } from '../src/theme/useAppTheme';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -61,7 +63,7 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const theme = useSettingsStore((s) => s.theme);
+  const colors = useAppTheme();
   const language = useSettingsStore((s) => s.language);
   const hasSeenOnboarding = useSettingsStore((s) => s.hasSeenOnboarding);
   const settingsHydrated = useSettingsHydrated();
@@ -111,8 +113,10 @@ function RootLayoutNav() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <TamaguiProvider config={tamaguiConfig} defaultTheme={theme}>
-        <Stack screenOptions={darkHeaderOptions}>
+      <TamaguiProvider config={tamaguiConfig} defaultTheme={colors.scheme}>
+        {/* Status bar text: light on the dark mode, dark on the light mode */}
+        <StatusBar style={colors.scheme === 'dark' ? 'light' : 'dark'} />
+        <Stack screenOptions={headerOptions(colors)}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           {Object.entries(SCREEN_HEADERS).map(([name, header]) => (
             <Stack.Screen
