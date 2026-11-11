@@ -15,6 +15,8 @@ import { deleteAllMatches } from '../../src/services/matchService';
 import { isPrivacyOptionsRequired, openPrivacyOptions } from '../../src/features/ads/adsService';
 import { useAccent } from '../../src/theme/useAccent';
 import { ACCENTS } from '../../src/theme/accent';
+import { DriveBackupSection } from '../../src/components/settings/DriveBackupSection';
+import { isDriveAvailable } from '../../src/features/backup/googleAccount';
 
 // Two rows of four swatches
 const ACCENT_ROWS = [ACCENTS.slice(0, 4), ACCENTS.slice(4)];
@@ -89,6 +91,8 @@ export default function SettingsScreen() {
           ))}
         </View>
       </View>
+
+      {isDriveAvailable() && <DriveBackupSection />}
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{t('settings.haptics')}</Text>

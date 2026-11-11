@@ -1077,5 +1077,38 @@
       "unsupported_version": "Este código QR viene de una versión más reciente de VolleyManager: actualiza la app desde Play Store.",
       "invalid": "Código QR ilegible o dañado. Acércate, evita los reflejos y vuelve a escanearlo."
     }
+  },
+  "backup": {
+    "title": "Copia de seguridad en Google Drive",
+    "intro": "Opcional: guarda una copia de tus equipos, partidos y torneos en tu Google Drive. La app funciona sin cuenta.",
+    "connect": "Iniciar sesión con Google",
+    "account": "Cuenta: {{email}}",
+    "lastBackup": "Última copia: {{date}}",
+    "noBackup": "No hay copia en línea",
+    "checking": "Buscando la copia…",
+    "backupNow": "Hacer copia ahora",
+    "notIncluded": "Los logotipos y las fotos no se incluyen.",
+    "restore": "Restaurar",
+    "deleteOnline": "Eliminar la copia en línea",
+    "disconnect": "Cerrar sesión",
+    "doneTitle": "Copia terminada",
+    "doneBody": "Tus datos están guardados en tu Google Drive.",
+    "restoreConfirmTitle": "¿Restaurar la copia?",
+    "restoreConfirmBody": "Todos los datos de este teléfono (equipos, jugadores, partidos, torneos) se sustituirán por la copia del {{date}}. Esta acción no se puede deshacer.",
+    "restoreDoneTitle": "Restauración terminada",
+    "restoreDoneBody": "Se han restaurado los datos de la copia.",
+    "deleteConfirmTitle": "¿Eliminar la copia en línea?",
+    "deleteConfirmBody": "La copia se borrará de tu Google Drive. Los datos de este teléfono no cambian.",
+    "deletedBody": "Se ha eliminado la copia en línea.",
+    "errors": {
+      "offline": "No hay conexión a internet. Inténtalo más tarde.",
+      "signedOut": "La sesión de Google ha caducado o se retiró el acceso. Vuelve a iniciar sesión.",
+      "full": "Tu Google Drive está lleno. Libera espacio e inténtalo de nuevo.",
+      "newer": "Esta copia viene de una versión más reciente de VolleyManager. Actualiza la app e inténtalo de nuevo.",
+      "damaged": "No se puede leer esta copia. Los datos de este teléfono no se han modificado.",
+      "restoreFailed": "La restauración ha fallado. Se han recuperado los datos anteriores.",
+      "connect": "No se pudo iniciar sesión en Google. Comprueba tu conexión e inténtalo de nuevo.",
+      "generic": "La operación no se ha completado. Inténtalo de nuevo."
+    }
   }
 }

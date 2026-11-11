@@ -1077,5 +1077,38 @@
       "unsupported_version": "Bu QR kodu VolleyManager'ın daha yeni bir sürümünden: uygulamayı Play Store'dan güncelle.",
       "invalid": "QR kodu okunamıyor veya hasarlı. Yaklaş, yansımadan kaçın ve yeniden tara."
     }
+  },
+  "backup": {
+    "title": "Google Drive yedeği",
+    "intro": "İsteğe bağlı: takımlarınızın, maçlarınızın ve turnuvalarınızın bir kopyasını Google Drive'ınızda saklayın. Uygulama hesap olmadan çalışır.",
+    "connect": "Google ile oturum aç",
+    "account": "Hesap: {{email}}",
+    "lastBackup": "Son yedek: {{date}}",
+    "noBackup": "Çevrimiçi yedek yok",
+    "checking": "Yedek aranıyor…",
+    "backupNow": "Şimdi yedekle",
+    "notIncluded": "Logolar ve fotoğraflar dahil değildir.",
+    "restore": "Geri yükle",
+    "deleteOnline": "Çevrimiçi yedeği sil",
+    "disconnect": "Oturumu kapat",
+    "doneTitle": "Yedekleme tamamlandı",
+    "doneBody": "Verileriniz Google Drive'ınıza yedeklendi.",
+    "restoreConfirmTitle": "Yedek geri yüklensin mi?",
+    "restoreConfirmBody": "Bu telefondaki tüm veriler (takımlar, oyuncular, maçlar, turnuvalar) {{date}} tarihli yedekle değiştirilecek. Bu işlem geri alınamaz.",
+    "restoreDoneTitle": "Geri yükleme tamamlandı",
+    "restoreDoneBody": "Yedekteki veriler geri yüklendi.",
+    "deleteConfirmTitle": "Çevrimiçi yedek silinsin mi?",
+    "deleteConfirmBody": "Yedek Google Drive'ınızdan silinecek. Bu telefondaki veriler değişmez.",
+    "deletedBody": "Çevrimiçi yedek silindi.",
+    "errors": {
+      "offline": "İnternet bağlantısı yok. Daha sonra tekrar deneyin.",
+      "signedOut": "Google oturumunun süresi doldu veya erişim kaldırıldı. Yeniden oturum açın.",
+      "full": "Google Drive'ınız dolu. Yer açın ve tekrar deneyin.",
+      "newer": "Bu yedek, VolleyManager'ın daha yeni bir sürümünden geliyor. Uygulamayı güncelleyip tekrar deneyin.",
+      "damaged": "Bu yedek okunamıyor. Bu telefondaki veriler değiştirilmedi.",
+      "restoreFailed": "Geri yükleme başarısız oldu. Önceki veriler yerine kondu.",
+      "connect": "Google'da oturum açılamadı. Bağlantınızı kontrol edip tekrar deneyin.",
+      "generic": "İşlem tamamlanamadı. Tekrar deneyin."
+    }
   }
 }

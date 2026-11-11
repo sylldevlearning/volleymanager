@@ -1077,5 +1077,38 @@
       "unsupported_version": "Questo codice QR viene da una versione più recente di VolleyManager: aggiorna l'app dal Play Store.",
       "invalid": "Codice QR illeggibile o danneggiato. Avvicinati, evita i riflessi e scansionalo di nuovo."
     }
+  },
+  "backup": {
+    "title": "Backup su Google Drive",
+    "intro": "Facoltativo: conserva una copia di squadre, partite e tornei nel tuo Google Drive. L'app funziona senza account.",
+    "connect": "Accedi con Google",
+    "account": "Account: {{email}}",
+    "lastBackup": "Ultimo backup: {{date}}",
+    "noBackup": "Nessun backup online",
+    "checking": "Ricerca del backup…",
+    "backupNow": "Esegui backup ora",
+    "notIncluded": "Loghi e foto non sono inclusi.",
+    "restore": "Ripristina",
+    "deleteOnline": "Elimina il backup online",
+    "disconnect": "Esci",
+    "doneTitle": "Backup completato",
+    "doneBody": "I tuoi dati sono salvati nel tuo Google Drive.",
+    "restoreConfirmTitle": "Ripristinare il backup?",
+    "restoreConfirmBody": "Tutti i dati di questo telefono (squadre, giocatori, partite, tornei) saranno sostituiti dal backup del {{date}}. L'operazione è irreversibile.",
+    "restoreDoneTitle": "Ripristino completato",
+    "restoreDoneBody": "I dati del backup sono stati ripristinati.",
+    "deleteConfirmTitle": "Eliminare il backup online?",
+    "deleteConfirmBody": "Il backup verrà cancellato dal tuo Google Drive. I dati di questo telefono non cambiano.",
+    "deletedBody": "Il backup online è stato eliminato.",
+    "errors": {
+      "offline": "Nessuna connessione a internet. Riprova più tardi.",
+      "signedOut": "L'accesso a Google è scaduto o è stato revocato. Accedi di nuovo.",
+      "full": "Il tuo Google Drive è pieno. Libera spazio e riprova.",
+      "newer": "Questo backup proviene da una versione più recente di VolleyManager. Aggiorna l'app e riprova.",
+      "damaged": "Impossibile leggere questo backup. I dati di questo telefono non sono stati modificati.",
+      "restoreFailed": "Il ripristino non è riuscito. I dati precedenti sono stati rimessi al loro posto.",
+      "connect": "Impossibile accedere a Google. Controlla la connessione e riprova.",
+      "generic": "L'operazione non è andata a buon fine. Riprova."
+    }
   }
 }

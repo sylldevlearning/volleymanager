@@ -15,6 +15,8 @@ interface SettingsState {
   hapticsEnabled: boolean;
   /** Main colour of the app (Settings), red by default */
   accentColor: AccentId;
+  /** E-mail of the Google account used for the Drive backup (shown in Settings), null = not signed in */
+  driveAccount: string | null;
   hasSeenOnboarding: boolean;
   seenTips: Partial<Record<HelpTipId, boolean>>;
   /** Store review prompt — see features/review/reviewPrompt.ts */
@@ -28,6 +30,7 @@ interface SettingsState {
   setLanguage: (lang: LanguagePreference) => void;
   setHapticsEnabled: (enabled: boolean) => void;
   setAccentColor: (accent: AccentId) => void;
+  setDriveAccount: (account: string | null) => void;
   toggleTheme: () => void;
   markOnboardingSeen: () => void;
   markTipSeen: (id: HelpTipId) => void;
@@ -47,6 +50,7 @@ export const useSettingsStore = create<SettingsState>()(
       language: 'system',
       hapticsEnabled: true,
       accentColor: DEFAULT_ACCENT_ID,
+      driveAccount: null,
       hasSeenOnboarding: false,
       seenTips: {},
       finishedMatchCount: 0,
@@ -57,6 +61,7 @@ export const useSettingsStore = create<SettingsState>()(
       setLanguage: (language) => set({ language }),
       setHapticsEnabled: (hapticsEnabled) => set({ hapticsEnabled }),
       setAccentColor: (accentColor) => set({ accentColor }),
+      setDriveAccount: (driveAccount) => set({ driveAccount }),
       toggleTheme: () => set({ theme: get().theme === 'dark' ? 'light' : 'dark' }),
       markOnboardingSeen: () => set({ hasSeenOnboarding: true }),
       markTipSeen: (id) => set({ seenTips: { ...get().seenTips, [id]: true } }),

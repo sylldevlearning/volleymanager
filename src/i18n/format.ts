@@ -14,6 +14,8 @@ const DATE_STYLES = {
   long: { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' },
   /** 16/05 — chart labels */
   dayMonth: { day: '2-digit', month: '2-digit' },
+  /** 16/05/2026 14:32 — last Drive backup */
+  dateTime: { day: 'numeric', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' },
 } as const satisfies Record<string, Intl.DateTimeFormatOptions>;
 
 export function formatDate(value: Date | string, lang: string, style: keyof typeof DATE_STYLES = 'short'): string {

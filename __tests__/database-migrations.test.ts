@@ -12,7 +12,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { runMigrations } from '../src/services/database';
+import { runMigrations, SCHEMA_VERSION } from '../src/services/database';
 import type * as SQLite from 'expo-sqlite';
 import {
   V8_MATCH_ROW,
@@ -299,4 +299,10 @@ test('v14 to v16 run each in one transaction on the same connection (atomic: no 
   await runMigrations(db as unknown as SQLite.SQLiteDatabase);
   expect(db.userVersion).toBe(16);
   expect(db.transactions).toEqual(['same-connection@13', 'same-connection@14', 'same-connection@15']);
+});
+
+test('SCHEMA_VERSION is the last migration (Drive backups newer than it are refused)', async () => {
+  const source = fs.readFileSync(path.join(__dirname, '../src/services/database.ts'), 'utf8');
+  const versions = [...source.matchAll(/PRAGMA user_version = (\d+)/g)].map((m) => Number(m[1]));
+  expect(SCHEMA_VERSION).toBe(Math.max(...versions));
 });

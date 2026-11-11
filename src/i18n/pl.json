@@ -1097,5 +1097,38 @@
       "unsupported_version": "Ten kod QR pochodzi z nowszej wersji VolleyManager: zaktualizuj aplikację w Sklepie Play.",
       "invalid": "Kod QR nieczytelny lub uszkodzony. Podejdź bliżej, unikaj odblasków i zeskanuj ponownie."
     }
+  },
+  "backup": {
+    "title": "Kopia zapasowa w Google Drive",
+    "intro": "Opcjonalnie: przechowuj kopię drużyn, meczów i turniejów na swoim Dysku Google. Aplikacja działa bez konta.",
+    "connect": "Zaloguj się przez Google",
+    "account": "Konto: {{email}}",
+    "lastBackup": "Ostatnia kopia: {{date}}",
+    "noBackup": "Brak kopii online",
+    "checking": "Wyszukiwanie kopii…",
+    "backupNow": "Utwórz kopię teraz",
+    "notIncluded": "Logo i zdjęcia nie są uwzględnione.",
+    "restore": "Przywróć",
+    "deleteOnline": "Usuń kopię online",
+    "disconnect": "Wyloguj się",
+    "doneTitle": "Kopia utworzona",
+    "doneBody": "Twoje dane są zapisane na Twoim Dysku Google.",
+    "restoreConfirmTitle": "Przywrócić kopię?",
+    "restoreConfirmBody": "Wszystkie dane na tym telefonie (drużyny, zawodnicy, mecze, turnieje) zostaną zastąpione kopią z {{date}}. Tej operacji nie można cofnąć.",
+    "restoreDoneTitle": "Przywracanie zakończone",
+    "restoreDoneBody": "Dane z kopii zostały przywrócone.",
+    "deleteConfirmTitle": "Usunąć kopię online?",
+    "deleteConfirmBody": "Kopia zostanie usunięta z Twojego Dysku Google. Dane na tym telefonie się nie zmienią.",
+    "deletedBody": "Kopia online została usunięta.",
+    "errors": {
+      "offline": "Brak połączenia z internetem. Spróbuj później.",
+      "signedOut": "Logowanie Google wygasło lub dostęp został cofnięty. Zaloguj się ponownie.",
+      "full": "Twój Dysk Google jest pełny. Zwolnij miejsce i spróbuj ponownie.",
+      "newer": "Ta kopia pochodzi z nowszej wersji VolleyManager. Zaktualizuj aplikację i spróbuj ponownie.",
+      "damaged": "Nie można odczytać tej kopii. Dane na tym telefonie nie zostały zmienione.",
+      "restoreFailed": "Przywracanie nie powiodło się. Poprzednie dane zostały przywrócone.",
+      "connect": "Nie udało się zalogować do Google. Sprawdź połączenie i spróbuj ponownie.",
+      "generic": "Operacja nie powiodła się. Spróbuj ponownie."
+    }
   }
 }

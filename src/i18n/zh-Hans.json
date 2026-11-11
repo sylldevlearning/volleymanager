@@ -1077,5 +1077,38 @@
       "unsupported_version": "这个二维码来自更新版本的 VolleyManager：请在 Play 商店更新应用。",
       "invalid": "二维码无法识别或已损坏。请靠近一些，避开反光后重新扫描。"
     }
+  },
+  "backup": {
+    "title": "Google 云端硬盘备份",
+    "intro": "可选：在你的 Google 云端硬盘中保留球队、比赛和赛事的副本。无需账号也能使用本应用。",
+    "connect": "使用 Google 登录",
+    "account": "账号：{{email}}",
+    "lastBackup": "上次备份：{{date}}",
+    "noBackup": "没有在线备份",
+    "checking": "正在查找备份…",
+    "backupNow": "立即备份",
+    "notIncluded": "不包含队徽和照片。",
+    "restore": "恢复",
+    "deleteOnline": "删除在线备份",
+    "disconnect": "退出登录",
+    "doneTitle": "备份完成",
+    "doneBody": "你的数据已备份到 Google 云端硬盘。",
+    "restoreConfirmTitle": "要恢复备份吗？",
+    "restoreConfirmBody": "此手机上的所有数据（球队、球员、比赛、赛事）将被 {{date}} 的备份替换。此操作无法撤销。",
+    "restoreDoneTitle": "恢复完成",
+    "restoreDoneBody": "备份中的数据已恢复。",
+    "deleteConfirmTitle": "要删除在线备份吗？",
+    "deleteConfirmBody": "备份将从你的 Google 云端硬盘中删除。此手机上的数据不会改变。",
+    "deletedBody": "在线备份已删除。",
+    "errors": {
+      "offline": "没有网络连接。请稍后重试。",
+      "signedOut": "Google 登录已过期或访问权限已被撤销。请重新登录。",
+      "full": "你的 Google 云端硬盘已满。请释放空间后重试。",
+      "newer": "此备份来自更新版本的 VolleyManager。请更新应用后重试。",
+      "damaged": "无法读取此备份。此手机上的数据未被更改。",
+      "restoreFailed": "恢复失败。已还原之前的数据。",
+      "connect": "无法登录 Google。请检查网络连接后重试。",
+      "generic": "操作未完成。请重试。"
+    }
   }
 }

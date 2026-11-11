@@ -1077,5 +1077,38 @@
       "unsupported_version": "Dieser QR-Code stammt aus einer neueren VolleyManager-Version: aktualisiere die App im Play Store.",
       "invalid": "QR-Code unlesbar oder beschädigt. Geh näher heran, vermeide Spiegelungen und scanne erneut."
     }
+  },
+  "backup": {
+    "title": "Google-Drive-Sicherung",
+    "intro": "Optional: Bewahre eine Kopie deiner Teams, Spiele und Turniere in deinem Google Drive auf. Die App funktioniert ohne Konto.",
+    "connect": "Mit Google anmelden",
+    "account": "Konto: {{email}}",
+    "lastBackup": "Letzte Sicherung: {{date}}",
+    "noBackup": "Keine Online-Sicherung",
+    "checking": "Sicherung wird gesucht…",
+    "backupNow": "Jetzt sichern",
+    "notIncluded": "Logos und Fotos sind nicht enthalten.",
+    "restore": "Wiederherstellen",
+    "deleteOnline": "Online-Sicherung löschen",
+    "disconnect": "Abmelden",
+    "doneTitle": "Sicherung abgeschlossen",
+    "doneBody": "Deine Daten sind in deinem Google Drive gesichert.",
+    "restoreConfirmTitle": "Sicherung wiederherstellen?",
+    "restoreConfirmBody": "Alle Daten auf diesem Telefon (Teams, Spieler, Spiele, Turniere) werden durch die Sicherung vom {{date}} ersetzt. Dies kann nicht rückgängig gemacht werden.",
+    "restoreDoneTitle": "Wiederherstellung abgeschlossen",
+    "restoreDoneBody": "Die Daten der Sicherung wurden wiederhergestellt.",
+    "deleteConfirmTitle": "Online-Sicherung löschen?",
+    "deleteConfirmBody": "Die Sicherung wird aus deinem Google Drive gelöscht. Die Daten auf diesem Telefon ändern sich nicht.",
+    "deletedBody": "Die Online-Sicherung wurde gelöscht.",
+    "errors": {
+      "offline": "Keine Internetverbindung. Versuche es später erneut.",
+      "signedOut": "Die Google-Anmeldung ist abgelaufen oder der Zugriff wurde entzogen. Melde dich erneut an.",
+      "full": "Dein Google Drive ist voll. Gib Speicherplatz frei und versuche es erneut.",
+      "newer": "Diese Sicherung stammt aus einer neueren Version von VolleyManager. Aktualisiere die App und versuche es erneut.",
+      "damaged": "Diese Sicherung kann nicht gelesen werden. Die Daten auf diesem Telefon wurden nicht geändert.",
+      "restoreFailed": "Die Wiederherstellung ist fehlgeschlagen. Die vorherigen Daten wurden wiederhergestellt.",
+      "connect": "Anmeldung bei Google nicht möglich. Prüfe deine Verbindung und versuche es erneut.",
+      "generic": "Der Vorgang wurde nicht abgeschlossen. Versuche es erneut."
+    }
   }
 }

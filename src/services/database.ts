@@ -1,5 +1,10 @@
 import * as SQLite from 'expo-sqlite';
 
+/** File name of the app database (in SQLite.defaultDatabaseDirectory) */
+export const DB_NAME = 'volleymanager.db';
+/** user_version reached by runMigrations — a backup from a newer schema is refused */
+export const SCHEMA_VERSION = 16;
+
 let _db: SQLite.SQLiteDatabase | null = null;
 let _initPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
@@ -7,13 +12,29 @@ export async function getDb(): Promise<SQLite.SQLiteDatabase> {
   if (_db) return _db;
   if (!_initPromise) {
     _initPromise = (async () => {
-      const db = await SQLite.openDatabaseAsync('volleymanager.db');
-      await runMigrations(db);
+      const db = await SQLite.openDatabaseAsync(DB_NAME);
+      try {
+        await runMigrations(db);
+      } catch (e) {
+        await db.closeAsync().catch(() => {});
+        throw e;
+      }
       _db = db;
       return db;
     })();
+    // A failed opening can be retried (restoration rollback)
+    _initPromise.catch(() => { _initPromise = null; });
   }
   return _initPromise;
+}
+
+/** Closes the database (restoration replaces its file); the next getDb() opens it again. */
+export async function closeDb(): Promise<void> {
+  const pending = _initPromise;
+  _db = null;
+  _initPromise = null;
+  const db = await pending?.catch(() => null);
+  await db?.closeAsync();
 }
 
 export async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {

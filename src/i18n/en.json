@@ -1077,5 +1077,38 @@
       "unsupported_version": "This QR code comes from a newer VolleyManager: update the app from the Play Store.",
       "invalid": "Unreadable or damaged QR code. Move closer, avoid reflections and scan it again."
     }
+  },
+  "backup": {
+    "title": "Google Drive backup",
+    "intro": "Optional: keep a copy of your teams, matches and tournaments in your Google Drive. The app works without an account.",
+    "connect": "Sign in with Google",
+    "account": "Account: {{email}}",
+    "lastBackup": "Last backup: {{date}}",
+    "noBackup": "No online backup",
+    "checking": "Looking for the backup…",
+    "backupNow": "Back up now",
+    "notIncluded": "Logos and photos are not included.",
+    "restore": "Restore",
+    "deleteOnline": "Delete the online backup",
+    "disconnect": "Sign out",
+    "doneTitle": "Backup complete",
+    "doneBody": "Your data is backed up in your Google Drive.",
+    "restoreConfirmTitle": "Restore the backup?",
+    "restoreConfirmBody": "All the data on this phone (teams, players, matches, tournaments) will be replaced by the backup of {{date}}. This cannot be undone.",
+    "restoreDoneTitle": "Restore complete",
+    "restoreDoneBody": "The data of the backup has been restored.",
+    "deleteConfirmTitle": "Delete the online backup?",
+    "deleteConfirmBody": "The backup will be erased from your Google Drive. The data on this phone does not change.",
+    "deletedBody": "The online backup has been deleted.",
+    "errors": {
+      "offline": "No internet connection. Try again later.",
+      "signedOut": "The Google sign-in has expired or access was removed. Sign in again.",
+      "full": "Your Google Drive is full. Free up some space and try again.",
+      "newer": "This backup comes from a newer version of VolleyManager. Update the app and try again.",
+      "damaged": "This backup cannot be read. The data on this phone has not been changed.",
+      "restoreFailed": "The restore failed. The previous data has been put back.",
+      "connect": "Could not sign in to Google. Check your connection and try again.",
+      "generic": "The operation did not complete. Try again."
+    }
   }
 }

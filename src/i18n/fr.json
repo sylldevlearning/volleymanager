@@ -1077,5 +1077,38 @@
       "unsupported_version": "Ce QR code vient d'une version plus récente de VolleyManager : mettez l'app à jour depuis le Play Store.",
       "invalid": "QR code illisible ou abîmé. Rapprochez-vous, évitez les reflets et scannez-le à nouveau."
     }
+  },
+  "backup": {
+    "title": "Sauvegarde Google Drive",
+    "intro": "Facultatif : gardez une copie de vos équipes, matchs et tournois dans votre Google Drive. L'app fonctionne sans compte.",
+    "connect": "Se connecter avec Google",
+    "account": "Compte : {{email}}",
+    "lastBackup": "Dernière sauvegarde : {{date}}",
+    "noBackup": "Aucune sauvegarde en ligne",
+    "checking": "Recherche de la sauvegarde…",
+    "backupNow": "Sauvegarder maintenant",
+    "notIncluded": "Les logos et photos ne sont pas inclus.",
+    "restore": "Restaurer",
+    "deleteOnline": "Supprimer la sauvegarde en ligne",
+    "disconnect": "Se déconnecter",
+    "doneTitle": "Sauvegarde terminée",
+    "doneBody": "Vos données sont sauvegardées dans votre Google Drive.",
+    "restoreConfirmTitle": "Restaurer la sauvegarde ?",
+    "restoreConfirmBody": "Toutes les données de ce téléphone (équipes, joueurs, matchs, tournois) seront remplacées par la sauvegarde du {{date}}. Cette action est irréversible.",
+    "restoreDoneTitle": "Restauration terminée",
+    "restoreDoneBody": "Les données de la sauvegarde ont été restaurées.",
+    "deleteConfirmTitle": "Supprimer la sauvegarde en ligne ?",
+    "deleteConfirmBody": "La sauvegarde sera effacée de votre Google Drive. Les données de ce téléphone ne changent pas.",
+    "deletedBody": "La sauvegarde en ligne a été supprimée.",
+    "errors": {
+      "offline": "Pas de connexion internet. Réessayez plus tard.",
+      "signedOut": "La connexion à Google a expiré ou l'accès a été retiré. Reconnectez-vous.",
+      "full": "Votre Google Drive est plein. Libérez de l'espace puis réessayez.",
+      "newer": "Cette sauvegarde vient d'une version plus récente de VolleyManager. Mettez l'application à jour puis réessayez.",
+      "damaged": "Cette sauvegarde est illisible. Les données de ce téléphone n'ont pas été modifiées.",
+      "restoreFailed": "La restauration a échoué. Les données d'avant ont été remises en place.",
+      "connect": "Connexion à Google impossible. Vérifiez votre connexion et réessayez.",
+      "generic": "L'opération n'a pas abouti. Réessayez."
+    }
   }
 }

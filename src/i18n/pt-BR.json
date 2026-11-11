@@ -1077,5 +1077,38 @@
       "unsupported_version": "Este QR code vem de uma versão mais nova do VolleyManager: atualize o app pela Play Store.",
       "invalid": "QR code ilegível ou danificado. Chegue mais perto, evite reflexos e leia de novo."
     }
+  },
+  "backup": {
+    "title": "Backup no Google Drive",
+    "intro": "Opcional: guarde uma cópia dos seus times, partidas e torneios no seu Google Drive. O app funciona sem conta.",
+    "connect": "Entrar com o Google",
+    "account": "Conta: {{email}}",
+    "lastBackup": "Último backup: {{date}}",
+    "noBackup": "Nenhum backup on-line",
+    "checking": "Procurando o backup…",
+    "backupNow": "Fazer backup agora",
+    "notIncluded": "Logotipos e fotos não são incluídos.",
+    "restore": "Restaurar",
+    "deleteOnline": "Excluir o backup on-line",
+    "disconnect": "Sair",
+    "doneTitle": "Backup concluído",
+    "doneBody": "Seus dados estão salvos no seu Google Drive.",
+    "restoreConfirmTitle": "Restaurar o backup?",
+    "restoreConfirmBody": "Todos os dados deste celular (times, jogadores, partidas, torneios) serão substituídos pelo backup de {{date}}. Esta ação não pode ser desfeita.",
+    "restoreDoneTitle": "Restauração concluída",
+    "restoreDoneBody": "Os dados do backup foram restaurados.",
+    "deleteConfirmTitle": "Excluir o backup on-line?",
+    "deleteConfirmBody": "O backup será apagado do seu Google Drive. Os dados deste celular não mudam.",
+    "deletedBody": "O backup on-line foi excluído.",
+    "errors": {
+      "offline": "Sem conexão com a internet. Tente mais tarde.",
+      "signedOut": "O login do Google expirou ou o acesso foi removido. Entre novamente.",
+      "full": "Seu Google Drive está cheio. Libere espaço e tente novamente.",
+      "newer": "Este backup vem de uma versão mais recente do VolleyManager. Atualize o app e tente novamente.",
+      "damaged": "Não é possível ler este backup. Os dados deste celular não foram alterados.",
+      "restoreFailed": "A restauração falhou. Os dados anteriores foram recolocados.",
+      "connect": "Não foi possível entrar no Google. Verifique sua conexão e tente novamente.",
+      "generic": "A operação não foi concluída. Tente novamente."
+    }
   }
 }
