@@ -10,9 +10,11 @@ import {
   applyTemplate,
   initialWizardState,
   previewTournament,
+  routeAfterCreate,
   templatePayload,
   toCreateInput,
   validateStep,
+  type CreateMode,
   type WizardError,
   type WizardState,
   type WizardStep,
@@ -39,7 +41,8 @@ export default function NewTournamentScreen() {
   const [step, setStep] = useState<WizardStep>(1);
   const [errors, setErrors] = useState<WizardError[]>([]);
   const [templates, setTemplates] = useState<TournamentTemplate[]>([]);
-  const [creating, setCreating] = useState(false);
+  /** Button being processed at the last step */
+  const [creating, setCreating] = useState<CreateMode | null>(null);
   const scrollRef = useRef<ScrollView>(null);
   const created = useRef(false);
   // Anything changed from the suggested setup
@@ -77,20 +80,27 @@ export default function NewTournamentScreen() {
       return;
     }
     if (step < 4) goTo((step + 1) as WizardStep);
-    else handleCreate();
   }
 
-  async function handleCreate() {
+  async function handleCreate(mode: CreateMode) {
     if (creating) return;
-    setCreating(true);
+    const found = validateStep(state, 4);
+    if (found.length > 0) {
+      setErrors(found);
+      return;
+    }
+    setCreating(mode);
     try {
-      await createTournament(toCreateInput(state));
+      const bundle = await createTournament(toCreateInput(state));
       created.current = true;
-      router.back();
+      const route = routeAfterCreate(mode, bundle.tournament.id);
+      // "Créer et lancer": the wizard is replaced by the tournament (back goes to the list)
+      if (route) router.replace(route as never);
+      else router.back();
     } catch (e) {
       Alert.alert(t('common.error'), String(e));
     } finally {
-      setCreating(false);
+      setCreating(null);
     }
   }
 
@@ -158,17 +168,41 @@ export default function NewTournamentScreen() {
               <Text style={styles.backText}>{t('common.back')}</Text>
             </Pressable>
           )}
-          <Pressable
-            style={({ pressed }) => [styles.nextButton, pressed && styles.pressed, creating && styles.disabled]}
-            onPress={handleNext}
-            disabled={creating}
-            accessibilityRole="button"
-          >
-            <Text style={styles.nextText}>
-              {step < 4 ? t('common.next') : creating ? t('tournament.wizard.creating') : t('tournament.wizard.create')}
-            </Text>
-          </Pressable>
+          {step < 4 ? (
+            <Pressable
+              style={({ pressed }) => [styles.nextButton, pressed && styles.pressed]}
+              onPress={handleNext}
+              accessibilityRole="button"
+            >
+              <Text style={styles.nextText}>{t('common.next')}</Text>
+            </Pressable>
+          ) : (
+            <Pressable
+              style={({ pressed }) => [styles.laterButton, pressed && styles.pressed, !!creating && styles.disabled]}
+              onPress={() => handleCreate('later')}
+              disabled={!!creating}
+              accessibilityRole="button"
+            >
+              <Text style={styles.laterText} numberOfLines={2}>
+                {creating === 'later' ? t('tournament.wizard.creating') : t('tournament.wizard.saveForLater')}
+              </Text>
+            </Pressable>
+          )}
         </View>
+        {step === 4 && (
+          <View style={styles.launchRow}>
+            <Pressable
+              style={({ pressed }) => [styles.nextButton, pressed && styles.pressed, !!creating && styles.disabled]}
+              onPress={() => handleCreate('launch')}
+              disabled={!!creating}
+              accessibilityRole="button"
+            >
+              <Text style={styles.nextText}>
+                {creating === 'launch' ? t('tournament.wizard.creating') : t('tournament.wizard.createAndLaunch')}
+              </Text>
+            </Pressable>
+          </View>
+        )}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -194,6 +228,12 @@ const makeStyles = (a: AccentTheme) => StyleSheet.create({
   backText: { fontSize: 16, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },
   nextButton: { flex: 1, paddingVertical: 16, borderRadius: 14, alignItems: 'center', backgroundColor: a.fill },
   nextText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.onFill },
+  laterButton: {
+    flex: 1, paddingVertical: 16, paddingHorizontal: 12, borderRadius: 14, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: a.color,
+  },
+  laterText: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary, textAlign: 'center' },
+  launchRow: { flexDirection: 'row', paddingHorizontal: 16, paddingBottom: 16 },
   pressed: { opacity: 0.85 },
   disabled: { opacity: 0.5 },
 });

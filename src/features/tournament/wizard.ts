@@ -412,3 +412,14 @@ export function applyTemplate(state: WizardState, payload: TournamentTemplate['p
     restMinutes: schedule.restMinutes,
   };
 }
+
+/**
+ * End of the wizard. Both buttons create the same tournament, already "En cours"
+ * with its schedule: "Créer et lancer" opens it, ready to play; "Enregistrer pour
+ * plus tard" goes back to the list (null: router.back()).
+ */
+export type CreateMode = 'launch' | 'later';
+
+export function routeAfterCreate(mode: CreateMode, tournamentId: string): string | null {
+  return mode === 'launch' ? `/tournament/${tournamentId}` : null;
+}
