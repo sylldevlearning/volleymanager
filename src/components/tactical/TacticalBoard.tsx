@@ -1154,6 +1154,21 @@ export function TacticalBoard({
     ]);
   }
 
+  // "Tout effacer" (⋮ menu): drawings only, players stay — same action as the toolbar's
+  function confirmClearDrawings() {
+    Alert.alert(t('tactical.clearConfirm'), t('tactical.newBoardConfirm.message'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('tactical.newBoardConfirm.action'),
+        style: 'destructive',
+        onPress: () => {
+          clearArrows();
+          handleReset();
+        },
+      },
+    ]);
+  }
+
   function handleNewBoard() {
     handleReset();
     clearArrows();
@@ -1347,7 +1362,7 @@ export function TacticalBoard({
               <View style={styles.menuDivider} />
               <Pressable
                 style={styles.menuItem}
-                onPress={() => { setShowMenu(false); clearArrows(); handleReset(); }}
+                onPress={() => { setShowMenu(false); confirmClearDrawings(); }}
               >
                 <Text style={styles.menuItemIcon}>🧺</Text>
                 <Text style={[styles.menuItemText, { color: palette.error }]}>{t('tactical.tools.clearAll')}</Text>

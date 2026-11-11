@@ -39,3 +39,23 @@ describe('tactical board: the slate icon asks before clearing', () => {
     }
   });
 });
+
+describe('tactical board: "Tout effacer" in the ⋮ menu asks too', () => {
+  const board = read('src/components/tactical/TacticalBoard.tsx');
+
+  it('the menu item opens a confirmation instead of clearing at once', () => {
+    expect(board).not.toContain('onPress={() => { setShowMenu(false); clearArrows(); handleReset(); }}');
+    expect(board).toContain('onPress={() => { setShowMenu(false); confirmClearDrawings(); }}');
+  });
+
+  it('same action as the toolbar (drawings only): its title, Cancel / Clear', () => {
+    const start = board.indexOf('function confirmClearDrawings');
+    const body = board.slice(start, board.indexOf('\n  }\n', start));
+    expect(body).toContain("t('tactical.clearConfirm')");
+    expect(body).toContain("t('tactical.newBoardConfirm.message')");
+    expect(body).toContain("t('common.cancel')");
+    expect(body).toContain("style: 'destructive'");
+    expect(body).toContain("t('tactical.newBoardConfirm.action')");
+    expect(body).toMatch(/clearArrows\(\);\s*handleReset\(\);/);
+  });
+});
