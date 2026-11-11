@@ -14,8 +14,10 @@ import { TopPerformerCard } from '../../../src/components/charts/TopPerformerCar
 import { StatCard } from '../../../src/components/charts/StatCard';
 import { palette } from '../../../src/theme/tokens';
 import { InfoTooltip } from '../../../src/components/ui/InfoTooltip';
+import { useAccent } from '../../../src/theme/useAccent';
 
 export default function MatchStatsScreen() {
+  const accent = useAccent();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t, i18n } = useTranslation();
   const router = useRouter();
@@ -47,7 +49,7 @@ export default function MatchStatsScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator color={palette.accentPrimary} />
+        <ActivityIndicator color={accent.color} />
       </View>
     );
   }
@@ -156,7 +158,7 @@ export default function MatchStatsScreen() {
             ))}
             <View style={styles.pointTypeLegend}>
               {[
-                { label: t('stats.pointTypes.attack'), color: palette.accentPrimary },
+                { label: t('stats.pointTypes.attack'), color: palette.statAttack },
                 { label: t('stats.pointTypes.block'), color: palette.info },
                 { label: t('stats.pointTypes.ace'), color: palette.success },
                 { label: t('stats.pointTypes.opponentFault'), color: palette.textMuted },
@@ -261,7 +263,7 @@ function SetPointsRow({
       <View style={styles.setBarWrap}>
         <SegmentedBar
           segments={[
-            { value: hp.attack, color: palette.accentPrimary },
+            { value: hp.attack, color: palette.statAttack },
             { value: hp.block, color: palette.info },
             { value: hp.ace, color: palette.success },
             { value: hp.opponentFault, color: palette.textMuted },
@@ -274,7 +276,7 @@ function SetPointsRow({
         <Text style={styles.setTotal}>{awayTotal}</Text>
         <SegmentedBar
           segments={[
-            { value: ap.attack, color: palette.accentPrimary },
+            { value: ap.attack, color: palette.statAttack },
             { value: ap.block, color: palette.info },
             { value: ap.ace, color: palette.success },
             { value: ap.opponentFault, color: palette.textMuted },

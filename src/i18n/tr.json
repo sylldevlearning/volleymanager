@@ -583,7 +583,18 @@
     "help": "Yardım",
     "replayHelp": "Yardımı yeniden göster",
     "privacyOptions": "Gizlilik ayarları",
-    "languageSystem": "Telefon dili ({{name}})"
+    "languageSystem": "Telefon dili ({{name}})",
+    "accentTitle": "Ana renk",
+    "accentColors": {
+      "red": "Kırmızı",
+      "blue": "Mavi",
+      "violet": "Mor",
+      "pink": "Pembe",
+      "green": "Yeşil",
+      "teal": "Camgöbeği",
+      "orange": "Turuncu",
+      "gold": "Altın"
+    }
   },
   "scoring": {
     "removePoint": "-1 sayı",

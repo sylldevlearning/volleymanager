@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Alert, FlatList, Modal, StyleSheet, Text, View, Switch, Pressable } from 'react-native';
+import { Alert, FlatList, Modal, ScrollView, StyleSheet, Text, View, Switch, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Zap, Globe, Info, ChevronRight, LifeBuoy, ShieldCheck, Check } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,11 +13,17 @@ import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
 import { AdBanner } from '../../src/components/ads/AdBanner';
 import { deleteAllMatches } from '../../src/services/matchService';
 import { isPrivacyOptionsRequired, openPrivacyOptions } from '../../src/features/ads/adsService';
+import { useAccent } from '../../src/theme/useAccent';
+import { ACCENTS } from '../../src/theme/accent';
+
+// Two rows of four swatches
+const ACCENT_ROWS = [ACCENTS.slice(0, 4), ACCENTS.slice(4)];
 
 export default function SettingsScreen() {
+  const accent = useAccent();
   const { t } = useTranslation();
   const router = useRouter();
-  const { hapticsEnabled, setHapticsEnabled, language, setLanguage, resetHelp } = useSettingsStore();
+  const { hapticsEnabled, setHapticsEnabled, language, setLanguage, resetHelp, accentColor, setAccentColor } = useSettingsStore();
 
   // UMP only offers the privacy form where it's required (EEA / UK) — re-checked on
   // each visit since consent is gathered asynchronously at startup.
@@ -38,6 +44,7 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
       <View style={styles.topBar}>
         <InfoTooltip textKey="help.settings" />
       </View>
@@ -50,10 +57,36 @@ export default function SettingsScreen() {
             accessibilityRole="button"
             accessibilityLabel={`${t('settings.language')} : ${languageLabel(language)}`}
           >
-            <Globe size={20} color={palette.accentPrimary} />
+            <Globe size={20} color={accent.color} />
             <Text style={styles.rowLabel} numberOfLines={1}>{languageLabel(language)}</Text>
             <ChevronRight size={16} color={palette.textMuted} />
           </Pressable>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t('settings.accentTitle')}</Text>
+        <View style={[styles.card, styles.swatchCard]}>
+          {ACCENT_ROWS.map((row) => (
+            <View key={row[0].id} style={styles.swatchRow}>
+              {row.map((choice) => {
+                const active = accentColor === choice.id;
+                return (
+                  <Pressable
+                    key={choice.id}
+                    style={[styles.swatch, { backgroundColor: choice.fill }, active && styles.swatchActive]}
+                    onPress={() => setAccentColor(choice.id)}
+                    hitSlop={4}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected: active }}
+                    accessibilityLabel={t(`settings.accentColors.${choice.id}`)}
+                  >
+                    {active && <Check size={20} color={choice.onFill} strokeWidth={3} />}
+                  </Pressable>
+                );
+              })}
+            </View>
+          ))}
         </View>
       </View>
 
@@ -150,6 +183,7 @@ export default function SettingsScreen() {
           </Pressable>
         </View>
       </View>
+      </ScrollView>
       <AdBanner unitId={ADMOB_IDS.BANNER_SETTINGS} />
 
       <Modal visible={languageOpen} transparent animationType="fade" onRequestClose={() => setLanguageOpen(false)}>
@@ -202,6 +236,7 @@ function LanguageOption({
   active: boolean;
   onPress: () => void;
 }) {
+  const accent = useAccent();
   return (
     <Pressable
       style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
@@ -209,14 +244,27 @@ function LanguageOption({
       accessibilityRole="button"
       accessibilityState={{ selected: active }}
     >
-      <Text style={[styles.rowLabel, active && { color: palette.accentPrimary }]}>{label}</Text>
-      {active && <Check size={18} color={palette.accentPrimary} />}
+      <Text style={[styles.rowLabel, active && { color: accent.color }]}>{label}</Text>
+      {active && <Check size={18} color={accent.color} />}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: palette.background, padding: 16, gap: 0 },
+  container: { flex: 1, backgroundColor: palette.background },
+  scroll: { padding: 16 },
+  swatchCard: { padding: 14, gap: 12 },
+  swatchRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  swatch: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  swatchActive: { borderColor: palette.textPrimary },
   topBar: { flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 4 },
   section: { marginBottom: 20 },
   sectionTitle: {

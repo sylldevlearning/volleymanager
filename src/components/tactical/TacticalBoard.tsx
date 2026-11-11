@@ -45,6 +45,7 @@ import { palette } from '../../theme/tokens';
 import { InfoTooltip } from '../ui/InfoTooltip';
 import { CoachMarks } from '../ui/CoachMarks';
 import * as Haptics from 'expo-haptics';
+import { type AccentTheme, useThemedStyles } from '../../theme/useAccent';
 
 const BENCH_TOKEN_SIZE = 30;
 /** Halo around the token selected for an arrow */
@@ -315,6 +316,7 @@ export function TacticalBoard({
   homePlayers = [],
   awayPlayers = [],
 }: TacticalBoardProps) {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const { width: screenW, height: screenH } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -1538,7 +1540,7 @@ export function TacticalBoard({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: palette.background,
@@ -1592,7 +1594,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: palette.backgroundElevated,
     borderWidth: 1,
-    borderColor: palette.accentPrimary + '40',
+    borderColor: a.color + '40',
   },
   scorePillText: {
     fontSize: 11,

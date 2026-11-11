@@ -18,6 +18,7 @@ import { ONBOARDING_SLIDES, type OnboardingSlide, type OnboardingSlideId } from 
 import { TacticalBoardIcon } from '../src/components/ui/TacticalBoardIcon';
 import { useSettingsStore } from '../src/stores/settingsStore';
 import { palette } from '../src/theme/tokens';
+import { type AccentTheme, useThemedStyles } from '../src/theme/useAccent';
 
 const ICON_SIZE = 56;
 
@@ -25,7 +26,7 @@ const SLIDE_COLORS: Record<OnboardingSlideId, string> = {
   quickMatch: palette.success,
   arbitrage: palette.accentSecondary,
   tournament: '#D4AF37',
-  tactical: palette.accentPrimary,
+  tactical: '#E63946', // feature colour, fixed like the others
   teams: palette.warning,
 };
 
@@ -41,6 +42,7 @@ function SlideIcon({ id }: { id: OnboardingSlideId }) {
 }
 
 export default function OnboardingScreen() {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const router = useRouter();
   const { width } = useWindowDimensions();
@@ -129,7 +131,7 @@ export default function OnboardingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
   topBar: {
     flexDirection: 'row',
@@ -196,12 +198,12 @@ const styles = StyleSheet.create({
   },
   dotActive: {
     width: 24,
-    backgroundColor: palette.accentPrimary,
+    backgroundColor: a.fill,
   },
   nextBtn: {
     height: 56,
     borderRadius: 14,
-    backgroundColor: palette.accentPrimary,
+    backgroundColor: a.fill,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -209,6 +211,6 @@ const styles = StyleSheet.create({
   nextText: {
     fontSize: 16,
     fontFamily: 'Inter_700Bold',
-    color: '#FFFFFF',
+    color: a.onFill,
   },
 });

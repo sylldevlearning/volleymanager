@@ -23,8 +23,10 @@ import { LineChart } from '../../../../src/components/charts/LineChart';
 import { StatCard } from '../../../../src/components/charts/StatCard';
 import { palette } from '../../../../src/theme/tokens';
 import { getPlayerDisplayName } from '../../../../src/features/players/player-helpers';
+import { useAccent } from '../../../../src/theme/useAccent';
 
 export default function PlayerStatsScreen() {
+  const accent = useAccent();
   const { id: matchId, playerId } = useLocalSearchParams<{ id: string; playerId: string }>();
   const { t, i18n } = useTranslation();
   const router = useRouter();
@@ -66,7 +68,7 @@ export default function PlayerStatsScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator color={palette.accentPrimary} />
+        <ActivityIndicator color={accent.color} />
       </View>
     );
   }

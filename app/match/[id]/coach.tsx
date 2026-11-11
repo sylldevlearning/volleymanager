@@ -19,6 +19,7 @@ import { StatButton } from '../../../src/components/stats/StatButton';
 import { useResponsive } from '../../../src/hooks/useResponsive';
 import { palette } from '../../../src/theme/tokens';
 import { InfoTooltip } from '../../../src/components/ui/InfoTooltip';
+import { type AccentTheme, useAccent, useThemedStyles } from '../../../src/theme/useAccent';
 
 interface StatAction {
   type: StatEventType;
@@ -85,6 +86,8 @@ const STAT_CATEGORIES: Array<{ title: string; key: string; actions: StatAction[]
 ];
 
 export default function CoachScreen() {
+  const accent = useAccent();
+  const styles = useThemedStyles(makeStyles);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
   const router = useRouter();
@@ -195,8 +198,8 @@ export default function CoachScreen() {
         renderItem={({ item }) => {
           const isSelected = selectedPlayer?.id === item.id;
           const isLibero = item.position === 'libero';
-          const chipBorder = isLibero ? palette.libero : (isSelected ? palette.accentPrimary : 'transparent');
-          const chipBg = isLibero ? palette.libero + '20' : (isSelected ? palette.accentPrimaryMuted : palette.backgroundSurface);
+          const chipBorder = isLibero ? palette.libero : (isSelected ? accent.color : 'transparent');
+          const chipBg = isLibero ? palette.libero + '20' : (isSelected ? accent.muted : palette.backgroundSurface);
           return (
             <Pressable
               style={[styles.playerChip, { borderColor: chipBorder, backgroundColor: chipBg }]}
@@ -205,7 +208,7 @@ export default function CoachScreen() {
               accessibilityState={{ selected: isSelected }}
               accessibilityLabel={`${item.firstName ?? ''} ${item.lastName ?? ''}`}
             >
-              <Text style={[styles.playerChipNum, { color: isLibero ? palette.libero : isSelected ? palette.accentPrimary : palette.textMuted }]}>
+              <Text style={[styles.playerChipNum, { color: isLibero ? palette.libero : isSelected ? accent.color : palette.textMuted }]}>
                 {isLibero ? '⚡' : ''}#{item.number}
               </Text>
               <Text style={[styles.playerChipName, isSelected && styles.playerChipNameActive]} numberOfLines={1}>
@@ -248,7 +251,7 @@ export default function CoachScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
   loading: { flex: 1, backgroundColor: palette.background, alignItems: 'center', justifyContent: 'center' },
   loadingText: { color: palette.textSecondary, fontFamily: 'Inter_400Regular' },
@@ -276,9 +279,9 @@ const styles = StyleSheet.create({
     minWidth: 70,
     alignItems: 'center',
   },
-  playerChipActive: { borderColor: palette.accentPrimary, backgroundColor: palette.accentPrimaryMuted },
+  playerChipActive: { borderColor: a.color, backgroundColor: a.muted },
   playerChipNum: { fontSize: 12, fontFamily: 'Inter_700Bold', color: palette.textMuted },
-  playerChipNumActive: { color: palette.accentPrimary },
+  playerChipNumActive: { color: a.color },
   playerChipName: { fontSize: 13, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
   playerChipNameActive: { color: palette.textPrimary },
   statsScroll: { padding: 16, gap: 16 },

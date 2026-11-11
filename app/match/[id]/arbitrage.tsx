@@ -45,6 +45,7 @@ import { CoachMarks } from '../../../src/components/ui/CoachMarks';
 import { InfoTooltip } from '../../../src/components/ui/InfoTooltip';
 import { WarningBanner } from '../../../src/components/ui/WarningBanner';
 import { timeoutWarning, substitutionWarning } from '../../../src/features/match/quotaWarnings';
+import { type AccentTheme, useThemedStyles } from '../../../src/theme/useAccent';
 
 type SetupPhase = 'serveChoice' | null;
 
@@ -83,6 +84,7 @@ function courtPlayers(
 }
 
 export default function ArbitrageScreen() {
+  const styles = useThemedStyles(makeStyles);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
   const router = useRouter();
@@ -1079,6 +1081,7 @@ function ServeChoiceView({
   t: (key: string, opts?: Record<string, unknown>) => string;
   context?: 'firstSet' | 'set5';
 }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.serveChoiceContainer}>
       {context === 'set5' && <Text style={styles.serveChoiceSubtitle}>{t('arbitrage.set5Title')}</Text>}
@@ -1104,6 +1107,7 @@ function ServeChoiceView({
 }
 
 function TimeoutButton({ label, color, onPress }: { label: string; color: string; onPress: () => void }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <Pressable
       style={({ pressed }) => [styles.timeoutBtn, { borderColor: color + '60' }, pressed && styles.timeoutBtnPressed]}
@@ -1127,6 +1131,7 @@ function CounterPill({
   onPress: () => void;
   reversed?: boolean;
 }) {
+  const styles = useThemedStyles(makeStyles);
   const dots = max !== null ? Array.from({ length: max }, (_, i) => i < used) : [];
   return (
     <Pressable
@@ -1160,6 +1165,7 @@ function ActionButton({
   disabled?: boolean;
   danger?: boolean;
 }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <Pressable
       ref={ref}
@@ -1187,7 +1193,7 @@ function ActionButton({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
   loading: { flex: 1, backgroundColor: palette.background, alignItems: 'center', justifyContent: 'center' },
   loadingText: { color: palette.textSecondary, fontFamily: 'Inter_400Regular' },
@@ -1233,14 +1239,14 @@ const styles = StyleSheet.create({
 
   footer: { paddingHorizontal: 16, paddingBottom: 12, paddingTop: 4 },
   validateLineupBtn: {
-    backgroundColor: palette.accentPrimary,
+    backgroundColor: a.fill,
     paddingVertical: 16,
     borderRadius: 14,
     alignItems: 'center',
   },
   validateLineupBtnPressed: { opacity: 0.85 },
   validateLineupBtnDisabled: { opacity: 0.4 },
-  validateLineupBtnText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: '#fff' },
+  validateLineupBtnText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.onFill },
 
   infoRow: {
     flexDirection: 'row',
@@ -1328,7 +1334,7 @@ const styles = StyleSheet.create({
 
   serveChoiceContainer: { flex: 1, justifyContent: 'center', padding: 24, gap: 16 },
   serveChoiceSubtitle: {
-    fontSize: 14, fontFamily: 'Inter_600SemiBold', color: palette.accentPrimary,
+    fontSize: 14, fontFamily: 'Inter_600SemiBold', color: a.color,
     textAlign: 'center', textTransform: 'uppercase', letterSpacing: 0.5,
   },
   serveChoiceTitle: {

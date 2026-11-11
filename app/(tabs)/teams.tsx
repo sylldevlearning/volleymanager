@@ -9,6 +9,7 @@ import { getPlayersByTeam } from '../../src/services/playerService';
 import type { Team } from '../../src/models/team';
 import { palette } from '../../src/theme/tokens';
 import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
+import { type AccentTheme, useAccent, useThemedStyles } from '../../src/theme/useAccent';
 
 interface TeamWithCount {
   team: Team;
@@ -16,6 +17,8 @@ interface TeamWithCount {
 }
 
 export default function TeamsScreen() {
+  const styles = useThemedStyles(makeStyles);
+  const accent = useAccent();
   const { t } = useTranslation();
   const router = useRouter();
   const [teams, setTeams] = useState<TeamWithCount[]>([]);
@@ -76,13 +79,13 @@ export default function TeamsScreen() {
         accessibilityLabel={t('team.new')}
         accessibilityRole="button"
       >
-        <Plus size={26} color="#fff" />
+        <Plus size={26} color={accent.onFill} />
       </Pressable>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
   topBar: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 16, paddingTop: 8 },
   list: { padding: 16, gap: 10, paddingBottom: 80 },
@@ -111,7 +114,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: palette.accentPrimary,
+    backgroundColor: a.fill,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 8,

@@ -40,6 +40,7 @@ import type {
   TournamentGameType,
   TournamentTemplate,
 } from '../../models/tournament';
+import { type AccentTheme, useAccent, useThemedStyles } from '../../theme/useAccent';
 
 const GAME_TYPES: TournamentGameType[] = ['indoor_6v6', 'indoor_4v4', 'indoor_3v3', 'beach_2v2'];
 const FORMATS: TournamentFormat[] = ['round_robin', 'pools_knockout', 'knockout', 'brassage_levels'];
@@ -52,6 +53,7 @@ interface StepProps {
 // ─── Small pieces ───────────────────────────────────────────────────────────
 
 export function Chip({ label, active, onPress, onLongPress }: { label: string; active: boolean; onPress: () => void; onLongPress?: () => void }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <Pressable
       style={[styles.chip, active && styles.chipActive]}
@@ -66,6 +68,7 @@ export function Chip({ label, active, onPress, onLongPress }: { label: string; a
 }
 
 function ChoiceCard({ title, description, active, onPress }: { title: string; description: string; active: boolean; onPress: () => void }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <Pressable
       style={[styles.choice, active && styles.choiceActive]}
@@ -83,6 +86,7 @@ function ChoiceCard({ title, description, active, onPress }: { title: string; de
 }
 
 function IconButton({ icon, label, onPress, disabled }: { icon: ReactNode; label: string; onPress: () => void; disabled?: boolean }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <Pressable
       style={[styles.iconButton, disabled && styles.disabled]}
@@ -98,6 +102,7 @@ function IconButton({ icon, label, onPress, disabled }: { icon: ReactNode; label
 }
 
 function SecondaryButton({ icon, label, onPress, disabled }: { icon: ReactNode; label: string; onPress: () => void; disabled?: boolean }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <Pressable
       style={({ pressed }) => [styles.secondary, pressed && styles.pressed, disabled && styles.disabled]}
@@ -116,6 +121,7 @@ function SecondaryButton({ icon, label, onPress, disabled }: { icon: ReactNode; 
  * compact picker in place.
  */
 export function PickerField({ mode, value, label, onPick }: { mode: 'date' | 'time'; value: Date; label: string; onPick: (date: Date) => void }) {
+  const styles = useThemedStyles(makeStyles);
   const [open, setOpen] = useState(false);
   const Icon = mode === 'date' ? CalendarDays : Clock;
 
@@ -151,6 +157,7 @@ export function DetailsStep({
   onApplyTemplate: (template: TournamentTemplate) => void;
   onDeleteTemplate: (template: TournamentTemplate) => void;
 }) {
+  const styles = useThemedStyles(makeStyles);
   const { t, i18n } = useTranslation();
 
   return (
@@ -231,6 +238,7 @@ const POINT_ROWS: (keyof PointsScale)[] = ['winClear', 'winTight', 'lossTight', 
 const samePoints = (a: PointsScale, b: PointsScale) => POINT_ROWS.every((k) => a[k] === b[k]);
 
 export function FormatStep({ state, onChange }: StepProps) {
+  const styles = useThemedStyles(makeStyles);
   const { t, i18n } = useTranslation();
   const [advanced, setAdvanced] = useState(false);
 
@@ -342,6 +350,7 @@ function durationText(minutes: number, t: (key: string, opts?: Record<string, un
 }
 
 export function TeamsStep({ state, onChange }: StepProps) {
+  const styles = useThemedStyles(makeStyles);
   const { t, i18n } = useTranslation();
   const [libraryOpen, setLibraryOpen] = useState(false);
   const label = (k: number) => t('tournament.wizard.teamNumber', { n: k });
@@ -507,6 +516,8 @@ export function SummaryStep({
   onRedraw: () => void;
   onSaveTemplate: (name: string) => Promise<void>;
 }) {
+  const styles = useThemedStyles(makeStyles);
+  const accent = useAccent();
   const { t, i18n } = useTranslation();
   const [templateName, setTemplateName] = useState('');
   const [saved, setSaved] = useState(false);
@@ -577,7 +588,7 @@ export function SummaryStep({
           />
           <Pressable style={[styles.addButton, !templateName.trim() && styles.disabled]} onPress={save}
             disabled={!templateName.trim()} accessibilityRole="button" accessibilityLabel={t('tournament.wizard.saveTemplate')}>
-            <Save size={20} color="#fff" />
+            <Save size={20} color={accent.onFill} />
           </Pressable>
         </View>
         {saved && <Text style={styles.success}>{t('tournament.wizard.templateSaved')}</Text>}
@@ -586,7 +597,7 @@ export function SummaryStep({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   input: {
     backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
     borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13,
@@ -597,22 +608,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10,
     backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
   },
-  chipActive: { backgroundColor: palette.accentPrimary, borderColor: palette.accentPrimary },
+  chipActive: { backgroundColor: a.fill, borderColor: a.fill },
   chipText: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary },
-  chipTextActive: { color: '#fff' },
+  chipTextActive: { color: a.onFill },
   hint: { fontSize: 13, fontFamily: 'Inter_400Regular', color: palette.textSecondary, lineHeight: 18, paddingVertical: 8 },
   choices: { gap: 8 },
   choice: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 12, padding: 14, borderRadius: 12,
     backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
   },
-  choiceActive: { borderColor: palette.accentPrimary },
+  choiceActive: { borderColor: a.color },
   radio: {
     width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: palette.textMuted,
     alignItems: 'center', justifyContent: 'center', marginTop: 1,
   },
-  radioActive: { borderColor: palette.accentPrimary },
-  radioDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: palette.accentPrimary },
+  radioActive: { borderColor: a.color },
+  radioDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: a.fill },
   choiceText: { flex: 1, gap: 3 },
   choiceTitle: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },
   choiceDesc: { fontSize: 13, fontFamily: 'Inter_400Regular', color: palette.textSecondary, lineHeight: 18 },
@@ -639,7 +650,7 @@ const styles = StyleSheet.create({
   addRow: { flexDirection: 'row', gap: 8, alignItems: 'center' },
   addInput: { flex: 1 },
   addButton: {
-    width: 48, height: 48, borderRadius: 12, backgroundColor: palette.accentPrimary,
+    width: 48, height: 48, borderRadius: 12, backgroundColor: a.fill,
     alignItems: 'center', justifyContent: 'center',
   },
   teamRow: {

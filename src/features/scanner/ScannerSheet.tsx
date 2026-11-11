@@ -20,6 +20,7 @@ import { isOcrAvailable, recognizeText } from './ocrService';
 import { parseNames, type DetectedPlayer } from './ocrParser';
 import { createPlayer } from '../../services/playerService';
 import type { Player } from '../../models/player';
+import { type AccentTheme, useAccent, useThemedStyles } from '../../theme/useAccent';
 
 interface ScannerSheetProps {
   visible: boolean;
@@ -36,6 +37,8 @@ export function ScannerSheet({
   onClose,
   onImported,
 }: ScannerSheetProps) {
+  const accent = useAccent();
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const [photos, setPhotos] = useState<string[]>([]);
   const [analyzing, setAnalyzing] = useState(false);
@@ -222,7 +225,7 @@ export function ScannerSheet({
                 disabled={!ocrAvailable}
                 accessibilityRole="button"
               >
-                <Camera size={20} color={ocrAvailable ? palette.accentPrimary : palette.textMuted} />
+                <Camera size={20} color={ocrAvailable ? accent.color : palette.textMuted} />
                 <Text style={[styles.photoBtnText, !ocrAvailable && styles.photoBtnTextDisabled]}>
                   {photos.length === 0 ? t('scanner.takePhoto') : t('scanner.addPage')}
                 </Text>
@@ -234,7 +237,7 @@ export function ScannerSheet({
                 disabled={!ocrAvailable}
                 accessibilityRole="button"
               >
-                <Images size={20} color={ocrAvailable ? palette.accentPrimary : palette.textMuted} />
+                <Images size={20} color={ocrAvailable ? accent.color : palette.textMuted} />
                 <Text style={[styles.photoBtnText, !ocrAvailable && styles.photoBtnTextDisabled]}>
                   {t('scanner.choosePhoto')}
                 </Text>
@@ -250,7 +253,7 @@ export function ScannerSheet({
               accessibilityRole="button"
             >
               {analyzing ? (
-                <ActivityIndicator color="#fff" size="small" />
+                <ActivityIndicator color={accent.onFill} size="small" />
               ) : (
                 <Text style={styles.analyzeBtnText}>{t('scanner.analyze')}</Text>
               )}
@@ -280,7 +283,7 @@ export function ScannerSheet({
                   onPress={addManually}
                   accessibilityRole="button"
                 >
-                  <Plus size={16} color={palette.accentPrimary} />
+                  <Plus size={16} color={accent.color} />
                   <Text style={styles.addManuallyText}>{t('scanner.addManually')}</Text>
                 </Pressable>
               }
@@ -310,6 +313,7 @@ function PlayerResultRow({
   onToggle: () => void;
   onNumberChange: (v: string) => void;
 }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.resultRow}>
       <Pressable
@@ -344,7 +348,7 @@ function PlayerResultRow({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
   header: {
     flexDirection: 'row',
@@ -413,7 +417,7 @@ const styles = StyleSheet.create({
   photoBtnText: {
     fontSize: 15,
     fontFamily: 'Inter_500Medium',
-    color: palette.accentPrimary,
+    color: a.color,
   },
   photoBtnTextDisabled: { color: palette.textMuted },
 
@@ -423,14 +427,14 @@ const styles = StyleSheet.create({
     margin: 20,
     padding: 16,
     borderRadius: 14,
-    backgroundColor: palette.accentPrimary,
+    backgroundColor: a.fill,
     alignItems: 'center',
   },
   analyzeBtnDisabled: { opacity: 0.4 },
   analyzeBtnText: {
     fontSize: 16,
     fontFamily: 'Inter_700Bold',
-    color: '#fff',
+    color: a.onFill,
   },
 
   detectedCount: {
@@ -464,10 +468,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   checkboxSelected: {
-    backgroundColor: palette.accentPrimary,
-    borderColor: palette.accentPrimary,
+    backgroundColor: a.fill,
+    borderColor: a.fill,
   },
-  checkMark: { fontSize: 13, color: '#fff', fontFamily: 'Inter_700Bold' },
+  checkMark: { fontSize: 13, color: a.onFill, fontFamily: 'Inter_700Bold' },
   playerInfo: { flex: 1 },
   playerName: {
     fontSize: 15,
@@ -505,7 +509,7 @@ const styles = StyleSheet.create({
   addManuallyText: {
     fontSize: 14,
     fontFamily: 'Inter_500Medium',
-    color: palette.accentPrimary,
+    color: a.color,
   },
 
   resultFooter: {
@@ -531,12 +535,12 @@ const styles = StyleSheet.create({
     flex: 2,
     padding: 14,
     borderRadius: 12,
-    backgroundColor: palette.accentPrimary,
+    backgroundColor: a.fill,
     alignItems: 'center',
   },
   importBtnText: {
     fontSize: 15,
     fontFamily: 'Inter_700Bold',
-    color: '#fff',
+    color: a.onFill,
   },
 });

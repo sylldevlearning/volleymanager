@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { LanguagePreference } from '../i18n/languages';
+import { DEFAULT_ACCENT_ID, isAccentId, type AccentId } from '../theme/accent';
 
 type AppTheme = 'dark' | 'light';
 /** Screens with first-use help bubbles */
@@ -12,6 +13,8 @@ interface SettingsState {
   /** 'system' follows the phone */
   language: LanguagePreference;
   hapticsEnabled: boolean;
+  /** Main colour of the app (Settings), red by default */
+  accentColor: AccentId;
   hasSeenOnboarding: boolean;
   seenTips: Partial<Record<HelpTipId, boolean>>;
   /** Store review prompt — see features/review/reviewPrompt.ts */
@@ -24,6 +27,7 @@ interface SettingsState {
   setTheme: (theme: AppTheme) => void;
   setLanguage: (lang: LanguagePreference) => void;
   setHapticsEnabled: (enabled: boolean) => void;
+  setAccentColor: (accent: AccentId) => void;
   toggleTheme: () => void;
   markOnboardingSeen: () => void;
   markTipSeen: (id: HelpTipId) => void;
@@ -42,6 +46,7 @@ export const useSettingsStore = create<SettingsState>()(
       theme: 'dark',
       language: 'system',
       hapticsEnabled: true,
+      accentColor: DEFAULT_ACCENT_ID,
       hasSeenOnboarding: false,
       seenTips: {},
       finishedMatchCount: 0,
@@ -51,6 +56,7 @@ export const useSettingsStore = create<SettingsState>()(
       setTheme: (theme) => set({ theme }),
       setLanguage: (language) => set({ language }),
       setHapticsEnabled: (hapticsEnabled) => set({ hapticsEnabled }),
+      setAccentColor: (accentColor) => set({ accentColor }),
       toggleTheme: () => set({ theme: get().theme === 'dark' ? 'light' : 'dark' }),
       markOnboardingSeen: () => set({ hasSeenOnboarding: true }),
       markTipSeen: (id) => set({ seenTips: { ...get().seenTips, [id]: true } }),
@@ -73,6 +79,15 @@ export const useSettingsStore = create<SettingsState>()(
       storage: createJSONStorage(() => AsyncStorage),
       version: 1,
       migrate: (persisted, version) => migrateSettings(persisted, version) as SettingsState,
+      // Settings saved before 1.2.0 have no accent; an unknown one goes back to red
+      merge: (persisted, current) => {
+        const saved = (persisted ?? {}) as Partial<SettingsState>;
+        return {
+          ...current,
+          ...saved,
+          accentColor: isAccentId(saved.accentColor) ? saved.accentColor : current.accentColor,
+        };
+      },
     }
   )
 );

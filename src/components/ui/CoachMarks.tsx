@@ -5,6 +5,7 @@ import { useSettingsStore, type HelpTipId } from '../../stores/settingsStore';
 import { useSettingsHydrated } from '../../hooks/useSettingsHydrated';
 import { placeBubble, tipTextKey, type Rect } from '../../features/onboarding/helpTips';
 import { palette } from '../../theme/tokens';
+import { type AccentTheme, useThemedStyles } from '../../theme/useAccent';
 
 export interface CoachMarkStep {
   id: string;
@@ -26,6 +27,7 @@ const FIRST_MEASURE_DELAY_MS = 450;
 
 /** First-use help bubbles, shown once per screen (flag in settingsStore.seenTips). */
 export function CoachMarks({ tipId, steps, enabled }: CoachMarksProps) {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const { width: screenW, height: screenH } = useWindowDimensions();
   const hydrated = useSettingsHydrated();
@@ -115,7 +117,7 @@ export function CoachMarks({ tipId, steps, enabled }: CoachMarksProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   dim: {
     position: 'absolute',
     backgroundColor: DIM,
@@ -124,7 +126,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: palette.accentPrimary,
+    borderColor: a.color,
   },
   bubble: {
     position: 'absolute',
@@ -155,12 +157,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 10,
-    backgroundColor: palette.accentPrimary,
+    backgroundColor: a.fill,
   },
   btnPressed: { opacity: 0.85 },
   btnText: {
     fontSize: 14,
     fontFamily: 'Inter_700Bold',
-    color: '#FFFFFF',
+    color: a.onFill,
   },
 });

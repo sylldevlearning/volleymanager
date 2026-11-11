@@ -9,9 +9,11 @@ import { PickerField } from '../../../src/components/tournament/WizardSteps';
 import { getTournamentBundle, rescheduleTournament } from '../../../src/services/tournamentService';
 import { dateFromTime, timeFromDate } from '../../../src/features/tournament/wizard';
 import type { TournamentSchedule } from '../../../src/models/tournament';
+import { type AccentTheme, useThemedStyles } from '../../../src/theme/useAccent';
 
 /** Courts and times changed during the day: matches still to play are placed again. */
 export default function TournamentScheduleScreen() {
+  const styles = useThemedStyles(makeStyles);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
   const router = useRouter();
@@ -63,7 +65,7 @@ export default function TournamentScheduleScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
   scroll: { padding: 16 },
   hint: { fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textSecondary, lineHeight: 20, marginBottom: 12 },
@@ -73,8 +75,8 @@ const styles = StyleSheet.create({
   },
   label: { flex: 1, fontSize: 14, fontFamily: 'Inter_500Medium', color: palette.textPrimary },
   footer: { padding: 16, borderTopWidth: 1, borderTopColor: palette.backgroundElevated },
-  button: { backgroundColor: palette.accentPrimary, paddingVertical: 16, borderRadius: 14, alignItems: 'center' },
-  buttonText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: '#fff' },
+  button: { backgroundColor: a.fill, paddingVertical: 16, borderRadius: 14, alignItems: 'center' },
+  buttonText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.onFill },
   pressed: { opacity: 0.85 },
   disabled: { opacity: 0.5 },
 });

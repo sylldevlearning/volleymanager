@@ -11,10 +11,12 @@ import { RadarChart } from '../../../src/components/stats/RadarChart';
 import { LineChart } from '../../../src/components/charts/LineChart';
 import { StatCard } from '../../../src/components/charts/StatCard';
 import { palette } from '../../../src/theme/tokens';
+import { useAccent } from '../../../src/theme/useAccent';
 
 type EvolutionKey = 'attack' | 'reception' | 'serve' | 'defense';
 
 export default function PlayerCareerScreen() {
+  const accent = useAccent();
   const { id: playerId } = useLocalSearchParams<{ id: string }>();
   const { t, i18n } = useTranslation();
   const router = useRouter();
@@ -39,7 +41,7 @@ export default function PlayerCareerScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator color={palette.accentPrimary} />
+        <ActivityIndicator color={accent.color} />
       </View>
     );
   }

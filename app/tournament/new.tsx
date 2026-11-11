@@ -24,10 +24,12 @@ import {
   saveTemplate,
 } from '../../src/services/tournamentService';
 import type { TournamentTemplate } from '../../src/models/tournament';
+import { type AccentTheme, useThemedStyles } from '../../src/theme/useAccent';
 
 const newSeed = () => Math.floor(Math.random() * 2 ** 31);
 
 export default function NewTournamentScreen() {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const router = useRouter();
   const navigation = useNavigation();
@@ -172,13 +174,13 @@ export default function NewTournamentScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
   flex: { flex: 1 },
   progress: { paddingHorizontal: 16, paddingBottom: 8, gap: 8 },
   progressBar: { flexDirection: 'row', gap: 6 },
   progressSegment: { flex: 1, height: 4, borderRadius: 2, backgroundColor: palette.backgroundElevated },
-  progressSegmentDone: { backgroundColor: palette.accentPrimary },
+  progressSegmentDone: { backgroundColor: a.fill },
   progressText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary },
   scroll: { padding: 16, paddingBottom: 32 },
   errors: { paddingHorizontal: 16, paddingVertical: 10, gap: 2, backgroundColor: 'rgba(248, 81, 73, 0.12)' },
@@ -190,8 +192,8 @@ const styles = StyleSheet.create({
     backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
   },
   backText: { fontSize: 16, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },
-  nextButton: { flex: 1, paddingVertical: 16, borderRadius: 14, alignItems: 'center', backgroundColor: palette.accentPrimary },
-  nextText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: '#fff' },
+  nextButton: { flex: 1, paddingVertical: 16, borderRadius: 14, alignItems: 'center', backgroundColor: a.fill },
+  nextText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.onFill },
   pressed: { opacity: 0.85 },
   disabled: { opacity: 0.5 },
 });

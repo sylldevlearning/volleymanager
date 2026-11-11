@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { ScanQrCode } from 'lucide-react-native';
 import { palette } from '../../theme/tokens';
+import { type AccentTheme, useThemedStyles } from '../../theme/useAccent';
 
 interface QrScannerProps {
   /** Text over the camera */
@@ -15,6 +16,7 @@ interface QrScannerProps {
 
 /** Camera reading QR codes, with the permission request. The image is processed on the phone only. */
 export function QrScanner({ aim, onScan, active }: QrScannerProps) {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const [permission, requestPermission] = useCameraPermissions();
   // The camera reports the same code many times per second: read it once
@@ -65,7 +67,7 @@ export function QrScanner({ aim, onScan, active }: QrScannerProps) {
 
 const FRAME = 240;
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   flex: { flex: 1 },
   centered: { alignItems: 'center', justifyContent: 'center', padding: 24, gap: 12 },
   overlay: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center', gap: 20 },
@@ -76,7 +78,7 @@ const styles = StyleSheet.create({
   },
   title: { fontSize: 20, fontFamily: 'Inter_700Bold', color: palette.textPrimary, textAlign: 'center' },
   text: { fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textSecondary, lineHeight: 20, textAlign: 'center' },
-  primary: { backgroundColor: palette.accentPrimary, paddingVertical: 16, paddingHorizontal: 24, borderRadius: 14, alignItems: 'center', alignSelf: 'stretch' },
-  primaryText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: '#fff' },
+  primary: { backgroundColor: a.fill, paddingVertical: 16, paddingHorizontal: 24, borderRadius: 14, alignItems: 'center', alignSelf: 'stretch' },
+  primaryText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.onFill },
   pressed: { opacity: 0.85 },
 });

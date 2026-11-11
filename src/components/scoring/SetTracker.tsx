@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { palette } from '../../theme/tokens';
+import { type AccentTheme, useThemedStyles } from '../../theme/useAccent';
 
 interface SetScore {
   home: number;
@@ -13,6 +14,7 @@ interface SetTrackerProps {
 }
 
 export function SetTracker({ setScores, currentSetNumber, maxSets }: SetTrackerProps) {
+  const styles = useThemedStyles(makeStyles);
   const slots = Array.from({ length: maxSets }, (_, i) => i + 1);
 
   return (
@@ -46,7 +48,7 @@ export function SetTracker({ setScores, currentSetNumber, maxSets }: SetTrackerP
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     gap: 8,
@@ -64,8 +66,8 @@ const styles = StyleSheet.create({
     minWidth: 52,
   },
   setSlotActive: {
-    borderColor: palette.accentPrimary,
-    backgroundColor: palette.accentPrimaryMuted,
+    borderColor: a.color,
+    backgroundColor: a.muted,
   },
   setSlotFinished: {
     borderColor: palette.backgroundHover,
@@ -87,7 +89,7 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: palette.accentPrimary,
+    backgroundColor: a.fill,
     marginTop: 2,
   },
   dash: {

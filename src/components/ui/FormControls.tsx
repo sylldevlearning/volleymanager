@@ -2,12 +2,14 @@ import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Minus, Plus } from 'lucide-react-native';
 import { palette } from '../../theme/tokens';
+import { type AccentTheme, useThemedStyles } from '../../theme/useAccent';
 
 // Form rows shared by the setup screens (arbitrage, tournament)
 
 export function Stepper({
   label, value, onChange, min = 0, max = 99, step = 1,
 }: { label: string; value: number; onChange: (v: number) => void; min?: number; max?: number; step?: number }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.stepperRow}>
       <Text style={styles.stepperLabel}>{label}</Text>
@@ -35,6 +37,7 @@ export function Stepper({
 }
 
 export function ToggleRow({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <Pressable style={styles.toggleRow} onPress={() => onChange(!value)} accessibilityRole="switch" accessibilityState={{ checked: value }}>
       <Text style={styles.stepperLabel}>{label}</Text>
@@ -46,6 +49,7 @@ export function ToggleRow({ label, value, onChange }: { label: string; value: bo
 }
 
 export function FormField({ label, required, children }: { label: string; required?: boolean; children: ReactNode }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.field}>
       <Text style={styles.fieldLabel}>
@@ -57,13 +61,13 @@ export function FormField({ label, required, children }: { label: string; requir
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   field: { marginBottom: 20 },
   fieldLabel: {
     fontSize: 13, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary,
     marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5,
   },
-  required: { color: palette.accentPrimary },
+  required: { color: a.color },
   stepperRow: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: palette.backgroundElevated,
@@ -85,7 +89,7 @@ const styles = StyleSheet.create({
     width: 44, height: 26, borderRadius: 13, backgroundColor: palette.backgroundElevated,
     padding: 3, justifyContent: 'center',
   },
-  toggleTrackActive: { backgroundColor: palette.accentPrimary },
+  toggleTrackActive: { backgroundColor: a.fill },
   toggleThumb: { width: 20, height: 20, borderRadius: 10, backgroundColor: '#fff', alignSelf: 'flex-start' },
   toggleThumbActive: { alignSelf: 'flex-end' },
 });

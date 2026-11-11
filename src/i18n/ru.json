@@ -593,7 +593,18 @@
     "help": "Справка",
     "replayHelp": "Показать справку снова",
     "privacyOptions": "Настройки конфиденциальности",
-    "languageSystem": "Язык телефона ({{name}})"
+    "languageSystem": "Язык телефона ({{name}})",
+    "accentTitle": "Основной цвет",
+    "accentColors": {
+      "red": "Красный",
+      "blue": "Синий",
+      "violet": "Фиолетовый",
+      "pink": "Розовый",
+      "green": "Зелёный",
+      "teal": "Бирюзовый",
+      "orange": "Оранжевый",
+      "gold": "Золотой"
+    }
   },
   "scoring": {
     "removePoint": "-1 очко",

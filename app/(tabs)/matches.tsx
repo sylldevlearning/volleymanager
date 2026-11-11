@@ -14,6 +14,7 @@ import { useResponsive } from '../../src/hooks/useResponsive';
 import { palette } from '../../src/theme/tokens';
 import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
 import { AdBanner } from '../../src/components/ads/AdBanner';
+import { type AccentTheme, useAccent, useThemedStyles } from '../../src/theme/useAccent';
 
 type StatusFilter = 'all' | 'live' | 'finished';
 
@@ -25,6 +26,8 @@ const FORMAT_LABELS: Record<Match['format'], string> = {
 };
 
 export default function MatchesScreen() {
+  const accent = useAccent();
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const router = useRouter();
   const [matches, setMatches] = useState<Match[]>([]);
@@ -156,7 +159,7 @@ export default function MatchesScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={refresh}
-            tintColor={palette.accentPrimary}
+            tintColor={accent.color}
           />
         }
         ListEmptyComponent={
@@ -191,7 +194,7 @@ export default function MatchesScreen() {
         accessibilityLabel={t('match.new')}
         accessibilityRole="button"
       >
-        <Plus size={26} color="#fff" />
+        <Plus size={26} color={accent.onFill} />
       </Pressable>
     </SafeAreaView>
   );
@@ -212,6 +215,7 @@ function MatchCard({
   onPress: () => void;
   onDelete: () => void;
 }) {
+  const styles = useThemedStyles(makeStyles);
   const { t, i18n } = useTranslation();
   const date = formatDate(match.date, i18n.language);
   const isLive = match.status === 'live';
@@ -285,7 +289,7 @@ function MatchCard({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
 
   filterBarRow: {
@@ -318,8 +322,8 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   chipActive: {
-    backgroundColor: palette.accentPrimaryMuted,
-    borderColor: palette.accentPrimary + '60',
+    backgroundColor: a.muted,
+    borderColor: a.color + '60',
   },
   chipTeamActive: {
     backgroundColor: palette.backgroundHover,
@@ -330,7 +334,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_500Medium',
     color: palette.textSecondary,
   },
-  chipTextActive: { color: palette.accentPrimary },
+  chipTextActive: { color: a.color },
   chipDivider: {
     width: 1,
     height: 20,
@@ -362,12 +366,12 @@ const styles = StyleSheet.create({
   cardDate: { fontSize: 12, fontFamily: 'Inter_400Regular', color: palette.textMuted, flex: 1 },
   cardFormat: { fontSize: 11, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
   liveBadge: {
-    backgroundColor: palette.accentPrimary + '30',
+    backgroundColor: a.color + '30',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
   },
-  liveBadgeText: { fontSize: 10, fontFamily: 'Inter_700Bold', color: palette.accentPrimary },
+  liveBadgeText: { fontSize: 10, fontFamily: 'Inter_700Bold', color: a.color },
   cardTeams: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   cardTeamLeft: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 },
   cardTeamRight: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 6 },
@@ -408,10 +412,10 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: palette.accentPrimary,
+    backgroundColor: a.fill,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: palette.accentPrimary,
+    shadowColor: a.color,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
     shadowRadius: 8,

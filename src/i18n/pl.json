@@ -593,7 +593,18 @@
     "help": "Pomoc",
     "replayHelp": "Pokaż pomoc ponownie",
     "privacyOptions": "Ustawienia prywatności",
-    "languageSystem": "Język telefonu ({{name}})"
+    "languageSystem": "Język telefonu ({{name}})",
+    "accentTitle": "Kolor główny",
+    "accentColors": {
+      "red": "Czerwony",
+      "blue": "Niebieski",
+      "violet": "Fioletowy",
+      "pink": "Różowy",
+      "green": "Zielony",
+      "teal": "Morski",
+      "orange": "Pomarańczowy",
+      "gold": "Złoty"
+    }
   },
   "scoring": {
     "removePoint": "-1 punkt",

@@ -4,6 +4,7 @@ import { X } from 'lucide-react-native';
 import type { ApplyPlan, BoardCheckResult, TeamLineupPlan } from '../../features/tactical/applyToMatch';
 import type { Player } from '../../models/player';
 import { palette } from '../../theme/tokens';
+import { type AccentTheme, useThemedStyles } from '../../theme/useAccent';
 
 type ShownPlan = Exclude<ApplyPlan, { kind: 'none' }>;
 
@@ -24,6 +25,7 @@ const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI'];
 export function ApplyToMatchSheet({
   plan, homeTeamName, awayTeamName, homePlayers, awayPlayers, applying, onCancel, onConfirm,
 }: ApplyToMatchSheetProps) {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const canConfirm = plan?.ok === true && !applying;
 
@@ -75,6 +77,7 @@ export function ApplyToMatchSheet({
 }
 
 function TeamSubstitutions({ name, result }: { name: string; result: BoardCheckResult }) {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   if (result.items.length === 0) return null;
   return (
@@ -94,6 +97,7 @@ function TeamSubstitutions({ name, result }: { name: string; result: BoardCheckR
 }
 
 function TeamLineup({ name, plan, players }: { name: string; plan: TeamLineupPlan; players: Player[] }) {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   if (plan.status === 'unchanged') return null;
   return (
@@ -119,7 +123,7 @@ function TeamLineup({ name, plan, players }: { name: string; plan: TeamLineupPla
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
   sheet: {
     backgroundColor: palette.backgroundSurface,
@@ -149,7 +153,7 @@ const styles = StyleSheet.create({
   btn: { flex: 1, minHeight: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   btnSecondary: { backgroundColor: palette.backgroundElevated },
   btnSecondaryText: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },
-  btnPrimary: { backgroundColor: palette.accentPrimary },
-  btnPrimaryText: { fontSize: 15, fontFamily: 'Inter_700Bold', color: '#FFFFFF' },
+  btnPrimary: { backgroundColor: a.fill },
+  btnPrimaryText: { fontSize: 15, fontFamily: 'Inter_700Bold', color: a.onFill },
   btnDisabled: { opacity: 0.4 },
 });

@@ -13,6 +13,7 @@ import { X } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { palette } from '../../theme/tokens';
 import { normalizeTeamName, TEAM_NAME_MAX_LENGTH } from '../../features/match/teamRename';
+import { type AccentTheme, useThemedStyles } from '../../theme/useAccent';
 
 interface TeamNameSheetProps {
   visible: boolean;
@@ -26,6 +27,7 @@ interface TeamNameSheetProps {
 
 /** Quick match: rename a team from the scoring screen (tap on its name). */
 export function TeamNameSheet({ visible, name, teamColor, onClose, onSave }: TeamNameSheetProps) {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const [value, setValue] = useState(name);
   const [invalid, setInvalid] = useState(false);
@@ -106,7 +108,7 @@ export function TeamNameSheet({ visible, name, teamColor, onClose, onSave }: Tea
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',
@@ -146,8 +148,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   cancelBtn: { backgroundColor: palette.backgroundElevated },
-  saveBtn: { backgroundColor: palette.accentPrimary },
+  saveBtn: { backgroundColor: a.fill },
   pressed: { opacity: 0.8 },
   cancelText: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },
-  saveText: { fontSize: 15, fontFamily: 'Inter_700Bold', color: '#FFFFFF' },
+  saveText: { fontSize: 15, fontFamily: 'Inter_700Bold', color: a.onFill },
 });

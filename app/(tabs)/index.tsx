@@ -14,8 +14,10 @@ import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
 import { AdBanner } from '../../src/components/ads/AdBanner';
 import { getInProgressAdHocMatch, updateMatchStatus } from '../../src/services/matchService';
 import { createQuickMatch } from '../../src/services/quickMatchService';
+import { useAccent } from '../../src/theme/useAccent';
 
 export default function HomeScreen() {
+  const accent = useAccent();
   const router = useRouter();
   const { t } = useTranslation();
   const [showTactical, setShowTactical] = useState(false);
@@ -116,7 +118,7 @@ export default function HomeScreen() {
           accessibilityLabel={t('home.newMatch')}
           accessibilityRole="button"
         >
-          <Volleyball size={26} color={palette.accentPrimary} strokeWidth={1.5} />
+          <Volleyball size={26} color={accent.color} strokeWidth={1.5} />
           <View style={styles.ctaContent}>
             <Text style={styles.ctaText}>{t('home.newMatch')}</Text>
           </View>

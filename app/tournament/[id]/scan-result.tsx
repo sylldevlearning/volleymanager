@@ -12,9 +12,11 @@ import { evaluateScore, rulesForStage } from '../../../src/features/tournament/e
 import { matchTitle, scoreErrorText, scoreText } from '../../../src/features/tournament/display';
 import { justFinished, resultRoute } from '../../../src/features/tournament/phases';
 import { showFinished } from '../../../src/components/tournament/showFinished';
+import { type AccentTheme, useThemedStyles } from '../../../src/theme/useAccent';
 
 /** Organiser: scans the referee's result QR, checks it, then records it like a typed score. */
 export default function ScanResultScreen() {
+  const styles = useThemedStyles(makeStyles);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
   const router = useRouter();
@@ -175,12 +177,12 @@ export default function ScanResultScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
   scroll: { padding: 16, gap: 16 },
   errorBox: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 10, padding: 14, borderRadius: 12,
-    backgroundColor: 'rgba(230, 57, 70, 0.12)',
+    backgroundColor: a.muted,
   },
   errorText: { flex: 1, fontSize: 15, fontFamily: 'Inter_500Medium', color: palette.textPrimary, lineHeight: 21 },
   card: {
@@ -204,8 +206,8 @@ const styles = StyleSheet.create({
   warningText: { flex: 1, fontSize: 15, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary, lineHeight: 21 },
   info: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: palette.success, textAlign: 'center' },
   footer: { padding: 16, gap: 10, borderTopWidth: 1, borderTopColor: palette.backgroundElevated },
-  primary: { backgroundColor: palette.accentPrimary, paddingVertical: 16, borderRadius: 14, alignItems: 'center' },
-  primaryText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: '#fff' },
+  primary: { backgroundColor: a.fill, paddingVertical: 16, borderRadius: 14, alignItems: 'center' },
+  primaryText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.onFill },
   secondary: { paddingVertical: 14, borderRadius: 14, alignItems: 'center', borderWidth: 1, borderColor: palette.backgroundElevated },
   secondaryText: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },
   pressed: { opacity: 0.85 },

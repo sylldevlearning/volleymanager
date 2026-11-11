@@ -37,6 +37,7 @@ import { takeLineupDraft } from '../../../src/features/lineup/lineupDraft';
 import { buildLineupState } from '../../../src/features/lineup/lineupState';
 import { resumeQuickMatch, saveStartingLineups, startingCourtForNextSet } from '../../../src/features/match/quickMatchLineup';
 import { palette } from '../../../src/theme/tokens';
+import { type AccentTheme, useThemedStyles } from '../../../src/theme/useAccent';
 
 type PointAction =
   | 'serve_ace' | 'attack_kill' | 'block_kill'
@@ -63,6 +64,7 @@ interface AttributionState {
 }
 
 export default function RefereeScreen() {
+  const styles = useThemedStyles(makeStyles);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
   const router = useRouter();
@@ -874,6 +876,7 @@ function SubIndicator({
   onPress: () => void;
   reversed?: boolean;
 }) {
+  const styles = useThemedStyles(makeStyles);
   const dots = max !== null ? Array.from({ length: max }, (_, i) => i < used) : [];
   const full = max !== null && used >= max;
   return (
@@ -911,6 +914,7 @@ function TimeoutIndicator({
   color: string;
   reversed?: boolean;
 }) {
+  const styles = useThemedStyles(makeStyles);
   const dots = max === Infinity ? [] : Array.from({ length: max }, (_, i) => i < used);
   return (
     <Pressable
@@ -932,7 +936,7 @@ function TimeoutIndicator({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
   loading: { flex: 1, backgroundColor: palette.background, alignItems: 'center', justifyContent: 'center' },
   loadingText: { color: palette.textSecondary, fontFamily: 'Inter_400Regular' },
@@ -962,7 +966,7 @@ const styles = StyleSheet.create({
   },
   serviceBall: { width: 28, height: 28, marginHorizontal: 4 },
   serviceDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: palette.backgroundHover },
-  serviceDotActive: { backgroundColor: palette.accentPrimary },
+  serviceDotActive: { backgroundColor: a.fill },
   serviceText: { fontSize: 13, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
   infoRow: {
     flexDirection: 'row',
@@ -1092,10 +1096,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   changeEndsBtn: {
-    backgroundColor: palette.accentPrimary,
+    backgroundColor: a.fill,
     paddingHorizontal: 40,
     paddingVertical: 14,
     borderRadius: 14,
   },
-  changeEndsBtnText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: '#fff' },
+  changeEndsBtnText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.onFill },
 });

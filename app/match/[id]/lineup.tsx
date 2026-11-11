@@ -15,6 +15,7 @@ import type { LiberoState } from '../../../src/models/substitution';
 import type { CourtMap } from '../../../src/stores/scoringStore';
 import { palette } from '../../../src/theme/tokens';
 import { InfoTooltip } from '../../../src/components/ui/InfoTooltip';
+import { type AccentTheme, useThemedStyles } from '../../../src/theme/useAccent';
 
 interface PlayerSlot {
   player: Player;
@@ -50,6 +51,7 @@ function buildSideLineup(slots: PlayerSlot[]): { courtMap: CourtMap; bench: Play
 }
 
 export default function LineupScreen() {
+  const styles = useThemedStyles(makeStyles);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
   const router = useRouter();
@@ -206,6 +208,7 @@ function TeamSection({
   onToggleStarter: (id: string) => void;
   t: (key: string, opts?: Record<string, unknown>) => string;
 }) {
+  const styles = useThemedStyles(makeStyles);
   const starterCount = slots.filter((s) => s.isStarter).length;
   const teamColor = team?.color ?? (side === 'home' ? palette.teamHome : palette.teamAway);
 
@@ -247,6 +250,7 @@ function PlayerRow({
   onToggleStarter: () => void;
   t: (key: string, opts?: Record<string, unknown>) => string;
 }) {
+  const styles = useThemedStyles(makeStyles);
   const { player, isPresent, isStarter } = slot;
   const isLibero = player.position === 'libero';
   const displayName = [player.lastName, player.firstName].filter(Boolean).join(' ') || `#${player.number}`;
@@ -299,7 +303,7 @@ function PlayerRow({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
   loadingText: { color: palette.textMuted, textAlign: 'center', marginTop: 40 },
 
@@ -384,10 +388,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   checkboxActive: {
-    backgroundColor: palette.accentPrimary,
-    borderColor: palette.accentPrimary,
+    backgroundColor: a.fill,
+    borderColor: a.fill,
   },
-  checkMark: { fontSize: 12, color: '#fff', fontFamily: 'Inter_700Bold' },
+  checkMark: { fontSize: 12, color: a.onFill, fontFamily: 'Inter_700Bold' },
 
   jerseyBadge: {
     width: 30,
@@ -415,7 +419,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   badgeText: { fontSize: 11, fontFamily: 'Inter_700Bold', letterSpacing: 0.3, color: palette.textPrimary },
-  badgeStarter: { backgroundColor: 'rgba(230,57,70,0.15)', borderWidth: 1, borderColor: palette.accentPrimary },
+  badgeStarter: { backgroundColor: a.muted, borderWidth: 1, borderColor: a.color },
   badgeBench: { backgroundColor: palette.backgroundElevated },
   badgeAbsent: { backgroundColor: 'transparent', borderWidth: 1, borderColor: palette.backgroundElevated },
   badgeLibero: { backgroundColor: palette.libero + '25', borderWidth: 1, borderColor: palette.libero },
@@ -428,11 +432,11 @@ const styles = StyleSheet.create({
     borderTopColor: palette.backgroundElevated,
   },
   validateBtn: {
-    backgroundColor: palette.accentPrimary,
+    backgroundColor: a.fill,
     paddingVertical: 16,
     borderRadius: 14,
     alignItems: 'center',
   },
   validateBtnPressed: { opacity: 0.85 },
-  validateBtnText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: '#fff' },
+  validateBtnText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.onFill },
 });

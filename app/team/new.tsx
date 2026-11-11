@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { createTeam } from '../../src/services/teamService';
 import { palette } from '../../src/theme/tokens';
+import { type AccentTheme, useThemedStyles } from '../../src/theme/useAccent';
 
 const PRESET_COLORS = [
   '#1D4ED8', '#E63946', '#2EA043', '#F59E0B',
@@ -20,6 +21,7 @@ const PRESET_COLORS = [
 ];
 
 export default function NewTeamScreen() {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const router = useRouter();
   const [name, setName] = useState('');
@@ -117,6 +119,7 @@ function FormField({
   required?: boolean;
   children: React.ReactNode;
 }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.field}>
       <Text style={styles.fieldLabel}>
@@ -128,7 +131,7 @@ function FormField({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
   scroll: { padding: 20, gap: 0, paddingBottom: 40 },
   field: { marginBottom: 20 },
@@ -140,7 +143,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
-  required: { color: palette.accentPrimary },
+  required: { color: a.color },
   input: {
     backgroundColor: palette.backgroundSurface,
     borderWidth: 1,
@@ -165,7 +168,7 @@ const styles = StyleSheet.create({
     transform: [{ scale: 1.1 }],
   },
   saveButton: {
-    backgroundColor: palette.accentPrimary,
+    backgroundColor: a.fill,
     paddingVertical: 17,
     borderRadius: 14,
     alignItems: 'center',
@@ -173,5 +176,5 @@ const styles = StyleSheet.create({
   },
   saveButtonPressed: { opacity: 0.85 },
   saveButtonDisabled: { opacity: 0.5 },
-  saveButtonText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: '#fff' },
+  saveButtonText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.onFill },
 });

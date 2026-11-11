@@ -13,6 +13,7 @@ import { X } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { palette } from '../../theme/tokens';
 import type { PlayerPosition } from '../../models/tactical';
+import { type AccentTheme, useThemedStyles } from '../../theme/useAccent';
 
 const JERSEY_COLORS = [
   '#1D4ED8',
@@ -36,6 +37,7 @@ interface PlayerEditSheetProps {
 }
 
 export function PlayerEditSheet({ visible, player, onClose, onSave }: PlayerEditSheetProps) {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const [numberStr, setNumberStr] = useState('');
   const [lastName, setLastName] = useState('');
@@ -189,7 +191,7 @@ export function PlayerEditSheet({ visible, player, onClose, onSave }: PlayerEdit
 
 const SWATCH_SIZE = 32;
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',
@@ -322,11 +324,11 @@ const styles = StyleSheet.create({
   saveBtn: {
     marginHorizontal: 20,
     marginTop: 8,
-    backgroundColor: palette.accentPrimary,
+    backgroundColor: a.fill,
     paddingVertical: 14,
     borderRadius: 14,
     alignItems: 'center',
   },
   saveBtnPressed: { opacity: 0.85 },
-  saveBtnText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: '#fff' },
+  saveBtnText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.onFill },
 });

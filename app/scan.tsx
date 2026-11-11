@@ -8,9 +8,11 @@ import { palette } from '../src/theme/tokens';
 import { decodeMatchQr, type MatchQr, type MatchQrError } from '../src/features/tournament/matchQr';
 import { createMatchFromQr } from '../src/services/qrMatchService';
 import { QrScanner } from '../src/components/qr/QrScanner';
+import { type AccentTheme, useThemedStyles } from '../src/theme/useAccent';
 
 /** Referee: reads the "QR du match" of a tournament and opens a filled quick match. */
 export default function ScanMatchQrScreen() {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const router = useRouter();
   const [scanned, setScanned] = useState<MatchQr | null>(null);
@@ -93,14 +95,14 @@ export default function ScanMatchQrScreen() {
 }
 
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
   flex: { flex: 1 },
   result: { padding: 16, justifyContent: 'center', gap: 16 },
   text: { fontSize: 14, fontFamily: 'Inter_400Regular', color: palette.textSecondary, lineHeight: 20, textAlign: 'center' },
   errorBox: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 10, padding: 14, borderRadius: 12,
-    backgroundColor: 'rgba(230, 57, 70, 0.12)',
+    backgroundColor: a.muted,
   },
   errorText: { flex: 1, fontSize: 15, fontFamily: 'Inter_500Medium', color: palette.textPrimary, lineHeight: 21 },
   card: {
@@ -112,8 +114,8 @@ const styles = StyleSheet.create({
   dot: { width: 16, height: 16, borderRadius: 8 },
   teamName: { flex: 1, fontSize: 18, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
   actions: { gap: 10 },
-  primary: { backgroundColor: palette.accentPrimary, paddingVertical: 16, paddingHorizontal: 24, borderRadius: 14, alignItems: 'center', alignSelf: 'stretch' },
-  primaryText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: '#fff' },
+  primary: { backgroundColor: a.fill, paddingVertical: 16, paddingHorizontal: 24, borderRadius: 14, alignItems: 'center', alignSelf: 'stretch' },
+  primaryText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.onFill },
   secondary: { paddingVertical: 14, borderRadius: 14, alignItems: 'center', borderWidth: 1, borderColor: palette.backgroundElevated },
   secondaryText: { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: palette.textPrimary },
   pressed: { opacity: 0.85 },

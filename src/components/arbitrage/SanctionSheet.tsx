@@ -5,6 +5,7 @@ import { X } from 'lucide-react-native';
 import type { Player } from '../../models/player';
 import type { SanctionType } from '../../utils/sanctionRules';
 import { palette } from '../../theme/tokens';
+import { type AccentTheme, useThemedStyles } from '../../theme/useAccent';
 
 interface SanctionSheetProps {
   visible: boolean;
@@ -25,6 +26,7 @@ const SANCTION_TYPES: { type: SanctionType; color: string }[] = [
 ];
 
 export function SanctionSheet({ visible, onClose, teamName, teamColor, players, onConfirm }: SanctionSheetProps) {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const [playerId, setPlayerId] = useState<string | null | undefined>(undefined);
   const [sanctionType, setSanctionType] = useState<SanctionType | null>(null);
@@ -122,7 +124,7 @@ export function SanctionSheet({ visible, onClose, teamName, teamColor, players, 
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
   sheet: {
     backgroundColor: palette.backgroundSurface,
@@ -184,11 +186,11 @@ const styles = StyleSheet.create({
   confirmBtn: {
     marginHorizontal: 20,
     marginTop: 12,
-    backgroundColor: palette.accentPrimary,
+    backgroundColor: a.fill,
     borderRadius: 14,
     paddingVertical: 16,
     alignItems: 'center',
   },
   confirmBtnDisabled: { opacity: 0.4 },
-  confirmText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: '#fff' },
+  confirmText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.onFill },
 });

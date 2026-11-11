@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View, Pressable } from 'react-native';
 import Svg, { Line, Rect, Circle, Text as SvgText, G } from 'react-native-svg';
 import { palette } from '../../theme/tokens';
+import { useAccent } from '../../theme/useAccent';
 
 export interface PlayerInPosition {
   position: 1 | 2 | 3 | 4 | 5 | 6;
@@ -46,6 +47,7 @@ export function IndoorCourt({
   showOpponentHalf = true,
   showAttackLines = true,
 }: IndoorCourtProps) {
+  const accent = useAccent();
   const height = width * 0.6;
   const pad = 16;
   const courtW = width - pad * 2;
@@ -114,7 +116,7 @@ export function IndoorCourt({
                     : palette.accentSecondary + '30'
                   : palette.backgroundHover}
                 stroke={isServing
-                  ? palette.accentPrimary
+                  ? accent.color
                   : player
                     ? player.isLibero
                       ? palette.libero
@@ -148,7 +150,7 @@ export function IndoorCourt({
                 </SvgText>
               )}
               {isServing && (
-                <Circle cx={cx + r - 4} cy={cy - r + 4} r={5} fill={palette.accentPrimary} />
+                <Circle cx={cx + r - 4} cy={cy - r + 4} r={5} fill={accent.color} />
               )}
               {player?.isLibero && (
                 <G>

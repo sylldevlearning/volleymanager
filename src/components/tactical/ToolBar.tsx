@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View, Alert } from 'react-nati
 import { useTranslation } from 'react-i18next';
 import type { TacticalTool, ArrowThickness } from '../../models/tactical';
 import { palette } from '../../theme/tokens';
+import { type AccentTheme, useThemedStyles } from '../../theme/useAccent';
 
 interface ToolBarProps {
   selectedTool: TacticalTool;
@@ -40,6 +41,7 @@ export function ToolBar({
   onSyncFromMatch,
   onApplyToMatch,
 }: ToolBarProps) {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
 
   function handleClearAll() {
@@ -148,7 +150,7 @@ export function ToolBar({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   container: {
     backgroundColor: palette.backgroundSurface,
     paddingVertical: 10,
@@ -172,13 +174,13 @@ const styles = StyleSheet.create({
     minWidth: 44,
   },
   toolBtnActive: {
-    backgroundColor: palette.accentPrimary,
+    backgroundColor: a.fill,
   },
   toolIcon: {
     fontSize: 18,
   },
   toolIconActive: {
-    color: '#FFFFFF',
+    color: a.onFill,
   },
   toolLabel: {
     fontSize: 9,
@@ -187,7 +189,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   toolLabelActive: {
-    color: 'rgba(255,255,255,0.9)',
+    color: a.onFill,
   },
   undoBtn: {
     width: 36,

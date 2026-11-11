@@ -6,6 +6,7 @@ import { Check, X } from 'lucide-react-native';
 import { palette } from '../../theme/tokens';
 import { getAllTeams } from '../../services/teamService';
 import type { Team } from '../../models/team';
+import { type AccentTheme, useAccent, useThemedStyles } from '../../theme/useAccent';
 
 interface Props {
   visible: boolean;
@@ -17,6 +18,8 @@ interface Props {
 
 /** Picks teams from "Mes équipes" for a tournament. */
 export function TeamLibrarySheet({ visible, alreadyAdded, onClose, onAdd }: Props) {
+  const styles = useThemedStyles(makeStyles);
+  const accent = useAccent();
   const { t } = useTranslation();
   const [teams, setTeams] = useState<Team[] | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -66,7 +69,7 @@ export function TeamLibrarySheet({ visible, alreadyAdded, onClose, onAdd }: Prop
                   {added && <Text style={styles.added}>{t('tournament.wizard.alreadyAdded')}</Text>}
                 </View>
                 <View style={[styles.check, (isSelected || added) && styles.checkOn]}>
-                  {(isSelected || added) && <Check size={16} color="#fff" />}
+                  {(isSelected || added) && <Check size={16} color={accent.onFill} />}
                 </View>
               </Pressable>
             );
@@ -87,7 +90,7 @@ export function TeamLibrarySheet({ visible, alreadyAdded, onClose, onAdd }: Prop
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14 },
   title: { fontSize: 18, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
@@ -106,9 +109,9 @@ const styles = StyleSheet.create({
     width: 26, height: 26, borderRadius: 8, borderWidth: 1.5, borderColor: palette.textMuted,
     alignItems: 'center', justifyContent: 'center',
   },
-  checkOn: { backgroundColor: palette.accentPrimary, borderColor: palette.accentPrimary },
+  checkOn: { backgroundColor: a.fill, borderColor: a.fill },
   footer: { padding: 16, borderTopWidth: 1, borderTopColor: palette.backgroundElevated },
-  addButton: { backgroundColor: palette.accentPrimary, paddingVertical: 15, borderRadius: 14, alignItems: 'center' },
+  addButton: { backgroundColor: a.fill, paddingVertical: 15, borderRadius: 14, alignItems: 'center' },
   addButtonDisabled: { opacity: 0.4 },
-  addButtonText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: '#fff' },
+  addButtonText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.onFill },
 });

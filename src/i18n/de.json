@@ -583,7 +583,18 @@
     "help": "Hilfe",
     "replayHelp": "Hilfe erneut zeigen",
     "privacyOptions": "Datenschutzeinstellungen",
-    "languageSystem": "Sprache des Handys ({{name}})"
+    "languageSystem": "Sprache des Handys ({{name}})",
+    "accentTitle": "Hauptfarbe",
+    "accentColors": {
+      "red": "Rot",
+      "blue": "Blau",
+      "violet": "Violett",
+      "pink": "Pink",
+      "green": "Grün",
+      "teal": "Petrol",
+      "orange": "Orange",
+      "gold": "Gold"
+    }
   },
   "scoring": {
     "removePoint": "-1 Punkt",

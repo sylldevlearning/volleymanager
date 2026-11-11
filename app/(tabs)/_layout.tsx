@@ -2,14 +2,16 @@ import { Tabs } from 'expo-router';
 import { Home, List, Users, Settings } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { palette } from '../../src/theme/tokens';
+import { useAccent } from '../../src/theme/useAccent';
 
 export default function TabLayout() {
+  const accent = useAccent();
   const { t } = useTranslation();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: palette.accentPrimary,
+        tabBarActiveTintColor: accent.color,
         tabBarInactiveTintColor: palette.textMuted,
         tabBarStyle: {
           backgroundColor: palette.background,

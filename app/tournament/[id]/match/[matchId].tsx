@@ -18,6 +18,7 @@ import { justFinished, resultRoute } from '../../../../src/features/tournament/p
 import { showFinished } from '../../../../src/components/tournament/showFinished';
 import { matchQrOf } from '../../../../src/features/tournament/matchQr';
 import type { SetScore, TournamentTeam } from '../../../../src/models/tournament';
+import { type AccentTheme, useThemedStyles } from '../../../../src/theme/useAccent';
 
 type Row = [string, string];
 
@@ -29,6 +30,7 @@ function parseRows(rows: Row[]): SetScore[] {
 }
 
 export default function TournamentMatchScreen() {
+  const styles = useThemedStyles(makeStyles);
   const { id, matchId } = useLocalSearchParams<{ id: string; matchId: string }>();
   const { t, i18n } = useTranslation();
   const router = useRouter();
@@ -249,7 +251,7 @@ export default function TournamentMatchScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
   flex: { flex: 1 },
   scroll: { padding: 16, paddingBottom: 32 },
@@ -294,8 +296,8 @@ const styles = StyleSheet.create({
   },
   forfeitText: { flexShrink: 1, fontSize: 13, fontFamily: 'Inter_600SemiBold', color: palette.warning },
   footer: { padding: 16, borderTopWidth: 1, borderTopColor: palette.backgroundElevated },
-  validate: { backgroundColor: palette.accentPrimary, paddingVertical: 16, borderRadius: 14, alignItems: 'center' },
-  validateText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: '#fff' },
+  validate: { backgroundColor: a.fill, paddingVertical: 16, borderRadius: 14, alignItems: 'center' },
+  validateText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.onFill },
   pressed: { opacity: 0.85 },
   disabled: { opacity: 0.5 },
 });

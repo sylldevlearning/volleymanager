@@ -18,6 +18,7 @@ import { FORMAT_PROFILES, applyPreset, defaultArbitrageConfig, isOfficial, prese
 import { validateAdHocTeam, validateAdHocRules, type AdHocTeamDraft } from '../../src/utils/adHocSetupValidation';
 import { createAdHocMatch } from '../../src/services/adHocMatchService';
 import type { AdHocTeamInput } from '../../src/services/adHocMatchService';
+import { type AccentTheme, useThemedStyles } from '../../src/theme/useAccent';
 
 type Tab = 'home' | 'away' | 'rules';
 
@@ -67,6 +68,7 @@ function toInput(state: TeamFormState): AdHocTeamInput {
 }
 
 export default function ArbitrageSetupScreen() {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const router = useRouter();
   const [tab, setTab] = useState<Tab>('home');
@@ -175,6 +177,7 @@ export default function ArbitrageSetupScreen() {
 function TabButton({
   label, active, color, onPress,
 }: { label: string; active: boolean; color?: string; onPress: () => void }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <Pressable
       style={[styles.tabButton, active && styles.tabButtonActive]}
@@ -193,6 +196,7 @@ function TabButton({
 function TeamTab({
   state, otherColor, onChange, hasLibero, t,
 }: { state: TeamFormState; otherColor: string; onChange: (s: TeamFormState) => void; hasLibero: boolean; t: (key: string, opts?: Record<string, unknown>) => string }) {
+  const styles = useThemedStyles(makeStyles);
   // 0-20 first; already open when a bigger number is selected
   const [showAllNumbers, setShowAllNumbers] = useState(() => state.selected.some((n) => n > COMPACT_MAX_NUMBER));
 
@@ -390,6 +394,7 @@ function TeamTab({
 function RulesTab({
   format, config, onChange, t,
 }: { format: MatchFormat; config: MatchConfig; onChange: (c: MatchConfig) => void; t: (key: string, opts?: Record<string, unknown>) => string }) {
+  const styles = useThemedStyles(makeStyles);
   function set<K extends keyof MatchConfig>(key: K, value: MatchConfig[K]) {
     onChange({ ...config, [key]: value });
   }
@@ -441,6 +446,7 @@ function SmallFormatRules({
   format: MatchFormat; config: MatchConfig; onChange: (c: MatchConfig) => void; labelKey: string;
   t: (key: string, opts?: Record<string, unknown>) => string;
 }) {
+  const styles = useThemedStyles(makeStyles);
   const official = isOfficial(format, config);
   const set = (patch: Partial<MatchConfig>) => onChange({ ...config, ...patch });
   const subsAllowed = config.substitutionMode !== 'none';
@@ -519,7 +525,7 @@ function SmallFormatRules({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
 
   formatRow: { flexDirection: 'row', gap: 6, marginHorizontal: 16, marginTop: 8, marginBottom: 8 },
@@ -527,9 +533,9 @@ const styles = StyleSheet.create({
     flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: 'center',
     backgroundColor: palette.backgroundSurface, borderWidth: 1, borderColor: palette.backgroundElevated,
   },
-  formatChipActive: { backgroundColor: palette.accentPrimary, borderColor: palette.accentPrimary },
+  formatChipActive: { backgroundColor: a.fill, borderColor: a.fill },
   formatChipText: { fontSize: 14, fontFamily: 'Inter_700Bold', color: palette.textSecondary },
-  formatChipTextActive: { color: '#fff' },
+  formatChipTextActive: { color: a.onFill },
   presetRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
   presetChip: {
     paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10,
@@ -610,10 +616,10 @@ const styles = StyleSheet.create({
     backgroundColor: palette.backgroundSurface,
     borderWidth: 1, borderColor: palette.backgroundElevated,
   },
-  tagBtnCaptainActive: { backgroundColor: palette.accentPrimary, borderColor: palette.accentPrimary },
+  tagBtnCaptainActive: { backgroundColor: a.fill, borderColor: a.fill },
   tagBtnDisabled: { opacity: 0.35 },
   tagBtnText: { fontSize: 13, fontFamily: 'Inter_700Bold', color: palette.textSecondary },
-  tagBtnTextActive: { color: '#fff' },
+  tagBtnTextActive: { color: a.onFill },
 
   rulesPreset: {
     fontSize: 12, fontFamily: 'Inter_500Medium', color: palette.textMuted,
@@ -621,8 +627,8 @@ const styles = StyleSheet.create({
   },
 
   footer: { padding: 16, borderTopWidth: 1, borderTopColor: palette.backgroundElevated },
-  startButton: { backgroundColor: palette.accentPrimary, paddingVertical: 16, borderRadius: 14, alignItems: 'center' },
+  startButton: { backgroundColor: a.fill, paddingVertical: 16, borderRadius: 14, alignItems: 'center' },
   startButtonPressed: { opacity: 0.85 },
   startButtonDisabled: { opacity: 0.5 },
-  startButtonText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: '#fff' },
+  startButtonText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.onFill },
 });

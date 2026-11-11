@@ -14,6 +14,7 @@ import { getAllPlays, savePlay, updatePlay, deletePlay } from '../../features/ta
 import type { TacticalPlay, PlayerPosition, Arrow, TacticalCategory } from '../../models/tactical';
 import type { MatchFormat } from '../../models/match';
 import { palette } from '../../theme/tokens';
+import { type AccentTheme, useThemedStyles } from '../../theme/useAccent';
 
 interface PlaybookSheetProps {
   visible: boolean;
@@ -49,6 +50,7 @@ export function PlaybookSheet({
   onClose,
   onPlayDeleted,
 }: PlaybookSheetProps) {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const [plays, setPlays] = useState<TacticalPlay[]>([]);
   const [saveName, setSaveName] = useState('');
@@ -319,7 +321,7 @@ const rowStyles = StyleSheet.create({
   deleteText: { fontSize: 16 },
 });
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   backdrop: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -410,9 +412,9 @@ const styles = StyleSheet.create({
     backgroundColor: palette.backgroundElevated,
   },
   catChipActive: {
-    backgroundColor: palette.accentPrimaryMuted,
+    backgroundColor: a.muted,
     borderWidth: 1,
-    borderColor: palette.accentPrimary + '50',
+    borderColor: a.color + '50',
   },
   catEmoji: { fontSize: 13 },
   catText: {
@@ -420,11 +422,11 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_500Medium',
     color: palette.textMuted,
   },
-  catTextActive: { color: palette.accentPrimary },
+  catTextActive: { color: a.color },
   saveBtn: {
     height: 50,
     borderRadius: 12,
-    backgroundColor: palette.accentPrimary,
+    backgroundColor: a.fill,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -432,6 +434,6 @@ const styles = StyleSheet.create({
   saveBtnText: {
     fontSize: 15,
     fontFamily: 'Inter_700Bold',
-    color: '#FFFFFF',
+    color: a.onFill,
   },
 });

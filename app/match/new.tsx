@@ -25,6 +25,7 @@ import {
 } from '../../src/models/match';
 import { palette } from '../../src/theme/tokens';
 import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
+import { type AccentTheme, useAccent, useThemedStyles } from '../../src/theme/useAccent';
 
 type FormatOption = { id: MatchFormat; label: string };
 type ModeOption = { id: MatchMode; label: string };
@@ -46,6 +47,7 @@ function getDefaultConfig(format: MatchFormat, mode: MatchMode): MatchConfig {
 }
 
 export default function NewMatchScreen() {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const router = useRouter();
   const [teams, setTeams] = useState<Team[]>([]);
@@ -163,6 +165,7 @@ export default function NewMatchScreen() {
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
@@ -180,6 +183,7 @@ function SegmentControl({
   selected: string;
   onSelect: (id: string) => void;
 }) {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   return (
     <View style={styles.segmentRow}>
@@ -211,6 +215,7 @@ function TeamPicker({
   onSelect: (id: string) => void;
   placeholder: string;
 }) {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   return (
     <View style={styles.teamPicker}>
@@ -246,6 +251,8 @@ function ServePicker({
   selected: string;
   onSelect: (id: string) => void;
 }) {
+  const accent = useAccent();
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.serveRow}>
       {teams.map((team) => {
@@ -253,7 +260,7 @@ function ServePicker({
         return (
           <Pressable
             key={team.id}
-            style={[styles.serveOption, isSelected && { borderColor: team.color ?? palette.accentPrimary }]}
+            style={[styles.serveOption, isSelected && { borderColor: team.color ?? accent.color }]}
             onPress={() => onSelect(team.id)}
             accessibilityRole="radio"
             accessibilityState={{ selected: isSelected }}
@@ -272,6 +279,7 @@ function ServePicker({
 }
 
 function ConfigPreview({ format, mode }: { format: MatchFormat; mode: MatchMode }) {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const config = getDefaultConfig(format, mode);
   return (
@@ -295,6 +303,7 @@ function ConfigPreview({ format, mode }: { format: MatchFormat; mode: MatchMode 
 }
 
 function ConfigRow({ label, value }: { label: string; value: string }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.configRow}>
       <Text style={styles.configLabel}>{label}</Text>
@@ -303,7 +312,7 @@ function ConfigRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
   topBar: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 16, paddingTop: 8 },
   scroll: { padding: 20, gap: 0, paddingBottom: 40 },
@@ -329,9 +338,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
   },
-  segmentActive: { backgroundColor: palette.accentPrimary },
+  segmentActive: { backgroundColor: a.fill },
   segmentText: { fontSize: 14, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
-  segmentTextActive: { color: '#fff', fontFamily: 'Inter_700Bold' },
+  segmentTextActive: { color: a.onFill, fontFamily: 'Inter_700Bold' },
   teamPicker: { gap: 8 },
   teamOption: {
     flexDirection: 'row',
@@ -343,7 +352,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: 'transparent',
   },
-  teamOptionActive: { borderColor: palette.accentPrimary, backgroundColor: palette.accentPrimaryMuted },
+  teamOptionActive: { borderColor: a.color, backgroundColor: a.muted },
   teamDot: { width: 12, height: 12, borderRadius: 6 },
   teamOptionText: { fontSize: 15, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
   teamOptionTextActive: { color: palette.textPrimary, fontFamily: 'Inter_600SemiBold' },
@@ -382,12 +391,12 @@ const styles = StyleSheet.create({
   configLabel: { fontSize: 13, fontFamily: 'Inter_400Regular', color: palette.textSecondary },
   configValue: { fontSize: 13, fontFamily: 'Inter_700Bold', color: palette.textPrimary },
   startButton: {
-    backgroundColor: palette.accentPrimary,
+    backgroundColor: a.fill,
     paddingVertical: 18,
     borderRadius: 16,
     alignItems: 'center',
   },
   startButtonPressed: { opacity: 0.85 },
   startButtonDisabled: { opacity: 0.5 },
-  startButtonText: { fontSize: 17, fontFamily: 'Inter_700Bold', color: '#fff' },
+  startButtonText: { fontSize: 17, fontFamily: 'Inter_700Bold', color: a.onFill },
 });

@@ -4,6 +4,7 @@ import { palette } from '../../theme/tokens';
 import type { PlayerInPosition } from './IndoorCourt';
 import type { MatchFormat } from '../../models/match';
 import { courtSize } from '../../features/match/formatProfile';
+import { useAccent } from '../../theme/useAccent';
 
 export interface FullCourtSide {
   players: PlayerInPosition[];
@@ -89,6 +90,7 @@ export function smallCourtSlot(size: number, position: number, isLeft: boolean):
 const CIRCLE_RADIUS = 20;
 
 export function FullCourt({ left, right, leftColor, rightColor, width, height, format = 'indoor_6v6' }: FullCourtProps) {
+  const accent = useAccent();
   const pad = 10;
   const courtW = width - pad * 2;
   const courtH = height - pad * 2;
@@ -130,7 +132,7 @@ export function FullCourt({ left, right, leftColor, rightColor, width, height, f
             cy={cy}
             r={r}
             fill={player ? (player.isLibero ? liberoColor + '40' : color + '30') : palette.backgroundHover}
-            stroke={isServing ? palette.accentPrimary : player ? (player.isLibero ? liberoColor : color) : palette.backgroundHover}
+            stroke={isServing ? accent.color : player ? (player.isLibero ? liberoColor : color) : palette.backgroundHover}
             strokeWidth={isServing ? 2.5 : 1.5}
             strokeDasharray={player?.isLibero ? '4 2' : undefined}
           />
@@ -140,7 +142,7 @@ export function FullCourt({ left, right, leftColor, rightColor, width, height, f
           >
             {player ? player.number : `P${pos}`}
           </SvgText>
-          {isServing && <Circle cx={cx} cy={cy - r - 7} r={4} fill={palette.accentPrimary} />}
+          {isServing && <Circle cx={cx} cy={cy - r - 7} r={4} fill={accent.color} />}
           {player?.isLibero && (
             <G>
               <Circle cx={cx + r - 4} cy={cy - r + 4} r={6} fill="#E63946" />

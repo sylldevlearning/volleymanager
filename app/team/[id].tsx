@@ -22,10 +22,13 @@ import { getPlayerDisplayName } from '../../src/features/players/player-helpers'
 import { ScannerSheet } from '../../src/features/scanner/ScannerSheet';
 import { palette } from '../../src/theme/tokens';
 import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
+import { type AccentTheme, useAccent, useThemedStyles } from '../../src/theme/useAccent';
 
 const POSITIONS: PPos[] = ['setter', 'outside', 'opposite', 'middle', 'libero', 'universal'];
 
 export default function TeamDetailScreen() {
+  const styles = useThemedStyles(makeStyles);
+  const accent = useAccent();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
   const router = useRouter();
@@ -120,7 +123,7 @@ export default function TeamDetailScreen() {
         accessibilityLabel={t('team.addPlayer')}
         accessibilityRole="button"
       >
-        <Plus size={26} color="#fff" />
+        <Plus size={26} color={accent.onFill} />
       </Pressable>
 
       <ScannerSheet
@@ -144,6 +147,7 @@ export default function TeamDetailScreen() {
 }
 
 function PlayerRow({ player, onDelete }: { player: Player; onDelete: () => void }) {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const router = useRouter();
   const name = getPlayerDisplayName(player);
@@ -192,6 +196,7 @@ function AddPlayerModal({
   onAdded: () => void;
   onAddedAnother: () => void;
 }) {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const [lastName, setLastName] = useState('');
   const [number, setNumber] = useState('');
@@ -354,7 +359,7 @@ function AddPlayerModal({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
   header: {
     flexDirection: 'row',
@@ -450,7 +455,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: palette.accentPrimary,
+    backgroundColor: a.fill,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 8,
@@ -506,8 +511,8 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   positionChipActive: {
-    borderColor: palette.accentPrimary,
-    backgroundColor: palette.accentPrimaryMuted,
+    borderColor: a.color,
+    backgroundColor: a.muted,
   },
   positionChipText: { fontSize: 13, fontFamily: 'Inter_500Medium', color: palette.textSecondary },
   positionChipTextActive: { color: palette.textPrimary },
@@ -535,12 +540,12 @@ const styles = StyleSheet.create({
   },
   addButton: {
     flex: 1,
-    backgroundColor: palette.accentPrimary,
+    backgroundColor: a.fill,
     paddingVertical: 14,
     borderRadius: 14,
     alignItems: 'center',
   },
   addButtonPressed: { opacity: 0.85 },
   btnDisabled: { opacity: 0.5 },
-  addButtonText: { fontSize: 15, fontFamily: 'Inter_700Bold', color: '#fff' },
+  addButtonText: { fontSize: 15, fontFamily: 'Inter_700Bold', color: a.onFill },
 });

@@ -22,6 +22,7 @@ import {
 } from '../../utils/rulesValidator';
 import { InfoTooltip } from '../ui/InfoTooltip';
 import { courtSize, substitutionsAllowed } from '../../features/match/formatProfile';
+import { useThemedStyles, type AccentTheme } from '../../theme/useAccent';
 
 const LIBERO_COLOR = palette.libero;
 
@@ -72,6 +73,7 @@ export function SubstitutionSheet({
   sanctionEventsForSet = [], sanctionEventsForMatch = [],
   initialOutId = null, initialOutPosition = null,
 }: SubstitutionSheetProps) {
+  const subStyles = useThemedStyles(makeSubStyles);
   const { t } = useTranslation();
   const [playerOutId, setPlayerOutId] = useState<string | null>(null);
   const [playerOutPos, setPlayerOutPos] = useState<number | null>(null);
@@ -370,6 +372,7 @@ export function SubstitutionSheet({
 function LiberoRow({
   player, isSelected, error, onPress,
 }: { player: Player; isSelected: boolean; error: string | null; onPress: () => void }) {
+  const subStyles = useThemedStyles(makeSubStyles);
   return (
     <Pressable
       style={[subStyles.benchRow, isSelected && subStyles.benchRowSelected, !!error && subStyles.benchRowDisabled,
@@ -403,6 +406,7 @@ function BenchRow({
   exceptional?: boolean;
   onPress?: () => void;
 }) {
+  const subStyles = useThemedStyles(makeSubStyles);
   const { t } = useTranslation();
   const blocked = !!error && !exceptional;
   return (
@@ -434,7 +438,7 @@ function BenchRow({
   );
 }
 
-const subStyles = StyleSheet.create({
+const makeSubStyles = (a: AccentTheme) => StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
   sheet: {
     backgroundColor: palette.backgroundSurface,
@@ -537,7 +541,7 @@ const subStyles = StyleSheet.create({
     borderColor: 'transparent',
     marginBottom: 6,
   },
-  benchRowSelected: { backgroundColor: palette.accentPrimaryMuted },
+  benchRowSelected: { backgroundColor: a.muted },
   benchRowDisabled: { opacity: 0.4 },
   benchRowExceptional: { borderColor: palette.warning, borderStyle: 'dashed' },
   benchNum: { fontSize: 16, fontFamily: 'Inter_700Bold', width: 36 },
@@ -556,11 +560,11 @@ const subStyles = StyleSheet.create({
   confirmBtn: {
     marginHorizontal: 20,
     marginTop: 12,
-    backgroundColor: palette.accentPrimary,
+    backgroundColor: a.fill,
     borderRadius: 14,
     paddingVertical: 16,
     alignItems: 'center',
   },
   confirmBtnExceptional: { backgroundColor: palette.warning },
-  confirmText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: '#fff' },
+  confirmText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.onFill },
 });

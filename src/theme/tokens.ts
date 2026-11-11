@@ -9,6 +9,8 @@ export const palette = {
   accentPrimary: '#E63946',
   accentSecondary: '#1D4ED8',
   accentPrimaryMuted: 'rgba(230, 57, 70, 0.12)',
+  // Stats charts: attack points (fixed, does not follow the main colour)
+  statAttack: '#E63946',
 
   // Text
   textPrimary: '#F0F6FC',

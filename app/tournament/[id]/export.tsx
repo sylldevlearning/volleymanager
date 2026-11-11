@@ -21,6 +21,7 @@ import {
   type ExportContent,
   type ExportFormat,
 } from '../../../src/features/tournament/exportDoc';
+import { type AccentTheme, useAccent, useThemedStyles } from '../../../src/theme/useAccent';
 
 /** Gives the shared file a readable name (mail attachment, Drive…). */
 async function renamed(uri: string, name: string): Promise<string> {
@@ -32,6 +33,8 @@ async function renamed(uri: string, name: string): Promise<string> {
 
 /** Export of the tournament: content and format, then the phone's share sheet. */
 export default function TournamentExportScreen() {
+  const styles = useThemedStyles(makeStyles);
+  const accent = useAccent();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t, i18n } = useTranslation();
   const lang = i18n.language;
@@ -124,12 +127,12 @@ export default function TournamentExportScreen() {
         >
           {busy ? (
             <>
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color={accent.onFill} />
               <Text style={styles.primaryText}>{t('tournament.export.preparing')}</Text>
             </>
           ) : (
             <>
-              <Share2 size={18} color="#fff" />
+              <Share2 size={18} color={accent.onFill} />
               <Text style={styles.primaryText}>{t('tournament.export.share')}</Text>
             </>
           )}
@@ -139,7 +142,7 @@ export default function TournamentExportScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
   choices: { padding: 16, paddingBottom: 8, gap: 8 },
   label: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: palette.textSecondary },
@@ -151,9 +154,9 @@ const styles = StyleSheet.create({
   footer: { padding: 16, borderTopWidth: 1, borderTopColor: palette.backgroundElevated },
   primary: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: palette.accentPrimary, paddingVertical: 16, borderRadius: 14,
+    backgroundColor: a.fill, paddingVertical: 16, borderRadius: 14,
   },
-  primaryText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: '#fff' },
+  primaryText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.onFill },
   pressed: { opacity: 0.85 },
   disabled: { opacity: 0.5 },
 });

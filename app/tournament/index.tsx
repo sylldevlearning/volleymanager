@@ -9,8 +9,10 @@ import { palette } from '../../src/theme/tokens';
 import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
 import { getTournaments } from '../../src/services/tournamentService';
 import type { Tournament } from '../../src/models/tournament';
+import { type AccentTheme, useThemedStyles } from '../../src/theme/useAccent';
 
 export default function TournamentListScreen() {
+  const styles = useThemedStyles(makeStyles);
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const [tournaments, setTournaments] = useState<Tournament[] | null>(null);
@@ -73,7 +75,7 @@ export default function TournamentListScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.background },
   list: { padding: 16, gap: 12, flexGrow: 1 },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10, paddingHorizontal: 24, paddingVertical: 48 },
@@ -94,8 +96,8 @@ const styles = StyleSheet.create({
   footer: { padding: 16, borderTopWidth: 1, borderTopColor: palette.backgroundElevated },
   newButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: palette.accentPrimary, paddingVertical: 16, borderRadius: 14,
+    backgroundColor: a.fill, paddingVertical: 16, borderRadius: 14,
   },
   newButtonPressed: { opacity: 0.85 },
-  newButtonText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: '#fff' },
+  newButtonText: { fontSize: 16, fontFamily: 'Inter_700Bold', color: a.onFill },
 });

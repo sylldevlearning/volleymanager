@@ -2,6 +2,7 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { palette } from '../../theme/tokens';
+import { type AccentTheme, useThemedStyles } from '../../theme/useAccent';
 
 type StepPhase = 'idle' | 'showing' | 'animating' | 'done';
 
@@ -26,6 +27,7 @@ export function PlaybackControls({
   onStepBack,
   onGoToStart,
 }: PlaybackControlsProps) {
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const isAnimating = stepPhase !== 'idle';
   const inHistory = historyViewStep >= 0;
@@ -86,13 +88,13 @@ export function PlaybackControls({
         accessibilityRole="button"
         accessibilityLabel={t('tactical.playback.forward')}
       >
-        <Text style={[styles.btnIcon, !canForward && styles.btnIconDisabled]}>▶</Text>
+        <Text style={[styles.btnIcon, styles.btnPrimaryIcon, !canForward && styles.btnIconDisabled]}>▶</Text>
       </Pressable>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (a: AccentTheme) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -112,7 +114,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   btnPrimary: {
-    backgroundColor: palette.accentPrimary,
+    backgroundColor: a.fill,
   },
   btnDisabled: {
     opacity: 0.35,
@@ -121,6 +123,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: palette.textPrimary,
   },
+  btnPrimaryIcon: { color: a.onFill },
   btnIconDisabled: {
     color: palette.textMuted,
   },
