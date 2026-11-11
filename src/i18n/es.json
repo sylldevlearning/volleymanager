@@ -502,7 +502,12 @@
         "lineup_libero": "El líbero (n.º {{number}}) no puede estar en la formación inicial."
       }
     },
-    "selectFirst": "Toca primero un jugador o el balón"
+    "selectFirst": "Toca primero un jugador o el balón",
+    "newBoardConfirm": {
+      "title": "¿Borrar todo?",
+      "message": "Se perderán las jugadas previstas.",
+      "action": "Borrar"
+    }
   },
   "scanner": {
     "title": "Escanear licencias",

@@ -502,7 +502,12 @@
         "lineup_libero": "Le libéro (n°{{number}}) ne peut pas faire partie de la composition de départ."
       }
     },
-    "selectFirst": "Touchez d'abord un joueur ou le ballon"
+    "selectFirst": "Touchez d'abord un joueur ou le ballon",
+    "newBoardConfirm": {
+      "title": "Tout effacer ?",
+      "message": "Les combinaisons prévues seront perdues.",
+      "action": "Effacer"
+    }
   },
   "scanner": {
     "title": "Scanner les licences",

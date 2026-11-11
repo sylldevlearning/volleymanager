@@ -502,7 +502,12 @@
         "lineup_libero": "O líbero (nº {{number}}) não pode estar na formação inicial."
       }
     },
-    "selectFirst": "Toque primeiro num jogador ou na bola"
+    "selectFirst": "Toque primeiro num jogador ou na bola",
+    "newBoardConfirm": {
+      "title": "Apagar tudo?",
+      "message": "As jogadas planejadas serão perdidas.",
+      "action": "Apagar"
+    }
   },
   "scanner": {
     "title": "Ler carteirinhas",

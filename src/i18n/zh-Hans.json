@@ -502,7 +502,12 @@
         "lineup_libero": "自由人（{{number}} 号）不能出现在首发阵容中。"
       }
     },
-    "selectFirst": "请先点击一名球员或球"
+    "selectFirst": "请先点击一名球员或球",
+    "newBoardConfirm": {
+      "title": "要全部清除吗？",
+      "message": "已规划的战术将会丢失。",
+      "action": "清除"
+    }
   },
   "scanner": {
     "title": "扫描注册证",

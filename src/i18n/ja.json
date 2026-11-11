@@ -502,7 +502,12 @@
         "lineup_libero": "リベロ（{{number}}番）はスターティングメンバーに入れません。"
       }
     },
-    "selectFirst": "先に選手かボールをタップしてください"
+    "selectFirst": "先に選手かボールをタップしてください",
+    "newBoardConfirm": {
+      "title": "すべて消去しますか？",
+      "message": "作成したプレーは失われます。",
+      "action": "消去"
+    }
   },
   "scanner": {
     "title": "登録証を読み取る",

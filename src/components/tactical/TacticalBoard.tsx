@@ -1146,6 +1146,14 @@ export function TacticalBoard({
     markBoardEdited();
   }
 
+  // The slate icon clears everything: ask first
+  function confirmNewBoard() {
+    Alert.alert(t('tactical.newBoardConfirm.title'), t('tactical.newBoardConfirm.message'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('tactical.newBoardConfirm.action'), style: 'destructive', onPress: handleNewBoard },
+    ]);
+  }
+
   function handleNewBoard() {
     handleReset();
     clearArrows();
@@ -1301,7 +1309,7 @@ export function TacticalBoard({
             </View>
           )}
 
-          <Pressable onPress={handleNewBoard} style={styles.headerBtn} accessibilityRole="button"
+          <Pressable onPress={confirmNewBoard} style={styles.headerBtn} accessibilityRole="button"
             accessibilityLabel="Nouveau schéma">
             <Text style={styles.headerBtnText}>🗒</Text>
           </Pressable>

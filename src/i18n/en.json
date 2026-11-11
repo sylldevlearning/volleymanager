@@ -502,7 +502,12 @@
         "lineup_libero": "The libero (no. {{number}}) cannot be in the starting lineup."
       }
     },
-    "selectFirst": "Tap a player or the ball first"
+    "selectFirst": "Tap a player or the ball first",
+    "newBoardConfirm": {
+      "title": "Clear everything?",
+      "message": "The planned plays will be lost.",
+      "action": "Clear"
+    }
   },
   "scanner": {
     "title": "Scan licenses",

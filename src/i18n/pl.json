@@ -512,7 +512,12 @@
         "lineup_libero": "Libero (nr {{number}}) nie może być w ustawieniu wyjściowym."
       }
     },
-    "selectFirst": "Najpierw dotknij zawodnika lub piłki"
+    "selectFirst": "Najpierw dotknij zawodnika lub piłki",
+    "newBoardConfirm": {
+      "title": "Wyczyścić wszystko?",
+      "message": "Zaplanowane zagrywki zostaną utracone.",
+      "action": "Wyczyść"
+    }
   },
   "scanner": {
     "title": "Skanuj licencje",

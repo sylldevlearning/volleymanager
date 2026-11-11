@@ -502,7 +502,12 @@
         "lineup_libero": "Il libero (n. {{number}}) non può essere nella formazione iniziale."
       }
     },
-    "selectFirst": "Tocca prima un giocatore o la palla"
+    "selectFirst": "Tocca prima un giocatore o la palla",
+    "newBoardConfirm": {
+      "title": "Cancellare tutto?",
+      "message": "Gli schemi previsti andranno persi.",
+      "action": "Cancella"
+    }
   },
   "scanner": {
     "title": "Scansiona i tesserini",

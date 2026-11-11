@@ -502,7 +502,12 @@
         "lineup_libero": "Der Libero (Nr. {{number}}) darf nicht in der Startaufstellung stehen."
       }
     },
-    "selectFirst": "Tippe zuerst auf einen Spieler oder den Ball"
+    "selectFirst": "Tippe zuerst auf einen Spieler oder den Ball",
+    "newBoardConfirm": {
+      "title": "Alles löschen?",
+      "message": "Die geplanten Spielzüge gehen verloren.",
+      "action": "Löschen"
+    }
   },
   "scanner": {
     "title": "Spielerpässe scannen",

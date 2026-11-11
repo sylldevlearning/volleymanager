@@ -502,7 +502,12 @@
         "lineup_libero": "Libero ({{number}} numara) başlangıç dizilişinde olamaz."
       }
     },
-    "selectFirst": "Önce bir oyuncuya veya topa dokun"
+    "selectFirst": "Önce bir oyuncuya veya topa dokun",
+    "newBoardConfirm": {
+      "title": "Her şey silinsin mi?",
+      "message": "Planlanan kombinasyonlar kaybolacak.",
+      "action": "Sil"
+    }
   },
   "scanner": {
     "title": "Lisansları tara",
