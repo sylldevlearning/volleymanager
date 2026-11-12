@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
-import { FlatList, StyleSheet, Text, View, Pressable } from 'react-native';
+import { FlatList, StyleSheet, View, Pressable } from 'react-native';
+import { Text } from '../../src/components/ui/Text';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Plus, Users, ChevronRight } from 'lucide-react-native';

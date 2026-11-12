@@ -4,10 +4,10 @@ import {
   Modal,
   Pressable,
   StyleSheet,
-  Text,
   View,
   useWindowDimensions,
 } from 'react-native';
+import { Text } from '../ui/Text';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, runOnJS } from 'react-native-reanimated';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -1638,6 +1638,8 @@ const makeStyles = (a: AppTheme) => StyleSheet.create({
     top: 52,
     right: 8,
     minWidth: 200,
+    // Long labels (German…) wrap instead of running off the left edge
+    maxWidth: '92%',
     backgroundColor: a.backgroundSurface,
     borderRadius: 12,
     borderWidth: 1,

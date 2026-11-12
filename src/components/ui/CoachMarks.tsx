@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Modal, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Text } from './Text';
 import { useTranslation } from 'react-i18next';
 import { useSettingsStore, type HelpTipId } from '../../stores/settingsStore';
 import { useSettingsHydrated } from '../../hooks/useSettingsHydrated';
@@ -29,6 +31,8 @@ export function CoachMarks({ tipId, steps, enabled }: CoachMarksProps) {
   const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const { width: screenW, height: screenH } = useWindowDimensions();
+  // The bubble stays above the navigation bar
+  const insets = useSafeAreaInsets();
   const hydrated = useSettingsHydrated();
   const seen = useSettingsStore((s) => s.seenTips[tipId] === true);
   const markTipSeen = useSettingsStore((s) => s.markTipSeen);
@@ -77,7 +81,7 @@ export function CoachMarks({ tipId, steps, enabled }: CoachMarksProps) {
     width: rect.width + SPOT_PADDING * 2,
     height: rect.height + SPOT_PADDING * 2,
   };
-  const bubble = placeBubble(spot, { width: screenW, height: screenH }, bubbleH);
+  const bubble = placeBubble(spot, { width: screenW, height: screenH - insets.bottom }, bubbleH);
 
   return (
     <Modal visible transparent statusBarTranslucent animationType="fade" onRequestClose={handleNext}>

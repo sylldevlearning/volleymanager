@@ -1,7 +1,13 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import {
-  Modal, Pressable, ScrollView, StyleSheet, Text, View,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Text } from '../ui/Text';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react-native';
 import type { Player } from '../../models/player';
@@ -75,6 +81,7 @@ export function SubstitutionSheet({
 }: SubstitutionSheetProps) {
   const colors = useAppTheme();
   const subStyles = useThemedStyles(makeSubStyles);
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const [playerOutId, setPlayerOutId] = useState<string | null>(null);
   const [playerOutPos, setPlayerOutPos] = useState<number | null>(null);
@@ -237,7 +244,7 @@ export function SubstitutionSheet({
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
       <Pressable style={subStyles.backdrop} onPress={handleClose} />
-      <View style={subStyles.sheet}>
+      <View style={[subStyles.sheet, { paddingBottom: 24 + insets.bottom }]}>
         {/* Header */}
         <View style={subStyles.header}>
           <View>

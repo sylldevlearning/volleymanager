@@ -1,4 +1,5 @@
-import { StyleSheet, Text, Pressable } from 'react-native';
+import { StyleSheet, Pressable } from 'react-native';
+import { Text } from '../ui/Text';
 import { RotateCcw } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useThemedStyles, useAppTheme, type AppTheme } from '../../theme/useAppTheme';

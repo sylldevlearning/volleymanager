@@ -1,4 +1,5 @@
-import { StyleSheet, Text, Pressable } from 'react-native';
+import { StyleSheet, Pressable } from 'react-native';
+import { Text } from '../ui/Text';
 import * as Haptics from 'expo-haptics';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { useAppTheme } from '../../theme/useAppTheme';

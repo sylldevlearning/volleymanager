@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Text } from '../ui/Text';
 import { useTranslation } from 'react-i18next';
 import type { StandingsTable } from '../../features/tournament/display';
 import { useThemedStyles, type AppTheme } from '../../theme/useAppTheme';

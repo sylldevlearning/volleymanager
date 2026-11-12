@@ -5,10 +5,10 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Text,
-  TextInput,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Text, TextInput } from '../ui/Text';
 import { X } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { palette } from '../../theme/tokens';
@@ -39,6 +39,7 @@ interface PlayerEditSheetProps {
 export function PlayerEditSheet({ visible, player, onClose, onSave }: PlayerEditSheetProps) {
   const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const [numberStr, setNumberStr] = useState('');
   const [lastName, setLastName] = useState('');
@@ -89,7 +90,7 @@ export function PlayerEditSheet({ visible, player, onClose, onSave }: PlayerEdit
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.kav}
         >
-          <View style={styles.sheet}>
+          <View style={[styles.sheet, { paddingBottom: (Platform.OS === 'ios' ? 32 : 20) + insets.bottom }]}>
             <View style={styles.handle} />
 
             <View style={styles.header}>

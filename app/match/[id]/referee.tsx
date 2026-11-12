@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
-import { Alert, FlatList, Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, Image, Modal, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '../../../src/components/ui/Text';
 
 const BALL_IMG = require('../../../assets/images/ballon.png');
 import { useLocalSearchParams, useRouter } from 'expo-router';

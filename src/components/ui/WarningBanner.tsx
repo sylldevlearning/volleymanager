@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Text } from 'react-native';
+import { Animated, StyleSheet } from 'react-native';
+import { Text } from './Text';
 import { AlertTriangle } from 'lucide-react-native';
 import { useThemedStyles, useAppTheme, type AppTheme } from '../../theme/useAppTheme';
 

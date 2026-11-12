@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View, Pressable } from 'react-native';
+import { StyleSheet, View, Pressable } from 'react-native';
+import { Text } from '../ui/Text';
 import Svg, { Line, Rect, Circle, Text as SvgText, G } from 'react-native-svg';
 import { palette } from '../../theme/tokens';
 import { useAppTheme } from '../../theme/useAppTheme';

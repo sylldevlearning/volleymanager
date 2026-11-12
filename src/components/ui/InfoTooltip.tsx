@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
+import { ScrollView, Modal, Pressable, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Text } from './Text';
 import { useTranslation } from 'react-i18next';
 import { useThemedStyles, type AppTheme } from '../../theme/useAppTheme';
 
@@ -11,6 +13,7 @@ export function InfoTooltip({ textKey }: InfoTooltipProps) {
   const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
+  const insets = useSafeAreaInsets();
 
   return (
     <>
@@ -31,10 +34,12 @@ export function InfoTooltip({ textKey }: InfoTooltipProps) {
         onRequestClose={() => setVisible(false)}
       >
         <TouchableWithoutFeedback onPress={() => setVisible(false)}>
-          <View style={styles.overlay}>
+          <View style={[styles.overlay, { paddingBottom: 16 + insets.bottom }]}>
             <TouchableWithoutFeedback>
               <View style={styles.popup}>
-                <Text style={styles.text}>{t(textKey)}</Text>
+                <ScrollView bounces={false}>
+                  <Text style={styles.text}>{t(textKey)}</Text>
+                </ScrollView>
               </View>
             </TouchableWithoutFeedback>
           </View>
@@ -68,6 +73,7 @@ const makeStyles = (a: AppTheme) => StyleSheet.create({
     paddingRight: 16,
   },
   popup: {
+    flexShrink: 1,
     backgroundColor: a.backgroundSurface,
     borderRadius: 12,
     padding: 16,

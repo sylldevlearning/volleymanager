@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Text } from '../../../src/components/ui/Text';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -34,7 +35,7 @@ export default function TournamentLevelsScreen() {
           {levels?.map((level) => (
             <View key={level.level} style={[styles.card, { borderColor: level.color }]}>
               <View style={[styles.header, { backgroundColor: level.color }]}>
-                <Text style={styles.levelName}>{level.name}</Text>
+                <Text style={styles.levelName} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>{level.name}</Text>
                 <Text style={styles.count}>{t('tournament.levels.count', { count: level.teams.length })}</Text>
               </View>
               {level.teams.map((team, i) => (

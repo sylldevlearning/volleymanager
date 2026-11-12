@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Text } from '../ui/Text';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react-native';
 import type { Player } from '../../models/player';
@@ -27,6 +29,7 @@ const SANCTION_TYPES: { type: SanctionType; color: string }[] = [
 export function SanctionSheet({ visible, onClose, teamName, teamColor, players, onConfirm }: SanctionSheetProps) {
   const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const [playerId, setPlayerId] = useState<string | null | undefined>(undefined);
   const [sanctionType, setSanctionType] = useState<SanctionType | null>(null);
@@ -53,7 +56,7 @@ export function SanctionSheet({ visible, onClose, teamName, teamColor, players, 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
       <Pressable style={styles.backdrop} onPress={handleClose} />
-      <View style={styles.sheet}>
+      <View style={[styles.sheet, { paddingBottom: 24 + insets.bottom }]}>
         <View style={styles.header}>
           <View>
             <Text style={styles.title}>{t('sanction.title')}</Text>

@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import {
-  Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
 } from 'react-native';
+import { Text, TextInput } from '../../src/components/ui/Text';
 import { Stack, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';

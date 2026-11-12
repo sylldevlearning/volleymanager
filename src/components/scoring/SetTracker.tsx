@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Text } from '../ui/Text';
 import { useThemedStyles, type AppTheme } from '../../theme/useAppTheme';
 import { useResponsive } from '../../hooks/useResponsive';
 

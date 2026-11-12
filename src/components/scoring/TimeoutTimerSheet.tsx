@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Text } from '../ui/Text';
 import * as Haptics from 'expo-haptics';
 import { useAudioPlayer, setAudioModeAsync } from 'expo-audio';
 import { useTranslation } from 'react-i18next';
 import { useThemedStyles, useAppTheme, type AppTheme } from '../../theme/useAppTheme';
+import { timeoutSheetLayout } from './timeoutSheetLayout';
 
 const TIMEOUT_DURATION = 30;
 
@@ -19,6 +22,8 @@ export function TimeoutTimerSheet({ visible, teamName, teamColor, onEnd, onCance
   const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
+  const layout = timeoutSheetLayout(useWindowDimensions());
   const [seconds, setSeconds] = useState(TIMEOUT_DURATION);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const hasBuzzed = useRef(false);
@@ -80,13 +85,19 @@ export function TimeoutTimerSheet({ visible, teamName, teamColor, onEnd, onCance
 
   return (
     <Modal visible={visible} transparent animationType="fade">
-      <View style={styles.overlay}>
-        <View style={styles.card}>
+      <View style={[styles.overlay, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+        <View style={[styles.card, { width: layout.cardWidth }]}>
           <Text style={styles.title}>{t('timeout.title')}</Text>
           <Text style={[styles.teamName, { color: teamColor }]}>{teamName}</Text>
 
           <View style={styles.timerContainer}>
-            <Text style={[styles.timer, isUrgent && styles.timerUrgent]}>
+            <Text
+              style={[
+                styles.timer,
+                { fontSize: layout.timerFontSize, lineHeight: layout.timerLineHeight },
+                isUrgent && styles.timerUrgent,
+              ]}
+            >
               {String(seconds).padStart(2, '0')}
             </Text>
             <View style={styles.progressBar}>
@@ -142,8 +153,6 @@ const makeStyles = (a: AppTheme) => StyleSheet.create({
     padding: 32,
     alignItems: 'center',
     gap: 16,
-    marginHorizontal: 32,
-    width: 300,
     borderWidth: 1,
     borderColor: a.backgroundElevated,
   },
@@ -164,10 +173,8 @@ const makeStyles = (a: AppTheme) => StyleSheet.create({
     width: '100%',
   },
   timer: {
-    fontSize: 72,
     fontFamily: 'Inter_900Black',
     color: a.textPrimary,
-    lineHeight: 80,
     includeFontPadding: false,
   },
   timerUrgent: {

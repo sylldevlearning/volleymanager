@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Text } from '../ui/Text';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react-native';
 import { getPairsForMatch } from '../../services/substitutionService';
@@ -30,6 +32,7 @@ export function SubstitutionRecapSheet({
 }: SubstitutionRecapSheetProps) {
   const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const [homePairs, setHomePairs] = useState<SubstitutionPair[]>([]);
   const [awayPairs, setAwayPairs] = useState<SubstitutionPair[]>([]);
@@ -56,7 +59,7 @@ export function SubstitutionRecapSheet({
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable style={styles.backdrop} onPress={onClose} />
-      <View style={styles.sheet}>
+      <View style={[styles.sheet, { paddingBottom: 24 + insets.bottom }]}>
         <View style={styles.header}>
           <Text style={styles.title}>{t('arbitrage.recapTitle')}</Text>
           <Pressable onPress={onClose} accessibilityRole="button">

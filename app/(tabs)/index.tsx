@@ -1,4 +1,5 @@
-import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, View, Text, Pressable, StatusBar } from 'react-native';
+import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, View, Pressable, StatusBar } from 'react-native';
+import { Text } from '../../src/components/ui/Text';
 
 const BALL_IMG = require('../../assets/images/ballon.png');
 import { useState } from 'react';

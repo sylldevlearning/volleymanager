@@ -3,12 +3,11 @@ import {
   Image,
   ScrollView,
   StyleSheet,
-  Text,
   View,
   Pressable,
-  TextInput,
   Alert,
 } from 'react-native';
+import { Text, TextInput } from '../../src/components/ui/Text';
 
 const BALL_IMG = require('../../assets/images/ballon.png');
 import { useRouter } from 'expo-router';

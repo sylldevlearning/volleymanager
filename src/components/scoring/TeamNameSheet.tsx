@@ -5,10 +5,10 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Text,
-  TextInput,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Text, TextInput } from '../ui/Text';
 import { X } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { normalizeTeamName, TEAM_NAME_MAX_LENGTH } from '../../features/match/teamRename';
@@ -28,6 +28,7 @@ interface TeamNameSheetProps {
 export function TeamNameSheet({ visible, name, teamColor, onClose, onSave }: TeamNameSheetProps) {
   const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const [value, setValue] = useState(name);
   const [invalid, setInvalid] = useState(false);
@@ -53,7 +54,7 @@ export function TeamNameSheet({ visible, name, teamColor, onClose, onSave }: Tea
       <View style={styles.overlay}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel={t('common.close')} />
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.kav}>
-          <View style={styles.sheet}>
+          <View style={[styles.sheet, { paddingBottom: 32 + insets.bottom }]}>
             <View style={styles.header}>
               <View style={[styles.headerDot, { backgroundColor: teamColor }]} />
               <Text style={styles.title}>{t('referee.renameTeamTitle')}</Text>

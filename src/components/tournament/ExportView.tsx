@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Text } from '../ui/Text';
 import type { ExportDoc } from '../../features/tournament/exportDoc';
 
 /** The exported document as a native view: preview, and the image that is shared. Light, like the PDF. */

@@ -5,10 +5,10 @@ import {
   Modal,
   Pressable,
   StyleSheet,
-  Text,
-  TextInput,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Text, TextInput } from '../ui/Text';
 import { useTranslation } from 'react-i18next';
 import { getAllPlays, savePlay, updatePlay, deletePlay } from '../../features/tactical/tacticalService';
 import type { TacticalPlay, PlayerPosition, Arrow, TacticalCategory } from '../../models/tactical';
@@ -51,6 +51,7 @@ export function PlaybookSheet({
 }: PlaybookSheetProps) {
   const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const [plays, setPlays] = useState<TacticalPlay[]>([]);
   const [saveName, setSaveName] = useState('');
@@ -133,7 +134,7 @@ export function PlaybookSheet({
       onRequestClose={onClose}
     >
       <Pressable style={styles.backdrop} onPress={onClose} />
-      <View style={styles.sheet}>
+      <View style={[styles.sheet, { paddingBottom: 32 + insets.bottom }]}>
         <View style={styles.handle} />
 
         <View style={styles.sheetHeader}>

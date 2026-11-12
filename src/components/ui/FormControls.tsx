@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { Text } from './Text';
 import { Minus, Plus } from 'lucide-react-native';
 import { useThemedStyles, useAppTheme, type AppTheme } from '../../theme/useAppTheme';
 

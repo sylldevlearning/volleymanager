@@ -1,4 +1,5 @@
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
+import { Text } from '../src/components/ui/Text';
 
 const BALL_IMG = require('../assets/images/ballon.png');
 import { useTranslation } from 'react-i18next';

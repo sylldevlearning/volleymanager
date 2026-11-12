@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
-import { Alert, FlatList, Modal, ScrollView, StyleSheet, Text, View, Switch, Pressable } from 'react-native';
+import { Alert, FlatList, Modal, ScrollView, StyleSheet, View, Switch, Pressable } from 'react-native';
+import { Text } from '../../src/components/ui/Text';
 import { useTranslation } from 'react-i18next';
 import { Zap, Globe, Info, ChevronRight, LifeBuoy, ShieldCheck, Check } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';

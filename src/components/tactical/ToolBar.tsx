@@ -1,5 +1,6 @@
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View, Alert } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View, Alert } from 'react-native';
+import { Text } from '../ui/Text';
 import { useTranslation } from 'react-i18next';
 import type { TacticalTool, ArrowThickness } from '../../models/tactical';
 import { useThemedStyles, type AppTheme } from '../../theme/useAppTheme';

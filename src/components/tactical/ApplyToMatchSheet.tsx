@@ -1,4 +1,6 @@
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Text } from '../ui/Text';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react-native';
 import type { ApplyPlan, BoardCheckResult, TeamLineupPlan } from '../../features/tactical/applyToMatch';
@@ -27,13 +29,14 @@ export function ApplyToMatchSheet({
 }: ApplyToMatchSheetProps) {
   const colors = useAppTheme();
   const styles = useThemedStyles(makeStyles);
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const canConfirm = plan?.ok === true && !applying;
 
   return (
     <Modal visible={plan !== null} transparent animationType="slide" onRequestClose={onCancel}>
       <Pressable style={styles.backdrop} onPress={onCancel} />
-      <View style={styles.sheet}>
+      <View style={[styles.sheet, { paddingBottom: 24 + insets.bottom }]}>
         <View style={styles.header}>
           <Text style={styles.title}>{t('tactical.apply.title')}</Text>
           <Pressable onPress={onCancel} accessibilityRole="button" accessibilityLabel={t('common.cancel')}>

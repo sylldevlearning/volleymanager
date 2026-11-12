@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
-import { Alert, FlatList, Modal, Pressable, ScrollView, SectionList, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, Modal, Pressable, ScrollView, SectionList, StyleSheet, View } from 'react-native';
+import { Text } from '../../../src/components/ui/Text';
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { formatClock } from '../../../src/i18n/format';

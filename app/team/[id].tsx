@@ -2,13 +2,12 @@ import { useCallback, useState } from 'react';
 import {
   FlatList,
   StyleSheet,
-  Text,
   View,
   Pressable,
   Alert,
-  TextInput,
   Modal,
 } from 'react-native';
+import { Text, TextInput } from '../../src/components/ui/Text';
 import { Stack, useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Plus, Trash2, X, BarChart2, ScanLine } from 'lucide-react-native';

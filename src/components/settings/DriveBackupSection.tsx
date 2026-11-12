@@ -1,4 +1,5 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '../ui/Text';
 import { useTranslation } from 'react-i18next';
 import { CloudUpload, Cloud, History, LogOut, Trash2 } from 'lucide-react-native';
 import { useDriveBackup } from '../../features/backup/useDriveBackup';

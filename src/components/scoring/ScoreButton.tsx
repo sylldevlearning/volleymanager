@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
+import { Pressable, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
+import { Text } from '../ui/Text';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedStyle,
@@ -176,7 +177,8 @@ const makeStyles = (a: AppTheme) => StyleSheet.create({
   button: {
     width: 140,
     aspectRatio: 1,
-    maxWidth: 160,
+    // Never wider than the team's column (arbitrage screen on 360 dp phones)
+    maxWidth: '100%',
     borderRadius: 24,
     borderWidth: 2,
     alignItems: 'center',
