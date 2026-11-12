@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { useThemedStyles, type AppTheme } from '../../theme/useAppTheme';
+import { useResponsive } from '../../hooks/useResponsive';
 
 interface SetScore {
   home: number;
@@ -14,10 +15,12 @@ interface SetTrackerProps {
 
 export function SetTracker({ setScores, currentSetNumber, maxSets }: SetTrackerProps) {
   const styles = useThemedStyles(makeStyles);
+  // Under 370 dp (Galaxy S7…) five tabs plus the help button no longer fit at full width
+  const { isSmall } = useResponsive();
   const slots = Array.from({ length: maxSets }, (_, i) => i + 1);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isSmall && styles.containerCompact]}>
       {slots.map((setNum) => {
         const isFinished = setNum < currentSetNumber;
         const isCurrent = setNum === currentSetNumber;
@@ -28,6 +31,7 @@ export function SetTracker({ setScores, currentSetNumber, maxSets }: SetTrackerP
             key={setNum}
             style={[
               styles.setSlot,
+              isSmall && styles.setSlotCompact,
               isCurrent && styles.setSlotActive,
               isFinished && styles.setSlotFinished,
             ]}
@@ -54,6 +58,8 @@ const makeStyles = (a: AppTheme) => StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 16,
   },
+  containerCompact: { gap: 4, paddingHorizontal: 8 },
+  setSlotCompact: { minWidth: 44, paddingHorizontal: 6 },
   setSlot: {
     alignItems: 'center',
     paddingHorizontal: 10,

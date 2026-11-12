@@ -146,7 +146,8 @@
     },
     "renameTeamTitle": "Nazwa drużyny",
     "renameTeamHint": "Dotknij, aby zmienić nazwę drużyny",
-    "renameTeamInvalid": "Wpisz nazwę od 1 do {{max}} znaków."
+    "renameTeamInvalid": "Wpisz nazwę od 1 do {{max}} znaków.",
+    "actionTactical": "Taktyka"
   },
   "arbitrage": {
     "title": "Sędziowanie",

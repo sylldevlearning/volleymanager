@@ -146,7 +146,8 @@
     },
     "renameTeamTitle": "Takım adı",
     "renameTeamHint": "Takımı yeniden adlandırmak için dokunun",
-    "renameTeamInvalid": "1 ile {{max}} karakter arasında bir ad girin."
+    "renameTeamInvalid": "1 ile {{max}} karakter arasında bir ad girin.",
+    "actionTactical": "Taktik"
   },
   "arbitrage": {
     "title": "Hakemlik",

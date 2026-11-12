@@ -146,7 +146,8 @@
     },
     "renameTeamTitle": "チーム名",
     "renameTeamHint": "タップしてチーム名を変更",
-    "renameTeamInvalid": "1〜{{max}}文字の名前を入力してください。"
+    "renameTeamInvalid": "1〜{{max}}文字の名前を入力してください。",
+    "actionTactical": "作戦"
   },
   "arbitrage": {
     "title": "審判",

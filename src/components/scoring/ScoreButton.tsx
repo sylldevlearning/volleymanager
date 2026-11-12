@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedStyle,
@@ -12,6 +13,7 @@ import { Pencil } from 'lucide-react-native';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { useResponsive } from '../../hooks/useResponsive';
 import { ANIMATION_DURATION_SHORT } from '../../utils/constants';
+import { fitScoreButton } from '../../features/match/scoreLayout';
 import { useAppTheme, useThemedStyles, type AppTheme } from '../../theme/useAppTheme';
 
 interface ScoreButtonProps {
@@ -25,11 +27,17 @@ interface ScoreButtonProps {
   onNamePress?: () => void;
   /** Accessibility hint of the name button */
   nameHint?: string;
+  /**
+   * The parent stretches this column to its full height (alignItems: 'stretch'):
+   * the square then shrinks to fit it. Not for content-sized parents, where the
+   * measure would depend on the square itself.
+   */
+  fitColumn?: boolean;
 }
 
 const DEBOUNCE_MS = 400;
 
-export function ScoreButton({ teamName, score, teamColor, onPress, onRemove, disabled, onNamePress, nameHint }: ScoreButtonProps) {
+export function ScoreButton({ teamName, score, teamColor, onPress, onRemove, disabled, onNamePress, nameHint, fitColumn }: ScoreButtonProps) {
   const styles = useThemedStyles(makeStyles);
   const colors = useAppTheme();
   const hapticsEnabled = useSettingsStore((s) => s.hapticsEnabled);
@@ -37,6 +45,15 @@ export function ScoreButton({ teamName, score, teamColor, onPress, onRemove, dis
   const scale = useSharedValue(1);
   const lastPressTime = useSharedValue(0);
   const shouldFire = useSharedValue(false);
+  // Column given by the screen: the square shrinks so that name, square and badges always fit
+  const [column, setColumn] = useState<{ width: number; height: number } | null>(null);
+  const fit = fitScoreButton(column);
+  const fontSize = fit.fontSize === null ? scoreFontSize : Math.min(scoreFontSize, fit.fontSize);
+
+  function handleLayout(e: LayoutChangeEvent) {
+    const { width, height } = e.nativeEvent.layout;
+    setColumn((prev) => (prev && prev.width === width && prev.height === height ? prev : { width, height }));
+  }
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -68,7 +85,7 @@ export function ScoreButton({ teamName, score, teamColor, onPress, onRemove, dis
     });
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, fit.compact && styles.containerCompact]} onLayout={fitColumn ? handleLayout : undefined}>
       {onNamePress ? (
         <Pressable
           style={styles.nameButton}
@@ -90,8 +107,22 @@ export function ScoreButton({ teamName, score, teamColor, onPress, onRemove, dis
       {/* GestureDetector covers only the score circle — keeps badges separate */}
       <GestureDetector gesture={gesture}>
         <Animated.View style={animatedStyle}>
-          <View style={[styles.button, { backgroundColor: teamColor + '20', borderColor: teamColor, minHeight: scoreButtonSize }]}>
-            <Text style={[styles.score, { color: teamColor, fontSize: scoreFontSize, lineHeight: scoreFontSize }]}>{score}</Text>
+          <View
+            style={[
+              styles.button,
+              { backgroundColor: teamColor + '20', borderColor: teamColor },
+              column
+                ? { width: fit.size, height: fit.size }
+                : { minHeight: scoreButtonSize },
+            ]}
+          >
+            <Text
+              style={[styles.score, { color: teamColor, fontSize, lineHeight: fontSize }]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
+              {score}
+            </Text>
           </View>
         </Animated.View>
       </GestureDetector>
@@ -124,8 +155,10 @@ const makeStyles = (a: AppTheme) => StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 12,
   },
+  containerCompact: { gap: 6 },
   nameButton: {
     flexDirection: 'row',
     alignItems: 'center',

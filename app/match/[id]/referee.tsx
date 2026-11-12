@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, FlatList, Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { Alert, FlatList, Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 const BALL_IMG = require('../../../assets/images/ballon.png');
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Flag, ArrowLeft } from 'lucide-react-native';
+import { Flag, ArrowLeft, RotateCcw } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 
@@ -20,7 +20,6 @@ import { getTeamById } from '../../../src/services/teamService';
 import { isSetWon, isMatchWon, isLastSet, getTotalSets, canRequestTimeout } from '../../../src/utils/volleyball-rules';
 import { ScoreButton } from '../../../src/components/scoring/ScoreButton';
 import { SetTracker } from '../../../src/components/scoring/SetTracker';
-import { UndoButton } from '../../../src/components/scoring/UndoButton';
 import { SubstitutionSheet } from '../../../src/components/scoring/SubstitutionSheet';
 import { TimeoutTimerSheet } from '../../../src/components/scoring/TimeoutTimerSheet';
 import { TeamNameSheet } from '../../../src/components/scoring/TeamNameSheet';
@@ -455,6 +454,7 @@ export default function RefereeScreen() {
       {/* Score area */}
       <View style={styles.scoreArea}>
         <ScoreButton
+          fitColumn
           teamName={homeTeam.name}
           score={scoreHome}
           teamColor={homeTeam.color || palette.teamHome}
@@ -471,6 +471,7 @@ export default function RefereeScreen() {
         </View>
 
         <ScoreButton
+          fitColumn
           teamName={awayTeam.name}
           score={scoreAway}
           teamColor={palette.teamAway}
@@ -573,44 +574,39 @@ export default function RefereeScreen() {
       )}
 
       {/* Bottom actions */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.actionsScroll}
-        contentContainerStyle={styles.actionsRow}
-      >
-        <Pressable
-          style={({ pressed }) => [styles.actionBtn, pressed && styles.actionBtnPressed]}
+      {/* Fixed 4-column bar — the former horizontal scroll pushed "End match" off small screens */}
+      <View style={styles.actionsRow}>
+        <ActionButton
+          icon={<ArrowLeft size={18} color={colors.textSecondary} />}
+          label={t('arbitrage.actionMenu')}
+          accessibilityLabel={t('home.backToMenu')}
           onPress={() => {
             Alert.alert(t('home.quitMatch'), '', [
               { text: t('common.cancel'), style: 'cancel' },
               { text: t('home.backToMenu'), onPress: () => router.replace('/') },
             ]);
           }}
-          accessibilityRole="button"
-        >
-          <ArrowLeft size={16} color={colors.textSecondary} />
-          <Text style={styles.actionText}>{t('home.backToMenu')}</Text>
-        </Pressable>
-        <UndoButton onPress={handleUndo} disabled={setIsOver} />
-        <Pressable
-          style={({ pressed }) => [styles.tacticalBtn, pressed && styles.actionBtnPressed]}
-          onPress={() => setShowTactical(true)}
+        />
+        <ActionButton
+          icon={<RotateCcw size={18} color={setIsOver ? colors.textMuted : colors.textSecondary} />}
+          label={t('match.undo')}
+          onPress={handleUndo}
+          disabled={setIsOver}
+        />
+        <ActionButton
+          icon={<TacticalBoardIcon size={18} />}
+          label={t('referee.actionTactical')}
           accessibilityLabel={t('tactical.title')}
-          accessibilityRole="button"
-        >
-          <TacticalBoardIcon size={20} />
-        </Pressable>
-        <Pressable
-          style={({ pressed }) => [styles.actionBtnEnd, pressed && styles.actionBtnPressed]}
-          onPress={handleEndMatch}
+          onPress={() => setShowTactical(true)}
+        />
+        <ActionButton
+          icon={<Flag size={18} color={colors.error} />}
+          label={t('arbitrage.actionEnd')}
           accessibilityLabel={t('match.endMatch')}
-          accessibilityRole="button"
-        >
-          <Flag size={16} color={colors.error} />
-          <Text style={[styles.actionText, { color: colors.error }]}>{t('match.endMatch')}</Text>
-        </Pressable>
-      </ScrollView>
+          onPress={handleEndMatch}
+          danger
+        />
+      </View>
 
       {/* Quick match: rename a team (tap on its name) */}
       <TeamNameSheet
@@ -902,6 +898,44 @@ function SubIndicator({
   );
 }
 
+function ActionButton({
+  icon, label, accessibilityLabel, onPress, disabled, danger,
+}: {
+  icon: ReactNode;
+  label: string;
+  accessibilityLabel?: string;
+  onPress: () => void;
+  disabled?: boolean;
+  danger?: boolean;
+}) {
+  const styles = useThemedStyles(makeStyles);
+  const colors = useAppTheme();
+  return (
+    <Pressable
+      style={({ pressed }) => [
+        styles.actionBtn,
+        danger && styles.actionBtnDanger,
+        disabled && styles.actionBtnDisabled,
+        pressed && styles.actionBtnPressed,
+      ]}
+      onPress={onPress}
+      disabled={disabled}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? label}
+    >
+      {icon}
+      <Text
+        style={[styles.actionText, danger && { color: colors.error }]}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.8}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
 function TimeoutIndicator({
   label,
   used,
@@ -947,11 +981,13 @@ const makeStyles = (a: AppTheme) => StyleSheet.create({
   scoreArea: {
     flex: 1,
     flexDirection: 'row',
-    alignItems: 'center',
+    // Each column takes the whole height and its square shrinks to fit (small screens)
+    alignItems: 'stretch',
+    overflow: 'hidden',
     paddingHorizontal: 16,
     gap: 8,
   },
-  scoreSeparator: { alignItems: 'center', gap: 4, width: 56 },
+  scoreSeparator: { alignItems: 'center', justifyContent: 'center', gap: 4, width: 56 },
   setsScore: { fontSize: 20, fontFamily: 'Inter_700Bold', color: a.textPrimary },
   setLabel: { fontSize: 9, fontFamily: 'Inter_600SemiBold', color: a.textMuted, letterSpacing: 1 },
   serviceRow: {
@@ -1000,52 +1036,27 @@ const makeStyles = (a: AppTheme) => StyleSheet.create({
   timeoutDots: { flexDirection: 'row', gap: 4 },
   timeoutDot: { width: 10, height: 10, borderRadius: 5 },
   timeoutInf: { fontSize: 16, color: a.textMuted, fontFamily: 'Inter_700Bold' },
-  actionsScroll: {
-    flexShrink: 0,
-  },
   actionsRow: {
     flexDirection: 'row',
     paddingHorizontal: 16,
     paddingBottom: 8,
     gap: 8,
-    alignItems: 'center',
-    flexWrap: 'nowrap',
   },
   actionBtn: {
     flex: 1,
-    flexDirection: 'row',
+    minWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 12,
+    gap: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
     borderRadius: 12,
     backgroundColor: a.backgroundSurface,
     borderWidth: 1,
     borderColor: a.backgroundElevated,
   },
-  actionBtnEnd: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderRadius: 12,
-    backgroundColor: a.backgroundSurface,
-    borderWidth: 1,
-    borderColor: a.error + '40',
-  },
-  tacticalBtn: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: a.backgroundSurface,
-    borderWidth: 1,
-    borderColor: a.backgroundElevated,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  tacticalIcon: { alignItems: 'center', justifyContent: 'center' },
+  actionBtnDanger: { borderColor: a.error + '40' },
+  actionBtnDisabled: { opacity: 0.5 },
   actionBtnPressed: { opacity: 0.7 },
   actionText: { fontSize: 12, fontFamily: 'Inter_500Medium', color: a.textSecondary },
   setEndBanner: {

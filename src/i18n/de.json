@@ -146,7 +146,8 @@
     },
     "renameTeamTitle": "Teamname",
     "renameTeamHint": "Tippen, um das Team umzubenennen",
-    "renameTeamInvalid": "Gib einen Namen mit 1 bis {{max}} Zeichen ein."
+    "renameTeamInvalid": "Gib einen Namen mit 1 bis {{max}} Zeichen ein.",
+    "actionTactical": "Taktik"
   },
   "arbitrage": {
     "title": "Schiedsrichter",

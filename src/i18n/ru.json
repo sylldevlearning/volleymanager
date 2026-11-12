@@ -146,7 +146,8 @@
     },
     "renameTeamTitle": "Название команды",
     "renameTeamHint": "Нажмите, чтобы переименовать команду",
-    "renameTeamInvalid": "Введите название от 1 до {{max}} символов."
+    "renameTeamInvalid": "Введите название от 1 до {{max}} символов.",
+    "actionTactical": "Тактика"
   },
   "arbitrage": {
     "title": "Судейство",
