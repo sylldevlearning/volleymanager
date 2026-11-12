@@ -22,5 +22,13 @@
         "EXPO_PUBLIC_APP_ENV": "production"
       }
     }
+  },
+  "submit": {
+    "production": {
+      "android": {
+        "track": "internal",
+        "releaseStatus": "draft"
+      }
+    }
   }
 }
