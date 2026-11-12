@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.2.0";
+export const APP_VERSION = "1.2.1";
 
 // Real AdMob banner unit IDs, read from EAS environment variables (never
 // committed). Only used in the "production" build; everywhere else, or when a
