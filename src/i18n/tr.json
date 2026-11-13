@@ -20,7 +20,7 @@
     "actionFailed": "İşlem tamamlanamadı. Tekrar dene."
   },
   "home": {
-    "title": "VolleyManager",
+    "title": "Zone1 Volley",
     "subtitle": "Maçlarını yönet",
     "newMatch": "Yeni maç",
     "myTeams": "Takımlarım",
@@ -1002,7 +1002,7 @@
     },
     "qr": {
       "button": "Maç QR kodu",
-      "scanWith": "VolleyManager uygulamasıyla tara (Play Store)",
+      "scanWith": "Zone1 Volley uygulamasıyla tara (Play Store)",
       "hint": "Hakem uygulamada Turnuva'ya, ardından «Maç QR kodunu tara»ya dokunur: hızlı maç bu takımlar ve kurallarla açılır. Maç sonunda hakemin uygulaması sonuç QR kodunu gösterir: turnuvanın ⋯ menüsünden tara.",
       "lead": " · {{margin}} sayı fark"
     },
@@ -1026,7 +1026,7 @@
       "error": "Dışa aktarma oluşturulamadı. Tekrar dene.",
       "unavailable": "Bu cihazda paylaşım kullanılamıyor.",
       "hint": "PDF yazdırılır veya yansıtılır; görsel bir sohbete gönderilir. Sonra uygulamayı seçersin: e-posta, Drive, Quick Share…",
-      "footer": "VolleyManager ile hazırlandı",
+      "footer": "Zone1 Volley ile hazırlandı",
       "colTime": "Saat",
       "colCourt": "Saha",
       "colMatch": "Maç",
@@ -1051,8 +1051,8 @@
     "start": "Maçı başlat",
     "rescan": "Başka QR tara",
     "errors": {
-      "not_volleymanager": "Bu QR kodu VolleyManager'dan değil. Turnuvada gösterilen «Maç QR kodu»nu tara.",
-      "unsupported_version": "Bu QR kodu VolleyManager'ın daha yeni bir sürümünden: uygulamayı Play Store'dan güncelle.",
+      "not_volleymanager": "Bu QR kodu Zone1 Volley'den değil. Turnuvada gösterilen «Maç QR kodu»nu tara.",
+      "unsupported_version": "Bu QR kodu Zone1 Volley'in daha yeni bir sürümünden: uygulamayı Play Store'dan güncelle.",
       "invalid": "QR kodu okunamıyor veya hasarlı. Yaklaş, yansımadan kaçın ve yeniden tara.",
       "result_qr": "Bu bir sonuç QR kodu: onu organizatör turnuvadan tarar (⋯ menüsü)."
     }
@@ -1075,8 +1075,8 @@
       "match_not_found": "Bu maç bu turnuvada yok (turnuva yeniden oluşturulmuş veya maç silinmiş). Skoru elle gir.",
       "teams_changed": "QR gösterildiğinden beri bu maçın takımları değişti (önceki bir sonuç düzeltildi). Skoru elle gir.",
       "match_qr": "Bu bir maç QR kodu, sonuç değil: hakem maçı başlatmak için tarar.",
-      "not_volleymanager": "Bu QR kodu VolleyManager'dan değil. Hakemin gösterdiği «Sonuç QR kodu»nu tara.",
-      "unsupported_version": "Bu QR kodu VolleyManager'ın daha yeni bir sürümünden: uygulamayı Play Store'dan güncelle.",
+      "not_volleymanager": "Bu QR kodu Zone1 Volley'den değil. Hakemin gösterdiği «Sonuç QR kodu»nu tara.",
+      "unsupported_version": "Bu QR kodu Zone1 Volley'in daha yeni bir sürümünden: uygulamayı Play Store'dan güncelle.",
       "invalid": "QR kodu okunamıyor veya hasarlı. Yaklaş, yansımadan kaçın ve yeniden tara."
     }
   },
@@ -1106,7 +1106,7 @@
       "offline": "İnternet bağlantısı yok. Daha sonra tekrar deneyin.",
       "signedOut": "Google oturumunun süresi doldu veya erişim kaldırıldı. Yeniden oturum açın.",
       "full": "Google Drive'ınız dolu. Yer açın ve tekrar deneyin.",
-      "newer": "Bu yedek, VolleyManager'ın daha yeni bir sürümünden geliyor. Uygulamayı güncelleyip tekrar deneyin.",
+      "newer": "Bu yedek, Zone1 Volley'in daha yeni bir sürümünden geliyor. Uygulamayı güncelleyip tekrar deneyin.",
       "damaged": "Bu yedek okunamıyor. Bu telefondaki veriler değiştirilmedi.",
       "restoreFailed": "Geri yükleme başarısız oldu. Önceki veriler yerine kondu.",
       "connect": "Google'da oturum açılamadı. Bağlantınızı kontrol edip tekrar deneyin.",

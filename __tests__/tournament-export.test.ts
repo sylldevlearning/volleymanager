@@ -54,7 +54,7 @@ describe('the exported document', () => {
     expect(doc.title).toBe('Open de Lyon');
     expect(doc.subtitle).toBe('samedi 16 mai 2026 · Gymnase Jean Macé');
     expect(doc.contentTitle).toBe(fr.tournament.export.contents.planning);
-    expect(doc.footer).toBe('Réalisé avec VolleyManager');
+    expect(doc.footer).toBe('Réalisé avec Zone1 Volley');
   });
 
   it('the date in the format of the language', () => {
@@ -111,7 +111,7 @@ describe('PDF (HTML for A4) and file name', () => {
     expect(html).toContain('<html lang="fr">');
     expect(html).toContain('@page { size: A4;');
     expect(html).toContain('position: fixed');
-    expect(html).toContain('Réalisé avec VolleyManager');
+    expect(html).toContain('Réalisé avec Zone1 Volley');
     expect(html).toContain('Open &lt;A&amp;B&gt;');
     expect(html).not.toContain('<A&B>');
   });

@@ -18,7 +18,7 @@ export default function AboutScreen() {
       {/* App identity */}
       <View style={styles.heroBlock}>
         <Image source={BALL_IMG} style={styles.heroEmoji} resizeMode="contain" />
-        <Text style={styles.heroName}>VolleyManager</Text>
+        <Text style={styles.heroName}>{t('home.title')}</Text>
         <Text style={styles.heroVersion}>{t('about.version')} {APP_VERSION}</Text>
       </View>
 

@@ -20,7 +20,7 @@
     "actionFailed": "処理を完了できませんでした。もう一度お試しください。"
   },
   "home": {
-    "title": "VolleyManager",
+    "title": "Zone1 Volley",
     "subtitle": "試合を管理しよう",
     "newMatch": "新しい試合",
     "myTeams": "マイチーム",
@@ -1002,7 +1002,7 @@
     },
     "qr": {
       "button": "試合のQR",
-      "scanWith": "VolleyManager アプリで読み取ってください（Play ストア）",
+      "scanWith": "Zone1 Volley アプリで読み取ってください（Play ストア）",
       "hint": "審判はアプリで「大会」→「試合のQRを読み取る」をタップ：このチームとルールでクイックマッチが開きます。試合終了後、審判のアプリに結果のQRが表示されるので、大会の ⋯ メニューから読み取ってください。",
       "lead": "・{{margin}}点差"
     },
@@ -1026,7 +1026,7 @@
       "error": "書き出しを作成できませんでした。もう一度お試しください。",
       "unavailable": "この端末では共有できません。",
       "hint": "PDF は印刷や投影に、画像はチャットに便利です。そのあとアプリを選びます：メール、Drive、Quick Share…",
-      "footer": "VolleyManager で作成",
+      "footer": "Zone1 Volley で作成",
       "colTime": "時刻",
       "colCourt": "コート",
       "colMatch": "試合",
@@ -1051,8 +1051,8 @@
     "start": "試合開始",
     "rescan": "別のQRを読み取る",
     "errors": {
-      "not_volleymanager": "このQRコードは VolleyManager のものではありません。大会で表示される「試合のQR」を読み取ってください。",
-      "unsupported_version": "このQRコードは新しいバージョンの VolleyManager で作られています。Play ストアでアプリを更新してください。",
+      "not_volleymanager": "このQRコードは Zone1 Volley のものではありません。大会で表示される「試合のQR」を読み取ってください。",
+      "unsupported_version": "このQRコードは新しいバージョンの Zone1 Volley で作られています。Play ストアでアプリを更新してください。",
       "invalid": "QRコードが読めないか、破損しています。近づいて、反射を避けてもう一度読み取ってください。",
       "result_qr": "これは結果のQRです。主催者が大会（⋯ メニュー）から読み取ります。"
     }
@@ -1075,8 +1075,8 @@
       "match_not_found": "この試合はこの大会にありません（大会の作り直しまたは試合の削除）。スコアを手入力してください。",
       "teams_changed": "QRの表示後にこの試合のチームが変わりました（前の結果が訂正されました）。スコアを手入力してください。",
       "match_qr": "これは試合のQRで、結果ではありません。審判が試合を始めるために読み取ります。",
-      "not_volleymanager": "このQRコードは VolleyManager のものではありません。審判が表示した「結果のQR」を読み取ってください。",
-      "unsupported_version": "このQRコードは新しいバージョンの VolleyManager で作られています。Play ストアでアプリを更新してください。",
+      "not_volleymanager": "このQRコードは Zone1 Volley のものではありません。審判が表示した「結果のQR」を読み取ってください。",
+      "unsupported_version": "このQRコードは新しいバージョンの Zone1 Volley で作られています。Play ストアでアプリを更新してください。",
       "invalid": "QRコードが読めないか、破損しています。近づいて、反射を避けてもう一度読み取ってください。"
     }
   },
@@ -1106,7 +1106,7 @@
       "offline": "インターネットに接続されていません。後でもう一度お試しください。",
       "signedOut": "Google のログインの有効期限が切れたか、アクセスが取り消されました。もう一度ログインしてください。",
       "full": "Google ドライブの容量がいっぱいです。空き容量を作ってからもう一度お試しください。",
-      "newer": "このバックアップは新しいバージョンの VolleyManager で作成されています。アプリを更新してからもう一度お試しください。",
+      "newer": "このバックアップは新しいバージョンの Zone1 Volley で作成されています。アプリを更新してからもう一度お試しください。",
       "damaged": "このバックアップを読み込めません。この端末のデータは変更されていません。",
       "restoreFailed": "復元に失敗しました。以前のデータに戻しました。",
       "connect": "Google にログインできませんでした。接続を確認してもう一度お試しください。",

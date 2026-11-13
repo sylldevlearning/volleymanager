@@ -20,7 +20,7 @@
     "actionFailed": "Das hat nicht geklappt. Versuche es erneut."
   },
   "home": {
-    "title": "VolleyManager",
+    "title": "Zone1 Volley",
     "subtitle": "Verwalte deine Spiele",
     "newMatch": "Neues Spiel",
     "myTeams": "Meine Teams",
@@ -1002,7 +1002,7 @@
     },
     "qr": {
       "button": "Spiel-QR",
-      "scanWith": "Mit der App VolleyManager scannen (Play Store)",
+      "scanWith": "Mit der App Zone1 Volley scannen (Play Store)",
       "hint": "Der Schiedsrichter tippt in der App auf Turnier und dann auf „Spiel-QR scannen“: das schnelle Spiel öffnet sich mit diesen Teams und Regeln. Am Spielende zeigt die App des Schiedsrichters den Ergebnis-QR: scanne ihn über das Menü ⋯ des Turniers.",
       "lead": " · {{margin}} Punkte Vorsprung"
     },
@@ -1026,7 +1026,7 @@
       "error": "Der Export konnte nicht erstellt werden. Versuche es erneut.",
       "unavailable": "Teilen ist auf diesem Gerät nicht möglich.",
       "hint": "Das PDF lässt sich drucken oder projizieren; das Bild passt in einen Chat. Danach wählst du die App: E-Mail, Drive, Quick Share …",
-      "footer": "Erstellt mit VolleyManager",
+      "footer": "Erstellt mit Zone1 Volley",
       "colTime": "Zeit",
       "colCourt": "Feld",
       "colMatch": "Spiel",
@@ -1051,8 +1051,8 @@
     "start": "Spiel starten",
     "rescan": "Anderen QR scannen",
     "errors": {
-      "not_volleymanager": "Dieser QR-Code stammt nicht von VolleyManager. Scanne den „Spiel-QR“ aus dem Turnier.",
-      "unsupported_version": "Dieser QR-Code stammt aus einer neueren VolleyManager-Version: aktualisiere die App im Play Store.",
+      "not_volleymanager": "Dieser QR-Code stammt nicht von Zone1 Volley. Scanne den „Spiel-QR“ aus dem Turnier.",
+      "unsupported_version": "Dieser QR-Code stammt aus einer neueren Version von Zone1 Volley: aktualisiere die App im Play Store.",
       "invalid": "QR-Code unlesbar oder beschädigt. Geh näher heran, vermeide Spiegelungen und scanne erneut.",
       "result_qr": "Das ist ein Ergebnis-QR: ihn scannt der Veranstalter im Turnier (Menü ⋯)."
     }
@@ -1075,8 +1075,8 @@
       "match_not_found": "Dieses Spiel gibt es in diesem Turnier nicht (Turnier neu angelegt oder Spiel gelöscht). Gib das Ergebnis von Hand ein.",
       "teams_changed": "Die Teams dieses Spiels haben sich seit dem QR geändert (ein früheres Ergebnis wurde korrigiert). Gib das Ergebnis von Hand ein.",
       "match_qr": "Das ist ein Spiel-QR, kein Ergebnis: der Schiedsrichter scannt ihn, um das Spiel zu starten.",
-      "not_volleymanager": "Dieser QR-Code stammt nicht von VolleyManager. Scanne den „Ergebnis-QR“ des Schiedsrichters.",
-      "unsupported_version": "Dieser QR-Code stammt aus einer neueren VolleyManager-Version: aktualisiere die App im Play Store.",
+      "not_volleymanager": "Dieser QR-Code stammt nicht von Zone1 Volley. Scanne den „Ergebnis-QR“ des Schiedsrichters.",
+      "unsupported_version": "Dieser QR-Code stammt aus einer neueren Version von Zone1 Volley: aktualisiere die App im Play Store.",
       "invalid": "QR-Code unlesbar oder beschädigt. Geh näher heran, vermeide Spiegelungen und scanne erneut."
     }
   },
@@ -1106,7 +1106,7 @@
       "offline": "Keine Internetverbindung. Versuche es später erneut.",
       "signedOut": "Die Google-Anmeldung ist abgelaufen oder der Zugriff wurde entzogen. Melde dich erneut an.",
       "full": "Dein Google Drive ist voll. Gib Speicherplatz frei und versuche es erneut.",
-      "newer": "Diese Sicherung stammt aus einer neueren Version von VolleyManager. Aktualisiere die App und versuche es erneut.",
+      "newer": "Diese Sicherung stammt aus einer neueren Version von Zone1 Volley. Aktualisiere die App und versuche es erneut.",
       "damaged": "Diese Sicherung kann nicht gelesen werden. Die Daten auf diesem Telefon wurden nicht geändert.",
       "restoreFailed": "Die Wiederherstellung ist fehlgeschlagen. Die vorherigen Daten wurden wiederhergestellt.",
       "connect": "Anmeldung bei Google nicht möglich. Prüfe deine Verbindung und versuche es erneut.",

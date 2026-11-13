@@ -20,7 +20,7 @@
     "actionFailed": "操作未能完成，请重试。"
   },
   "home": {
-    "title": "VolleyManager",
+    "title": "Zone1 Volley",
     "subtitle": "管理你的比赛",
     "newMatch": "新比赛",
     "myTeams": "我的球队",
@@ -1002,7 +1002,7 @@
     },
     "qr": {
       "button": "比赛二维码",
-      "scanWith": "请用 VolleyManager 应用扫描（Play 商店）",
+      "scanWith": "请用 Zone1 Volley 应用扫描（Play 商店）",
       "hint": "裁判在应用中点击「赛事」→「扫描比赛二维码」：快速比赛会以这些球队和规则打开。比赛结束后，裁判的应用会显示结果二维码：请在赛事的 ⋯ 菜单中扫描。",
       "lead": " · 领先 {{margin}} 分"
     },
@@ -1026,7 +1026,7 @@
       "error": "无法生成导出文件，请重试。",
       "unavailable": "此设备无法分享。",
       "hint": "PDF 适合打印或投影；图片适合发到聊天里。之后再选择应用：邮件、云端硬盘、快速分享…",
-      "footer": "由 VolleyManager 生成",
+      "footer": "由 Zone1 Volley 生成",
       "colTime": "时间",
       "colCourt": "场地",
       "colMatch": "比赛",
@@ -1051,8 +1051,8 @@
     "start": "开始比赛",
     "rescan": "扫描其他二维码",
     "errors": {
-      "not_volleymanager": "这个二维码不是 VolleyManager 生成的。请扫描赛事中显示的「比赛二维码」。",
-      "unsupported_version": "这个二维码来自更新版本的 VolleyManager：请在 Play 商店更新应用。",
+      "not_volleymanager": "这个二维码不是 Zone1 Volley 生成的。请扫描赛事中显示的「比赛二维码」。",
+      "unsupported_version": "这个二维码来自更新版本的 Zone1 Volley：请在 Play 商店更新应用。",
       "invalid": "二维码无法识别或已损坏。请靠近一些，避开反光后重新扫描。",
       "result_qr": "这是结果二维码：应由主办方在赛事中扫描（⋯ 菜单）。"
     }
@@ -1075,8 +1075,8 @@
       "match_not_found": "本赛事中没有这场比赛（赛事已重建或比赛已删除）。请手动录入比分。",
       "teams_changed": "显示二维码后，这场比赛的球队发生了变化（之前的结果被修改）。请手动录入比分。",
       "match_qr": "这是比赛二维码，不是结果：裁判扫描它来开始比赛。",
-      "not_volleymanager": "这个二维码不是 VolleyManager 生成的。请扫描裁判展示的「结果二维码」。",
-      "unsupported_version": "这个二维码来自更新版本的 VolleyManager：请在 Play 商店更新应用。",
+      "not_volleymanager": "这个二维码不是 Zone1 Volley 生成的。请扫描裁判展示的「结果二维码」。",
+      "unsupported_version": "这个二维码来自更新版本的 Zone1 Volley：请在 Play 商店更新应用。",
       "invalid": "二维码无法识别或已损坏。请靠近一些，避开反光后重新扫描。"
     }
   },
@@ -1106,7 +1106,7 @@
       "offline": "没有网络连接。请稍后重试。",
       "signedOut": "Google 登录已过期或访问权限已被撤销。请重新登录。",
       "full": "你的 Google 云端硬盘已满。请释放空间后重试。",
-      "newer": "此备份来自更新版本的 VolleyManager。请更新应用后重试。",
+      "newer": "此备份来自更新版本的 Zone1 Volley。请更新应用后重试。",
       "damaged": "无法读取此备份。此手机上的数据未被更改。",
       "restoreFailed": "恢复失败。已还原之前的数据。",
       "connect": "无法登录 Google。请检查网络连接后重试。",

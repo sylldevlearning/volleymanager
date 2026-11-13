@@ -131,7 +131,7 @@ describe('screens wiring', () => {
     const qrScreen = read('app/tournament/[id]/qr/[matchId].tsx');
     expect(qrScreen).toContain("from 'react-native-qrcode-svg'");
     expect(qrScreen).toContain('encodeMatchQr(');
-    expect(fr.tournament.qr.scanWith).toBe("À scanner avec l'app VolleyManager (Play Store)");
+    expect(fr.tournament.qr.scanWith).toBe("À scanner avec l'app Zone1 Volley (Play Store)");
     expect(en.tournament.qr.scanWith).toBeTruthy();
   });
 
@@ -152,7 +152,7 @@ describe('screens wiring', () => {
         expect(dict.scan.errors[reason]).toBeTruthy();
       }
     }
-    expect(fr.scan.errors.not_volleymanager).toMatch(/VolleyManager/);
+    expect(fr.scan.errors.not_volleymanager).toMatch(/Zone1 Volley/);
   });
 
   it('the camera does not record sound', () => {

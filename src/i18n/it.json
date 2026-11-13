@@ -20,7 +20,7 @@
     "actionFailed": "L'operazione non è riuscita. Riprova."
   },
   "home": {
-    "title": "VolleyManager",
+    "title": "Zone1 Volley",
     "subtitle": "Gestisci le tue partite",
     "newMatch": "Nuova partita",
     "myTeams": "Le mie squadre",
@@ -1002,7 +1002,7 @@
     },
     "qr": {
       "button": "QR della partita",
-      "scanWith": "Da scansionare con l'app VolleyManager (Play Store)",
+      "scanWith": "Da scansionare con l'app Zone1 Volley (Play Store)",
       "hint": "L'arbitro tocca Torneo e poi «Scansiona il QR di una partita» nell'app: la partita veloce si apre con queste squadre e queste regole. A fine partita, l'app dell'arbitro mostra il QR del risultato: scansionalo dal menu ⋯ del torneo.",
       "lead": " · {{margin}} punti di scarto"
     },
@@ -1026,7 +1026,7 @@
       "error": "Impossibile creare l'esportazione. Riprova.",
       "unavailable": "La condivisione non è disponibile su questo dispositivo.",
       "hint": "Il PDF si stampa o si proietta; l'immagine si invia in una chat. Poi scegli l'app: e-mail, Drive, Quick Share…",
-      "footer": "Realizzato con VolleyManager",
+      "footer": "Realizzato con Zone1 Volley",
       "colTime": "Ora",
       "colCourt": "Campo",
       "colMatch": "Partita",
@@ -1051,8 +1051,8 @@
     "start": "Inizia la partita",
     "rescan": "Scansiona un altro QR",
     "errors": {
-      "not_volleymanager": "Questo codice QR non viene da VolleyManager. Scansiona il «QR della partita» mostrato nel torneo.",
-      "unsupported_version": "Questo codice QR viene da una versione più recente di VolleyManager: aggiorna l'app dal Play Store.",
+      "not_volleymanager": "Questo codice QR non viene da Zone1 Volley. Scansiona il «QR della partita» mostrato nel torneo.",
+      "unsupported_version": "Questo codice QR viene da una versione più recente di Zone1 Volley: aggiorna l'app dal Play Store.",
       "invalid": "Codice QR illeggibile o danneggiato. Avvicinati, evita i riflessi e scansionalo di nuovo.",
       "result_qr": "Questo è il QR di un risultato: lo scansiona l'organizzatore, dal torneo (menu ⋯)."
     }
@@ -1075,8 +1075,8 @@
       "match_not_found": "Questa partita non esiste in questo torneo (torneo ricreato o partita eliminata). Inserisci il risultato a mano.",
       "teams_changed": "Le squadre di questa partita sono cambiate da quando è stato mostrato il QR (è stato corretto un risultato precedente). Inserisci il risultato a mano.",
       "match_qr": "Questo è il QR di una partita, non un risultato: lo scansiona l'arbitro per iniziare la partita.",
-      "not_volleymanager": "Questo codice QR non viene da VolleyManager. Scansiona il «QR del risultato» mostrato dall'arbitro.",
-      "unsupported_version": "Questo codice QR viene da una versione più recente di VolleyManager: aggiorna l'app dal Play Store.",
+      "not_volleymanager": "Questo codice QR non viene da Zone1 Volley. Scansiona il «QR del risultato» mostrato dall'arbitro.",
+      "unsupported_version": "Questo codice QR viene da una versione più recente di Zone1 Volley: aggiorna l'app dal Play Store.",
       "invalid": "Codice QR illeggibile o danneggiato. Avvicinati, evita i riflessi e scansionalo di nuovo."
     }
   },
@@ -1106,7 +1106,7 @@
       "offline": "Nessuna connessione a internet. Riprova più tardi.",
       "signedOut": "L'accesso a Google è scaduto o è stato revocato. Accedi di nuovo.",
       "full": "Il tuo Google Drive è pieno. Libera spazio e riprova.",
-      "newer": "Questo backup proviene da una versione più recente di VolleyManager. Aggiorna l'app e riprova.",
+      "newer": "Questo backup proviene da una versione più recente di Zone1 Volley. Aggiorna l'app e riprova.",
       "damaged": "Impossibile leggere questo backup. I dati di questo telefono non sono stati modificati.",
       "restoreFailed": "Il ripristino non è riuscito. I dati precedenti sono stati rimessi al loro posto.",
       "connect": "Impossibile accedere a Google. Controlla la connessione e riprova.",
