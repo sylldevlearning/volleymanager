@@ -2,7 +2,7 @@
   "expo": {
     "name": "Zone1 Volley",
     "slug": "volleymanager",
-    "version": "1.2.3",
+    "version": "1.2.4",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "volleymanager",
@@ -17,7 +17,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.sylldevlearning.volleymanager",
-      "versionCode": 13,
+      "versionCode": 14,
       "permissions": [
         "android.permission.VIBRATE",
         "android.permission.MODIFY_AUDIO_SETTINGS"
