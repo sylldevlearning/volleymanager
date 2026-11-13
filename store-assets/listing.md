@@ -32,7 +32,7 @@ VolleyManager est l'outil complet pour les arbitres et entraîneurs de volleybal
 • Remplacements FIVB avec réciprocité
 • Gestion du libéro (zone arrière)
 • Effectifs complets (13 joueurs par équipe)
-• France et Brésil pré-chargés pour démarrer immédiatement
+• Données d'exemple fictives pour découvrir l'app, supprimables d'un geste
 
 🌍 Disponible en français et en anglais.
 

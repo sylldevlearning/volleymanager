@@ -16,7 +16,7 @@ import {
 import tamaguiConfig from '../tamagui.config';
 import { useSettingsStore } from '../src/stores/settingsStore';
 import { useSettingsHydrated } from '../src/hooks/useSettingsHydrated';
-import { seedDefaultDataIfEmpty } from '../src/services/seedService';
+import { runStartupDataTasks } from '../src/services/seedService';
 import { initAds } from '../src/features/ads/adsService';
 import i18n from '../src/i18n';
 import { useLocales } from 'expo-localization';
@@ -51,7 +51,7 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
-      seedDefaultDataIfEmpty().catch(console.error);
+      runStartupDataTasks().catch(console.error);
       // After the splash screen: the GDPR consent form may need to show.
       initAds();
     }
