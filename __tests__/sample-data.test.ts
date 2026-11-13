@@ -274,7 +274,7 @@ describe('screens and texts', () => {
 
   it('created at startup, after the legacy teams cleanup', () => {
     const src = read('src/services/seedService.ts');
-    expect(src.indexOf('removeUntouchedLegacyTeams()')).toBeLessThan(src.indexOf('createSampleDataIfEmpty('));
+    expect(src.indexOf('removeLegacyTeamsOnce()')).toBeLessThan(src.indexOf('createSampleDataIfEmpty('));
     const layout = read('app/_layout.tsx');
     expect(layout).toMatch(/tournamentName: i18n\.t\('sample\.tournamentName'\)/);
     expect(layout).toMatch(/teamNames: i18n\.t\('sample\.teams', \{ returnObjects: true \}\)/);

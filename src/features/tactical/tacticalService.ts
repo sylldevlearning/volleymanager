@@ -2,7 +2,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { generateId } from '../../services/database';
 import type { TacticalPlay, PlayerPosition, Arrow } from '../../models/tactical';
 import type { MatchFormat } from '../../models/match';
-import { DEFAULT_PLAYS } from './defaultPlays';
 
 const STORAGE_KEY = '@volleymanager/tactical_plays';
 
@@ -20,20 +19,11 @@ async function writeCustomPlays(plays: TacticalPlay[]): Promise<void> {
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(plays));
 }
 
-// No-op: defaults live in-memory, no DB needed
-export async function seedDefaultPlays(): Promise<void> {}
-
 export async function getAllPlays(format?: MatchFormat): Promise<TacticalPlay[]> {
-  const custom = await readCustomPlays();
-  const all = [
-    ...DEFAULT_PLAYS,
-    ...custom,
-  ];
-  const filtered = format ? all.filter((p) => p.format === format || !format) : all;
-  return filtered.sort((a, b) => {
-    if (a.isDefault !== b.isDefault) return a.isDefault ? -1 : 1;
-    return a.name.localeCompare(b.name);
-  });
+  // No play ships with the app any more (1.2.5): only the user's own are listed
+  const custom = (await readCustomPlays()).filter((p) => !p.isDefault);
+  const filtered = format ? custom.filter((p) => p.format === format) : custom;
+  return filtered.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export async function getCustomPlaysOnly(): Promise<TacticalPlay[]> {

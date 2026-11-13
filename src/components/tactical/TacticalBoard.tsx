@@ -25,7 +25,6 @@ import { PlaybookSheet } from './PlaybookSheet';
 import { PlayerEditSheet } from './PlayerEditSheet';
 import { ApplyToMatchSheet } from './ApplyToMatchSheet';
 import { useTacticalStore } from '../../features/tactical/tacticalStore';
-import { seedDefaultPlays } from '../../features/tactical/tacticalService';
 import { openMatchBoard, saveMatchBoard } from '../../features/tactical/boardPersistence';
 import { matchPhase, planBoardApply, rulesContextFromStore, type ApplyPlan } from '../../features/tactical/applyToMatch';
 import { recordSubstitution, type SubstitutionContext } from '../../features/match/recordSubstitution';
@@ -473,7 +472,6 @@ export function TacticalBoard({
   // ── Lifecycle ─────────────────────────────────────────────────────────────
   useEffect(() => {
     if (visible) {
-      seedDefaultPlays().catch(console.error);
       if (matchId) {
         // Restore this match's board; without a save, start from the match state
         let cancelled = false;

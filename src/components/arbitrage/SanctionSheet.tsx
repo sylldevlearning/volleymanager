@@ -68,7 +68,26 @@ export function SanctionSheet({ visible, onClose, teamName, teamColor, players, 
         </View>
 
         <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
-          <Text style={styles.sectionTitle}>{t('sanction.target')}</Text>
+          <Text style={styles.sectionTitle}>{t('sanction.type')}</Text>
+          <View style={styles.typeGrid}>
+            {SANCTION_TYPES.map(({ type, color }) => {
+              const isSelected = sanctionType === type;
+              return (
+                <Pressable
+                  key={type}
+                  style={[styles.typeChip, { borderColor: color }, isSelected && { backgroundColor: color + '25' }]}
+                  onPress={() => setSanctionType(type)}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected: isSelected }}
+                >
+                  <View style={[styles.typeDot, { backgroundColor: color }]} />
+                  <Text style={styles.typeLabel}>{t(`sanction.types.${type}`)}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          <Text style={[styles.sectionTitle, { marginTop: 16 }]}>{t('sanction.target')}</Text>
           <View style={styles.targetList}>
             <Pressable
               style={[styles.targetRow, playerId === null && [styles.targetRowSelected, { borderColor: teamColor, backgroundColor: teamColor + '15' }]]}
@@ -92,25 +111,6 @@ export function SanctionSheet({ visible, onClose, teamName, teamColor, players, 
                 </Text>
               </Pressable>
             ))}
-          </View>
-
-          <Text style={[styles.sectionTitle, { marginTop: 16 }]}>{t('sanction.type')}</Text>
-          <View style={styles.typeGrid}>
-            {SANCTION_TYPES.map(({ type, color }) => {
-              const isSelected = sanctionType === type;
-              return (
-                <Pressable
-                  key={type}
-                  style={[styles.typeChip, { borderColor: color }, isSelected && { backgroundColor: color + '25' }]}
-                  onPress={() => setSanctionType(type)}
-                  accessibilityRole="radio"
-                  accessibilityState={{ selected: isSelected }}
-                >
-                  <View style={[styles.typeDot, { backgroundColor: color }]} />
-                  <Text style={styles.typeLabel}>{t(`sanction.types.${type}`)}</Text>
-                </Pressable>
-              );
-            })}
           </View>
         </ScrollView>
 

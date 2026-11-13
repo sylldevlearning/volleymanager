@@ -123,8 +123,7 @@ export function PlaybookSheet({
     onClose();
   }
 
-  const defaultPlays = plays.filter((p) => p.isDefault);
-  const customPlays = plays.filter((p) => !p.isDefault);
+  const customPlays = plays;
 
   return (
     <Modal
@@ -216,18 +215,8 @@ export function PlaybookSheet({
                         t={t}
                       />
                     ))}
-                    <View style={styles.sectionDivider} />
                   </>
                 )}
-                <Text style={styles.sectionTitle}>📚 {t('tactical.playbook.defaults')}</Text>
-                {defaultPlays.map((play) => (
-                  <PlayRow
-                    key={play.id}
-                    play={play}
-                    onLoad={() => { onLoad(play); onClose(); }}
-                    t={t}
-                  />
-                ))}
                 {plays.length === 0 && (
                   <Text style={styles.emptyText}>{t('tactical.playbook.noPlays')}</Text>
                 )}
