@@ -58,7 +58,11 @@
     "stoppedHint": "Terminata prima della fine: nessun vincitore.",
     "setNumber": "Set {{n}}",
     "setStopped": "Set {{n}} (interrotto)",
-    "noStats": "Nessuna statistica dei giocatori registrata per questa partita."
+    "teamStats": "Statistiche per squadra",
+    "playerStats": "Statistiche per giocatore",
+    "pointsBreakdown": "Ripartizione dei punti",
+    "successRates": "% = percentuale di riuscita: battute senza errore, attacchi vincenti, ricezioni A + B.",
+    "noTeamStats": "Nessuna statistica dei giocatori registrata: il dettaglio dei punti non è disponibile per questa partita."
   },
   "match": {
     "new": "Nuova partita",
@@ -404,7 +408,8 @@
       "attack": "Attacco",
       "block": "Muro",
       "ace": "Ace",
-      "opponentFault": "Errore avversario"
+      "opponentFault": "Errore avversario",
+      "unspecified": "Non specificati"
     },
     "noData": "Nessuna statistica disponibile",
     "noMatches": "Nessuna partita giocata",
@@ -661,7 +666,7 @@
     "teams": "Tocca una squadra per vedere e gestire i suoi giocatori. + per creare una squadra.",
     "team": "+ aggiunge un giocatore: è obbligatorio solo il numero. Il pulsante scanner importa i giocatori da una foto del tesserino. Grafico: statistiche del giocatore; cestino: eliminarlo.",
     "newMatch": "Scegli le squadre, il formato, la modalità e chi batte per primo. Le regole (set, punti, time-out, sostituzioni) si possono regolare.",
-    "stats": "Confronta le due squadre fondamentale per fondamentale, guarda i migliori giocatori e come sono arrivati i punti. Tocca un giocatore per vedere il dettaglio.",
+    "stats": "Confronta le due squadre fondamentale per fondamentale, guarda i migliori giocatori e come sono arrivati i punti. Tocca un giocatore per vedere il dettaglio. Efficienza = (punti − errori) ÷ tentativi: può essere negativa quando gli errori superano i punti.",
     "history": "Tocca una partita per riprenderla o vederne il riepilogo; tieni premuto per eliminarla. Filtra per stato o per squadra.",
     "settings": "Cambia la lingua, attiva le vibrazioni e rivedi l'aiuto dell'app. Di default l'app segue la lingua del telefono; puoi sceglierne un'altra tra 11.",
     "substitution": "Scegli chi esce, poi chi entra. Il libero ⚡ non conta nel limite di sostituzioni.",

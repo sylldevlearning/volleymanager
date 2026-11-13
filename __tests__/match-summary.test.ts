@@ -117,15 +117,14 @@ describe('summary screen', () => {
     expect(src).toMatch(/t\('stats\.short\.points'\)/);
   });
 
-  it('chart grouped by skill, a message when nothing was recorded', () => {
-    expect(src).toMatch(/<GroupedBarChart/);
-    expect(src).toMatch(/t\('summary\.noStats'\)/);
+  it('a message when no player stat was recorded', () => {
+    expect(src).toMatch(/t\('summary\.noTeamStats'\)/);
   });
 });
 
 describe('texts in the 11 languages', () => {
   const KEYS = [
-    'summary.stopped', 'summary.stoppedHint', 'summary.setNumber', 'summary.setStopped', 'summary.noStats',
+    'summary.stopped', 'summary.stoppedHint', 'summary.setNumber', 'summary.setStopped', 'summary.noTeamStats',
     'stats.short.aces', 'stats.short.points', 'stats.short.serve', 'stats.short.attack', 'stats.short.reception',
   ];
   it.each(LOCALES)('%s', (f) => {

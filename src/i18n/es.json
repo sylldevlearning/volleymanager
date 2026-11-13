@@ -58,7 +58,11 @@
     "stoppedHint": "Terminado antes del final: sin ganador.",
     "setNumber": "Set {{n}}",
     "setStopped": "Set {{n}} (detenido)",
-    "noStats": "No se registraron estadísticas de jugadores en este partido."
+    "teamStats": "Estadísticas por equipo",
+    "playerStats": "Estadísticas por jugador",
+    "pointsBreakdown": "Reparto de los puntos",
+    "successRates": "% = tasa de acierto: saques sin falta, ataques ganadores, recepciones A + B.",
+    "noTeamStats": "No se registraron estadísticas de jugadores: el detalle de los puntos no está disponible para este partido."
   },
   "match": {
     "new": "Nuevo partido",
@@ -404,7 +408,8 @@
       "attack": "Ataque",
       "block": "Bloqueo",
       "ace": "Ace",
-      "opponentFault": "Error del rival"
+      "opponentFault": "Error del rival",
+      "unspecified": "Sin precisar"
     },
     "noData": "No hay estadísticas disponibles",
     "noMatches": "No se ha jugado ningún partido",
@@ -661,7 +666,7 @@
     "teams": "Toca un equipo para ver y gestionar sus jugadores. + para crear un equipo.",
     "team": "+ añade un jugador: solo el dorsal es obligatorio. El botón del escáner importa jugadores desde una foto de licencia. Gráfico: estadísticas del jugador; papelera: eliminarlo.",
     "newMatch": "Elige los equipos, el formato, el modo y quién saca primero. Las reglas (sets, puntos, tiempos muertos, cambios) se pueden ajustar.",
-    "stats": "Compara los dos equipos fundamento a fundamento, mira los mejores jugadores y cómo se han conseguido los puntos. Toca un jugador para ver su detalle.",
+    "stats": "Compara los dos equipos fundamento a fundamento, mira los mejores jugadores y cómo se han conseguido los puntos. Toca un jugador para ver su detalle. Eficacia = (puntos − errores) ÷ intentos: puede ser negativa cuando los errores superan a los puntos.",
     "history": "Toca un partido para reanudarlo o ver su resumen; mantén pulsado para eliminarlo. Filtra por estado o por equipo.",
     "settings": "Cambia el idioma, activa las vibraciones y vuelve a ver la ayuda de la app. Por defecto, la app sigue el idioma del teléfono; puedes elegir otro entre 11 idiomas.",
     "substitution": "Elige quién sale y después quién entra. El líbero ⚡ no cuenta en el límite de cambios.",

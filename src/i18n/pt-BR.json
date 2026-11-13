@@ -58,7 +58,11 @@
     "stoppedHint": "Encerrada antes do fim: sem vencedor.",
     "setNumber": "Set {{n}}",
     "setStopped": "Set {{n}} (interrompido)",
-    "noStats": "Nenhuma estatística de jogador registrada nesta partida."
+    "teamStats": "Estatísticas por equipe",
+    "playerStats": "Estatísticas por jogador",
+    "pointsBreakdown": "Distribuição dos pontos",
+    "successRates": "% = taxa de acerto: saques sem erro, ataques vencedores, recepções A + B.",
+    "noTeamStats": "Nenhuma estatística de jogador registrada: o detalhe dos pontos não está disponível para esta partida."
   },
   "match": {
     "new": "Nova partida",
@@ -404,7 +408,8 @@
       "attack": "Ataque",
       "block": "Bloqueio",
       "ace": "Ace",
-      "opponentFault": "Erro do adversário"
+      "opponentFault": "Erro do adversário",
+      "unspecified": "Não informados"
     },
     "noData": "Nenhuma estatística disponível",
     "noMatches": "Nenhuma partida jogada",
@@ -661,7 +666,7 @@
     "teams": "Toque num time para ver e gerenciar seus jogadores. + para criar um time.",
     "team": "+ adiciona um jogador: só o número é obrigatório. O botão do leitor importa jogadores de uma foto da carteirinha. Gráfico: estatísticas do jogador; lixeira: excluí-lo.",
     "newMatch": "Escolha os times, o formato, o modo e quem saca primeiro. As regras (sets, pontos, pedidos de tempo, substituições) podem ser ajustadas.",
-    "stats": "Compare os dois times fundamento por fundamento, veja os destaques e como os pontos foram feitos. Toque num jogador para ver os detalhes.",
+    "stats": "Compare os dois times fundamento por fundamento, veja os destaques e como os pontos foram feitos. Toque num jogador para ver os detalhes. Eficiência = (pontos − erros) ÷ tentativas: pode ser negativa quando os erros superam os pontos.",
     "history": "Toque numa partida para retomá-la ou ver o resumo; toque longo para excluí-la. Filtre por situação ou por time.",
     "settings": "Mude o idioma, ative a vibração e veja de novo a ajuda do app. Por padrão, o app segue o idioma do celular; você pode escolher outro entre 11 idiomas.",
     "substitution": "Escolha quem sai e depois quem entra. O líbero ⚡ não conta no limite de substituições.",

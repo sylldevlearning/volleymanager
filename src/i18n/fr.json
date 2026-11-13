@@ -58,7 +58,11 @@
     "stoppedHint": "Terminé avant la fin : pas de vainqueur.",
     "setNumber": "Set {{n}}",
     "setStopped": "Set {{n}} (arrêté)",
-    "noStats": "Aucune statistique de joueur saisie pour ce match."
+    "teamStats": "Statistiques par équipe",
+    "playerStats": "Statistiques par joueur",
+    "pointsBreakdown": "Répartition des points",
+    "successRates": "% = taux de réussite : services sans faute, attaques gagnantes, réceptions A + B.",
+    "noTeamStats": "Aucune statistique de joueur saisie : le détail des points n’est pas disponible pour ce match."
   },
   "match": {
     "new": "Nouveau match",
@@ -404,7 +408,8 @@
       "attack": "Attaque",
       "block": "Block",
       "ace": "Ace",
-      "opponentFault": "Faute adverse"
+      "opponentFault": "Faute adverse",
+      "unspecified": "Non précisés"
     },
     "noData": "Aucune donnée statistique",
     "noMatches": "Aucun match joué",
@@ -661,7 +666,7 @@
     "teams": "Touchez une équipe pour voir et gérer ses joueurs. + pour créer une équipe.",
     "team": "+ ajoute un joueur : seul le numéro est obligatoire. Le bouton scanner importe les joueurs depuis une photo de licence. Graphique : statistiques du joueur ; corbeille : le supprimer.",
     "newMatch": "Choisissez les équipes, le format, le mode et qui sert en premier. Les règles (sets, points, temps morts, remplacements) sont ajustables.",
-    "stats": "Comparez les deux équipes compétence par compétence, découvrez les meilleurs joueurs et la répartition des points. Touchez un joueur pour voir son détail.",
+    "stats": "Comparez les deux équipes compétence par compétence, découvrez les meilleurs joueurs et la répartition des points. Touchez un joueur pour voir son détail. Efficacité = (points − fautes) ÷ tentatives : elle peut être négative quand les fautes dépassent les points.",
     "history": "Touchez un match pour le reprendre ou voir son résumé, appui long pour le supprimer. Filtrez par statut ou par équipe.",
     "settings": "Changez la langue, activez les vibrations et revoyez l'aide de l'app. Par défaut, l'app suit la langue du téléphone ; vous pouvez en choisir une autre parmi 11.",
     "substitution": "Choisissez qui sort puis qui entre. Le libéro ⚡ ne compte pas dans le quota de remplacements.",

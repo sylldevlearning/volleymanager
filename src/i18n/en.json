@@ -58,7 +58,11 @@
     "stoppedHint": "Ended early: no winner.",
     "setNumber": "Set {{n}}",
     "setStopped": "Set {{n}} (stopped)",
-    "noStats": "No player statistics recorded for this match."
+    "teamStats": "Team stats",
+    "playerStats": "Player stats",
+    "pointsBreakdown": "How points were scored",
+    "successRates": "% = success rate: serves without a fault, winning attacks, A + B receptions.",
+    "noTeamStats": "No player stats recorded: the points are not broken down for this match."
   },
   "match": {
     "new": "New match",
@@ -404,7 +408,8 @@
       "attack": "Attack",
       "block": "Block",
       "ace": "Ace",
-      "opponentFault": "Opponent error"
+      "opponentFault": "Opponent error",
+      "unspecified": "Not specified"
     },
     "noData": "No statistics available",
     "noMatches": "No matches played",
@@ -661,7 +666,7 @@
     "teams": "Tap a team to see and manage its players. + to create a team.",
     "team": "+ adds a player: only the number is required. The scanner button imports players from a licence photo. Chart: player stats; bin: delete them.",
     "newMatch": "Choose the teams, format, mode and who serves first. The rules (sets, points, timeouts, substitutions) can be adjusted.",
-    "stats": "Compare both teams skill by skill, see the top players and how points were scored. Tap a player to see their details.",
+    "stats": "Compare both teams skill by skill, see the top players and how points were scored. Tap a player to see their details. Efficiency = (points − errors) ÷ attempts: it can be negative when errors outnumber points.",
     "history": "Tap a match to resume it or see its summary, long-press to delete it. Filter by status or team.",
     "settings": "Change the language, turn vibrations on and replay the app help. By default the app follows the phone language; you can pick another of the 11 languages.",
     "substitution": "Choose who goes out, then who comes in. The libero ⚡ does not count towards the substitution limit.",

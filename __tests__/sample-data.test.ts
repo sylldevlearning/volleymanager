@@ -175,6 +175,31 @@ describe('the sample match (pure)', () => {
   });
 });
 
+describe('the sample match looks like a real one', () => {
+  const count = (side: Side, type: string, player?: string) => SETS.flatMap((x) => x.events)
+    .filter((e) => e.kind === 'stat' && e.side === side && e.type === type && (!player || e.player === player)).length;
+
+  it.each(['home', 'away'] as const)('%s: 8 to 10 block points', (side) => {
+    const blocks = count(side, 'block_kill');
+    expect(blocks).toBeGreaterThanOrEqual(8);
+    expect(blocks).toBeLessThanOrEqual(10);
+  });
+
+  it.each(['home', 'away'] as const)('%s: a few aces, and some serve faults', (side) => {
+    expect(count(side, 'serve_ace')).toBeGreaterThanOrEqual(4);
+    expect(count(side, 'serve_fault')).toBeGreaterThanOrEqual(4);
+  });
+
+  it('a few players serve more aces than faults', () => {
+    const servers = new Set(SETS.flatMap((x) => x.events).flatMap((e) => (e.kind === 'stat' && e.type.startsWith('serve') ? [`${e.side}|${e.player}`] : [])));
+    const better = [...servers].filter((k) => {
+      const [side, player] = k.split('|') as [Side, string];
+      return count(side, 'serve_ace', player) > count(side, 'serve_fault', player);
+    });
+    expect(better.length).toBeGreaterThanOrEqual(3);
+  });
+});
+
 describe('created on a fresh install', () => {
   it('teams, match, tournament — all marked as samples', async () => {
     expect(await createSampleDataIfEmpty({ ...FR, tournamentName: 'Tournoi d’exemple' })).toBe(true);

@@ -17,18 +17,17 @@ import type { Team } from '../../../src/models/team';
 import type { Player } from '../../../src/models/player';
 import type { PlayerStats } from '../../../src/models/stats';
 import {
-  serveEfficiency,
-  attackEfficiency,
-  receptionEfficiency,
-  servePositiveRate,
-  attackPositiveRate,
-  blockPositiveRate,
-  receptionPositiveRate,
-  defensePositiveRate,
-} from '../../../src/models/stats';
+  pointBreakdown,
+  playersByTeam,
+  pointsScored,
+  radarValues,
+  successRates,
+  sumStats,
+  SUMMARY_RADAR,
+  type PointBreakdown,
+} from '../../../src/features/match/summaryStats';
 import { getPlayerDisplayName } from '../../../src/features/players/player-helpers';
 import { RadarChart } from '../../../src/components/stats/RadarChart';
-import { GroupedBarChart } from '../../../src/components/stats/GroupedBarChart';
 import { palette } from '../../../src/theme/tokens';
 import { useInterstitialAd } from '../../../src/components/ads/useInterstitialAd';
 import { maybeRequestReview } from '../../../src/features/review/reviewPrompt';
@@ -113,31 +112,24 @@ export default function SummaryScreen() {
   // Quick match started from a tournament match QR: the organiser scans its result
   const resultQr = resultQrOf(match, homeTeam.name, awayTeam.name, sets);
 
-  const homePlayerIds = new Set(
-    players.filter((p) => p.teamId === match.teamHomeId).map((p) => p.id)
-  );
+  const homePlayers = players.filter((p) => p.teamId === match.teamHomeId);
+  const awayPlayers = players.filter((p) => p.teamId === match.teamAwayId);
+  const homeIds = new Set(homePlayers.map((p) => p.id));
+  const awayIds = new Set(awayPlayers.map((p) => p.id));
+  const homeTotals = sumStats(stats.filter((ps) => homeIds.has(ps.playerId)));
+  const awayTotals = sumStats(stats.filter((ps) => awayIds.has(ps.playerId)));
+  const groups = playersByTeam(stats, homePlayers, awayPlayers);
+  const hasPlayerStats = groups.length > 0;
 
-  function sumStat(ps: PlayerStats[], key: keyof PlayerStats): number {
-    return ps.reduce((acc, s) => acc + (s[key] as number), 0);
-  }
-
-  // Players with at least one recorded action (substitutions alone give empty stats)
-  const recorded = stats.filter(hasRecordedStats);
-  const homeStats = recorded.filter((ps) => homePlayerIds.has(ps.playerId));
-  const awayStats = recorded.filter((ps) => !homePlayerIds.has(ps.playerId));
-
-  const teamGroups = [
-    { label: t('stats.serve'), key: 'serveAce' as const },
-    { label: t('stats.attack'), key: 'attackKill' as const },
-    { label: t('stats.block'), key: 'blockKill' as const },
-  ].map(({ label, key }) => ({
-    label,
-    bars: [
-      { value: sumStat(homeStats, key), color: homeTeam.color },
-      { value: sumStat(awayStats, key), color: palette.teamAway },
-    ],
-  }));
-  const hasTeamChart = teamGroups.some((g) => g.bars.some((b) => b.value > 0));
+  // Team score over the sets shown (a stopped set counts with its points)
+  const homePoints = summary.sets.reduce((n, x) => n + x.scoreHome, 0);
+  const awayPoints = summary.sets.reduce((n, x) => n + x.scoreAway, 0);
+  const homeColor = homeTeam.color || palette.teamHome;
+  const awayColor = palette.teamAway;
+  const axes = [t('stats.serve'), t('stats.attack'), t('stats.block'), t('stats.reception'), t('stats.defense')];
+  const homeRadar = radarValues(homeTotals);
+  const awayRadar = radarValues(awayTotals);
+  const hasRadar = [...homeRadar, ...awayRadar].some((v) => v > 0);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -177,21 +169,37 @@ export default function SummaryScreen() {
         </View>
 
         <View style={styles.section}>
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>{t('stats.title')}</Text>
-            <View style={styles.legendRow}>
-              <View style={[styles.legendDot, { backgroundColor: homeTeam.color }]} />
-              <Text style={styles.legendText}>{homeTeam.name}</Text>
-              <View style={[styles.legendDot, { backgroundColor: palette.teamAway }]} />
-              <Text style={styles.legendText}>{awayTeam.name}</Text>
+          <Text style={styles.sectionTitle}>{t('summary.teamStats')}</Text>
+          <View style={styles.legendRow}>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendDot, { backgroundColor: homeColor }]} />
+              <Text style={styles.legendText} numberOfLines={1}>{homeTeam.name}</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendDot, { backgroundColor: awayColor }]} />
+              <Text style={styles.legendText} numberOfLines={1}>{awayTeam.name}</Text>
             </View>
           </View>
-          {hasTeamChart ? (
-            <View style={styles.barChartWrap}>
-              <GroupedBarChart groups={teamGroups} />
-            </View>
+          {hasPlayerStats ? (
+            <>
+              {hasRadar && (
+                <View style={styles.radarWrap}>
+                  <RadarChart
+                    metrics={axes.map((label) => ({ label, value: 0 }))}
+                    series={[{ values: homeRadar, color: homeColor }, { values: awayRadar, color: awayColor }]}
+                    size={SUMMARY_RADAR.width}
+                    height={SUMMARY_RADAR.height}
+                  />
+                </View>
+              )}
+              <Text style={styles.subTitle}>{t('summary.pointsBreakdown')}</Text>
+              <PointsTable
+                home={{ name: homeTeam.name, color: homeColor, breakdown: pointBreakdown(homePoints, homeTotals, awayTotals) }}
+                away={{ name: awayTeam.name, color: awayColor, breakdown: pointBreakdown(awayPoints, awayTotals, homeTotals) }}
+              />
+            </>
           ) : (
-            <Text style={styles.noStats}>{t('summary.noStats')}</Text>
+            <Text style={styles.noStats}>{t('summary.noTeamStats')}</Text>
           )}
         </View>
 
@@ -204,21 +212,23 @@ export default function SummaryScreen() {
           <Text style={styles.statsDetailBtnText}>{t('stats.detailed')}</Text>
         </Pressable>
 
-        {recorded.length > 0 && (
+        {hasPlayerStats && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t('stats.title')} — {t('player.position')}</Text>
-            {recorded.map((ps) => {
-              const player = players.find((p) => p.id === ps.playerId);
-              if (!player) return null;
-              const isHome = homePlayerIds.has(ps.playerId);
-              const teamColor = isHome ? homeTeam.color : palette.teamAway;
+            <Text style={styles.sectionTitle}>{t('summary.playerStats')}</Text>
+            <Text style={styles.ratesHint}>{t('summary.successRates')}</Text>
+            {groups.map((group) => {
+              const isHome = group.side === 'home';
+              const teamColor = isHome ? homeColor : awayColor;
               return (
-                <PlayerStatCard
-                  key={ps.playerId}
-                  player={player}
-                  stats={ps}
-                  teamColor={teamColor}
-                />
+                <View key={group.side}>
+                  <View style={styles.teamGroupHeader}>
+                    <View style={[styles.legendDot, { backgroundColor: teamColor }]} />
+                    <Text style={styles.teamGroupName} numberOfLines={1}>{isHome ? homeTeam.name : awayTeam.name}</Text>
+                  </View>
+                  {group.players.map(({ player, stats: ps }) => (
+                    <PlayerStatCard key={player.id} player={player} stats={ps} teamColor={teamColor} axes={axes} />
+                  ))}
+                </View>
               );
             })}
           </View>
@@ -250,28 +260,18 @@ function PlayerStatCard({
   player,
   stats,
   teamColor,
+  axes,
 }: {
   player: Player;
   stats: PlayerStats;
   teamColor: string;
+  axes: string[];
 }) {
   const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
-  const serveEff = serveEfficiency(stats);
-  const attackEff = attackEfficiency(stats);
-  const receptionEff = receptionEfficiency(stats);
-  const totalAces = stats.serveAce;
-  const totalKills = stats.attackKill + stats.blockKill;
-
-  const radarMetrics = [
-    { label: t('stats.serve'), value: servePositiveRate(stats) },
-    { label: t('stats.attack'), value: attackPositiveRate(stats) },
-    { label: t('stats.block'), value: blockPositiveRate(stats) },
-    { label: t('stats.reception'), value: receptionPositiveRate(stats) },
-    { label: t('stats.defense'), value: defensePositiveRate(stats) },
-  ];
-
-  const hasData = radarMetrics.some((m) => m.value > 0);
+  const rates = successRates(stats);
+  const values = radarValues(stats);
+  const hasData = values.some((v) => v > 0);
 
   return (
     <View style={styles.playerCard}>
@@ -283,27 +283,61 @@ function PlayerStatCard({
       </View>
 
       <View style={styles.playerCardBody}>
+        <View style={styles.statGrid}>
+          <StatCell label={t('stats.short.aces')} value={stats.serveAce} />
+          <StatCell label={t('stats.short.points')} value={pointsScored(stats)} />
+          <StatCell label={t('stats.short.serve')} value={rates.serve} suffix="%" />
+          <StatCell label={t('stats.short.attack')} value={rates.attack} suffix="%" />
+          <StatCell label={t('stats.short.reception')} value={rates.reception} suffix="%" />
+        </View>
         {hasData && (
           <View style={styles.radarWrap}>
-            <RadarChart metrics={radarMetrics} size={148} color={teamColor} />
+            <RadarChart
+              metrics={axes.map((label, i) => ({ label, value: values[i] }))}
+              size={SUMMARY_RADAR.width}
+              height={SUMMARY_RADAR.height}
+              color={teamColor}
+            />
           </View>
         )}
-
-        <View style={styles.statGrid}>
-          <StatCell label={t('stats.short.aces')} value={totalAces} />
-          <StatCell label={t('stats.short.points')} value={totalKills} />
-          <StatCell label={t('stats.short.serve')} value={serveEff} suffix="%" />
-          <StatCell label={t('stats.short.attack')} value={attackEff} suffix="%" />
-          <StatCell label={t('stats.short.reception')} value={receptionEff} suffix="%" />
-        </View>
       </View>
     </View>
   );
 }
 
-/** At least one counted action (any numeric total above 0). */
-function hasRecordedStats(ps: PlayerStats): boolean {
-  return Object.entries(ps).some(([k, v]) => k !== 'playerId' && typeof v === 'number' && v > 0);
+interface TeamPoints { name: string; color: string; breakdown: PointBreakdown }
+
+/** Attack, block, ace, opponent faults (and undetailed points): count and share, side by side. */
+function PointsTable({ home, away }: { home: TeamPoints; away: TeamPoints }) {
+  const styles = useThemedStyles(makeStyles);
+  const { t } = useTranslation();
+  const kinds = home.breakdown.rows.map((r) => r.kind);
+  for (const r of away.breakdown.rows) if (!kinds.includes(r.kind)) kinds.push(r.kind);
+  const cell = (team: TeamPoints, kind: string) => {
+    const row = team.breakdown.rows.find((r) => r.kind === kind);
+    return row ? `${row.count} (${row.percent} %)` : '0 (0 %)';
+  };
+  return (
+    <View style={styles.pointsTable}>
+      <View style={styles.pointsRow}>
+        <Text style={styles.pointsKind} />
+        <View style={[styles.pointsHead, { backgroundColor: home.color }]} />
+        <View style={[styles.pointsHead, { backgroundColor: away.color }]} />
+      </View>
+      {kinds.map((kind) => (
+        <View key={kind} style={styles.pointsRow}>
+          <Text style={styles.pointsKind} numberOfLines={2}>{t(`stats.pointTypes.${kind}`)}</Text>
+          <Text style={styles.pointsValue}>{cell(home, kind)}</Text>
+          <Text style={styles.pointsValue}>{cell(away, kind)}</Text>
+        </View>
+      ))}
+      <View style={[styles.pointsRow, styles.pointsTotalRow]}>
+        <Text style={[styles.pointsKind, styles.pointsTotal]}>{t('stats.total')}</Text>
+        <Text style={[styles.pointsValue, styles.pointsTotal]}>{home.breakdown.total}</Text>
+        <Text style={[styles.pointsValue, styles.pointsTotal]}>{away.breakdown.total}</Text>
+      </View>
+    </View>
+  );
 }
 
 function StatCell({ label, value, suffix = '' }: { label: string; value: number; suffix?: string }) {
@@ -385,10 +419,21 @@ const makeStyles = (a: AppTheme) => StyleSheet.create({
     borderBottomColor: a.backgroundElevated,
     paddingRight: 14,
   },
-  legendRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginLeft: 'auto' },
+  legendRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: 14, rowGap: 4, paddingHorizontal: 14, paddingBottom: 6 },
+  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6, maxWidth: '100%' },
+  subTitle: { fontSize: 12, fontFamily: 'Inter_600SemiBold', color: a.textSecondary, paddingHorizontal: 14, paddingTop: 8, paddingBottom: 4 },
+  ratesHint: { fontSize: 11, fontFamily: 'Inter_400Regular', color: a.textMuted, paddingHorizontal: 14, marginTop: -6, paddingBottom: 6 },
+  teamGroupHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingVertical: 8, backgroundColor: a.backgroundElevated },
+  teamGroupName: { flex: 1, fontSize: 13, fontFamily: 'Inter_700Bold', color: a.textPrimary },
+  pointsTable: { paddingHorizontal: 14, paddingBottom: 12 },
+  pointsRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 5, gap: 8 },
+  pointsHead: { flex: 1, height: 4, borderRadius: 2 },
+  pointsKind: { flex: 1.3, fontSize: 13, fontFamily: 'Inter_500Medium', color: a.textSecondary },
+  pointsValue: { flex: 1, fontSize: 13, fontFamily: 'Inter_600SemiBold', color: a.textPrimary, textAlign: 'center' },
+  pointsTotalRow: { borderTopWidth: 1, borderTopColor: a.backgroundElevated, marginTop: 2 },
+  pointsTotal: { fontFamily: 'Inter_700Bold', color: a.textPrimary },
   legendDot: { width: 8, height: 8, borderRadius: 4 },
   legendText: { fontSize: 11, fontFamily: 'Inter_500Medium', color: a.textSecondary },
-  barChartWrap: { paddingHorizontal: 8, paddingTop: 8 },
   noStats: {
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
@@ -431,14 +476,13 @@ const makeStyles = (a: AppTheme) => StyleSheet.create({
   playerTeamBar: { width: 3, height: 20, borderRadius: 2 },
   playerStatName: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: a.textPrimary },
   playerCardBody: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'stretch',
     paddingHorizontal: 14,
     paddingBottom: 12,
     gap: 12,
   },
   radarWrap: { alignItems: 'center', justifyContent: 'center' },
-  statGrid: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  statGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 8 },
   statCell: { minWidth: 48, alignItems: 'center' },
   statCellValue: { fontSize: 18, fontFamily: 'Inter_700Bold', color: a.textPrimary },
   statCellLabel: {

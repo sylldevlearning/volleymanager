@@ -58,7 +58,11 @@
     "stoppedHint": "Zakończony przed czasem: brak zwycięzcy.",
     "setNumber": "Set {{n}}",
     "setStopped": "Set {{n}} (przerwany)",
-    "noStats": "W tym meczu nie zapisano statystyk zawodników."
+    "teamStats": "Statystyki drużyn",
+    "playerStats": "Statystyki zawodników",
+    "pointsBreakdown": "Podział punktów",
+    "successRates": "% = skuteczność: zagrywki bez błędu, skończone ataki, przyjęcia A + B.",
+    "noTeamStats": "Nie zapisano statystyk zawodników: podział punktów nie jest dostępny dla tego meczu."
   },
   "match": {
     "new": "Nowy mecz",
@@ -408,7 +412,8 @@
       "attack": "Atak",
       "block": "Blok",
       "ace": "As",
-      "opponentFault": "Błąd rywala"
+      "opponentFault": "Błąd rywala",
+      "unspecified": "Nieokreślone"
     },
     "noData": "Brak statystyk",
     "noMatches": "Brak rozegranych meczów",
@@ -671,7 +676,7 @@
     "teams": "Dotknij drużyny, aby zobaczyć jej zawodników i nimi zarządzać. + tworzy drużynę.",
     "team": "+ dodaje zawodnika: wymagany jest tylko numer. Przycisk skanera importuje zawodników ze zdjęcia licencji. Wykres: statystyki zawodnika; kosz: usunięcie.",
     "newMatch": "Wybierz drużyny, format, tryb i kto zagrywa pierwszy. Zasady (sety, punkty, czasy, zmiany) można dostosować.",
-    "stats": "Porównaj obie drużyny element po elemencie, zobacz najlepszych zawodników i jak zdobyto punkty. Dotknij zawodnika, aby zobaczyć szczegóły.",
+    "stats": "Porównaj obie drużyny element po elemencie, zobacz najlepszych zawodników i jak zdobyto punkty. Dotknij zawodnika, aby zobaczyć szczegóły. Efektywność = (punkty − błędy) ÷ próby: może być ujemna, gdy błędów jest więcej niż punktów.",
     "history": "Dotknij meczu, aby go wznowić lub zobaczyć podsumowanie; przytrzymaj, aby usunąć. Filtruj według stanu lub drużyny.",
     "settings": "Zmień język, włącz wibracje i obejrzyj ponownie pomoc aplikacji. Domyślnie aplikacja używa języka telefonu; możesz wybrać inny spośród 11 języków.",
     "substitution": "Wybierz, kto schodzi, potem kto wchodzi. Libero ⚡ nie wlicza się do limitu zmian.",

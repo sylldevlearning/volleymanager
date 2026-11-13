@@ -33,6 +33,14 @@ export interface SampleSet {
 
 export const keyOf = (side: Side, number: number) => `${side}:${number}`;
 
+/** Serve outcome rates, tuned for a believable match: a few aces, the hard servers above their faults */
+const ACE_STRONG = 0.3;
+const FAULT_STRONG = 0.1;
+const ACE_STEADY = 0.07;
+const FAULT_STEADY = 0.15;
+/** Block points per team over the match, spread over the points it wins */
+const BLOCK_TARGET = 9;
+
 const other = (side: Side): Side => (side === 'home' ? 'away' : 'home');
 
 /** Rally winners in order: the set winner takes the last point, never reached before. */
@@ -67,6 +75,18 @@ export function buildSampleSets(teams: Record<Side, SampleTeam>, plans: SampleSe
   const positionOf = (side: Side, number: number) => teams[side].players.find((p) => p.number === number)!.position;
   const liberoOf = (side: Side) => keyOf(side, teams[side].players.find((p) => p.position === 'libero')!.number);
   const numberOf = (key: string) => Number(key.split(':')[1]);
+  // The captain and the opposite serve hard: more aces than faults; the others are steadier
+  const isStrongServer = (side: Side, key: string) => {
+    const n = numberOf(key);
+    return n === teams[side].captain || positionOf(side, n) === 'opposite';
+  };
+
+  // Block points come from a quota: about the same number each time, whatever the draw
+  const pointsLeft: Record<Side, number> = {
+    home: plans.reduce((n, p) => n + p.home, 0),
+    away: plans.reduce((n, p) => n + p.away, 0),
+  };
+  const blocksLeft: Record<Side, number> = { home: BLOCK_TARGET, away: BLOCK_TARGET };
 
   return plans.map((plan, index) => {
     const lineup: Record<Side, CourtMap> = { home: {}, away: {} };
@@ -123,9 +143,10 @@ export function buildSampleSets(teams: Record<Side, SampleTeam>, plans: SampleSe
       const receiving = other(serving);
       const server = state[serving].onCourt[1];
       const roll = rng();
-      if (roll < 0.08 && winner === serving) {
+      const [aceRate, faultRate] = isStrongServer(serving, server) ? [ACE_STRONG, FAULT_STRONG] : [ACE_STEADY, FAULT_STEADY];
+      if (roll < aceRate && winner === serving) {
         events.push({ kind: 'stat', type: 'serve_ace', side: serving, player: server });
-      } else if (roll < 0.14 && winner === receiving) {
+      } else if (roll < faultRate && winner === receiving) {
         events.push({ kind: 'stat', type: 'serve_fault', side: serving, player: server });
       } else {
         events.push({ kind: 'stat', type: 'serve_in', side: serving, player: server });
@@ -136,11 +157,13 @@ export function buildSampleSets(teams: Record<Side, SampleTeam>, plans: SampleSe
         const attackers = onCourtAt(winner, [2, 3, 4], ['outside', 'opposite', 'middle']);
         const blockers = onCourtAt(winner, [2, 3, 4], ['middle', 'opposite', 'outside']);
         const loserAttackers = onCourtAt(other(winner), [2, 3, 4], ['outside', 'opposite', 'middle']);
+        const blockChance = blocksLeft[winner] / Math.max(1, pointsLeft[winner]);
         const r = rng();
-        if (r < 0.62 && attackers.length) {
-          events.push({ kind: 'stat', type: 'attack_kill', side: winner, player: pick(attackers) });
-        } else if (r < 0.78 && blockers.length) {
+        if (r < blockChance && blockers.length) {
           events.push({ kind: 'stat', type: 'block_kill', side: winner, player: pick(blockers) });
+          blocksLeft[winner]--;
+        } else if (r < blockChance + (1 - blockChance) * 0.8 && attackers.length) {
+          events.push({ kind: 'stat', type: 'attack_kill', side: winner, player: pick(attackers) });
         } else if (loserAttackers.length) {
           events.push({ kind: 'stat', type: 'attack_fault', side: other(winner), player: pick(loserAttackers) });
         }
@@ -150,6 +173,7 @@ export function buildSampleSets(teams: Record<Side, SampleTeam>, plans: SampleSe
 
       events.push({ kind: 'point', side: winner });
       score[winner]++;
+      pointsLeft[winner]--;
       if (winner !== serving) {
         const { state: next, autoExit } = rotateSideOnSideOut(winner, state[winner]);
         state[winner] = next;

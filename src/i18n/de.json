@@ -58,7 +58,11 @@
     "stoppedHint": "Vorzeitig beendet: kein Sieger.",
     "setNumber": "Satz {{n}}",
     "setStopped": "Satz {{n}} (abgebrochen)",
-    "noStats": "Für dieses Spiel wurden keine Spielerstatistiken erfasst."
+    "teamStats": "Statistik pro Team",
+    "playerStats": "Statistik pro Spieler",
+    "pointsBreakdown": "Verteilung der Punkte",
+    "successRates": "% = Erfolgsquote: Aufschläge ohne Fehler, erfolgreiche Angriffe, Annahmen A + B.",
+    "noTeamStats": "Keine Spielerstatistik erfasst: Die Punkte sind für dieses Spiel nicht aufgeschlüsselt."
   },
   "match": {
     "new": "Neues Spiel",
@@ -404,7 +408,8 @@
       "attack": "Angriff",
       "block": "Block",
       "ace": "Ass",
-      "opponentFault": "Fehler des Gegners"
+      "opponentFault": "Fehler des Gegners",
+      "unspecified": "Nicht angegeben"
     },
     "noData": "Keine Statistik verfügbar",
     "noMatches": "Noch keine Spiele",
@@ -661,7 +666,7 @@
     "teams": "Tippe auf ein Team, um seine Spieler zu sehen und zu verwalten. + legt ein Team an.",
     "team": "+ fügt einen Spieler hinzu: nur die Nummer ist Pflicht. Der Scanner-Knopf importiert Spieler aus einem Passfoto. Diagramm: Spielerstatistik; Mülleimer: löschen.",
     "newMatch": "Wähle die Teams, das Format, den Modus und wer zuerst aufschlägt. Die Regeln (Sätze, Punkte, Auszeiten, Wechsel) lassen sich anpassen.",
-    "stats": "Vergleiche beide Teams Element für Element, sieh die besten Spieler und wie die Punkte entstanden sind. Tippe auf einen Spieler für Details.",
+    "stats": "Vergleiche beide Teams Element für Element, sieh die besten Spieler und wie die Punkte entstanden sind. Tippe auf einen Spieler für Details. Effizienz = (Punkte − Fehler) ÷ Versuche: Sie kann negativ sein, wenn es mehr Fehler als Punkte gibt.",
     "history": "Tippe auf ein Spiel, um es fortzusetzen oder die Übersicht zu sehen; lange drücken zum Löschen. Filtere nach Status oder Team.",
     "settings": "Ändere die Sprache, schalte die Vibration ein und sieh dir die Hilfe der App erneut an. Standardmäßig folgt die App der Sprache des Handys; du kannst eine von 11 Sprachen wählen.",
     "substitution": "Wähle, wer rausgeht, dann wer reinkommt. Der Libero ⚡ zählt nicht zum Wechselkontingent.",

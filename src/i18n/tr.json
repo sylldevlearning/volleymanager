@@ -58,7 +58,11 @@
     "stoppedHint": "Erken bitirildi: kazanan yok.",
     "setNumber": "{{n}}. set",
     "setStopped": "{{n}}. set (durduruldu)",
-    "noStats": "Bu maç için oyuncu istatistiği girilmedi."
+    "teamStats": "Takım istatistikleri",
+    "playerStats": "Oyuncu istatistikleri",
+    "pointsBreakdown": "Sayıların dağılımı",
+    "successRates": "% = başarı oranı: hatasız servisler, sayı getiren hücumlar, A + B karşılamalar.",
+    "noTeamStats": "Oyuncu istatistiği girilmedi: bu maç için sayıların dağılımı yok."
   },
   "match": {
     "new": "Yeni maç",
@@ -404,7 +408,8 @@
       "attack": "Hücum",
       "block": "Blok",
       "ace": "As",
-      "opponentFault": "Rakip hatası"
+      "opponentFault": "Rakip hatası",
+      "unspecified": "Belirtilmemiş"
     },
     "noData": "İstatistik yok",
     "noMatches": "Oynanmış maç yok",
@@ -661,7 +666,7 @@
     "teams": "Oyuncularını görmek ve yönetmek için bir takıma dokun. Takım oluşturmak için +.",
     "team": "+ oyuncu ekler: yalnızca numara zorunlu. Tarayıcı düğmesi lisans fotoğrafından oyuncu aktarır. Grafik: oyuncu istatistikleri; çöp kutusu: sil.",
     "newMatch": "Takımları, biçimi, modu ve ilk servisi kimin atacağını seç. Kurallar (setler, sayılar, molalar, değişiklikler) ayarlanabilir.",
-    "stats": "İki takımı beceri beceri karşılaştır, en iyi oyuncuları ve sayıların nasıl alındığını gör. Ayrıntılar için bir oyuncuya dokun.",
+    "stats": "İki takımı beceri beceri karşılaştır, en iyi oyuncuları ve sayıların nasıl alındığını gör. Ayrıntılar için bir oyuncuya dokun. Verimlilik = (sayılar − hatalar) ÷ denemeler: hatalar sayılardan fazlaysa negatif olabilir.",
     "history": "Devam etmek veya özetini görmek için bir maça dokun; silmek için uzun bas. Duruma veya takıma göre filtrele.",
     "settings": "Dili değiştir, titreşimi aç ve uygulama yardımını yeniden gör. Uygulama varsayılan olarak telefonun dilini kullanır; 11 dil arasından başka birini seçebilirsin.",
     "substitution": "Önce kimin çıkacağını, sonra kimin gireceğini seç. Libero ⚡ değişiklik sınırına sayılmaz.",
