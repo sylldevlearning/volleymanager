@@ -53,7 +53,12 @@
     "settings": "Impostazioni"
   },
   "summary": {
-    "backToMenu": "Torna al menu"
+    "backToMenu": "Torna al menu",
+    "stopped": "Partita interrotta",
+    "stoppedHint": "Terminata prima della fine: nessun vincitore.",
+    "setNumber": "Set {{n}}",
+    "setStopped": "Set {{n}} (interrotto)",
+    "noStats": "Nessuna statistica dei giocatori registrata per questa partita."
   },
   "match": {
     "new": "Nuova partita",
@@ -405,7 +410,14 @@
     "noMatches": "Nessuna partita giocata",
     "setEndStats": "Inserisci le statistiche dell'ultimo punto",
     "aces_one": "{{count}} ace",
-    "aces_other": "{{count}} ace"
+    "aces_other": "{{count}} ace",
+    "short": {
+      "aces": "Ace",
+      "points": "Punti",
+      "serve": "Batt. %",
+      "attack": "Att. %",
+      "reception": "Ric. %"
+    }
   },
   "history": {
     "title": "Storico",

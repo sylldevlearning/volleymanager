@@ -53,7 +53,12 @@
     "settings": "设置"
   },
   "summary": {
-    "backToMenu": "返回菜单"
+    "backToMenu": "返回菜单",
+    "stopped": "比赛已中止",
+    "stoppedHint": "提前结束：没有胜者。",
+    "setNumber": "第{{n}}局",
+    "setStopped": "第{{n}}局（中止）",
+    "noStats": "本场比赛未记录球员统计。"
   },
   "match": {
     "new": "新比赛",
@@ -405,7 +410,14 @@
     "noMatches": "暂无比赛",
     "setEndStats": "录入最后一分的数据",
     "aces_one": "{{count}} 个发球得分",
-    "aces_other": "{{count}} 个发球得分"
+    "aces_other": "{{count}} 个发球得分",
+    "short": {
+      "aces": "ACE",
+      "points": "得分",
+      "serve": "发球%",
+      "attack": "进攻%",
+      "reception": "一传%"
+    }
   },
   "history": {
     "title": "历史",

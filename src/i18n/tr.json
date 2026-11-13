@@ -53,7 +53,12 @@
     "settings": "Ayarlar"
   },
   "summary": {
-    "backToMenu": "Menüye dön"
+    "backToMenu": "Menüye dön",
+    "stopped": "Maç durduruldu",
+    "stoppedHint": "Erken bitirildi: kazanan yok.",
+    "setNumber": "{{n}}. set",
+    "setStopped": "{{n}}. set (durduruldu)",
+    "noStats": "Bu maç için oyuncu istatistiği girilmedi."
   },
   "match": {
     "new": "Yeni maç",
@@ -405,7 +410,14 @@
     "noMatches": "Oynanmış maç yok",
     "setEndStats": "Son sayının istatistiklerini gir",
     "aces_one": "{{count}} as",
-    "aces_other": "{{count}} as"
+    "aces_other": "{{count}} as",
+    "short": {
+      "aces": "As",
+      "points": "Sayı",
+      "serve": "Servis %",
+      "attack": "Hücum %",
+      "reception": "Karş. %"
+    }
   },
   "history": {
     "title": "Geçmiş",

@@ -11,6 +11,7 @@ import * as Haptics from 'expo-haptics';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 
 import { getMatchById, createSet, getSetsForMatch, updateSet, updateMatchStatus } from '../../../src/services/matchService';
+import { stopMatch } from '../../../src/services/stopMatchService';
 import { addEvent, addDirectPointCorrection } from '../../../src/services/eventService';
 import { getPlayersByTeam } from '../../../src/services/playerService';
 import { recordSubstitution } from '../../../src/features/match/recordSubstitution';
@@ -403,7 +404,7 @@ export default function RefereeScreen() {
         style: 'destructive',
         onPress: async () => {
           if (match) {
-            await updateMatchStatus(match.id, 'finished');
+            await stopMatch(match.id);
             router.replace(`/match/${match.id}/summary`);
           }
         },

@@ -12,6 +12,7 @@ const BALL_IMG = require('../../../assets/images/ballon.png');
 const SERVE_BALL_OFFSET = 34;
 
 import { getMatchById, createSet, updateSet, updateMatchStatus, setMatchRefereeState, setFirstServeTeam } from '../../../src/services/matchService';
+import { stopMatch } from '../../../src/services/stopMatchService';
 import { addEvent, undoLastEvent } from '../../../src/services/eventService';
 import { getPlayersByTeam } from '../../../src/services/playerService';
 import { performSubstitution } from '../../../src/services/substitutionService';
@@ -644,7 +645,7 @@ export default function ArbitrageScreen() {
         style: 'destructive',
         onPress: async () => {
           if (match) {
-            await updateMatchStatus(match.id, 'finished');
+            await stopMatch(match.id);
             router.replace(`/match/${match.id}/summary`);
           }
         },

@@ -205,7 +205,8 @@ export function quickMatchConfig(qr: MatchQr): MatchConfig {
 /** Result QR of a finished quick match started from a tournament match QR (null otherwise). */
 export function resultQrOf(match: Match, homeName: string, awayName: string, sets: MatchSet[]): ResultQr | null {
   const ref = match.config.tournamentRef;
-  if (!ref || match.status !== 'finished') return null;
+  // A stopped match (no winner) has no result to give the organiser
+  if (!ref || match.status !== 'finished' || !match.winnerTeamId) return null;
   const played = sets
     .filter((s) => s.winnerTeamId !== null)
     .sort((x, y) => x.setNumber - y.setNumber)

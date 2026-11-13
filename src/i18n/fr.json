@@ -53,7 +53,12 @@
     "settings": "Paramètres"
   },
   "summary": {
-    "backToMenu": "Retour au menu"
+    "backToMenu": "Retour au menu",
+    "stopped": "Match arrêté",
+    "stoppedHint": "Terminé avant la fin : pas de vainqueur.",
+    "setNumber": "Set {{n}}",
+    "setStopped": "Set {{n}} (arrêté)",
+    "noStats": "Aucune statistique de joueur saisie pour ce match."
   },
   "match": {
     "new": "Nouveau match",
@@ -405,7 +410,14 @@
     "noMatches": "Aucun match joué",
     "setEndStats": "Saisissez les stats du dernier point",
     "aces_one": "{{count}} ace",
-    "aces_other": "{{count}} aces"
+    "aces_other": "{{count}} aces",
+    "short": {
+      "aces": "Aces",
+      "points": "Pts",
+      "serve": "Serv. %",
+      "attack": "Att. %",
+      "reception": "Réc. %"
+    }
   },
   "history": {
     "title": "Historique",

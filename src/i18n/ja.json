@@ -53,7 +53,12 @@
     "settings": "設定"
   },
   "summary": {
-    "backToMenu": "メニューに戻る"
+    "backToMenu": "メニューに戻る",
+    "stopped": "試合中断",
+    "stoppedHint": "途中で終了したため、勝者はいません。",
+    "setNumber": "第{{n}}セット",
+    "setStopped": "第{{n}}セット（中断）",
+    "noStats": "この試合では選手の統計が記録されていません。"
   },
   "match": {
     "new": "新しい試合",
@@ -405,7 +410,14 @@
     "noMatches": "試合がありません",
     "setEndStats": "最後の得点の統計を入力",
     "aces_one": "エース {{count}}本",
-    "aces_other": "エース {{count}}本"
+    "aces_other": "エース {{count}}本",
+    "short": {
+      "aces": "エース",
+      "points": "得点",
+      "serve": "サーブ%",
+      "attack": "アタック%",
+      "reception": "レセプ%"
+    }
   },
   "history": {
     "title": "履歴",

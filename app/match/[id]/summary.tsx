@@ -9,6 +9,8 @@ import { Trophy, BarChart2 } from 'lucide-react-native';
 import { getMatchById, getSetsForMatch } from '../../../src/services/matchService';
 import { getTeamById } from '../../../src/services/teamService';
 import { getPlayerStatsForMatch } from '../../../src/services/statsService';
+import { computeScore, getEventsForSet } from '../../../src/services/eventService';
+import { summarizeMatch } from '../../../src/features/match/matchSummary';
 import { getPlayersByTeam } from '../../../src/services/playerService';
 import type { Match, MatchSet } from '../../../src/models/match';
 import type { Team } from '../../../src/models/team';
@@ -26,7 +28,7 @@ import {
 } from '../../../src/models/stats';
 import { getPlayerDisplayName } from '../../../src/features/players/player-helpers';
 import { RadarChart } from '../../../src/components/stats/RadarChart';
-import { BarChart } from '../../../src/components/stats/BarChart';
+import { GroupedBarChart } from '../../../src/components/stats/GroupedBarChart';
 import { palette } from '../../../src/theme/tokens';
 import { useInterstitialAd } from '../../../src/components/ads/useInterstitialAd';
 import { maybeRequestReview } from '../../../src/features/review/reviewPrompt';
@@ -47,6 +49,7 @@ export default function SummaryScreen() {
   const [awayTeam, setAwayTeam] = useState<Team | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [stats, setStats] = useState<PlayerStats[]>([]);
+  const [liveScores, setLiveScores] = useState<Record<string, { home: number; away: number }>>({});
 
   const { show } = useInterstitialAd();
   const hasShownAd = useRef(false);
@@ -73,6 +76,12 @@ export default function SummaryScreen() {
       if (!m) return;
       setMatch(m);
       setSets(s);
+      // Sets without a winner (match stopped mid-set): their points come from the events
+      const live: Record<string, { home: number; away: number }> = {};
+      for (const set of s.filter((x) => !x.winnerTeamId)) {
+        live[set.id] = computeScore(await getEventsForSet(id, set.id));
+      }
+      setLiveScores(live);
 
       const [home, away, ps, homePlayers, awayPlayers] = await Promise.all([
         getTeamById(m.teamHomeId),
@@ -97,9 +106,10 @@ export default function SummaryScreen() {
     );
   }
 
-  const setsHome = sets.filter((s) => s.winnerTeamId === match.teamHomeId).length;
-  const setsAway = sets.filter((s) => s.winnerTeamId === match.teamAwayId).length;
-  const winner = match.winnerTeamId === match.teamHomeId ? homeTeam : awayTeam;
+  const summary = summarizeMatch(match, sets, liveScores);
+  const { setsHome, setsAway } = summary;
+  const winner = summary.winnerTeamId === match.teamHomeId ? homeTeam
+    : summary.winnerTeamId === match.teamAwayId ? awayTeam : null;
   // Quick match started from a tournament match QR: the organiser scans its result
   const resultQr = resultQrOf(match, homeTeam.name, awayTeam.name, sets);
 
@@ -111,22 +121,23 @@ export default function SummaryScreen() {
     return ps.reduce((acc, s) => acc + (s[key] as number), 0);
   }
 
-  const homeStats = stats.filter((ps) => homePlayerIds.has(ps.playerId));
-  const awayStats = stats.filter((ps) => !homePlayerIds.has(ps.playerId));
-  const showTeamComparison = homeStats.length > 0 || awayStats.length > 0;
+  // Players with at least one recorded action (substitutions alone give empty stats)
+  const recorded = stats.filter(hasRecordedStats);
+  const homeStats = recorded.filter((ps) => homePlayerIds.has(ps.playerId));
+  const awayStats = recorded.filter((ps) => !homePlayerIds.has(ps.playerId));
 
-  const teamBarData = showTeamComparison
-    ? [
-        { label: t('stats.serveAce'), value: sumStat(homeStats, 'serveAce'), color: homeTeam.color },
-        { label: t('stats.serveAce'), value: sumStat(awayStats, 'serveAce'), color: palette.teamAway },
-        { label: '', value: 0, color: 'transparent' },
-        { label: t('stats.attackKill'), value: sumStat(homeStats, 'attackKill'), color: homeTeam.color },
-        { label: t('stats.attackKill'), value: sumStat(awayStats, 'attackKill'), color: palette.teamAway },
-        { label: '', value: 0, color: 'transparent' },
-        { label: t('stats.blockKill'), value: sumStat(homeStats, 'blockKill'), color: homeTeam.color },
-        { label: t('stats.blockKill'), value: sumStat(awayStats, 'blockKill'), color: palette.teamAway },
-      ]
-    : [];
+  const teamGroups = [
+    { label: t('stats.serve'), key: 'serveAce' as const },
+    { label: t('stats.attack'), key: 'attackKill' as const },
+    { label: t('stats.block'), key: 'blockKill' as const },
+  ].map(({ label, key }) => ({
+    label,
+    bars: [
+      { value: sumStat(homeStats, key), color: homeTeam.color },
+      { value: sumStat(awayStats, key), color: palette.teamAway },
+    ],
+  }));
+  const hasTeamChart = teamGroups.some((g) => g.bars.some((b) => b.value > 0));
 
   return (
     <SafeAreaView style={styles.container}>
@@ -136,6 +147,12 @@ export default function SummaryScreen() {
             <Trophy size={28} color={colors.warning} />
             <Text style={styles.winnerLabel}>{t('match.winner')}</Text>
             <Text style={styles.winnerName}>{winner.name}</Text>
+          </View>
+        )}
+        {summary.stopped && (
+          <View style={styles.stoppedBanner}>
+            <Text style={styles.stoppedTitle}>{t('summary.stopped')}</Text>
+            <Text style={styles.stoppedHint}>{t('summary.stoppedHint')}</Text>
           </View>
         )}
 
@@ -149,35 +166,34 @@ export default function SummaryScreen() {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('match.sets')}</Text>
-          {sets.map((set) => (
+          {summary.sets.map((set) => (
             <View key={set.id} style={styles.setRow}>
-              <Text style={styles.setNum}>Set {set.setNumber}</Text>
+              <Text style={styles.setNum}>
+                {t(set.stopped ? 'summary.setStopped' : 'summary.setNumber', { n: set.setNumber })}
+              </Text>
               <Text style={styles.setScore}>{set.scoreHome} — {set.scoreAway}</Text>
             </View>
           ))}
         </View>
 
-        {showTeamComparison && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeaderRow}>
-              <Text style={styles.sectionTitle}>{t('stats.title')}</Text>
-              <View style={styles.legendRow}>
-                <View style={[styles.legendDot, { backgroundColor: homeTeam.color }]} />
-                <Text style={styles.legendText}>{homeTeam.name}</Text>
-                <View style={[styles.legendDot, { backgroundColor: palette.teamAway }]} />
-                <Text style={styles.legendText}>{awayTeam.name}</Text>
-              </View>
-            </View>
-            <View style={styles.barChartWrap}>
-              <BarChart data={teamBarData} height={120} />
-            </View>
-            <View style={styles.barLabelRow}>
-              <Text style={styles.barGroupLabel}>{t('stats.serve')}</Text>
-              <Text style={styles.barGroupLabel}>{t('stats.attack')}</Text>
-              <Text style={styles.barGroupLabel}>{t('stats.block')}</Text>
+        <View style={styles.section}>
+          <View style={styles.sectionHeaderRow}>
+            <Text style={styles.sectionTitle}>{t('stats.title')}</Text>
+            <View style={styles.legendRow}>
+              <View style={[styles.legendDot, { backgroundColor: homeTeam.color }]} />
+              <Text style={styles.legendText}>{homeTeam.name}</Text>
+              <View style={[styles.legendDot, { backgroundColor: palette.teamAway }]} />
+              <Text style={styles.legendText}>{awayTeam.name}</Text>
             </View>
           </View>
-        )}
+          {hasTeamChart ? (
+            <View style={styles.barChartWrap}>
+              <GroupedBarChart groups={teamGroups} />
+            </View>
+          ) : (
+            <Text style={styles.noStats}>{t('summary.noStats')}</Text>
+          )}
+        </View>
 
         <Pressable
           style={({ pressed }) => [styles.statsDetailBtn, pressed && { opacity: 0.75 }]}
@@ -188,10 +204,10 @@ export default function SummaryScreen() {
           <Text style={styles.statsDetailBtnText}>{t('stats.detailed')}</Text>
         </Pressable>
 
-        {stats.length > 0 && (
+        {recorded.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{t('stats.title')} — {t('player.position')}</Text>
-            {stats.map((ps) => {
+            {recorded.map((ps) => {
               const player = players.find((p) => p.id === ps.playerId);
               if (!player) return null;
               const isHome = homePlayerIds.has(ps.playerId);
@@ -274,15 +290,20 @@ function PlayerStatCard({
         )}
 
         <View style={styles.statGrid}>
-          <StatCell label="Ace" value={totalAces} />
-          <StatCell label="Kill" value={totalKills} />
-          <StatCell label="Srv%" value={serveEff} suffix="%" />
-          <StatCell label="Atk%" value={attackEff} suffix="%" />
-          <StatCell label="Rec%" value={receptionEff} suffix="%" />
+          <StatCell label={t('stats.short.aces')} value={totalAces} />
+          <StatCell label={t('stats.short.points')} value={totalKills} />
+          <StatCell label={t('stats.short.serve')} value={serveEff} suffix="%" />
+          <StatCell label={t('stats.short.attack')} value={attackEff} suffix="%" />
+          <StatCell label={t('stats.short.reception')} value={receptionEff} suffix="%" />
         </View>
       </View>
     </View>
   );
+}
+
+/** At least one counted action (any numeric total above 0). */
+function hasRecordedStats(ps: PlayerStats): boolean {
+  return Object.entries(ps).some(([k, v]) => k !== 'playerId' && typeof v === 'number' && v > 0);
 }
 
 function StatCell({ label, value, suffix = '' }: { label: string; value: number; suffix?: string }) {
@@ -368,19 +389,23 @@ const makeStyles = (a: AppTheme) => StyleSheet.create({
   legendDot: { width: 8, height: 8, borderRadius: 4 },
   legendText: { fontSize: 11, fontFamily: 'Inter_500Medium', color: a.textSecondary },
   barChartWrap: { paddingHorizontal: 8, paddingTop: 8 },
-  barLabelRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingHorizontal: 8,
-    paddingBottom: 12,
-  },
-  barGroupLabel: {
-    fontSize: 10,
-    fontFamily: 'Inter_600SemiBold',
+  noStats: {
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
     color: a.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    padding: 14,
   },
+  stoppedBanner: {
+    backgroundColor: a.backgroundSurface,
+    borderWidth: 1,
+    borderColor: a.backgroundElevated,
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'center',
+    gap: 6,
+  },
+  stoppedTitle: { fontSize: 20, fontFamily: 'Inter_700Bold', color: a.textPrimary },
+  stoppedHint: { fontSize: 13, fontFamily: 'Inter_400Regular', color: a.textSecondary, textAlign: 'center' },
   setRow: {
     flexDirection: 'row',
     alignItems: 'center',

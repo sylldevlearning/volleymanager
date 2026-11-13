@@ -53,7 +53,12 @@
     "settings": "Настройки"
   },
   "summary": {
-    "backToMenu": "В меню"
+    "backToMenu": "В меню",
+    "stopped": "Матч остановлен",
+    "stoppedHint": "Завершён досрочно: без победителя.",
+    "setNumber": "Партия {{n}}",
+    "setStopped": "Партия {{n}} (остановлена)",
+    "noStats": "Статистика игроков для этого матча не вводилась."
   },
   "match": {
     "new": "Новый матч",
@@ -411,7 +416,14 @@
     "aces_one": "{{count}} эйс",
     "aces_few": "{{count}} эйса",
     "aces_many": "{{count}} эйсов",
-    "aces_other": "{{count}} эйса"
+    "aces_other": "{{count}} эйса",
+    "short": {
+      "aces": "Эйсы",
+      "points": "Очки",
+      "serve": "Подача %",
+      "attack": "Атака %",
+      "reception": "Приём %"
+    }
   },
   "history": {
     "title": "История",

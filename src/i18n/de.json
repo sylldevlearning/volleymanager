@@ -53,7 +53,12 @@
     "settings": "Einstellungen"
   },
   "summary": {
-    "backToMenu": "Zum Menü"
+    "backToMenu": "Zum Menü",
+    "stopped": "Spiel abgebrochen",
+    "stoppedHint": "Vorzeitig beendet: kein Sieger.",
+    "setNumber": "Satz {{n}}",
+    "setStopped": "Satz {{n}} (abgebrochen)",
+    "noStats": "Für dieses Spiel wurden keine Spielerstatistiken erfasst."
   },
   "match": {
     "new": "Neues Spiel",
@@ -405,7 +410,14 @@
     "noMatches": "Noch keine Spiele",
     "setEndStats": "Statistik zum letzten Punkt eingeben",
     "aces_one": "{{count}} Ass",
-    "aces_other": "{{count}} Asse"
+    "aces_other": "{{count}} Asse",
+    "short": {
+      "aces": "Asse",
+      "points": "Pkt.",
+      "serve": "Aufschl. %",
+      "attack": "Angr. %",
+      "reception": "Ann. %"
+    }
   },
   "history": {
     "title": "Verlauf",

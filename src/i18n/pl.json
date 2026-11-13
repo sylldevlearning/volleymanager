@@ -53,7 +53,12 @@
     "settings": "Ustawienia"
   },
   "summary": {
-    "backToMenu": "Wróć do menu"
+    "backToMenu": "Wróć do menu",
+    "stopped": "Mecz przerwany",
+    "stoppedHint": "Zakończony przed czasem: brak zwycięzcy.",
+    "setNumber": "Set {{n}}",
+    "setStopped": "Set {{n}} (przerwany)",
+    "noStats": "W tym meczu nie zapisano statystyk zawodników."
   },
   "match": {
     "new": "Nowy mecz",
@@ -411,7 +416,14 @@
     "aces_one": "{{count}} as",
     "aces_few": "{{count}} asy",
     "aces_many": "{{count}} asów",
-    "aces_other": "{{count}} asa"
+    "aces_other": "{{count}} asa",
+    "short": {
+      "aces": "Asy",
+      "points": "Pkt",
+      "serve": "Zagr. %",
+      "attack": "Atak %",
+      "reception": "Przyj. %"
+    }
   },
   "history": {
     "title": "Historia",

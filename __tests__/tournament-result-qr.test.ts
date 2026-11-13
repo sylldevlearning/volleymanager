@@ -70,7 +70,7 @@ describe('result QR (referee → organiser)', () => {
 
   describe('made by the referee at the end of the quick match', () => {
     const quick = (patch: Partial<Match>) => ({
-      id: 'q', status: 'finished', teamHomeId: 'h', teamAwayId: 'a',
+      id: 'q', status: 'finished', teamHomeId: 'h', teamAwayId: 'a', winnerTeamId: 'h',
       config: quickMatchConfig(matchQr), ...patch,
     }) as Match;
     const set = (setNumber: number, scoreHome: number, scoreAway: number, winnerTeamId: string | null): MatchSet => ({
@@ -86,6 +86,10 @@ describe('result QR (referee → organiser)', () => {
     it('nothing before the end, nor for a match not started from a tournament QR', () => {
       expect(resultQrOf(quick({ status: 'live' }), 'Sable', 'Vagues', sets)).toBeNull();
       expect(resultQrOf(quick({ config: quickMatchConfig({ ...matchQr, ref: undefined }) }), 'Sable', 'Vagues', sets)).toBeNull();
+    });
+
+    it('a stopped match (no winner) gives no result', () => {
+      expect(resultQrOf(quick({ winnerTeamId: null }), 'Sable', 'Vagues', sets)).toBeNull();
     });
 
     it('a set not finished is left out', () => {

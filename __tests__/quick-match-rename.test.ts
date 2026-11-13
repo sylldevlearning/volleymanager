@@ -144,7 +144,7 @@ describe('renamed teams and the tournament result QR', () => {
 
   it('with team ids: still matched by id after a renaming', () => {
     const config = quickMatchConfig({ ...qr, ref: { tournamentId: 't', matchId: 'm', homeTeamId: 'h', awayTeamId: 'a' } });
-    const match = { ...baseMatch, status: 'finished', config } as Match;
+    const match = { ...baseMatch, status: 'finished', winnerTeamId: baseMatch.teamHomeId, config } as Match;
     const result = resultQrOf(match, 'Les Aigles', 'Les Requins', sets)!;
     expect(result.ref).toEqual({ tournamentId: 't', matchId: 'm', homeTeamId: 'h', awayTeamId: 'a' });
     expect(checkResultQr(bundle, result)).toMatchObject({ ok: true });
@@ -152,7 +152,7 @@ describe('renamed teams and the tournament result QR', () => {
 
   it('older QR without team ids: the result carries the tournament names, not the new ones', () => {
     const config = quickMatchConfig({ ...qr, ref: { tournamentId: 't', matchId: 'm' } });
-    const match = { ...baseMatch, status: 'finished', config } as Match;
+    const match = { ...baseMatch, status: 'finished', winnerTeamId: baseMatch.teamHomeId, config } as Match;
     const result = resultQrOf(match, 'Les Aigles', 'Les Requins', sets)!;
     expect(result).toMatchObject({ home: 'Sable', away: 'Vagues' });
     expect(result.ref).toEqual({ tournamentId: 't', matchId: 'm' });
