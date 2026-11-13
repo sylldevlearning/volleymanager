@@ -69,6 +69,7 @@ function rowToTournament(row: Row): Tournament {
     status: row.status as Tournament['status'],
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
+    isSample: row.is_sample === 1,
   };
 }
 

@@ -15,10 +15,11 @@ function rowToEvent(row: Record<string, unknown>): MatchEvent {
   };
 }
 
-export async function addEvent(input: MatchEventInput): Promise<MatchEvent> {
+/** `timestamp`: only for events written after the fact (sample match), in their real order. */
+export async function addEvent(input: MatchEventInput & { timestamp?: string }): Promise<MatchEvent> {
   const db = await getDb();
   const id = generateId();
-  const now = new Date().toISOString();
+  const now = input.timestamp ?? new Date().toISOString();
   await db.runAsync(
     `INSERT INTO match_events
      (id, match_id, set_id, event_type, player_id, team_id, timestamp, details_json, is_cancelled)

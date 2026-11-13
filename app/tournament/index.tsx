@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { Text } from '../../src/components/ui/Text';
+import { SampleBadge } from '../../src/components/ui/SampleBadge';
 import { Stack, useFocusEffect, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { formatDate } from '../../src/i18n/format';
@@ -68,6 +69,7 @@ export default function TournamentListScreen() {
                 </Text>
               </View>
             </View>
+            {item.isSample && <SampleBadge />}
             <Text style={styles.cardLine}>
               {[formatDate(item.date, i18n.language), item.location].filter(Boolean).join(' · ')}
             </Text>

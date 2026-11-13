@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { Alert, FlatList, ScrollView, StyleSheet, View, Pressable, RefreshControl } from 'react-native';
 import { Text } from '../../src/components/ui/Text';
+import { SampleBadge } from '../../src/components/ui/SampleBadge';
 import { useRouter, useFocusEffect, type ImperativeRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { formatDate } from '../../src/i18n/format';
@@ -233,6 +234,7 @@ function MatchCard({
     >
       <View style={styles.cardHeader}>
         <Text style={styles.cardDate}>{date}</Text>
+        {match.isSample && <SampleBadge />}
         {isLive && (
           <View style={styles.liveBadge}>
             <Text style={styles.liveBadgeText}>LIVE</Text>

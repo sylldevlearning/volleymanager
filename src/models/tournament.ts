@@ -94,6 +94,8 @@ export interface Tournament {
   status: TournamentStatus;
   createdAt: string;
   updatedAt: string;
+  /** Sample data (« Exemple »), removed in one go from the Settings */
+  isSample?: boolean;
 }
 
 export interface TournamentPool {

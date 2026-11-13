@@ -51,7 +51,7 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
-      runStartupDataTasks().catch(console.error);
+      runStartupDataTasks({ tournamentName: i18n.t('sample.tournamentName') }).catch(console.error);
       // After the splash screen: the GDPR consent form may need to show.
       initAds();
     }

@@ -605,6 +605,13 @@
       "system": "Automatisch (wie das Handy)",
       "light": "Hell",
       "dark": "Dunkel"
+    },
+    "samples": {
+      "title": "Beispieldaten",
+      "delete": "Beispiele löschen",
+      "hint": "Erfundene Teams, ein Spiel und ein Turnier zum Kennenlernen der App. Deine eigenen Daten bleiben unberührt.",
+      "confirmTitle": "Beispiele löschen?",
+      "confirmMessage": "Die Beispielteams, das Beispielspiel und das Beispielturnier werden gelöscht. Deine eigenen Daten bleiben erhalten."
     }
   },
   "scoring": {
@@ -1124,5 +1131,9 @@
       "connect": "Anmeldung bei Google nicht möglich. Prüfe deine Verbindung und versuche es erneut.",
       "generic": "Der Vorgang wurde nicht abgeschlossen. Versuche es erneut."
     }
+  },
+  "sample": {
+    "badge": "Beispiel",
+    "tournamentName": "Beispielturnier"
   }
 }

@@ -26,9 +26,8 @@ qu'elle revienne après « Supprimer les exemples ».
 
 **Contenu** (noms inventés, courants, aucun joueur ni club réel ; toutes les
 données dans `src/features/sample/sampleData.ts`) :
-- 2 équipes de 12 joueurs, par exemple « Les Mouettes » et « Les Faucons » : 1
-  passeur, 1 pointu, 4 réceptionneurs-attaquants, 3 centraux, 2 libéros, 1
-  universel. Le capitaine est fixé au niveau du match, comme dans l'app.
+- 2 équipes de 12 joueurs, « Les Mouettes » et « Les Faucons » : 2 passeurs,
+  2 pointus, 4 réceptionneurs-attaquants, 3 centraux, 1 libéro. Le capitaine est fixé au niveau du match, comme dans l'app.
 - Alignement 5-1 de chaque équipe : passeur en 1, réceptionneur-attaquant en 2,
   central en 3, pointu en 4, réceptionneur-attaquant en 5, central en 6. Le libéro
   remplace les centraux en zone arrière.
@@ -57,8 +56,12 @@ Les exemples gardent leurs propres stats dans leurs écrans (résumé, stats du 
 
 ## 3. Bugs du résumé
 
-- **0-0** : pas un bug. Le match avait été terminé avant la fin d'un set
-  (confirmé par l'utilisateur). Pas de changement.
+- **Match arrêté** (terminé avant la fin) : « Terminer le match » enregistre les
+  points du set en cours (calculés depuis les événements) et aucun vainqueur. Le
+  résumé affiche « Match arrêté », sans trophée, avec le score au moment de
+  l'arrêt, set en cours compris (« Set 3 (arrêté) »). Les anciens matchs arrêtés
+  sont réparés à l'affichage. Un match de tournoi arrêté ne donne pas de QR du
+  résultat. L'export du tournoi ne lit pas les matchs arbitrés : rien à changer.
 - **Graphique vide, libellés qui se chevauchent.** Les 8 barres ont chacune un
   libellé de 10 px sur environ 40 px de largeur. Correction :
   - barres groupées par compétence, sans libellé par barre (les groupes sont déjà
@@ -89,8 +92,14 @@ Les exemples gardent leurs propres stats dans leurs écrans (résumé, stats du 
 - **i18n** : les nouvelles clés existent dans les 11 langues ; plus de libellé
   anglais codé en dur dans `summary.tsx`.
 
-## Question
+## Décisions
 
-Les deux équipes France / Brésil déjà présentes sur les téléphones : est-ce que la
-suppression « seulement si intactes et jamais utilisées » te convient ? L'autre
-option serait de renommer leurs joueurs.
+- Équipes France / Brésil déjà présentes : supprimées seulement si intactes et
+  jamais utilisées (validé).
+- Un seul libéro par équipe d'exemple (l'app suit le premier libéro de l'effectif).
+- « Vrais chiffres » : la demande de note ne compte que les matchs terminés dans
+  l'app (les exemples n'y entrent pas). Il n'existe pas d'autre statistique
+  globale : les statistiques d'équipe et de joueur ne mélangent pas exemples et
+  données réelles (équipes distinctes).
+- Une équipe d'exemple utilisée ensuite dans un vrai match est gardée et devient
+  une équipe de l'utilisateur.

@@ -9,11 +9,13 @@ export interface Team {
   liberoColor: string | null;
   /** True for a team created just for a single arbitrage match — hidden from the team library. */
   isAdHoc: boolean;
+  /** Sample data (« Exemple »), removed in one go from the Settings */
+  isSample?: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
-export type TeamInput = Omit<Team, 'id' | 'createdAt' | 'updatedAt' | 'isAdHoc' | 'coachName' | 'liberoColor'> & {
+export type TeamInput = Omit<Team, 'id' | 'createdAt' | 'updatedAt' | 'isAdHoc' | 'isSample' | 'coachName' | 'liberoColor'> & {
   coachName?: string | null;
   liberoColor?: string | null;
 };

@@ -21,6 +21,7 @@ function rowToMatch(row: Record<string, unknown>): Match {
     actingCaptainAwayId: (row.acting_captain_away_id as string | null) ?? null,
     createdAt: row.created_at as string,
     finishedAt: row.finished_at as string | null,
+    isSample: row.is_sample === 1,
   };
 }
 

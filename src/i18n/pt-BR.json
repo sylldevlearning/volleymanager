@@ -605,6 +605,13 @@
       "system": "Automática (como o celular)",
       "light": "Clara",
       "dark": "Escura"
+    },
+    "samples": {
+      "title": "Dados de exemplo",
+      "delete": "Excluir os exemplos",
+      "hint": "Equipes, partida e torneio fictícios para conhecer o app. Seus próprios dados não são alterados.",
+      "confirmTitle": "Excluir os exemplos?",
+      "confirmMessage": "As equipes, a partida e o torneio de exemplo serão excluídos. Seus próprios dados permanecem."
     }
   },
   "scoring": {
@@ -1124,5 +1131,9 @@
       "connect": "Não foi possível entrar no Google. Verifique sua conexão e tente novamente.",
       "generic": "A operação não foi concluída. Tente novamente."
     }
+  },
+  "sample": {
+    "badge": "Exemplo",
+    "tournamentName": "Torneio de exemplo"
   }
 }

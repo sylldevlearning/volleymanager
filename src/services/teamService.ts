@@ -11,6 +11,7 @@ function rowToTeam(row: Record<string, unknown>): Team {
     coachName: (row.coach_name as string | null) ?? null,
     liberoColor: (row.libero_color as string | null) ?? null,
     isAdHoc: row.is_ad_hoc === 1,
+    isSample: row.is_sample === 1,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   };

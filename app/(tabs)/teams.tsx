@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, View, Pressable } from 'react-native';
 import { Text } from '../../src/components/ui/Text';
+import { SampleBadge } from '../../src/components/ui/SampleBadge';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Plus, Users, ChevronRight } from 'lucide-react-native';
@@ -65,6 +66,7 @@ export default function TeamsScreen() {
             <View style={[styles.colorDot, { backgroundColor: item.team.color }]} />
             <View style={styles.cardContent}>
               <Text style={styles.teamName}>{item.team.name}</Text>
+              {item.team.isSample && <SampleBadge />}
               <Text style={styles.playerCount}>
                 {t('team.playerCount', { count: item.playerCount })}
               </Text>

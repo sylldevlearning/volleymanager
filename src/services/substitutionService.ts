@@ -98,6 +98,8 @@ export async function performSubstitution(opts: {
   isLibero: boolean;
   isExceptional?: boolean;
   isAutomatic?: boolean;
+  /** Only for events written after the fact (sample match) */
+  timestamp?: string;
 }): Promise<PerformSubResult> {
   const { matchId, setId, teamId, teamSide, playerOutId, playerInId, position, isLibero } = opts;
   const isExceptional = opts.isExceptional ?? false;
@@ -112,6 +114,7 @@ export async function performSubstitution(opts: {
     playerId: playerInId,
     teamId,
     details: { playerOutId, position, pairId: pair.id, isLibero, isExceptional, isAutomatic: opts.isAutomatic ?? false },
+    timestamp: opts.timestamp,
   });
 
   return { pair, eventId: event.id, event };

@@ -109,6 +109,8 @@ export interface Match {
   actingCaptainAwayId: string | null;
   createdAt: string;
   finishedAt: string | null;
+  /** Sample data (« Exemple »), removed in one go from the Settings */
+  isSample?: boolean;
 }
 
 export interface MatchSet {

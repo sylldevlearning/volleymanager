@@ -605,6 +605,13 @@
       "system": "Otomatik (telefondaki gibi)",
       "light": "Açık",
       "dark": "Koyu"
+    },
+    "samples": {
+      "title": "Örnek veriler",
+      "delete": "Örnekleri sil",
+      "hint": "Uygulamayı keşfetmek için hayali takımlar, maç ve turnuva. Kendi verilerinize dokunulmaz.",
+      "confirmTitle": "Örnekler silinsin mi?",
+      "confirmMessage": "Örnek takımlar, maç ve turnuva silinecek. Kendi verileriniz kalır."
     }
   },
   "scoring": {
@@ -1124,5 +1131,9 @@
       "connect": "Google'da oturum açılamadı. Bağlantınızı kontrol edip tekrar deneyin.",
       "generic": "İşlem tamamlanamadı. Tekrar deneyin."
     }
+  },
+  "sample": {
+    "badge": "Örnek",
+    "tournamentName": "Örnek turnuva"
   }
 }

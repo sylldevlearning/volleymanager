@@ -615,6 +615,13 @@
       "system": "Automatyczny (jak w telefonie)",
       "light": "Jasny",
       "dark": "Ciemny"
+    },
+    "samples": {
+      "title": "Dane przykładowe",
+      "delete": "Usuń przykłady",
+      "hint": "Fikcyjne drużyny, mecz i turniej do poznania aplikacji. Twoje własne dane pozostają nietknięte.",
+      "confirmTitle": "Usunąć przykłady?",
+      "confirmMessage": "Przykładowe drużyny, mecz i turniej zostaną usunięte. Twoje własne dane zostaną."
     }
   },
   "scoring": {
@@ -1144,5 +1151,9 @@
       "connect": "Nie udało się zalogować do Google. Sprawdź połączenie i spróbuj ponownie.",
       "generic": "Operacja nie powiodła się. Spróbuj ponownie."
     }
+  },
+  "sample": {
+    "badge": "Przykład",
+    "tournamentName": "Przykładowy turniej"
   }
 }

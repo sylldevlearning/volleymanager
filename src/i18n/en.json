@@ -605,6 +605,13 @@
       "system": "Automatic (like the phone)",
       "light": "Light",
       "dark": "Dark"
+    },
+    "samples": {
+      "title": "Sample data",
+      "delete": "Delete the samples",
+      "hint": "Invented teams, match and tournament to discover the app. Your own data is not touched.",
+      "confirmTitle": "Delete the samples?",
+      "confirmMessage": "The sample teams, match and tournament will be deleted. Your own data stays."
     }
   },
   "scoring": {
@@ -1124,5 +1131,9 @@
       "connect": "Could not sign in to Google. Check your connection and try again.",
       "generic": "The operation did not complete. Try again."
     }
+  },
+  "sample": {
+    "badge": "Sample",
+    "tournamentName": "Sample tournament"
   }
 }

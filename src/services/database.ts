@@ -3,7 +3,7 @@ import * as SQLite from 'expo-sqlite';
 /** File name of the app database (in SQLite.defaultDatabaseDirectory) */
 export const DB_NAME = 'volleymanager.db';
 /** user_version reached by runMigrations — a backup from a newer schema is refused */
-export const SCHEMA_VERSION = 16;
+export const SCHEMA_VERSION = 17;
 
 let _db: SQLite.SQLiteDatabase | null = null;
 let _initPromise: Promise<SQLite.SQLiteDatabase> | null = null;
@@ -457,6 +457,19 @@ export async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
     } finally {
       if (fk?.foreign_keys) await db.execAsync('PRAGMA foreign_keys = ON');
     }
+  }
+
+  if (version < 17) {
+    await db.withTransactionAsync(async () => {
+      // Sample data (« Exemple »): kept apart from the user's own data and
+      // removed in one go from the Settings
+      await db.execAsync(`
+        ALTER TABLE teams ADD COLUMN is_sample INTEGER DEFAULT 0;
+        ALTER TABLE matches ADD COLUMN is_sample INTEGER DEFAULT 0;
+        ALTER TABLE tournaments ADD COLUMN is_sample INTEGER DEFAULT 0;
+        PRAGMA user_version = 17;
+      `);
+    });
   }
 }
 

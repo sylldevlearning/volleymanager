@@ -605,6 +605,13 @@
       "system": "自动（跟随手机）",
       "light": "浅色",
       "dark": "深色"
+    },
+    "samples": {
+      "title": "示例数据",
+      "delete": "删除示例",
+      "hint": "用于了解应用的虚构队伍、比赛和赛事。不会影响你自己的数据。",
+      "confirmTitle": "删除示例？",
+      "confirmMessage": "示例队伍、比赛和赛事将被删除。你自己的数据会保留。"
     }
   },
   "scoring": {
@@ -1124,5 +1131,9 @@
       "connect": "无法登录 Google。请检查网络连接后重试。",
       "generic": "操作未完成。请重试。"
     }
+  },
+  "sample": {
+    "badge": "示例",
+    "tournamentName": "示例赛事"
   }
 }

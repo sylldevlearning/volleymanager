@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { Alert, FlatList, Modal, ScrollView, StyleSheet, View, Switch, Pressable } from 'react-native';
 import { Text } from '../../src/components/ui/Text';
 import { useTranslation } from 'react-i18next';
-import { Zap, Globe, Info, ChevronRight, LifeBuoy, ShieldCheck, Check } from 'lucide-react-native';
+import { Zap, Globe, Info, ChevronRight, LifeBuoy, ShieldCheck, Check, Trash2 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSettingsStore } from '../../src/stores/settingsStore';
@@ -12,6 +12,7 @@ import { APP_VERSION, ADMOB_IDS } from '../../src/utils/constants';
 import { InfoTooltip } from '../../src/components/ui/InfoTooltip';
 import { AdBanner } from '../../src/components/ads/AdBanner';
 import { deleteAllMatches } from '../../src/services/matchService';
+import { deleteSampleData, hasSampleData } from '../../src/services/sampleDataService';
 import { isPrivacyOptionsRequired, openPrivacyOptions } from '../../src/features/ads/adsService';
 import type { Appearance } from '../../src/theme/colors';
 import { DriveBackupSection } from '../../src/components/settings/DriveBackupSection';
@@ -35,6 +36,32 @@ export default function SettingsScreen() {
     isPrivacyOptionsRequired().then((required) => { if (active) setPrivacyRequired(required); });
     return () => { active = false; };
   }, []));
+
+  // « Supprimer les exemples »: only while sample data is there
+  const [samplesPresent, setSamplesPresent] = useState(false);
+  useFocusEffect(useCallback(() => {
+    let active = true;
+    hasSampleData().then((present) => { if (active) setSamplesPresent(present); }).catch(() => {});
+    return () => { active = false; };
+  }, []));
+
+  const confirmDeleteSamples = () => {
+    Alert.alert(t('settings.samples.confirmTitle'), t('settings.samples.confirmMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('common.delete'),
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await deleteSampleData();
+            setSamplesPresent(false);
+          } catch {
+            Alert.alert(t('common.error'), t('common.actionFailed'));
+          }
+        },
+      },
+    ]);
+  };
 
   // The root layout applies it (phone language resolved there)
   const [languageOpen, setLanguageOpen] = useState(false);
@@ -151,6 +178,23 @@ export default function SettingsScreen() {
           />
         </View>
       </View>
+      {samplesPresent && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('settings.samples.title')}</Text>
+          <View style={styles.card}>
+            <Pressable
+              style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+              onPress={confirmDeleteSamples}
+              accessibilityRole="button"
+            >
+              <Trash2 size={20} color={colors.error} />
+              <Text style={[styles.rowLabel, { color: colors.error }]}>{t('settings.samples.delete')}</Text>
+            </Pressable>
+          </View>
+          <Text style={styles.sectionHint}>{t('settings.samples.hint')}</Text>
+        </View>
+      )}
+
       <View style={styles.section}>
         <View style={styles.card}>
           <Pressable
@@ -251,6 +295,7 @@ const makeStyles = (a: AppTheme) => StyleSheet.create({
   scroll: { padding: 16 },
   topBar: { flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 4 },
   section: { marginBottom: 20 },
+  sectionHint: { fontSize: 12, fontFamily: 'Inter_400Regular', color: a.textMuted, marginTop: 6, paddingHorizontal: 4 },
   sectionTitle: {
     fontSize: 12,
     fontFamily: 'Inter_600SemiBold',
