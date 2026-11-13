@@ -1134,6 +1134,40 @@
   },
   "sample": {
     "badge": "Sample",
-    "tournamentName": "Sample tournament"
+    "tournamentName": "Sample tournament",
+    "teams": {
+      "gulls": {
+        "name": "The Gulls",
+        "short": "GUL"
+      },
+      "herons": {
+        "name": "The Herons",
+        "short": "HER"
+      },
+      "lynxes": {
+        "name": "The Lynxes",
+        "short": "LYN"
+      },
+      "albatrosses": {
+        "name": "The Albatrosses",
+        "short": "ALB"
+      },
+      "beavers": {
+        "name": "The Beavers",
+        "short": "BEA"
+      },
+      "otters": {
+        "name": "The Otters",
+        "short": "OTT"
+      },
+      "puffins": {
+        "name": "The Puffins",
+        "short": "PUF"
+      },
+      "hedgehogs": {
+        "name": "The Hedgehogs",
+        "short": "HED"
+      }
+    }
   }
 }

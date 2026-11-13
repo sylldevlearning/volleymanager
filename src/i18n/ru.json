@@ -1154,6 +1154,40 @@
   },
   "sample": {
     "badge": "Пример",
-    "tournamentName": "Пример турнира"
+    "tournamentName": "Пример турнира",
+    "teams": {
+      "gulls": {
+        "name": "Чайки",
+        "short": "ЧАЙ"
+      },
+      "herons": {
+        "name": "Цапли",
+        "short": "ЦАП"
+      },
+      "lynxes": {
+        "name": "Рыси",
+        "short": "РЫС"
+      },
+      "albatrosses": {
+        "name": "Альбатросы",
+        "short": "АЛЬ"
+      },
+      "beavers": {
+        "name": "Бобры",
+        "short": "БОБ"
+      },
+      "otters": {
+        "name": "Выдры",
+        "short": "ВЫД"
+      },
+      "puffins": {
+        "name": "Тупики",
+        "short": "ТУП"
+      },
+      "hedgehogs": {
+        "name": "Ежи",
+        "short": "ЕЖИ"
+      }
+    }
   }
 }

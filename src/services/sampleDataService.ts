@@ -16,7 +16,9 @@ import { performSubstitution } from './substitutionService';
 import { saveLineup } from './lineupService';
 import { createTournament, deleteTournament, getTournamentBundle, recordTournamentResult } from './tournamentService';
 import { DEFAULT_INDOOR_CONFIG } from '../models/match';
-import { SAMPLE_AWAY, SAMPLE_HOME, SAMPLE_MATCH_SEED, SAMPLE_SETS, SAMPLE_TOURNAMENT, type SampleTeam } from '../features/sample/sampleData';
+import {
+  SAMPLE_AWAY, SAMPLE_HOME, SAMPLE_MATCH_SEED, SAMPLE_SETS, SAMPLE_TOURNAMENT, type SampleTeam, type SampleTeamNames,
+} from '../features/sample/sampleData';
 import { buildSampleSets, keyOf, type Side } from '../features/sample/sampleMatch';
 import { initialWizardState, toCreateInput } from '../features/tournament/wizard';
 import { randomValidScore } from '../features/tournament/devRandomScores';
@@ -36,8 +38,14 @@ async function isAppEmpty(): Promise<boolean> {
   return true;
 }
 
+/** Names in the phone language at first launch (sample.tournamentName, sample.teams) */
+export interface SampleTexts {
+  tournamentName: string;
+  teamNames: SampleTeamNames;
+}
+
 /** Fresh install only (no team, match nor tournament), and only once. */
-export async function createSampleDataIfEmpty(opts: { tournamentName: string }): Promise<boolean> {
+export async function createSampleDataIfEmpty(opts: SampleTexts): Promise<boolean> {
   if (await AsyncStorage.getItem(SAMPLE_CHECKED_KEY)) return false;
   const empty = await isAppEmpty();
   await AsyncStorage.setItem(SAMPLE_CHECKED_KEY, '1');
@@ -46,9 +54,10 @@ export async function createSampleDataIfEmpty(opts: { tournamentName: string }):
   return true;
 }
 
-async function createSampleTeam(def: SampleTeam): Promise<{ id: string; ids: Map<number, string> }> {
+async function createSampleTeam(def: SampleTeam, names: SampleTeamNames): Promise<{ id: string; ids: Map<number, string> }> {
   const db = await getDb();
-  const team = await createTeam({ name: def.name, shortName: def.shortName, logoUri: null, color: def.color });
+  const { name, short } = names[def.key];
+  const team = await createTeam({ name, shortName: short, logoUri: null, color: def.color });
   await db.runAsync('UPDATE teams SET is_sample = 1 WHERE id = ?', [team.id]);
   const ids = new Map<number, string>();
   for (const p of def.players) {
@@ -61,10 +70,10 @@ async function createSampleTeam(def: SampleTeam): Promise<{ id: string; ids: Map
   return { id: team.id, ids };
 }
 
-export async function createSampleData(opts: { tournamentName: string }): Promise<void> {
+export async function createSampleData(opts: SampleTexts): Promise<void> {
   const db = await getDb();
-  const home = await createSampleTeam(SAMPLE_HOME);
-  const away = await createSampleTeam(SAMPLE_AWAY);
+  const home = await createSampleTeam(SAMPLE_HOME, opts.teamNames);
+  const away = await createSampleTeam(SAMPLE_AWAY, opts.teamNames);
   const teamId: Record<Side, string> = { home: home.id, away: away.id };
   const playerId = (key: string) => {
     const [side, number] = key.split(':');
@@ -116,7 +125,9 @@ export async function createSampleData(opts: { tournamentName: string }): Promis
   const input = toCreateInput({
     ...wizard,
     name: opts.tournamentName,
-    teams: wizard.teams.map((t, i) => ({ ...t, name: SAMPLE_TOURNAMENT.teams[i].name, color: SAMPLE_TOURNAMENT.teams[i].color })),
+    teams: wizard.teams.map((t, i) => ({
+      ...t, name: opts.teamNames[SAMPLE_TOURNAMENT.teams[i].key].name, color: SAMPLE_TOURNAMENT.teams[i].color,
+    })),
   });
   const created = await createTournament(input);
   await db.runAsync('UPDATE tournaments SET is_sample = 1 WHERE id = ?', [created.tournament.id]);

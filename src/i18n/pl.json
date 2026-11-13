@@ -1154,6 +1154,40 @@
   },
   "sample": {
     "badge": "Przykład",
-    "tournamentName": "Przykładowy turniej"
+    "tournamentName": "Przykładowy turniej",
+    "teams": {
+      "gulls": {
+        "name": "Mewy",
+        "short": "MEW"
+      },
+      "herons": {
+        "name": "Czaple",
+        "short": "CZA"
+      },
+      "lynxes": {
+        "name": "Rysie",
+        "short": "RYS"
+      },
+      "albatrosses": {
+        "name": "Albatrosy",
+        "short": "ALB"
+      },
+      "beavers": {
+        "name": "Bobry",
+        "short": "BOB"
+      },
+      "otters": {
+        "name": "Wydry",
+        "short": "WYD"
+      },
+      "puffins": {
+        "name": "Maskonury",
+        "short": "MAS"
+      },
+      "hedgehogs": {
+        "name": "Jeże",
+        "short": "JEŻ"
+      }
+    }
   }
 }

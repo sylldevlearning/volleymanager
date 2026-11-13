@@ -11,9 +11,13 @@ export interface SamplePlayer {
   position: PlayerPosition;
 }
 
+/** Sample team names come from the locale of the phone (sample.teams.<key>) */
+export const SAMPLE_TEAM_KEYS = ['gulls', 'herons', 'lynxes', 'albatrosses', 'beavers', 'otters', 'puffins', 'hedgehogs'] as const;
+export type SampleTeamKey = (typeof SAMPLE_TEAM_KEYS)[number];
+export type SampleTeamNames = Record<SampleTeamKey, { name: string; short: string }>;
+
 export interface SampleTeam {
-  name: string;
-  shortName: string;
+  key: SampleTeamKey;
   color: string;
   /** Jersey number of the captain */
   captain: number;
@@ -23,8 +27,7 @@ export interface SampleTeam {
 }
 
 export const SAMPLE_HOME: SampleTeam = {
-  name: 'Les Mouettes',
-  shortName: 'MOU',
+  key: 'gulls',
   color: '#1D4ED8',
   captain: 1,
   // Setter 1, outside 2, middle 3, opposite 4, outside 5, middle 6
@@ -46,8 +49,7 @@ export const SAMPLE_HOME: SampleTeam = {
 };
 
 export const SAMPLE_AWAY: SampleTeam = {
-  name: 'Les Faucons',
-  shortName: 'FAU',
+  key: 'herons',
   color: '#F59E0B',
   captain: 3,
   lineup: { 1: 2, 2: 3, 3: 5, 4: 6, 5: 7, 6: 9 },
@@ -100,16 +102,15 @@ export const SAMPLE_MATCH_SEED = 20261113;
 
 /** Tournament of 8 invented teams (pools + finals), half played */
 export const SAMPLE_TOURNAMENT = {
-  name: 'Tournoi d’automne',
   seed: 2026,
   teams: [
-    { name: 'Les Mouettes', color: '#1D4ED8' },
-    { name: 'Les Faucons', color: '#F59E0B' },
-    { name: 'Les Lynx', color: '#10B981' },
-    { name: 'Les Hérons', color: '#8B5CF6' },
-    { name: 'Les Pumas', color: '#EF4444' },
-    { name: 'Les Albatros', color: '#06B6D4' },
-    { name: 'Les Castors', color: '#A16207' },
-    { name: 'Les Renards', color: '#EC4899' },
-  ],
+    { key: 'gulls', color: '#1D4ED8' },
+    { key: 'herons', color: '#F59E0B' },
+    { key: 'lynxes', color: '#10B981' },
+    { key: 'albatrosses', color: '#8B5CF6' },
+    { key: 'beavers', color: '#EF4444' },
+    { key: 'otters', color: '#06B6D4' },
+    { key: 'puffins', color: '#A16207' },
+    { key: 'hedgehogs', color: '#EC4899' },
+  ] as { key: SampleTeamKey; color: string }[],
 };

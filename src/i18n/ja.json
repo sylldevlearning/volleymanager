@@ -1134,6 +1134,40 @@
   },
   "sample": {
     "badge": "サンプル",
-    "tournamentName": "サンプル大会"
+    "tournamentName": "サンプル大会",
+    "teams": {
+      "gulls": {
+        "name": "カモメ",
+        "short": "カモメ"
+      },
+      "herons": {
+        "name": "サギ",
+        "short": "サギ"
+      },
+      "lynxes": {
+        "name": "ヤマネコ",
+        "short": "ヤマネコ"
+      },
+      "albatrosses": {
+        "name": "アホウドリ",
+        "short": "アホウ"
+      },
+      "beavers": {
+        "name": "ビーバー",
+        "short": "ビーバ"
+      },
+      "otters": {
+        "name": "カワウソ",
+        "short": "カワウ"
+      },
+      "puffins": {
+        "name": "ツノメドリ",
+        "short": "ツノメ"
+      },
+      "hedgehogs": {
+        "name": "ハリネズミ",
+        "short": "ハリネ"
+      }
+    }
   }
 }

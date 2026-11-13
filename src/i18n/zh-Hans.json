@@ -1134,6 +1134,40 @@
   },
   "sample": {
     "badge": "示例",
-    "tournamentName": "示例赛事"
+    "tournamentName": "示例赛事",
+    "teams": {
+      "gulls": {
+        "name": "海鸥队",
+        "short": "海鸥"
+      },
+      "herons": {
+        "name": "苍鹭队",
+        "short": "苍鹭"
+      },
+      "lynxes": {
+        "name": "猞猁队",
+        "short": "猞猁"
+      },
+      "albatrosses": {
+        "name": "信天翁队",
+        "short": "信天翁"
+      },
+      "beavers": {
+        "name": "河狸队",
+        "short": "河狸"
+      },
+      "otters": {
+        "name": "水獭队",
+        "short": "水獭"
+      },
+      "puffins": {
+        "name": "海鹦队",
+        "short": "海鹦"
+      },
+      "hedgehogs": {
+        "name": "刺猬队",
+        "short": "刺猬"
+      }
+    }
   }
 }

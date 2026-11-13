@@ -15,7 +15,11 @@ jest.mock('../src/services/database', () => ({
 }));
 
 import { getDb } from '../src/services/database';
-import { SAMPLE_AWAY, SAMPLE_HOME, SAMPLE_MATCH_SEED, SAMPLE_SETS, SAMPLE_TOURNAMENT, type SampleTeam } from '../src/features/sample/sampleData';
+import {
+  SAMPLE_AWAY, SAMPLE_HOME, SAMPLE_MATCH_SEED, SAMPLE_SETS, SAMPLE_TEAM_KEYS, SAMPLE_TOURNAMENT, type SampleTeam,
+} from '../src/features/sample/sampleData';
+import fr from '../src/i18n/fr.json';
+import en from '../src/i18n/en.json';
 import { buildSampleSets, keyOf, type SampleEvent, type Side } from '../src/features/sample/sampleMatch';
 import {
   createSampleDataIfEmpty, deleteSampleData, hasSampleData, SAMPLE_CHECKED_KEY,
@@ -35,6 +39,7 @@ import type { MatchEvent } from '../src/models/event';
 import type { Player } from '../src/models/player';
 
 const TEAMS: Record<Side, SampleTeam> = { home: SAMPLE_HOME, away: SAMPLE_AWAY };
+const FR = { tournamentName: 'T', teamNames: fr.sample.teams };
 const SETS = buildSampleSets(TEAMS, SAMPLE_SETS, SAMPLE_MATCH_SEED);
 
 const mockGetDb = getDb as jest.Mock;
@@ -64,8 +69,9 @@ describe('rosters', () => {
     expect([at(1), at(2), at(3), at(4), at(5), at(6)]).toEqual(['setter', 'outside', 'middle', 'opposite', 'outside', 'middle']);
   });
 
-  it('8 tournament teams with different names', () => {
-    expect(new Set(SAMPLE_TOURNAMENT.teams.map((t) => t.name)).size).toBe(8);
+  it('8 tournament teams, the two match teams among them', () => {
+    expect(new Set(SAMPLE_TOURNAMENT.teams.map((t) => t.key))).toEqual(new Set(SAMPLE_TEAM_KEYS));
+    expect(SAMPLE_TOURNAMENT.teams.map((t) => t.key)).toEqual(expect.arrayContaining([SAMPLE_HOME.key, SAMPLE_AWAY.key]));
   });
 });
 
@@ -171,10 +177,10 @@ describe('the sample match (pure)', () => {
 
 describe('created on a fresh install', () => {
   it('teams, match, tournament — all marked as samples', async () => {
-    expect(await createSampleDataIfEmpty({ tournamentName: 'Tournoi d’exemple' })).toBe(true);
+    expect(await createSampleDataIfEmpty({ ...FR, tournamentName: 'Tournoi d’exemple' })).toBe(true);
 
     const teams = await getAllTeams();
-    expect(teams.map((t) => [t.name, t.isSample])).toEqual([['Les Faucons', true], ['Les Mouettes', true]]);
+    expect(teams.map((t) => [t.name, t.shortName, t.isSample])).toEqual([['Les Hérons', 'HÉR', true], ['Les Mouettes', 'MOU', true]]);
     expect(db.tables.get('players')).toHaveLength(24);
 
     const [matchRow] = db.tables.get('matches')!;
@@ -193,35 +199,44 @@ describe('created on a fresh install', () => {
     const [tournament] = await getTournaments();
     expect(tournament).toMatchObject({ name: 'Tournoi d’exemple', isSample: true });
     const bundle = (await getTournamentBundle(tournament.id))!;
-    expect(bundle.teams.map((t) => t.name).sort()).toEqual(SAMPLE_TOURNAMENT.teams.map((t) => t.name).sort());
+    expect(bundle.teams.map((t) => t.name).sort()).toEqual(SAMPLE_TEAM_KEYS.map((k) => fr.sample.teams[k].name).sort());
     const played = bundle.matches.filter((m) => m.winnerId !== null);
     expect(played).toHaveLength(Math.floor(bundle.matches.length / 2));
     expect(bundle.matches.some((m) => m.stage !== 'pool')).toBe(true);
   });
 
+  it('in the phone language (English here), match and tournament teams alike', async () => {
+    await createSampleDataIfEmpty({ tournamentName: en.sample.tournamentName, teamNames: en.sample.teams });
+    expect((await getAllTeams()).map((t) => t.name)).toEqual(['The Gulls', 'The Herons']);
+    const [tournament] = await getTournaments();
+    expect(tournament.name).toBe('Sample tournament');
+    const bundle = (await getTournamentBundle(tournament.id))!;
+    expect(bundle.teams.map((t) => t.name)).toContain('The Hedgehogs');
+  });
+
   it('only once: never again, even after removing them', async () => {
-    await createSampleDataIfEmpty({ tournamentName: 'T' });
+    await createSampleDataIfEmpty(FR);
     await deleteSampleData();
-    expect(await createSampleDataIfEmpty({ tournamentName: 'T' })).toBe(false);
+    expect(await createSampleDataIfEmpty(FR)).toBe(false);
     expect(await getAllTeams()).toEqual([]);
   });
 
   it('not when the app already has data', async () => {
     await createTeam({ name: 'Mon club', shortName: null, logoUri: null, color: '#123456' });
-    expect(await createSampleDataIfEmpty({ tournamentName: 'T' })).toBe(false);
+    expect(await createSampleDataIfEmpty(FR)).toBe(false);
     expect(await AsyncStorage.getItem(SAMPLE_CHECKED_KEY)).toBe('1');
     expect(await hasSampleData()).toBe(false);
   });
 
   it('does not count for the rating request', async () => {
-    await createSampleDataIfEmpty({ tournamentName: 'T' });
+    await createSampleDataIfEmpty(FR);
     expect(useSettingsStore.getState().finishedMatchCount).toBe(0);
   });
 });
 
 describe('deleteSampleData', () => {
   it('removes every sample and keeps the user data', async () => {
-    await createSampleDataIfEmpty({ tournamentName: 'T' });
+    await createSampleDataIfEmpty(FR);
     const mine = await createTeam({ name: 'Mon club', shortName: null, logoUri: null, color: '#123456' });
     const other = await createTeam({ name: 'Voisins', shortName: null, logoUri: null, color: '#654321' });
     const myMatch = await createMatch({ format: 'indoor_6v6', mode: 'leisure', teamHomeId: mine.id, teamAwayId: other.id, config: DEFAULT_INDOOR_CONFIG });
@@ -239,7 +254,7 @@ describe('deleteSampleData', () => {
   });
 
   it('a sample team used in one of the user matches stays, as the user team', async () => {
-    await createSampleDataIfEmpty({ tournamentName: 'T' });
+    await createSampleDataIfEmpty(FR);
     const gulls = (await getAllTeams()).find((t) => t.name === 'Les Mouettes')!;
     const mine = await createTeam({ name: 'Mon club', shortName: null, logoUri: null, color: '#123456' });
     await createMatch({ format: 'indoor_6v6', mode: 'leisure', teamHomeId: mine.id, teamAwayId: gulls.id, config: DEFAULT_INDOOR_CONFIG });
@@ -260,7 +275,9 @@ describe('screens and texts', () => {
   it('created at startup, after the legacy teams cleanup', () => {
     const src = read('src/services/seedService.ts');
     expect(src.indexOf('removeUntouchedLegacyTeams()')).toBeLessThan(src.indexOf('createSampleDataIfEmpty('));
-    expect(read('app/_layout.tsx')).toMatch(/runStartupDataTasks\(\{ tournamentName: i18n\.t\('sample\.tournamentName'\) \}\)/);
+    const layout = read('app/_layout.tsx');
+    expect(layout).toMatch(/tournamentName: i18n\.t\('sample\.tournamentName'\)/);
+    expect(layout).toMatch(/teamNames: i18n\.t\('sample\.teams', \{ returnObjects: true \}\)/);
   });
 
   it('« Supprimer les exemples » in the Settings, with a confirmation', () => {
@@ -285,5 +302,14 @@ describe('screens and texts', () => {
       expect((v as string).length).toBeGreaterThan(0);
     }
     expect(Object.keys(json.settings.samples).sort()).toEqual(['confirmMessage', 'confirmTitle', 'delete', 'hint', 'title']);
+    // 8 team names, all different, with a short name for the scoreboard
+    expect(Object.keys(json.sample.teams).sort()).toEqual([...SAMPLE_TEAM_KEYS].sort());
+    const teams = Object.values(json.sample.teams) as { name: string; short: string }[];
+    expect(new Set(teams.map((t) => t.name)).size).toBe(8);
+    for (const t of teams) {
+      expect(t.name.length).toBeGreaterThan(0);
+      expect([...t.short].length).toBeGreaterThanOrEqual(2);
+      expect([...t.short].length).toBeLessThanOrEqual(4);
+    }
   });
 });

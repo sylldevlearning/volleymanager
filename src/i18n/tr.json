@@ -1134,6 +1134,40 @@
   },
   "sample": {
     "badge": "Örnek",
-    "tournamentName": "Örnek turnuva"
+    "tournamentName": "Örnek turnuva",
+    "teams": {
+      "gulls": {
+        "name": "Martılar",
+        "short": "MAR"
+      },
+      "herons": {
+        "name": "Balıkçıllar",
+        "short": "BAL"
+      },
+      "lynxes": {
+        "name": "Vaşaklar",
+        "short": "VAŞ"
+      },
+      "albatrosses": {
+        "name": "Albatroslar",
+        "short": "ALB"
+      },
+      "beavers": {
+        "name": "Kunduzlar",
+        "short": "KUN"
+      },
+      "otters": {
+        "name": "Su Samurları",
+        "short": "SAM"
+      },
+      "puffins": {
+        "name": "Deniz Papağanları",
+        "short": "PAP"
+      },
+      "hedgehogs": {
+        "name": "Kirpiler",
+        "short": "KİR"
+      }
+    }
   }
 }

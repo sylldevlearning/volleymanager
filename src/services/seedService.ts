@@ -1,12 +1,12 @@
 import { removeUntouchedLegacyTeams } from './legacySeedCleanup';
-import { createSampleDataIfEmpty } from './sampleDataService';
+import { createSampleDataIfEmpty, type SampleTexts } from './sampleDataService';
 
 /**
  * Data tasks run once the app has started: the teams of real players created
  * by older versions are removed when untouched and unused, then a fresh
  * install (nothing left) receives the sample data, once.
  */
-export async function runStartupDataTasks(opts: { tournamentName: string }): Promise<void> {
+export async function runStartupDataTasks(opts: SampleTexts): Promise<void> {
   try {
     await removeUntouchedLegacyTeams();
   } catch (e) {

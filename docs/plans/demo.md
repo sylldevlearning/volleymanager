@@ -26,7 +26,7 @@ qu'elle revienne après « Supprimer les exemples ».
 
 **Contenu** (noms inventés, courants, aucun joueur ni club réel ; toutes les
 données dans `src/features/sample/sampleData.ts`) :
-- 2 équipes de 12 joueurs, « Les Mouettes » et « Les Faucons » : 2 passeurs,
+- 2 équipes de 12 joueurs, nommées dans la langue du téléphone (par exemple « Les Mouettes » et « Les Hérons ») : 2 passeurs,
   2 pointus, 4 réceptionneurs-attaquants, 3 centraux, 1 libéro. Le capitaine est fixé au niveau du match, comme dans l'app.
 - Alignement 5-1 de chaque équipe : passeur en 1, réceptionneur-attaquant en 2,
   central en 3, pointu en 4, réceptionneur-attaquant en 5, central en 6. Le libéro

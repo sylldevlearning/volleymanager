@@ -1134,6 +1134,40 @@
   },
   "sample": {
     "badge": "Ejemplo",
-    "tournamentName": "Torneo de ejemplo"
+    "tournamentName": "Torneo de ejemplo",
+    "teams": {
+      "gulls": {
+        "name": "Las Gaviotas",
+        "short": "GAV"
+      },
+      "herons": {
+        "name": "Las Garzas",
+        "short": "GAR"
+      },
+      "lynxes": {
+        "name": "Los Linces",
+        "short": "LIN"
+      },
+      "albatrosses": {
+        "name": "Los Albatros",
+        "short": "ALB"
+      },
+      "beavers": {
+        "name": "Los Castores",
+        "short": "CAS"
+      },
+      "otters": {
+        "name": "Las Nutrias",
+        "short": "NUT"
+      },
+      "puffins": {
+        "name": "Los Frailecillos",
+        "short": "FRA"
+      },
+      "hedgehogs": {
+        "name": "Los Erizos",
+        "short": "ERI"
+      }
+    }
   }
 }

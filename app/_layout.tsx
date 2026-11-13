@@ -17,6 +17,7 @@ import tamaguiConfig from '../tamagui.config';
 import { useSettingsStore } from '../src/stores/settingsStore';
 import { useSettingsHydrated } from '../src/hooks/useSettingsHydrated';
 import { runStartupDataTasks } from '../src/services/seedService';
+import type { SampleTexts } from '../src/services/sampleDataService';
 import { initAds } from '../src/features/ads/adsService';
 import i18n from '../src/i18n';
 import { useLocales } from 'expo-localization';
@@ -51,7 +52,11 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
-      runStartupDataTasks({ tournamentName: i18n.t('sample.tournamentName') }).catch(console.error);
+      // Sample data, if any, is named in the phone language
+      runStartupDataTasks({
+        tournamentName: i18n.t('sample.tournamentName'),
+        teamNames: i18n.t('sample.teams', { returnObjects: true }) as SampleTexts['teamNames'],
+      }).catch(console.error);
       // After the splash screen: the GDPR consent form may need to show.
       initAds();
     }
